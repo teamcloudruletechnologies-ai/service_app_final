@@ -6,7 +6,15 @@ const { success, error } = require("../utils/response");
 async function listUsers(req, res, next) {
   try {
     const paging = getPagination(req.query);
-    const data = await User.list({ ...paging, search: req.query.search, status: req.query.status });
+    const data = await User.list({
+      ...paging,
+      search: req.query.search,
+      status: req.query.status,
+      sortBy: req.query.sortBy,
+      sortOrder: req.query.sortOrder,
+      created_after: req.query.created_after,
+      created_before: req.query.created_before,
+    });
     return success(res, "Users fetched", data);
   } catch (err) {
     return next(err);
@@ -55,4 +63,42 @@ async function deleteUser(req, res, next) {
   }
 }
 
-module.exports = { listUsers, getUser, createUser, updateUser, deleteUser };
+async function blockUser(req, res, next) {
+  try {
+    const user = await User.update(req.params.id, { status: "suspended" });
+    if (!user) return error(res, "User not found", 404);
+    return success(res, "User account blocked successfully", user);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function unblockUser(req, res, next) {
+  try {
+    const user = await User.update(req.params.id, { status: "active" });
+    if (!user) return error(res, "User not found", 404);
+    return success(res, "User account unblocked successfully", user);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getUserBookings(req, res, next) {
+  try {
+    const bookings = await User.getBookings(req.params.id);
+    return success(res, "User bookings fetched", bookings);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = {
+  listUsers,
+  getUser,
+  createUser,
+  updateUser,
+  deleteUser,
+  blockUser,
+  unblockUser,
+  getUserBookings,
+};

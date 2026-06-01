@@ -1,5 +1,5 @@
 const express = require("express");
-const { body, param } = require("express-validator");
+const { body, param, query } = require("express-validator");
 const auth = require("../middlewares/auth.middleware");
 const allowRoles = require("../middlewares/rbac.middleware");
 const validate = require("../middlewares/validate.middleware");
@@ -10,8 +10,20 @@ const router = express.Router();
 
 router.use(auth, allowRoles(roles.ADMIN));
 
-router.get("/", controller.listUsers);
+router.get(
+  "/",
+  [
+    query("sortBy").optional().isIn(["name", "email", "created_at", "status"]),
+    query("sortOrder").optional().isIn(["ASC", "DESC"]),
+    query("created_after").optional().isISO8601(),
+    query("created_before").optional().isISO8601(),
+  ],
+  validate,
+  controller.listUsers
+);
+
 router.get("/:id", [param("id").isInt()], validate, controller.getUser);
+
 router.post(
   "/",
   [
@@ -24,6 +36,7 @@ router.post(
   validate,
   controller.createUser
 );
+
 router.patch(
   "/:id",
   [
@@ -34,6 +47,13 @@ router.patch(
   validate,
   controller.updateUser
 );
+
 router.delete("/:id", [param("id").isInt()], validate, controller.deleteUser);
+
+router.patch("/:id/block", [param("id").isInt()], validate, controller.blockUser);
+
+router.patch("/:id/unblock", [param("id").isInt()], validate, controller.unblockUser);
+
+router.get("/:id/bookings", [param("id").isInt()], validate, controller.getUserBookings);
 
 module.exports = router;

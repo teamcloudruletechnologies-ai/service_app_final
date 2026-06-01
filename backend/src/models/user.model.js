@@ -19,11 +19,20 @@ async function findByEmailOrPhone(login) {
 }
 
 async function findById(id) {
-  const result = await db.query(`SELECT ${publicFields} FROM users WHERE id = $1`, [id]);
+  const result = await db.query(
+    `SELECT u.id, u.name, u.email, u.phone, u.status, u.created_at, u.updated_at,
+            COUNT(b.id)::int as total_bookings,
+            COALESCE(SUM(b.amount), 0)::float as total_spent
+     FROM users u
+     LEFT JOIN bookings b ON u.id = b.user_id
+     WHERE u.id = $1
+     GROUP BY u.id`,
+    [id]
+  );
   return result.rows[0];
 }
 
-async function list({ search, status, page, limit, offset }) {
+async function list({ search, status, page, limit, offset, sortBy, sortOrder, created_after, created_before }) {
   const params = [];
   const where = [];
 
@@ -37,11 +46,26 @@ async function list({ search, status, page, limit, offset }) {
     where.push(`status = $${params.length}`);
   }
 
+  if (created_after) {
+    params.push(created_after);
+    where.push(`created_at >= $${params.length}`);
+  }
+
+  if (created_before) {
+    params.push(created_before);
+    where.push(`created_at <= $${params.length}`);
+  }
+
   const clause = where.length ? `WHERE ${where.join(" AND ")}` : "";
   const count = await db.query(`SELECT COUNT(*) FROM users ${clause}`, params);
+
+  const allowedSortFields = ["name", "email", "created_at", "status"];
+  const sortField = allowedSortFields.includes(sortBy) ? sortBy : "created_at";
+  const order = sortOrder === "ASC" ? "ASC" : "DESC";
+
   params.push(limit, offset);
   const result = await db.query(
-    `SELECT ${publicFields} FROM users ${clause} ORDER BY created_at DESC LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    `SELECT ${publicFields} FROM users ${clause} ORDER BY ${sortField} ${order} LIMIT $${params.length - 1} OFFSET $${params.length}`,
     params
   );
 
@@ -75,4 +99,17 @@ async function remove(id) {
   return result.rows[0];
 }
 
-module.exports = { create, findByEmailOrPhone, findById, list, update, remove };
+async function getBookings(userId) {
+  const result = await db.query(
+    `SELECT b.id, b.status, b.amount::float as amount, b.created_at,
+            w.name as worker_name, w.service_type
+     FROM bookings b
+     LEFT JOIN workers w ON b.worker_id = w.id
+     WHERE b.user_id = $1
+     ORDER BY b.created_at DESC`,
+    [userId]
+  );
+  return result.rows;
+}
+
+module.exports = { create, findByEmailOrPhone, findById, list, update, remove, getBookings };
