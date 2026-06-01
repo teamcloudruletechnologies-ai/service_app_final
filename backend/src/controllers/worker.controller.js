@@ -60,4 +60,54 @@ async function deleteWorker(req, res, next) {
   }
 }
 
-module.exports = { listWorkers, getWorker, createWorker, updateWorker, deleteWorker };
+async function activateWorker(req, res, next) {
+  try {
+    const worker = await Worker.update(req.params.id, { status: "active" });
+    if (!worker) return error(res, "Worker not found", 404);
+    return success(res, "Worker activated successfully", worker);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function suspendWorker(req, res, next) {
+  try {
+    const worker = await Worker.update(req.params.id, { status: "suspended" });
+    if (!worker) return error(res, "Worker not found", 404);
+    return success(res, "Worker suspended successfully", worker);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getWorkerPerformance(req, res, next) {
+  try {
+    const worker = await Worker.findById(req.params.id);
+    if (!worker) return error(res, "Worker not found", 404);
+    
+    // Mocked performance data
+    const performance = {
+      workerId: worker.id,
+      rating: 4.5,
+      totalReviews: 24,
+      jobsCompleted: 15,
+      jobsCancelled: 2,
+      onTimePercentage: 92.5
+    };
+    
+    return success(res, "Worker performance fetched", performance);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = { 
+  listWorkers, 
+  getWorker, 
+  createWorker, 
+  updateWorker, 
+  deleteWorker,
+  activateWorker,
+  suspendWorker,
+  getWorkerPerformance
+};

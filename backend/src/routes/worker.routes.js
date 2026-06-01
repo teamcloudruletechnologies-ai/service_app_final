@@ -38,5 +38,8 @@ router.patch(
   controller.updateWorker
 );
 router.delete("/:id", [param("id").isInt()], validate, controller.deleteWorker);
+router.patch("/:id/activate", [param("id").isInt()], validate, controller.activateWorker);
+router.patch("/:id/suspend", [param("id").isInt()], validate, controller.suspendWorker);
+router.get("/:id/performance", [param("id").isInt()], validate, controller.getWorkerPerformance);
 
 module.exports = router;
