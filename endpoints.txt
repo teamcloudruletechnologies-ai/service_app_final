@@ -1,0 +1,56 @@
+POST /api/auth/admin/register
+POST /api/auth/user/register
+POST /api/auth/worker/register
+POST /api/auth/login
+GET  /api/auth/me
+
+GET  /api/dashboard/overview
+
+GET/POST/PATCH/DELETE /api/users
+GET/POST/PATCH/DELETE /api/workers
+
+POST /api/kyc
+GET  /api/kyc
+GET  /api/kyc/:id
+PATCH /api/kyc/:id/review
+
+
+-----------------------------------------------
+Main updates done:
+
+Added backend server setup in backend/src/app.js and backend/src/server.js
+Added Postgres connection and auto table creation in backend/src/config/db.js
+Added environment config in backend/src/config/env.js
+Added JWT config and token helpers
+Added password hashing with bcrypt
+Added response, pagination, logger utilities
+Added auth middleware, role-based access middleware, validation middleware, error handling, upload middleware, rate limiting
+Added models for:
+-----------------------------------
+Admin
+User
+Worker
+Worker KYC
+-------------------------------
+Added controllers for:
+Auth/Login
+Dashboard
+User management
+Worker management
+Worker KYC-
+----------------------------------------------------
+Added routes for:
+/api/auth
+/api/dashboard
+/api/users
+/api/workers
+/api/kyc
+/api/health
+-------------------------------------------
+Updated backend/package.json scripts:
+npm start
+npm run dev
+npm run check
+-----------------------------------
+Updated .env.example
+Updated .gitignore
