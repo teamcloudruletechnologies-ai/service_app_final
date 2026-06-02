@@ -67,8 +67,26 @@ async function initDb() {
       worker_id INTEGER REFERENCES workers(id),
       status VARCHAR(30) NOT NULL DEFAULT 'pending',
       amount NUMERIC(12,2) NOT NULL DEFAULT 0,
-      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS invoices (
+      id SERIAL PRIMARY KEY,
+      booking_id INTEGER REFERENCES bookings(id),
+      user_id INTEGER REFERENCES users(id),
+      worker_id INTEGER REFERENCES workers(id),
+      invoice_number VARCHAR(80) UNIQUE NOT NULL,
+      status VARCHAR(30) NOT NULL DEFAULT 'pending',
+      amount NUMERIC(12,2) NOT NULL DEFAULT 0,
+      platform_fee NUMERIC(12,2) NOT NULL DEFAULT 0,
+      worker_payout NUMERIC(12,2) NOT NULL DEFAULT 0,
+      paid_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
   `);
 }
 
