@@ -6,6 +6,7 @@ const workerRoutes = require("./worker.routes");
 const kycRoutes = require("./kyc.routes");
 const bookingRoutes = require("./booking.routes");
 const invoiceRoutes = require("./invoice.routes");
+const complaintRoutes = require("./complaint.routes");
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use("/workers", workerRoutes);
 router.use("/kyc", kycRoutes);
 router.use("/admin/bookings", bookingRoutes);
 router.use("/admin/invoices", invoiceRoutes);
+router.use("/admin/complaints", complaintRoutes);
 
 module.exports = router;
