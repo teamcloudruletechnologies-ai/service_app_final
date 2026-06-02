@@ -4,6 +4,7 @@ const dashboardRoutes = require("./dashboard.routes");
 const userRoutes = require("./user.routes");
 const workerRoutes = require("./worker.routes");
 const kycRoutes = require("./kyc.routes");
+const serviceRoutes = require("./service.routes");
 const bookingRoutes = require("./booking.routes");
 const invoiceRoutes = require("./invoice.routes");
 const complaintRoutes = require("./complaint.routes");
@@ -16,9 +17,10 @@ router.get("/health", (req, res) => {
 
 router.use("/auth", authRoutes);
 router.use("/dashboard", dashboardRoutes);
-router.use("/users", userRoutes);
+router.use("/admin/users", userRoutes);
 router.use("/workers", workerRoutes);
 router.use("/kyc", kycRoutes);
+router.use("/admin/services", serviceRoutes);
 router.use("/admin/bookings", bookingRoutes);
 router.use("/admin/invoices", invoiceRoutes);
 router.use("/admin/complaints", complaintRoutes);

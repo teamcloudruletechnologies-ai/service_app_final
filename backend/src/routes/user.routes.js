@@ -56,4 +56,8 @@ router.patch("/:id/unblock", [param("id").isInt()], validate, controller.unblock
 
 router.get("/:id/bookings", [param("id").isInt()], validate, controller.getUserBookings);
 
+router.get("/:id/activity-logs", [param("id").isInt()], validate, controller.getUserActivityLogs);
+
+router.get("/:id/activity-logs/download", [param("id").isInt()], validate, controller.downloadUserActivityLogs);
+
 module.exports = router;

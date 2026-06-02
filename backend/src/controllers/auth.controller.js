@@ -38,6 +38,10 @@ async function registerUser(req, res, next) {
   try {
     const passwordHash = req.body.password ? await hashPassword(req.body.password) : null;
     const user = await User.create({ ...req.body, passwordHash });
+    
+    // Log registration
+    await User.logActivity(user.id, "register", "User self-registered account");
+    
     return success(res, "User registered", user, 201);
   } catch (err) {
     if (err.code === "23505") return error(res, "User email or phone already exists", 409);
@@ -71,6 +75,10 @@ async function login(req, res, next) {
     if (account.status && account.status !== "active") return error(res, "Account is not active", 403);
 
     const payload = authPayload(account, role);
+    if (role === roles.USER) {
+      await User.logActivity(account.id, "login", "User logged in successfully");
+    }
+
     return success(res, "Login successful", {
       token: signToken({ id: account.id, role }),
       account: payload,
