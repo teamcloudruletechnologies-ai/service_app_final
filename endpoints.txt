@@ -6,7 +6,15 @@ GET  /api/auth/me
 
 GET  /api/dashboard/overview
 
-GET/POST/PATCH/DELETE /api/users
+GET/POST/PATCH/DELETE /api/admin/users (Supports sorting, pagination, and date range filters)
+PATCH /api/admin/users/:id/block (Blocks a user account)
+PATCH /api/admin/users/:id/unblock (Unblocks a user account)
+GET   /api/admin/users/:id/bookings (Retrieves a user's booking history)
+GET   /api/admin/users/:id/activity-logs (Retrieves a user's activity logs)
+GET   /api/admin/users/:id/activity-logs/download (Downloads a user's activity logs as CSV)
+GET/POST/PUT/DELETE /api/admin/services/categories (Category management CRUD)
+GET/POST/PUT/DELETE /api/admin/services (Service catalog management CRUD, handles image uploads)
+PATCH /api/admin/services/:id/status (Toggle service availability status)
 GET/POST/PATCH/DELETE /api/workers
 
 POST /api/kyc
@@ -28,21 +36,21 @@ Added auth middleware, role-based access middleware, validation middleware, erro
 Added models for:
 -----------------------------------
 Admin
-User
+User (enhanced findById aggregates, filtering, sorting, bookings helper)
 Worker
 Worker KYC
 -------------------------------
 Added controllers for:
 Auth/Login
 Dashboard
-User management
+User management (list, get, create, update, delete, block, unblock, bookings history)
 Worker management
 Worker KYC-
 ----------------------------------------------------
 Added routes for:
 /api/auth
 /api/dashboard
-/api/users
+/api/users (block, unblock, and bookings history endpoints added)
 /api/workers
 /api/kyc
 /api/health

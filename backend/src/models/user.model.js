@@ -112,4 +112,25 @@ async function getBookings(userId) {
   return result.rows;
 }
 
-module.exports = { create, findByEmailOrPhone, findById, list, update, remove, getBookings };
+async function logActivity(userId, action, details) {
+  const result = await db.query(
+    `INSERT INTO activity_logs (user_id, action, details)
+     VALUES ($1, $2, $3)
+     RETURNING *`,
+    [userId, action, details]
+  );
+  return result.rows[0];
+}
+
+async function getActivityLogs(userId, { limit = 100, offset = 0 } = {}) {
+  const result = await db.query(
+    `SELECT * FROM activity_logs
+     WHERE user_id = $1
+     ORDER BY created_at DESC
+     LIMIT $2 OFFSET $3`,
+    [userId, limit, offset]
+  );
+  return result.rows;
+}
+
+module.exports = { create, findByEmailOrPhone, findById, list, update, remove, getBookings, logActivity, getActivityLogs };
