@@ -39,7 +39,10 @@ async function getKyc(req, res, next) {
 async function reviewKyc(req, res, next) {
   try {
     const kyc = await Kyc.review(req.params.id, {
-      status: req.body.status,
+      aadhaarStatus: req.body.aadhaarStatus,
+      panStatus: req.body.panStatus,
+      bankPassbookStatus: req.body.bankPassbookStatus,
+      selfieStatus: req.body.selfieStatus,
       rejectionReason: req.body.rejectionReason,
       reviewedBy: req.auth.id,
     });
