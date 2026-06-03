@@ -14,10 +14,13 @@ router.post(
   allowRoles(roles.ADMIN, roles.WORKER),
   [
     body("workerId").if((value, { req }) => req.auth.role === roles.ADMIN).isInt(),
-    body("documentType").trim().notEmpty(),
-    body("documentNumber").trim().notEmpty(),
-    body("documentUrl").optional().isString(),
-    body("selfieUrl").optional().isString(),
+    body("aadhaarNumber").trim().notEmpty(),
+    body("aadhaarUrl").trim().notEmpty().isString(),
+    body("panNumber").trim().notEmpty(),
+    body("panUrl").trim().notEmpty().isString(),
+    body("bankAccountNumber").trim().notEmpty(),
+    body("bankPassbookUrl").trim().notEmpty().isString(),
+    body("selfieUrl").trim().notEmpty().isString(),
   ],
   validate,
   controller.submitKyc
@@ -25,13 +28,17 @@ router.post(
 
 router.get("/", auth, allowRoles(roles.ADMIN), controller.listKyc);
 router.get("/:id", auth, allowRoles(roles.ADMIN), [param("id").isInt()], validate, controller.getKyc);
+
 router.patch(
   "/:id/review",
   auth,
   allowRoles(roles.ADMIN),
   [
     param("id").isInt(),
-    body("status").isIn(["approved", "rejected"]),
+    body("aadhaarStatus").optional().isIn(["approved", "rejected"]),
+    body("panStatus").optional().isIn(["approved", "rejected"]),
+    body("bankPassbookStatus").optional().isIn(["approved", "rejected"]),
+    body("selfieStatus").optional().isIn(["approved", "rejected"]),
     body("rejectionReason").optional().isString(),
   ],
   validate,
