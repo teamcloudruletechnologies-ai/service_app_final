@@ -116,6 +116,34 @@ async function initDb() {
     );
 
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+    CREATE TABLE IF NOT EXISTS zones (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(120) NOT NULL,
+      city VARCHAR(100),
+      status VARCHAR(30) NOT NULL DEFAULT 'active',
+      radius_km NUMERIC DEFAULT 10,
+      center_lat NUMERIC,
+      center_lng NUMERIC,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS pincodes (
+      id SERIAL PRIMARY KEY,
+      code VARCHAR(20) UNIQUE NOT NULL,
+      zone_id INTEGER REFERENCES zones(id) ON DELETE CASCADE,
+      lat NUMERIC,
+      lng NUMERIC,
+      status VARCHAR(30) NOT NULL DEFAULT 'active',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    ALTER TABLE workers ADD COLUMN IF NOT EXISTS current_lat NUMERIC;
+    ALTER TABLE workers ADD COLUMN IF NOT EXISTS current_lng NUMERIC;
+    ALTER TABLE workers ADD COLUMN IF NOT EXISTS last_location_update TIMESTAMPTZ;
+    ALTER TABLE workers ADD COLUMN IF NOT EXISTS pincode VARCHAR(20);
   `);
 }
 

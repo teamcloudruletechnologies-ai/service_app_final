@@ -101,4 +101,40 @@ async function remove(id) {
   return result.rows[0];
 }
 
-module.exports = { create, findByEmailOrPhone, findById, list, update, remove };
+async function findNearbyWorkers(lat, lng, radiusKm = 10, serviceType = null) {
+  const params = [lat, lng, radiusKm];
+  let where = "status = 'active' AND kyc_status = 'approved' AND current_lat IS NOT NULL AND current_lng IS NOT NULL";
+  
+  if (serviceType) {
+    params.push(serviceType);
+    where += ` AND service_type = $${params.length}`;
+  }
+
+  // Haversine formula for distance in kilometers
+  const query = `
+    SELECT ${publicFields}, current_lat, current_lng, last_location_update,
+    (6371 * acos(cos(radians($1)) * cos(radians(current_lat)) * cos(radians(current_lng) - radians($2)) + sin(radians($1)) * sin(radians(current_lat)))) AS distance
+    FROM workers
+    WHERE ${where}
+    HAVING (6371 * acos(cos(radians($1)) * cos(radians(current_lat)) * cos(radians(current_lng) - radians($2)) + sin(radians($1)) * sin(radians(current_lat)))) <= $3
+    ORDER BY distance ASC
+  `;
+  
+  // Note: HAVING requires GROUP BY or aggregate in Postgres if not using subquery.
+  // We'll use a subquery to make it standard and clean.
+  const properQuery = `
+    SELECT * FROM (
+      SELECT ${publicFields}, current_lat, current_lng, last_location_update,
+      (6371 * acos(cos(radians($1)) * cos(radians(current_lat)) * cos(radians(current_lng) - radians($2)) + sin(radians($1)) * sin(radians(current_lat)))) AS distance
+      FROM workers
+      WHERE ${where}
+    ) AS nearby_workers
+    WHERE distance <= $3
+    ORDER BY distance ASC
+  `;
+
+  const result = await db.query(properQuery, params);
+  return result.rows;
+}
+
+module.exports = { create, findByEmailOrPhone, findById, list, update, remove, findNearbyWorkers };
