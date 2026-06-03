@@ -8,7 +8,8 @@ const serviceRoutes = require("./service.routes");
 const bookingRoutes = require("./booking.routes");
 const invoiceRoutes = require("./invoice.routes");
 const complaintRoutes = require("./complaint.routes");
-
+const locationRoutes = require("./location.routes");
+const userLocationRoutes = require("./user-location.routes");
 const router = express.Router();
 
 router.get("/health", (req, res) => {
@@ -24,5 +25,7 @@ router.use("/admin/services", serviceRoutes);
 router.use("/admin/bookings", bookingRoutes);
 router.use("/admin/invoices", invoiceRoutes);
 router.use("/admin/complaints", complaintRoutes);
+router.use("/admin/locations", locationRoutes);
+router.use("/app/locations", userLocationRoutes);
 
 module.exports = router;
