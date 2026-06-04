@@ -1,0 +1,494 @@
+import { useState, useEffect } from 'react';
+import { servicesAPI } from '../api';
+
+function Skeleton({ w = '100%', h = 16, radius = 6 }) {
+  return (
+    <div style={{
+      width: w, height: h, borderRadius: radius,
+      background: 'linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'shimmer 1.4s infinite',
+    }} />
+  );
+}
+
+function StatCard({ label, value, icon, bg, fg, loading }) {
+  return (
+    <div style={{
+      background: '#fff',
+      border: '0.5px solid #E5E7EB',
+      borderRadius: 12,
+      padding: '16px 20px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}>
+      <div>
+        <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>{label}</div>
+        {loading ? (
+          <Skeleton w="70px" h={24} />
+        ) : (
+          <div style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>{value}</div>
+        )}
+      </div>
+      <div style={{
+        width: 42, height: 42, borderRadius: 10,
+        backgroundColor: bg, color: fg,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 20, flexShrink: 0
+      }}>
+        {icon}
+      </div>
+    </div>
+  );
+}
+
+export default function Services() {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Form Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingService, setEditingService] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    icon: '',
+    description: '',
+    image: '',
+    price: 0,
+    status: 'active'
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  // Fetch Services list
+  const fetchServices = () => {
+    setLoading(true);
+    setError('');
+    servicesAPI.getAll()
+      .then(res => {
+        if (res && res.success) {
+          const serviceList = Array.isArray(res.data) 
+            ? res.data 
+            : (res.data?.rows || []);
+          setServices(serviceList);
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching admin services catalog:', err);
+        setError(err?.message || 'Failed to load services database.');
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  // Handle open modal for create
+  const handleOpenCreate = () => {
+    setEditingService(null);
+    setFormData({
+      name: '',
+      icon: '🔧',
+      description: '',
+      image: 'https://homeservice-assets.s3.amazonaws.com/services/custom.png',
+      price: 499,
+      status: 'active'
+    });
+    setIsModalOpen(true);
+  };
+
+  // Handle open modal for edit
+  const handleOpenEdit = (service) => {
+    setEditingService(service);
+    setFormData({
+      name: service.name,
+      icon: service.icon || '🔧',
+      description: service.description || '',
+      image: service.image || 'https://homeservice-assets.s3.amazonaws.com/services/custom.png',
+      price: Number(service.price) || 0,
+      status: service.status || 'active'
+    });
+    setIsModalOpen(true);
+  };
+
+  // Submit Form (Create / Edit)
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.name) return alert('Service Name is required.');
+
+    setSubmitting(true);
+    const savePromise = editingService
+      ? servicesAPI.update(editingService.id, formData)
+      : servicesAPI.create(formData);
+
+    savePromise
+      .then(res => {
+        if (res && res.success) {
+          setIsModalOpen(false);
+          fetchServices();
+        }
+      })
+      .catch(err => {
+        console.error('Error saving service:', err);
+        alert(err?.message || 'Failed to save service category.');
+      })
+      .finally(() => setSubmitting(false));
+  };
+
+  // Toggle status ('active' <-> 'inactive')
+  const handleToggleStatus = (service) => {
+    const newStatus = service.status === 'active' ? 'inactive' : 'active';
+    servicesAPI.updateStatus(service.id, newStatus)
+      .then(res => {
+        if (res && res.success) {
+          fetchServices();
+        }
+      })
+      .catch(err => {
+        console.error('Error toggling service status:', err);
+        alert(err?.message || 'Failed to update service availability status.');
+      });
+  };
+
+  // Delete Service
+  const handleDelete = (service) => {
+    if (window.confirm(`Are you sure you want to permanently delete the "${service.name}" service category?\nThis cannot be undone.`)) {
+      servicesAPI.delete(service.id)
+        .then(res => {
+          if (res && res.success) {
+            fetchServices();
+          }
+        })
+        .catch(err => {
+          console.error('Error deleting service:', err);
+          alert(err?.message || 'Failed to delete service category.');
+        });
+    }
+  };
+
+  // Stats
+  const totalCount = services.length;
+  const activeCount = services.filter(s => s.status === 'active').length;
+  const disabledCount = services.filter(s => s.status !== 'active').length;
+  const avgPrice = services.length > 0 
+    ? Math.round(services.reduce((acc, curr) => acc + Number(curr.price || 0), 0) / services.length) 
+    : 0;
+
+  const formatCurrency = (val) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(Number(val) || 0);
+  };
+
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#F9FAFB', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+      <style>{`
+        @keyframes shimmer {
+          0%   { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade {
+          animation: fadeIn 0.2s ease-out forwards;
+        }
+      `}</style>
+
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0 }}>Service Catalog Configuration</h2>
+          <p style={{ fontSize: 12, color: '#6B7280', margin: '4px 0 0' }}>Configure offered home services, update rates, upload service assets, and toggle service visibility.</p>
+        </div>
+        <button
+          onClick={handleOpenCreate}
+          style={{
+            background: '#1A56DB',
+            border: 'none',
+            borderRadius: 8,
+            color: '#fff',
+            padding: '8px 16px',
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(26, 86, 219, 0.15)',
+            transition: 'all 0.15s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#1e40af'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#1A56DB'}
+        >
+          ➕ Add New Service
+        </button>
+      </div>
+
+      {/* Stats Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+        <StatCard
+          label="Total Categories"
+          value={totalCount}
+          icon="🗂️"
+          bg="#EFF4FF"
+          fg="#1A56DB"
+          loading={loading}
+        />
+        <StatCard
+          label="Active Offerings"
+          value={activeCount}
+          icon="🟢"
+          bg="#F0FDF4"
+          fg="#059669"
+          loading={loading}
+        />
+        <StatCard
+          label="Disabled/Unavailable"
+          value={disabledCount}
+          icon="🔴"
+          bg="#FEE2E2"
+          fg="#DC2626"
+          loading={loading}
+        />
+      </div>
+
+      {/* Table Container Card */}
+      <div style={{ background: '#fff', border: '0.5px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+        
+        {error && (
+          <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '12px 16px', borderRadius: 8, margin: '20px 24px 0', fontSize: 13 }}>
+            ⚠️ <strong>Error:</strong> {error}
+          </div>
+        )}
+
+        <div style={{ overflowX: 'auto', padding: '20px 24px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 800 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid #E5E7EB', color: '#4B5563', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <th style={{ padding: '14px 8px', fontWeight: 600 }}>Image</th>
+                <th style={{ padding: '14px 8px', fontWeight: 600 }}>Service Name</th>
+                <th style={{ padding: '14px 8px', fontWeight: 600, textAlign: 'center' }}>Status</th>
+                <th style={{ padding: '14px 8px', textAlign: 'center', fontWeight: 600 }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody style={{ fontSize: 13, color: '#374151' }}>
+              {loading ? (
+                [...Array(4)].map((_, idx) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                    <td style={{ padding: '14px 8px' }}><Skeleton w="32px" h="32px" radius={8} /></td>
+                    <td style={{ padding: '14px 8px' }}><Skeleton w="120px" /></td>
+                    <td style={{ padding: '14px 8px' }}><Skeleton w="280px" /></td>
+                    <td style={{ padding: '14px 8px', textAlign: 'right' }}><Skeleton w="60px" /></td>
+                    <td style={{ padding: '14px 8px', textAlign: 'center' }}><Skeleton w="70px" radius={12} /></td>
+                    <td style={{ padding: '14px 8px' }}><Skeleton w="120px" /></td>
+                  </tr>
+                ))
+              ) : services.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>🗂️</div>
+                    <div style={{ fontWeight: 600, color: '#4B5563' }}>No services configured</div>
+                    <div style={{ fontSize: 12 }}>Add a service category to display here.</div>
+                  </td>
+                </tr>
+              ) : (
+                services.map(s => (
+                  <tr key={s.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                    <td style={{ padding: '14px 8px' }}>
+                      <div style={{ width: 44, height: 44, borderRadius: 8, overflow: 'hidden', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {s.image_url ? (
+                          <img src={s.image_url} alt={s.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <span style={{ fontSize: 20 }}>🛠️</span>
+                        )}
+                      </div>
+                    </td>
+                    <td style={{ padding: '14px 8px', fontWeight: 600, color: '#111827' }}>{s.name}</td>
+                    <td style={{ padding: '14px 8px', textAlign: 'center' }}>
+                      <span style={{
+                        display: 'inline-flex',
+                        fontSize: 10,
+                        borderRadius: 12,
+                        padding: '1px 8px',
+                        fontWeight: 700,
+                        backgroundColor: s.status === 'active' ? '#D1FAE5' : '#FEE2E2',
+                        color: s.status === 'active' ? '#065F46' : '#991B1B'
+                      }}>
+                        {s.status === 'active' ? 'Active' : 'Disabled'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '14px 8px', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                        <button
+                          onClick={() => handleOpenEdit(s)}
+                          style={{ border: '1px solid #E5E7EB', background: '#fff', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 600, color: '#374151', cursor: 'pointer' }}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleToggleStatus(s)}
+                          style={{
+                            border: '1px solid',
+                            borderColor: s.status === 'active' ? '#D97706' : '#059669',
+                            background: s.status === 'active' ? '#FFFBEB' : '#EFFDF5',
+                            borderRadius: 6,
+                            padding: '4px 8px',
+                            fontSize: 11,
+                            fontWeight: 600,
+                            color: s.status === 'active' ? '#D97706' : '#059669',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {s.status === 'active' ? '🚫 Disable' : '⚡ Enable'}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(s)}
+                          style={{ border: '1px solid #FCA5A5', background: '#FEE2E2', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 600, color: '#DC2626', cursor: 'pointer' }}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Edit / Create Form Modal */}
+      {isModalOpen && (
+        <div
+          onClick={() => setIsModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(11, 15, 25, 0.4)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <form
+            onSubmit={handleSubmit}
+            onClick={(e) => e.stopPropagation()}
+            className="animate-fade"
+            style={{
+              width: '90%',
+              maxWidth: 480,
+              background: '#fff',
+              border: '1px solid #E5E7EB',
+              borderRadius: 16,
+              display: 'flex',
+              flexDirection: 'column',
+              boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #E5E7EB' }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: 0 }}>
+                {editingService ? `Edit Service: ${editingService.name}` : 'Create New Service category'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                style={{ background: 'none', border: 'none', fontSize: 16, color: '#9CA3AF', cursor: 'pointer', padding: 4 }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Scrollable inputs */}
+            <div style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 14, maxHeight: '70vh', overflowY: 'auto' }}>
+              
+              {/* Name */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase' }}>Service Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Plumber"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none' }}
+                />
+              </div>
+
+
+
+              {/* Image URL */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase' }}>Service Image Asset URL</label>
+                <input
+                  type="text"
+                  placeholder="https://..."
+                  value={formData.image}
+                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                  style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none', fontFamily: 'monospace' }}
+                />
+              </div>
+
+              {/* Status toggle selector */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase' }}>Catalog Availability Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+                  style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none', cursor: 'pointer', background: '#fff' }}
+                >
+                  <option value="active">Active (Available for booking)</option>
+                  <option value="inactive">Disabled (Hidden from catalog)</option>
+                </select>
+              </div>
+
+            </div>
+
+            {/* Footer Buttons */}
+            <div style={{ borderTop: '1px solid #E5E7EB', padding: '12px 20px', backgroundColor: '#FAFAFB', display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 8,
+                  border: '1px solid #D1D5DB',
+                  background: '#fff',
+                  color: '#374151',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  border: 'none',
+                  background: '#1A56DB',
+                  color: '#fff',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 4px rgba(26, 86, 219, 0.1)'
+                }}
+              >
+                {submitting ? 'Saving...' : 'Save Configuration'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
