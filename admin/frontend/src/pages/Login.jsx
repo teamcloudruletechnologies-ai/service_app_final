@@ -14,6 +14,9 @@ export default function Login({ onLoginSuccess }) {
       setError('Please enter your email and password.');
       return;
     }
+
+
+    
     setError('');
     setLoading(true);
 

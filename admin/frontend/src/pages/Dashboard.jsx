@@ -10,6 +10,7 @@ const C = {
   red:    { bg: '#FFF1F2', fg: '#DC2626' },
 };
 
+
 const STATUS_STYLE = {
   Completed:     { background: '#D1FAE5', color: '#065F46' },
   completed:     { background: '#D1FAE5', color: '#065F46' },

@@ -9,6 +9,8 @@ const STATUS_BADGES = {
   cancelled: { bg: '#FEE2E2', fg: '#991B1B', text: 'Cancelled' },
 };
 
+
+
 function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
     <div style={{
