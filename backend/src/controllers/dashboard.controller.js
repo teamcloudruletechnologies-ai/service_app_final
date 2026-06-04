@@ -11,6 +11,9 @@ async function overview(req, res, next) {
       db.query("SELECT COALESCE(SUM(amount), 0) AS total FROM bookings WHERE status = 'completed'"),
     ]);
 
+
+
+    
     return success(res, "Dashboard overview fetched", {
       users: users.rows[0],
       workers: workers.rows[0],

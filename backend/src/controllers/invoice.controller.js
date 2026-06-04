@@ -17,6 +17,9 @@ async function listInvoices(req, res, next) {
   }
 }
 
+
+
+
 async function getInvoice(req, res, next) {
   try {
     const invoice = await Invoice.findById(req.params.id);
