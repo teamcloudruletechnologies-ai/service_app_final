@@ -101,16 +101,18 @@ async function listServices(req, res, next) {
 
 async function createService(req, res, next) {
   try {
-    // Check if category exists
-    const category = await Category.findById(req.body.category_id);
-    if (!category) return error(res, "Selected Category does not exist", 400);
+    // Check if category exists (if provided)
+    if (req.body.category_id) {
+      const category = await Category.findById(req.body.category_id);
+      if (!category) return error(res, "Selected Category does not exist", 400);
+    }
 
     // Check duplicate service name
     const existing = await Service.findByName(req.body.name);
     if (existing) return error(res, "Service with this name already exists", 409);
 
     // Save image file if uploaded
-    let image_url = null;
+    let image_url = req.body.image || null;
     if (req.file) {
       image_url = await saveUpload(req.file, "services");
     }
@@ -145,6 +147,9 @@ async function updateService(req, res, next) {
 
     // Save image file if new one is uploaded
     const updateData = { ...req.body };
+    if (req.body.image) {
+      updateData.image_url = req.body.image;
+    }
     if (req.file) {
       updateData.image_url = await saveUpload(req.file, "services");
     }

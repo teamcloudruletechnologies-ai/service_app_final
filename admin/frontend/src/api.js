@@ -55,14 +55,22 @@ export const usersAPI = {
   getById: (id) => api.get(`/admin/users/${id}`),
   update: (id, data) => api.put(`/admin/users/${id}`, data),
   delete: (id) => api.delete(`/admin/users/${id}`),
+  block: (id) => api.patch(`/admin/users/${id}/block`),
+  unblock: (id) => api.patch(`/admin/users/${id}/unblock`),
+  getBookings: (id) => api.get(`/admin/users/${id}/bookings`),
+  getActivityLogs: (id) => api.get(`/admin/users/${id}/activity-logs`),
 };
 
 // ─── Workers ─────────────────────────────────────────────────
 export const workersAPI = {
   getAll: (params) => api.get("/workers", { params }),
   getById: (id) => api.get(`/workers/${id}`),
-  update: (id, data) => api.put(`/workers/${id}`, data),
+  create: (data) => api.post("/workers", data),
+  update: (id, data) => api.patch(`/workers/${id}`, data),
   delete: (id) => api.delete(`/workers/${id}`),
+  activate: (id) => api.patch(`/workers/${id}/activate`),
+  suspend: (id) => api.patch(`/workers/${id}/suspend`),
+  getPerformance: (id) => api.get(`/workers/${id}/performance`),
 };
 
 // ─── KYC ─────────────────────────────────────────────────────
@@ -95,21 +103,29 @@ export const servicesAPI = {
   create: (data) => api.post("/admin/services", data),
   update: (id, data) => api.put(`/admin/services/${id}`, data),
   delete: (id) => api.delete(`/admin/services/${id}`),
+  updateStatus: (id, status) => api.patch(`/admin/services/${id}/status`, { status }),
+  getCategories: () => api.get("/admin/services/categories"),
 };
 
 // ─── Complaints ──────────────────────────────────────────────
 export const complaintsAPI = {
   getAll: (params) => api.get("/admin/complaints", { params }),
   getById: (id) => api.get(`/admin/complaints/${id}`),
-  update: (id, data) => api.put(`/admin/complaints/${id}`, data),
+  updateStatus: (id, status) => api.patch(`/admin/complaints/${id}/status`, { status }),
+  addNotes: (id, notes) => api.post(`/admin/complaints/${id}/notes`, { admin_notes: notes }),
 };
 
 // ─── Locations ───────────────────────────────────────────────
 export const locationsAPI = {
-  getAll: () => api.get("/admin/locations"),
-  create: (data) => api.post("/admin/locations", data),
-  update: (id, data) => api.put(`/admin/locations/${id}`, data),
-  delete: (id) => api.delete(`/admin/locations/${id}`),
+  getZones: () => api.get("/admin/locations/zones"),
+  createZone: (data) => api.post("/admin/locations/zones", data),
+  updateZone: (id, data) => api.put(`/admin/locations/zones/${id}`, data),
+  updateZoneStatus: (id, status) => api.patch(`/admin/locations/zones/${id}/status`, { status }),
+  deleteZone: (id) => api.delete(`/admin/locations/zones/${id}`),
+  getPincodes: () => api.get("/admin/locations/pincodes"),
+  createPincode: (data) => api.post("/admin/locations/pincodes", data),
+  deletePincode: (id) => api.delete(`/admin/locations/pincodes/${id}`),
+  getWorkerLiveLocation: (workerId) => api.get(`/admin/locations/worker-live/${workerId}`),
 };
 
 export default api;
