@@ -68,7 +68,7 @@ router.post(
   "/",
   upload.single("image"),
   [
-    body("category_id").isInt().withMessage("Valid category_id is required"),
+    body("category_id").optional().isInt().withMessage("Valid category_id is required"),
     body("name").trim().notEmpty().withMessage("Service name is required"),
     body("description").optional().trim(),
     body("status").optional().isIn(["active", "inactive"]),
