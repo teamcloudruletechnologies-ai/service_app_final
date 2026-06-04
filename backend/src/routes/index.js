@@ -10,6 +10,9 @@ const invoiceRoutes = require("./invoice.routes");
 const complaintRoutes = require("./complaint.routes");
 const locationRoutes = require("./location.routes");
 const userLocationRoutes = require("./user-location.routes");
+const checkPermission = require("../middlewares/permission.middleware");
+const subAdminRoutes = require("./subAdmin.routes");
+
 const router = express.Router();
 
 router.get("/health", (req, res) => {
@@ -17,15 +20,16 @@ router.get("/health", (req, res) => {
 });
 
 router.use("/auth", authRoutes);
-router.use("/dashboard", dashboardRoutes);
-router.use("/admin/users", userRoutes);
-router.use("/workers", workerRoutes);
-router.use("/kyc", kycRoutes);
-router.use("/admin/services", serviceRoutes);
-router.use("/admin/bookings", bookingRoutes);
-router.use("/admin/invoices", invoiceRoutes);
-router.use("/admin/complaints", complaintRoutes);
-router.use("/admin/locations", locationRoutes);
+router.use("/dashboard", checkPermission("dashboard"), dashboardRoutes);
+router.use("/admin/users", checkPermission("users"), userRoutes);
+router.use("/workers", checkPermission("workers"), workerRoutes);
+router.use("/kyc", checkPermission("kyc"), kycRoutes);
+router.use("/admin/services", checkPermission("services"), serviceRoutes);
+router.use("/admin/bookings", checkPermission("bookings"), bookingRoutes);
+router.use("/admin/invoices", checkPermission("invoices"), invoiceRoutes);
+router.use("/admin/complaints", checkPermission("complaints"), complaintRoutes);
+router.use("/admin/locations", checkPermission("locations"), locationRoutes);
 router.use("/app/locations", userLocationRoutes);
+router.use("/admin/sub-admins", subAdminRoutes);
 
 module.exports = router;
