@@ -4,6 +4,7 @@ import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Invoices from './pages/Invoices';
+import Bookings from './pages/Bookings';
 
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem('admin_token'));
@@ -30,6 +31,8 @@ export default function App() {
         return <Dashboard />;
       case 'invoices':
         return <Invoices />;
+      case 'bookings':
+        return <Bookings />;
       default:
         return (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, system-ui, sans-serif', color: '#9CA3AF', fontSize: 14 }}>

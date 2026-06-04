@@ -75,7 +75,8 @@ export const kycAPI = {
 export const bookingsAPI = {
   getAll: (params) => api.get("/admin/bookings", { params }),
   getById: (id) => api.get(`/admin/bookings/${id}`),
-  update: (id, data) => api.put(`/admin/bookings/${id}`, data),
+  updateStatus: (id, status) => api.patch(`/admin/bookings/${id}/status`, { status }),
+  getAnalytics: () => api.get("/admin/bookings/analytics"),
 };
 
 // ─── Invoices ────────────────────────────────────────────────
