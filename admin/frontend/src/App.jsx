@@ -5,6 +5,9 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Invoices from './pages/Invoices';
 import Bookings from './pages/Bookings';
+import Workers from './pages/Workers';
+import Support from './pages/Support';
+import Locations from './pages/Locations';
 
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem('admin_token'));
@@ -33,6 +36,12 @@ export default function App() {
         return <Invoices />;
       case 'bookings':
         return <Bookings />;
+      case 'workers':
+        return <Workers />;
+      case 'support':
+        return <Support />;
+      case 'locations':
+        return <Locations />;
       default:
         return (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, system-ui, sans-serif', color: '#9CA3AF', fontSize: 14 }}>
