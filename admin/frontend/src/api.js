@@ -79,6 +79,7 @@ export const kycAPI = {
   getById: (id) => api.get(`/kyc/${id}`),
   approve: (id) => api.post(`/kyc/${id}/approve`),
   reject: (id, reason) => api.post(`/kyc/${id}/reject`, { reason }),
+  review: (id, data) => api.patch(`/kyc/${id}/review`, data),
 };
 
 // ─── Bookings ────────────────────────────────────────────────

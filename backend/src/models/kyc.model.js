@@ -213,7 +213,13 @@ async function review(id, { aadhaarStatus, panStatus, bankPassbookStatus, selfie
 }
 
 async function findById(id) {
-  const result = await db.query("SELECT * FROM worker_kyc WHERE id = $1", [id]);
+  const result = await db.query(
+    `SELECT k.*, w.name AS worker_name, w.phone AS worker_phone, w.service_type
+     FROM worker_kyc k
+     JOIN workers w ON w.id = k.worker_id
+     WHERE k.id = $1`,
+    [id]
+  );
   return result.rows[0];
 }
 
