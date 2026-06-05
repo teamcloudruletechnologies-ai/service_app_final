@@ -153,6 +153,13 @@ async function initDb() {
     ALTER TABLE workers ADD COLUMN IF NOT EXISTS current_lng NUMERIC;
     ALTER TABLE workers ADD COLUMN IF NOT EXISTS last_location_update TIMESTAMPTZ;
     ALTER TABLE workers ADD COLUMN IF NOT EXISTS pincode VARCHAR(20);
+
+    CREATE TABLE IF NOT EXISTS admin_permissions (
+      id SERIAL PRIMARY KEY,
+      admin_id INTEGER NOT NULL REFERENCES admins(id) ON DELETE CASCADE,
+      permission VARCHAR(100) NOT NULL,
+      UNIQUE(admin_id, permission)
+    );
   `);
 }
 
