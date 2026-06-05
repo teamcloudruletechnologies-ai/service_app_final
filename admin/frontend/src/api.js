@@ -55,6 +55,10 @@ export const usersAPI = {
   getById: (id) => api.get(`/admin/users/${id}`),
   update: (id, data) => api.put(`/admin/users/${id}`, data),
   delete: (id) => api.delete(`/admin/users/${id}`),
+  block: (id) => api.patch(`/admin/users/${id}/block`),
+  unblock: (id) => api.patch(`/admin/users/${id}/unblock`),
+  getBookings: (id) => api.get(`/admin/users/${id}/bookings`),
+  getActivityLogs: (id) => api.get(`/admin/users/${id}/activity-logs`),
 };
 
 // ─── Workers ─────────────────────────────────────────────────
@@ -99,6 +103,8 @@ export const servicesAPI = {
   create: (data) => api.post("/admin/services", data),
   update: (id, data) => api.put(`/admin/services/${id}`, data),
   delete: (id) => api.delete(`/admin/services/${id}`),
+  updateStatus: (id, status) => api.patch(`/admin/services/${id}/status`, { status }),
+  getCategories: () => api.get("/admin/services/categories"),
 };
 
 // ─── Complaints ──────────────────────────────────────────────

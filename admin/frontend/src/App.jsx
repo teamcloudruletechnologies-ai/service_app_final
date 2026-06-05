@@ -8,6 +8,8 @@ import Bookings from './pages/Bookings';
 import Workers from './pages/Workers';
 import Support from './pages/Support';
 import Locations from './pages/Locations';
+import Users from './pages/Users';
+import Services from './pages/Services';
 
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem('admin_token'));
@@ -42,6 +44,10 @@ export default function App() {
         return <Support />;
       case 'locations':
         return <Locations />;
+      case 'users':
+        return <Users />;
+      case 'services':
+        return <Services />;
       default:
         return (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, system-ui, sans-serif', color: '#9CA3AF', fontSize: 14 }}>
