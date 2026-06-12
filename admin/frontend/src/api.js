@@ -129,4 +129,21 @@ export const locationsAPI = {
   getWorkerLiveLocation: (workerId) => api.get(`/admin/locations/worker-live/${workerId}`),
 };
 
+// ─── Roles & Permissions (Sub-Admins) ───────────────────────
+export const rolesAPI = {
+  getAll: () => api.get("/admin/sub-admins"),
+  getById: (id) => api.get(`/admin/sub-admins/${id}`),
+  create: (data) => api.post("/admin/sub-admins", data),
+  update: (id, data) => api.patch(`/admin/sub-admins/${id}`, data),
+  delete: (id) => api.delete(`/admin/sub-admins/${id}`),
+};
+
+// ─── Notifications ───────────────────────────────────────────
+export const notificationsAPI = {
+  getAll: (params) => api.get("/admin/notifications", { params }),
+  markRead: (id) => api.patch(`/admin/notifications/${id}/read`),
+  markAllRead: () => api.patch("/admin/notifications/read-all"),
+  delete: (id) => api.delete(`/admin/notifications/${id}`),
+};
+
 export default api;
