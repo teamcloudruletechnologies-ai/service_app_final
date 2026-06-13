@@ -12,6 +12,7 @@ const locationRoutes = require("./location.routes");
 const userLocationRoutes = require("./user-location.routes");
 const checkPermission = require("../middlewares/permission.middleware");
 const subAdminRoutes = require("./subAdmin.routes");
+const notificationRoutes = require("./notification.routes");
 
 const router = express.Router();
 
@@ -31,5 +32,6 @@ router.use("/admin/complaints", checkPermission("complaints"), complaintRoutes);
 router.use("/admin/locations", checkPermission("locations"), locationRoutes);
 router.use("/app/locations", userLocationRoutes);
 router.use("/admin/sub-admins", subAdminRoutes);
+router.use("/admin/notifications", checkPermission("notifications"), notificationRoutes);
 
 module.exports = router;

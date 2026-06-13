@@ -160,6 +160,18 @@ async function initDb() {
       permission VARCHAR(100) NOT NULL,
       UNIQUE(admin_id, permission)
     );
+
+    CREATE TABLE IF NOT EXISTS notifications (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      message TEXT NOT NULL,
+      type VARCHAR(50) NOT NULL DEFAULT 'system',
+      priority VARCHAR(20) NOT NULL DEFAULT 'normal',
+      read BOOLEAN NOT NULL DEFAULT FALSE,
+      entity_id VARCHAR(100),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
   `);
 }
 
