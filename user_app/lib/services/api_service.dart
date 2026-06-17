@@ -1,0 +1,215 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../config/api_config.dart';
+import '../models/models.dart';
+
+class ApiException implements Exception {
+  final String message;
+  final int? statusCode;
+
+  ApiException(this.message, {this.statusCode});
+
+  @override
+  String toString() => message;
+}
+
+class ApiService {
+  static const _tokenKey = 'user_token';
+  static const _accountKey = 'user_account';
+
+  String? _token;
+  UserAccount? _account;
+
+  String? get token => _token;
+  UserAccount? get account => _account;
+  bool get isLoggedIn => _token != null;
+
+  Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    _token = prefs.getString(_tokenKey);
+    final accountJson = prefs.getString(_accountKey);
+    if (accountJson != null) {
+      _account = UserAccount.fromJson(jsonDecode(accountJson));
+    }
+  }
+
+  Future<void> _saveSession(String token, UserAccount account) async {
+    _token = token;
+    _account = account;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_tokenKey, token);
+    await prefs.setString(_accountKey, jsonEncode({
+      'id': account.id,
+      'role': account.role,
+      'name': account.name,
+      'email': account.email,
+      'phone': account.phone,
+      'status': account.status,
+    }));
+  }
+
+  Future<void> logout() async {
+    _token = null;
+    _account = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+    await prefs.remove(_accountKey);
+  }
+
+  Map<String, String> _headers({bool auth = false}) {
+    final headers = {'Content-Type': 'application/json'};
+    if (auth && _token != null) {
+      headers['Authorization'] = 'Bearer $_token';
+    }
+    return headers;
+  }
+
+  dynamic _decode(http.Response response) {
+    final body = response.body.isEmpty ? {} : jsonDecode(response.body);
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return body;
+    }
+    final message = body is Map ? (body['message'] as String? ?? 'Request failed') : 'Request failed';
+    throw ApiException(message, statusCode: response.statusCode);
+  }
+
+  PagedResult<T> _parsePaged<T>(Map<String, dynamic> payload, T Function(Map<String, dynamic>) fromJson) {
+    final rows = (payload['rows'] as List? ?? [])
+        .map((e) => fromJson(e as Map<String, dynamic>))
+        .toList();
+    final meta = payload['meta'] as Map<String, dynamic>? ?? {};
+    return PagedResult(
+      items: rows,
+      total: meta['total'] as int? ?? rows.length,
+      page: meta['page'] as int? ?? 1,
+      limit: meta['limit'] as int? ?? 50,
+    );
+  }
+
+  Future<Map<String, dynamic>> login(String login, String password) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/auth/login'),
+      headers: _headers(),
+      body: jsonEncode({'login': login, 'password': password, 'role': 'user'}),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final payload = data['data'] as Map<String, dynamic>;
+    final account = UserAccount.fromJson(payload['account']);
+    await _saveSession(payload['token'] as String, account);
+    return payload;
+  }
+
+  Future<UserAccount> register({
+    required String name,
+    String? email,
+    String? phone,
+    required String password,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/auth/user/register'),
+      headers: _headers(),
+      body: jsonEncode({
+        'name': name,
+        if (email != null && email.isNotEmpty) 'email': email,
+        if (phone != null && phone.isNotEmpty) 'phone': phone,
+        'password': password,
+      }),
+    );
+    _decode(response);
+    await login(email ?? phone ?? '', password);
+    return _account!;
+  }
+
+  Future<UserAccount> fetchProfile() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/auth/me'),
+      headers: _headers(auth: true),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final account = UserAccount.fromJson(data['data']);
+    _account = account;
+    return account;
+  }
+
+  Future<PagedResult<ServiceCategory>> fetchCategories() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/services/categories?limit=50'),
+      headers: _headers(),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return _parsePaged(data['data'] as Map<String, dynamic>, ServiceCategory.fromJson);
+  }
+
+  Future<PagedResult<ServiceItem>> fetchServices({int? categoryId, String? search}) async {
+    final params = <String, String>{'limit': '50', 'status': 'active'};
+    if (categoryId != null) params['category_id'] = '$categoryId';
+    if (search != null && search.isNotEmpty) params['search'] = search;
+
+    final uri = Uri.parse('${ApiConfig.baseUrl}/app/services').replace(queryParameters: params);
+    final response = await http.get(uri, headers: _headers());
+    final data = _decode(response) as Map<String, dynamic>;
+    return _parsePaged(data['data'] as Map<String, dynamic>, ServiceItem.fromJson);
+  }
+
+  Future<ServiceItem> fetchService(int id) async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/services/$id'),
+      headers: _headers(),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return ServiceItem.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<BookingItem> createBooking({
+    required int serviceId,
+    required String address,
+    String? notes,
+    DateTime? scheduledAt,
+    int? workerId,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/app/bookings'),
+      headers: _headers(auth: true),
+      body: jsonEncode({
+        'service_id': serviceId,
+        'address': address,
+        if (notes != null && notes.isNotEmpty) 'notes': notes,
+        if (scheduledAt != null) 'scheduled_at': scheduledAt.toIso8601String(),
+        if (workerId != null) 'worker_id': workerId,
+      }),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return BookingItem.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<PagedResult<BookingItem>> fetchBookings({String? status}) async {
+    final params = <String, String>{'limit': '50'};
+    if (status != null) params['status'] = status;
+
+    final uri = Uri.parse('${ApiConfig.baseUrl}/app/bookings').replace(queryParameters: params);
+    final response = await http.get(uri, headers: _headers(auth: true));
+    final data = _decode(response) as Map<String, dynamic>;
+    return _parsePaged(data['data'] as Map<String, dynamic>, BookingItem.fromJson);
+  }
+
+  Future<BookingItem> fetchBooking(int id) async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/bookings/$id'),
+      headers: _headers(auth: true),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return BookingItem.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<BookingItem> cancelBooking(int id) async {
+    final response = await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/app/bookings/$id/cancel'),
+      headers: _headers(auth: true),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return BookingItem.fromJson(data['data'] as Map<String, dynamic>);
+  }
+}
