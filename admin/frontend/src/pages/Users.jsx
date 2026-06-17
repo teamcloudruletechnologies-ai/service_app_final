@@ -78,10 +78,10 @@ export default function Users() {
     usersAPI.getAll(params)
       .then(res => {
         if (res && res.success) {
-          const rawUsers = res.users || [];
+          const rawUsers = res.data?.rows || res.data || [];
           const mapped = rawUsers.map(u => ({
             ...u,
-            status: u.is_blocked ? 'suspended' : 'active'
+            status: u.status
           }));
           setAllUsers(mapped);
 
@@ -121,9 +121,8 @@ export default function Users() {
     
     usersAPI.getById(userId)
       .then(res => {
-        if (res && res.success && res.user) {
-          const user = res.user;
-          user.status = user.is_blocked ? 'suspended' : 'active';
+        if (res && res.success && res.data) {
+          const user = res.data;
           setSelectedUser(user);
         }
       })
