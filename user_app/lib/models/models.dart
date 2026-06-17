@@ -1,0 +1,158 @@
+class UserAccount {
+  final int id;
+  final String role;
+  final String name;
+  final String? email;
+  final String? phone;
+  final String status;
+
+  const UserAccount({
+    required this.id,
+    required this.role,
+    required this.name,
+    this.email,
+    this.phone,
+    required this.status,
+  });
+
+  factory UserAccount.fromJson(Map<String, dynamic> json) {
+    return UserAccount(
+      id: json['id'] as int,
+      role: json['role'] as String? ?? 'user',
+      name: json['name'] as String? ?? '',
+      email: json['email'] as String?,
+      phone: json['phone'] as String?,
+      status: json['status'] as String? ?? 'active',
+    );
+  }
+}
+
+class ServiceCategory {
+  final int id;
+  final String name;
+  final String? description;
+  final String? iconUrl;
+  final String status;
+
+  const ServiceCategory({
+    required this.id,
+    required this.name,
+    this.description,
+    this.iconUrl,
+    required this.status,
+  });
+
+  factory ServiceCategory.fromJson(Map<String, dynamic> json) {
+    return ServiceCategory(
+      id: json['id'] as int,
+      name: json['name'] as String? ?? '',
+      description: json['description'] as String?,
+      iconUrl: json['icon_url'] as String?,
+      status: json['status'] as String? ?? 'active',
+    );
+  }
+}
+
+class ServiceItem {
+  final int id;
+  final int? categoryId;
+  final String name;
+  final String? description;
+  final String? imageUrl;
+  final String? categoryName;
+  final double price;
+  final String status;
+
+  const ServiceItem({
+    required this.id,
+    this.categoryId,
+    required this.name,
+    this.description,
+    this.imageUrl,
+    this.categoryName,
+    required this.price,
+    required this.status,
+  });
+
+  factory ServiceItem.fromJson(Map<String, dynamic> json) {
+    return ServiceItem(
+      id: json['id'] as int,
+      categoryId: json['category_id'] as int?,
+      name: json['name'] as String? ?? '',
+      description: json['description'] as String?,
+      imageUrl: json['image_url'] as String?,
+      categoryName: json['category_name'] as String?,
+      price: (json['price'] as num?)?.toDouble() ?? 0,
+      status: json['status'] as String? ?? 'active',
+    );
+  }
+}
+
+class BookingItem {
+  final int id;
+  final int? serviceId;
+  final String? serviceName;
+  final String? serviceImage;
+  final String? workerName;
+  final String? workerPhone;
+  final String? serviceType;
+  final String status;
+  final double amount;
+  final String? address;
+  final String? notes;
+  final DateTime? scheduledAt;
+  final DateTime createdAt;
+
+  const BookingItem({
+    required this.id,
+    this.serviceId,
+    this.serviceName,
+    this.serviceImage,
+    this.workerName,
+    this.workerPhone,
+    this.serviceType,
+    required this.status,
+    required this.amount,
+    this.address,
+    this.notes,
+    this.scheduledAt,
+    required this.createdAt,
+  });
+
+  factory BookingItem.fromJson(Map<String, dynamic> json) {
+    return BookingItem(
+      id: json['id'] as int,
+      serviceId: json['service_id'] as int?,
+      serviceName: json['service_name'] as String?,
+      serviceImage: json['service_image'] as String?,
+      workerName: json['worker_name'] as String?,
+      workerPhone: json['worker_phone'] as String?,
+      serviceType: json['service_type'] as String?,
+      status: json['status'] as String? ?? 'pending',
+      amount: (json['amount'] as num?)?.toDouble() ?? 0,
+      address: json['address'] as String?,
+      notes: json['notes'] as String?,
+      scheduledAt: json['scheduled_at'] != null
+          ? DateTime.tryParse(json['scheduled_at'] as String)
+          : null,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          DateTime.now(),
+    );
+  }
+
+  bool get canCancel => status == 'pending' || status == 'confirmed';
+}
+
+class PagedResult<T> {
+  final List<T> items;
+  final int total;
+  final int page;
+  final int limit;
+
+  const PagedResult({
+    required this.items,
+    required this.total,
+    required this.page,
+    required this.limit,
+  });
+}
