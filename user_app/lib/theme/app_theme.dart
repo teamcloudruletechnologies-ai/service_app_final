@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const primary = Color(0xFF0D9488);
-  static const primaryDark = Color(0xFF0F766E);
-  static const accent = Color(0xFFF97316);
-  static const surface = Color(0xFFF8FAFC);
+  static const primary = Color(0xFFC5A880);
+  static const primaryDark = Color(0xFFA38965);
+  static const accent = Color(0xFF000000);
+  static const surface = Colors.white;
   static const card = Colors.white;
 
   static ThemeData light() {
@@ -47,8 +47,8 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primary,
-          foregroundColor: Colors.white,
+          backgroundColor: accent,
+          foregroundColor: primary,
           minimumSize: const Size.fromHeight(48),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
