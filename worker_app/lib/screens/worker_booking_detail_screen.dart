@@ -77,6 +77,7 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Job Details')),
       body: _buildBody(),
       bottomNavigationBar: _booking != null ? _buildActionButtons() : null,

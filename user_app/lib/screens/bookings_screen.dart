@@ -50,6 +50,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
     final booking = context.watch<BookingProvider>();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('My Bookings')),
       body: Column(
         children: [

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/catalog_provider.dart';
-import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'service_detail_screen.dart';
 
@@ -46,20 +45,31 @@ class _HomeScreenState extends State<HomeScreen> {
     final catalog = context.watch<CatalogProvider>();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 140,
+            expandedHeight: 130,
             pinned: true,
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+            elevation: 0,
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Container(height: 1, color: const Color(0xFFE5E7EB)),
+            ),
             flexibleSpace: FlexibleSpaceBar(
-              title: Text('Hi, ${auth.user?.name.split(' ').first ?? 'User'}'),
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [AppTheme.primary, AppTheme.primaryDark],
-                  ),
+              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+              title: Text(
+                'Hi, ${auth.user?.name.split(' ').first ?? 'User'} 👋',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                  letterSpacing: -0.3,
                 ),
               ),
+              background: Container(color: Colors.white),
             ),
           ),
           SliverToBoxAdapter(
