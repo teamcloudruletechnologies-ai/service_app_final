@@ -72,8 +72,8 @@ async function initDb() {
 
     CREATE TABLE IF NOT EXISTS bookings (
       id SERIAL PRIMARY KEY,
-      user_id INTEGER REFERENCES users(id),
-      worker_id INTEGER REFERENCES workers(id),
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      worker_id INTEGER REFERENCES workers(id) ON DELETE CASCADE,
       status VARCHAR(30) NOT NULL DEFAULT 'pending',
       amount NUMERIC(12,2) NOT NULL DEFAULT 0,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -82,9 +82,9 @@ async function initDb() {
 
     CREATE TABLE IF NOT EXISTS invoices (
       id SERIAL PRIMARY KEY,
-      booking_id INTEGER REFERENCES bookings(id),
-      user_id INTEGER REFERENCES users(id),
-      worker_id INTEGER REFERENCES workers(id),
+      booking_id INTEGER REFERENCES bookings(id) ON DELETE CASCADE,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      worker_id INTEGER REFERENCES workers(id) ON DELETE CASCADE,
       invoice_number VARCHAR(80) UNIQUE NOT NULL,
       status VARCHAR(30) NOT NULL DEFAULT 'pending',
       amount NUMERIC(12,2) NOT NULL DEFAULT 0,
@@ -176,6 +176,16 @@ async function initDb() {
       priority VARCHAR(20) NOT NULL DEFAULT 'normal',
       read BOOLEAN NOT NULL DEFAULT FALSE,
       entity_id VARCHAR(100),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS complaints (
+      id SERIAL PRIMARY KEY,
+      subject VARCHAR(255) NOT NULL,
+      description TEXT,
+      status VARCHAR(50) NOT NULL DEFAULT 'pending',
+      admin_notes TEXT DEFAULT '',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
