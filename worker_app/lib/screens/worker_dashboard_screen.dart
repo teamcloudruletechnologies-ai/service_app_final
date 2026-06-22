@@ -131,6 +131,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     }).toList();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Partner Dashboard'),
         actions: [

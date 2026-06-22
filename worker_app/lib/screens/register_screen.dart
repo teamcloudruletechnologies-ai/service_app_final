@@ -98,6 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final auth = context.watch<AuthProvider>();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Join as Service Partner')),
       body: SafeArea(
         child: SingleChildScrollView(

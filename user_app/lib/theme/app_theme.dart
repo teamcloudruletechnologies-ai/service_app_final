@@ -15,8 +15,25 @@ class AppTheme {
         primary: primary,
         secondary: accent,
         surface: surface,
+        onSurface: Colors.black,
+        surfaceContainer: Colors.white,
+        surfaceContainerHigh: Colors.white,
+        surfaceContainerHighest: Colors.white,
       ),
       scaffoldBackgroundColor: surface,
+      navigationBarTheme: const NavigationBarThemeData(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        indicatorColor: Color(0xFFF3F4F6),
+        iconTheme: WidgetStatePropertyAll(
+          IconThemeData(color: Colors.black),
+        ),
+        labelTextStyle: WidgetStatePropertyAll(
+          TextStyle(color: Colors.black, fontWeight: FontWeight.w600, fontSize: 12),
+        ),
+      ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,

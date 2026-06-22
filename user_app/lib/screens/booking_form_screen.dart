@@ -82,6 +82,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     final dateFmt = DateFormat('dd MMM yyyy, hh:mm a');
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Book Service')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
