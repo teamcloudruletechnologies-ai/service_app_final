@@ -48,6 +48,11 @@ class ApiService {
       'email': account.email,
       'phone': account.phone,
       'status': account.status,
+      'kyc_status': account.kycStatus,
+      'service_type': account.serviceType,
+      'experience_years': account.experienceYears,
+      'city': account.city,
+      'pincode': account.pincode,
     }));
   }
 
@@ -89,11 +94,11 @@ class ApiService {
     );
   }
 
-  Future<Map<String, dynamic>> login(String login, String password) async {
+  Future<Map<String, dynamic>> login(String login, String password, {String role = 'user'}) async {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/auth/login'),
       headers: _headers(),
-      body: jsonEncode({'login': login, 'password': password, 'role': 'user'}),
+      body: jsonEncode({'login': login, 'password': password, 'role': role}),
     );
     final data = _decode(response) as Map<String, dynamic>;
     final payload = data['data'] as Map<String, dynamic>;
@@ -119,7 +124,34 @@ class ApiService {
       }),
     );
     _decode(response);
-    await login(email ?? phone ?? '', password);
+    await login(email ?? phone ?? '', password, role: 'user');
+    return _account!;
+  }
+
+  Future<UserAccount> registerWorker({
+    required String name,
+    String? email,
+    required String phone,
+    required String password,
+    required String serviceType,
+    required int experienceYears,
+    required String city,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/auth/worker/register'),
+      headers: _headers(),
+      body: jsonEncode({
+        'name': name,
+        if (email != null && email.isNotEmpty) 'email': email,
+        'phone': phone,
+        'password': password,
+        'serviceType': serviceType,
+        'experienceYears': experienceYears,
+        'city': city,
+      }),
+    );
+    _decode(response);
+    await login(phone, password, role: 'worker');
     return _account!;
   }
 
@@ -211,5 +243,107 @@ class ApiService {
     );
     final data = _decode(response) as Map<String, dynamic>;
     return BookingItem.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  // --- WORKER SERVICES ---
+
+  Future<Map<String, dynamic>> submitKyc({
+    required String aadhaarNumber,
+    required String aadhaarUrl,
+    required String panNumber,
+    required String panUrl,
+    required String bankAccountNumber,
+    required String bankPassbookUrl,
+    required String selfieUrl,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/kyc'),
+      headers: _headers(auth: true),
+      body: jsonEncode({
+        'aadhaarNumber': aadhaarNumber,
+        'aadhaarUrl': aadhaarUrl,
+        'panNumber': panNumber,
+        'panUrl': panUrl,
+        'bankAccountNumber': bankAccountNumber,
+        'bankPassbookUrl': bankPassbookUrl,
+        'selfieUrl': selfieUrl,
+      }),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return data;
+  }
+
+  Future<Map<String, dynamic>?> fetchMyKyc() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/kyc'),
+      headers: _headers(auth: true),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final rows = data['data']?['rows'] as List?;
+    if (rows != null && rows.isNotEmpty) {
+      return rows.first as Map<String, dynamic>;
+    }
+    return null;
+  }
+
+  Future<UserAccount> updateWorkerProfile({
+    String? status,
+    String? city,
+    String? pincode,
+    String? serviceType,
+    int? experienceYears,
+  }) async {
+    final response = await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/app/worker/profile'),
+      headers: _headers(auth: true),
+      body: jsonEncode({
+        if (status != null) 'status': status,
+        if (city != null) 'city': city,
+        if (pincode != null) 'pincode': pincode,
+        if (serviceType != null) 'serviceType': serviceType,
+        if (experienceYears != null) 'experienceYears': experienceYears,
+      }),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final account = UserAccount.fromJson(data['data']);
+    _account = account;
+    // Update local cache
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accountKey, jsonEncode({
+      'id': account.id,
+      'role': account.role,
+      'name': account.name,
+      'email': account.email,
+      'phone': account.phone,
+      'status': account.status,
+      'kyc_status': account.kycStatus,
+      'service_type': account.serviceType,
+      'experience_years': account.experienceYears,
+      'city': account.city,
+      'pincode': account.pincode,
+    }));
+    return account;
+  }
+
+  Future<BookingItem> updateBookingStatus(int bookingId, String status) async {
+    final response = await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/app/bookings/$bookingId/status'),
+      headers: _headers(auth: true),
+      body: jsonEncode({'status': status}),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return BookingItem.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<void> updateWorkerLocation(double lat, double lng, {String? pincode}) async {
+    await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/app/locations/update-my-location'),
+      headers: _headers(auth: true),
+      body: jsonEncode({
+        'lat': lat,
+        'lng': lng,
+        if (pincode != null) 'pincode': pincode,
+      }),
+    );
   }
 }

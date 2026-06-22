@@ -56,7 +56,22 @@ async function findWorkersByPincode(req, res) {
   }
 }
 
+async function updateMyLocation(req, res) {
+  try {
+    const workerId = req.auth.id;
+    const { lat, lng, pincode } = req.body;
+    const updated = await locationModel.updateWorkerLocation(workerId, parseFloat(lat), parseFloat(lng), pincode);
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Worker not found" });
+    }
+    res.json({ success: true, message: "Location updated successfully", data: updated });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
 module.exports = {
   findNearbyWorkers,
   findWorkersByPincode,
+  updateMyLocation,
 };

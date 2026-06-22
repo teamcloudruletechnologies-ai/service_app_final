@@ -26,7 +26,7 @@ router.post(
   controller.submitKyc
 );
 
-router.get("/", auth, allowRoles(roles.ADMIN), controller.listKyc);
+router.get("/", auth, allowRoles(roles.ADMIN, roles.WORKER), controller.listKyc);
 router.get("/:id", auth, allowRoles(roles.ADMIN), [param("id").isInt()], validate, controller.getKyc);
 
 router.patch(

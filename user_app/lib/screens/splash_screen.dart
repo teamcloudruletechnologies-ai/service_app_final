@@ -136,25 +136,30 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: UrbanSplashBody(
-        logoOpacity: _logoOpacity,
-        logoScale: _logoScale,
-        brandSlide: _brandSlide,
-        brandOpacity: _brandOpacity,
-        lineWidth: _lineWidth,
-        taglineOpacity: _taglineOpacity,
-        skylineProgress: _skylineProgress,
-        windowGlow: _loopController,
-        gridProgress: _gridProgress,
-        gridShift: _loopController,
-        pinOpacity: _pinOpacity,
-        pinScale: _pinScale,
-        pinPulse: _loopController,
-        pinRipple: _loopController,
-        iconAnimations: _iconAnimations,
-        loaderOpacity: _loaderOpacity,
-        loaderRotation: _loopController,
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0D9488), Color(0xFF0F766E)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.home_repair_service_rounded, size: 72, color: Colors.white),
+            SizedBox(height: 16),
+            Text(
+              'Urban Service',
+              style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text('Home services at your doorstep', style: TextStyle(color: Colors.white70)),
+            SizedBox(height: 32),
+            CircularProgressIndicator(color: Colors.white),
+          ],
+        ),
       ),
     );
   }

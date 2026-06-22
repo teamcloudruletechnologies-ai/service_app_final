@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import 'main_shell.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +17,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _phoneFormKey = GlobalKey<FormState>();
   final _phoneCtrl = TextEditingController();
+  
+
   
   // OTP Fields (6 digits)
   final List<TextEditingController> _otpControllers = List.generate(6, (_) => TextEditingController());
@@ -126,9 +129,9 @@ class _LoginScreenState extends State<LoginScreen> {
     bool ok = false;
     String? localError;
     try {
-      ok = await auth.login(cleanPhone, 'user123');
+      ok = await auth.login(cleanPhone, 'user123', role: 'user');
 
-      // 2. If login fails, try automatically Registering
+      // 2. If login fails and we are logging in as customer, try automatically Registering
       if (!ok && auth.error != null && auth.error!.toLowerCase().contains('invalid')) {
         final suffix = enteredPhone.length >= 4 ? enteredPhone.substring(enteredPhone.length - 4) : 'User';
         ok = await auth.register(
@@ -289,7 +292,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
+
+
 
           // Mobile Number input field with country code selector (+91)
           TextFormField(
@@ -395,6 +400,34 @@ class _LoginScreenState extends State<LoginScreen> {
               fontSize: 12,
               color: Color(0xFF9CA3AF),
             ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "Don't have an account? ",
+                style: TextStyle(color: Color(0xFF6B7280), fontSize: 14),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const RegisterScreen(),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Sign Up',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

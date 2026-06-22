@@ -15,10 +15,11 @@ async function submitKyc(req, res, next) {
 async function listKyc(req, res, next) {
   try {
     const paging = getPagination(req.query);
+    const workerId = req.auth.role === "worker" ? req.auth.id : req.query.workerId;
     const data = await Kyc.list({
       ...paging,
       status: req.query.status,
-      workerId: req.query.workerId,
+      workerId,
     });
     return success(res, "KYC records fetched", data);
   } catch (err) {
