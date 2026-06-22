@@ -1,5 +1,5 @@
 const express = require("express");
-const { query } = require("express-validator");
+const { query, body } = require("express-validator");
 const auth = require("../middlewares/auth.middleware");
 const allowRoles = require("../middlewares/rbac.middleware");
 const validate = require("../middlewares/validate.middleware");
@@ -34,6 +34,18 @@ router.get(
   ],
   validate,
   controller.findWorkersByPincode
+);
+
+router.post(
+  "/update-my-location",
+  allowRoles(roles.WORKER),
+  [
+    body("lat").isNumeric(),
+    body("lng").isNumeric(),
+    body("pincode").optional().isString(),
+  ],
+  validate,
+  controller.updateMyLocation
 );
 
 module.exports = router;
