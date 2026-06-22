@@ -129,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
     bool ok = false;
     String? localError;
     try {
-      ok = await auth.login(cleanPhone, 'user123', role: 'worker');
+      ok = await auth.login(cleanPhone, 'worker123', role: 'worker');
     } catch (e) {
       ok = false;
       localError = e.toString();
