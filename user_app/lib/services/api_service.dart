@@ -321,6 +321,7 @@ class ApiService {
   Future<UserAccount> updateUserProfile({
     String? name,
     String? email,
+    String? phone,
   }) async {
     final response = await http.patch(
       Uri.parse('${ApiConfig.baseUrl}/app/user/profile'),
@@ -328,6 +329,7 @@ class ApiService {
       body: jsonEncode({
         if (name != null) 'name': name,
         if (email != null) 'email': email,
+        if (phone != null) 'phone': phone,
       }),
     );
     final data = _decode(response) as Map<String, dynamic>;

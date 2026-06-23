@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,155 +24,173 @@ class ProfileScreen extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
     final nameCtrl = TextEditingController(text: user.name);
     final emailCtrl = TextEditingController(text: user.email);
+    final phoneCtrl = TextEditingController(text: user.phone);
 
     showDialog(
       context: context,
       builder: (dialogContext) {
-        return Dialog(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Form(
-              key: formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Edit Profile',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF111827),
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: nameCtrl,
-                    cursorColor: const Color(0xFF111827),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xFFF9FAFB),
-                      labelText: 'Full Name',
-                      labelStyle: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.normal),
-                      prefixIcon: const Icon(Icons.badge_outlined, color: Colors.grey, size: 20),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF111827), width: 1.5),
-                      ),
-                    ),
-                    validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: emailCtrl,
-                    keyboardType: TextInputType.emailAddress,
-                    cursorColor: const Color(0xFF111827),
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xFFF9FAFB),
-                      labelText: 'Email Address',
-                      labelStyle: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.normal),
-                      prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey, size: 20),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFF111827), width: 1.5),
-                      ),
-                    ),
-                    validator: (v) {
-                      if (v == null || v.trim().isEmpty) {
-                        return 'Required';
-                      }
-                      if (!v.contains('@')) {
-                        return 'Enter a valid email address';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Dialog(
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(dialogContext),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
-                            side: const BorderSide(color: Color(0xFFE5E7EB)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      const Text(
+                        'Edit Profile',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1A1A1A),
+                          letterSpacing: -0.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      Center(
+                        child: Column(
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundColor: const Color(0xFFF5F5F3),
+                              child: Text(
+                                user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
+                                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+                              ),
                             ),
-                            foregroundColor: const Color(0xFF4B5563),
-                          ),
-                          child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () {},
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFF4A5343),
+                                textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                              ),
+                              child: const Text('Change Photo'),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (!formKey.currentState!.validate()) return;
-                            final name = nameCtrl.text.trim();
-                            final email = emailCtrl.text.trim();
-
-                            final auth = context.read<AuthProvider>();
-                            final ok = await auth.updateUserProfile(name: name, email: email);
-
-                            if (!dialogContext.mounted) return;
-                            Navigator.pop(dialogContext);
-
-                            if (ok) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Profile updated successfully')),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(auth.error ?? 'Failed to update profile')),
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: const Size.fromHeight(48),
-                            backgroundColor: const Color(0xFF111827),
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                      const SizedBox(height: 20),
+                      _buildTextField('Full Name', nameCtrl, Icons.badge_outlined),
+                      const SizedBox(height: 16),
+                      _buildTextField('Email Address', emailCtrl, Icons.email_outlined),
+                      const SizedBox(height: 16),
+                      _buildTextField('Phone Number', phoneCtrl, Icons.phone_outlined),
+                      const SizedBox(height: 24),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.pop(dialogContext),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(56),
+                                side: const BorderSide(color: Colors.grey),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                foregroundColor: const Color(0xFF4B5563),
+                                backgroundColor: Colors.transparent,
+                              ),
+                              child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ),
-                          child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold)),
-                        ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                if (!formKey.currentState!.validate()) return;
+                                final name = nameCtrl.text.trim();
+                                final email = emailCtrl.text.trim();
+                                final phone = phoneCtrl.text.trim();
+
+                                final auth = context.read<AuthProvider>();
+                                final ok = await auth.updateUserProfile(name: name, email: email, phone: phone);
+
+                                if (!dialogContext.mounted) return;
+                                Navigator.pop(dialogContext);
+
+                                if (ok) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Profile updated successfully')),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(auth.error ?? 'Failed to update profile')),
+                                  );
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(56),
+                                backgroundColor: const Color(0xFF0A1128),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                              ),
+                              child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController ctrl, IconData icon) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF1A1A1A)),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: ctrl,
+          cursorColor: const Color(0xFF1A1A1A),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFFF9FAFB),
+            prefixIcon: Icon(icon, color: Colors.grey, size: 20),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFF1A1A1A), width: 1.5),
+            ),
+          ),
+          validator: (v) {
+            if (v == null || v.trim().isEmpty) return 'Required';
+            if (label == 'Email Address' && !v.contains('@')) return 'Enter a valid email';
+            return null;
+          },
+        ),
+      ],
     );
   }
 

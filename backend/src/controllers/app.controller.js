@@ -192,8 +192,8 @@ async function updateMyBookingStatus(req, res, next) {
 async function updateUserProfile(req, res, next) {
   try {
     const userId = req.auth.id;
-    const { name, email } = req.body;
-    const updated = await User.update(userId, { name, email });
+    const { name, email, phone } = req.body;
+    const updated = await User.update(userId, { name, email, phone });
     if (!updated) return error(res, "User profile not found", 404);
     return success(res, "User profile updated successfully", updated);
   } catch (err) {

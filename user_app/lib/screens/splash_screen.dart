@@ -140,7 +140,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.black, Color(0xFF1F2937)],
+            colors: [Color(0xFF1A1A1A), Color(0xFF4A5343)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -148,16 +148,19 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.home_repair_service_rounded, size: 72, color: Colors.black),
+            Icon(Icons.home_repair_service_rounded, size: 72, color: Color(0xFFE3D0BA)),
             SizedBox(height: 16),
             Text(
               'Urban Service',
-              style: TextStyle(color: Colors.black, fontSize: 28, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Color(0xFFF5F5F3), fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: -0.5),
             ),
             SizedBox(height: 8),
-            Text('Home services at your doorstep', style: TextStyle(color: Colors.black54)),
+            Text(
+              'Home services at your doorstep',
+              style: TextStyle(color: Color(0xFFE3D0BA)),
+            ),
             SizedBox(height: 32),
-            CircularProgressIndicator(color: Colors.black),
+            CircularProgressIndicator(color: Color(0xFFE3D0BA)),
           ],
         ),
       ),

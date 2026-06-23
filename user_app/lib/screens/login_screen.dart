@@ -189,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final isLoading = auth.loading || _localLoading;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFFFF), // Pure White Background
+      backgroundColor: const Color(0xFFF5F5F3), // Pure White Background
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -225,14 +225,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: const [
-                                      Icon(Icons.arrow_back_ios_new_rounded, size: 13, color: Color(0xFF111827)),
+                                      Icon(Icons.arrow_back_ios_new_rounded, size: 13, color: Color(0xFF1A1A1A)),
                                       SizedBox(width: 6),
                                       Text(
                                         'Back',
                                         style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.w600,
-                                          color: Color(0xFF111827),
+                                          color: Color(0xFF1A1A1A),
                                         ),
                                       ),
                                     ],
@@ -296,7 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
             style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF111827), // Primary Accent (Near Black)
+              color: Color(0xFF1A1A1A), // Primary Accent (Near Black)
               letterSpacing: -1.0,
             ),
           ),
@@ -328,11 +328,11 @@ class _LoginScreenState extends State<LoginScreen> {
               FilteringTextInputFormatter.digitsOnly,
               LengthLimitingTextInputFormatter(10),
             ],
-            cursorColor: const Color(0xFF111827),
+            cursorColor: const Color(0xFF1A1A1A),
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF111827),
+              color: Color(0xFF1A1A1A),
               letterSpacing: 1.0,
             ),
             decoration: InputDecoration(
@@ -394,7 +394,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ElevatedButton(
             onPressed: (isLoading || !_isPhoneValid) ? null : _onGetOtpPressed,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _isPhoneValid ? const Color(0xFF111827) : const Color(0xFFF3F4F6),
+              backgroundColor: _isPhoneValid ? const Color(0xFF1A1A1A) : const Color(0xFFF3F4F6),
               foregroundColor: _isPhoneValid ? Colors.white : const Color(0xFF9CA3AF),
               disabledBackgroundColor: const Color(0xFFF3F4F6),
               disabledForegroundColor: const Color(0xFF9CA3AF),
@@ -469,7 +469,7 @@ class _LoginScreenState extends State<LoginScreen> {
           style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF111827),
+            color: Color(0xFF1A1A1A),
             letterSpacing: -1.0,
           ),
         ),
@@ -502,11 +502,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
                 textAlign: TextAlign.center,
                 maxLength: 1,
-                cursorColor: const Color(0xFF111827),
+                cursorColor: const Color(0xFF1A1A1A),
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF111827),
+                  color: Color(0xFF1A1A1A),
                 ),
                 decoration: InputDecoration(
                   counterText: '',
@@ -553,7 +553,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Text(
               '00:${_secondsRemaining.toString().padLeft(2, '0')}',
               style: const TextStyle(
-                color: Color(0xFF111827),
+                color: Color(0xFF1A1A1A),
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
@@ -572,7 +572,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: const Text(
                       'Resend OTP',
                       style: TextStyle(
-                        color: Color(0xFF111827),
+                        color: Color(0xFF1A1A1A),
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                         decoration: TextDecoration.underline,

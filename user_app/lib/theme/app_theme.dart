@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const primary = Color(0xFF000000);
-  static const primaryDark = Color(0xFF000000);
-  static const accent = Color(0xFF000000);
-  static const surface = Colors.white;
-  static const card = Color(0xFFF9FAFB);
+  static const primary = Color(0xFF1A1A1A); // Pure Matte Black
+  static const primaryDark = Color(0xFF1A1A1A);
+  static const accent = Color(0xFFE3D0BA); // Warm Sandal
+  static const secondary = Color(0xFF4A5343); // Muted Olive Green
+  static const surface = Color(0xFFF5F5F3); // Crisp Milk White
+  static const card = Colors.white;
 
   static ThemeData light() {
     final base = ThemeData(
@@ -13,67 +14,69 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: primary,
         primary: primary,
-        secondary: accent,
+        secondary: secondary,
+        tertiary: accent,
         surface: surface,
-        onSurface: Colors.black,
+        onSurface: primary,
         surfaceContainer: Colors.white,
         surfaceContainerHigh: Colors.white,
         surfaceContainerHighest: Colors.white,
       ),
       scaffoldBackgroundColor: surface,
+      fontFamily: 'sans-serif',
       navigationBarTheme: const NavigationBarThemeData(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: surface,
+        surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
-        indicatorColor: Color(0xFFF3F4F6),
+        indicatorColor: accent,
         iconTheme: WidgetStatePropertyAll(
-          IconThemeData(color: Colors.black),
+          IconThemeData(color: primary),
         ),
         labelTextStyle: WidgetStatePropertyAll(
-          TextStyle(color: Colors.black, fontWeight: FontWeight.w600, fontSize: 12),
+          TextStyle(color: primary, fontWeight: FontWeight.bold, fontSize: 12),
         ),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: surface,
+        foregroundColor: primary,
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.black),
-        titleTextStyle: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+        iconTheme: IconThemeData(color: primary),
+        titleTextStyle: TextStyle(color: primary, fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.5),
       ),
       cardTheme: CardThemeData(
         color: card,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey.shade200),
+          side: const BorderSide(color: Color(0xFFE3D0BA), width: 1.0),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.white,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE3D0BA), width: 1.0),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFFE3D0BA), width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: primary, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: Colors.white,
-          minimumSize: const Size.fromHeight(50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          minimumSize: const Size.fromHeight(52),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 0.5),
           elevation: 0,
         ),
       ),
@@ -81,20 +84,20 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: primary,
           side: const BorderSide(color: primary, width: 1.5),
-          minimumSize: const Size.fromHeight(50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          minimumSize: const Size.fromHeight(52),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 0.5),
           elevation: 0,
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primary,
-          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+          foregroundColor: secondary,
+          textStyle: const TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: primary,
+        backgroundColor: secondary,
         foregroundColor: Colors.white,
       ),
     );

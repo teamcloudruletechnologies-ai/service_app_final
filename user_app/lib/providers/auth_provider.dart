@@ -141,12 +141,13 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> updateUserProfile({
     String? name,
     String? email,
+    String? phone,
   }) async {
     error = null;
     loading = true;
     notifyListeners();
     try {
-      await _api.updateUserProfile(name: name, email: email);
+      await _api.updateUserProfile(name: name, email: email, phone: phone);
       loading = false;
       notifyListeners();
       return true;
