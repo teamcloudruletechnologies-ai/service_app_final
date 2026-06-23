@@ -5,7 +5,9 @@ import '../providers/auth_provider.dart';
 import 'main_shell.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({super.key, this.initialPhone});
+
+  final String? initialPhone;
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -19,6 +21,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordCtrl = TextEditingController();
   
   bool _obscure = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialPhone != null) {
+      _phoneCtrl.text = widget.initialPhone!;
+    }
+  }
 
   @override
   void dispose() {
@@ -47,12 +57,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
     
-    ok = await auth.register(
-      name: name,
-      email: email.isEmpty ? null : email,
-      phone: phone.isEmpty ? null : phone,
-      password: password,
-    );
+    if (widget.initialPhone != null) {
+      ok = await auth.registerWithoutPassword(
+        name: name,
+        email: email.isEmpty ? null : email,
+        phone: phone.isEmpty ? null : phone,
+      );
+    } else {
+      ok = await auth.register(
+        name: name,
+        email: email.isEmpty ? null : email,
+        phone: phone.isEmpty ? null : phone,
+        password: password,
+      );
+    }
 
     if (!mounted) return;
     if (ok) {
@@ -70,10 +88,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final isNewFromPhoneLogin = widget.initialPhone != null;
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text('Create Account')),
+      appBar: AppBar(title: Text(isNewFromPhoneLogin ? 'Complete Profile' : 'Create Account')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -90,10 +109,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 24),
                 
                 // Form Header
-                const Text(
-                  'Customer Signup',
+                Text(
+                  isNewFromPhoneLogin ? 'Complete Profile' : 'Customer Signup',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 const SizedBox(height: 24),
 
@@ -112,8 +131,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
                   cursorColor: Colors.black,
+                  readOnly: isNewFromPhoneLogin,
+                  enabled: !isNewFromPhoneLogin,
                   decoration: const InputDecoration(
-                    labelText: 'Phone Number (Optional)',
+                    labelText: 'Phone Number',
                     prefixIcon: Icon(Icons.phone_outlined),
                   ),
                 ),
@@ -124,26 +145,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   keyboardType: TextInputType.emailAddress,
                   cursorColor: Colors.black,
                   decoration: const InputDecoration(
-                    labelText: 'Email Address (Optional)',
+                    labelText: 'Email Address',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return 'Required';
+                    }
+                    if (!v.contains('@')) {
+                      return 'Enter a valid email address';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 
-                TextFormField(
-                  controller: _passwordCtrl,
-                  obscureText: _obscure,
-                  cursorColor: Colors.black,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _obscure = !_obscure),
+                if (!isNewFromPhoneLogin) ...[
+                  TextFormField(
+                    controller: _passwordCtrl,
+                    obscureText: _obscure,
+                    cursorColor: Colors.black,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _obscure = !_obscure),
+                      ),
                     ),
+                    validator: (v) => v == null || v.length < 6 ? 'Min 6 characters' : null,
                   ),
-                  validator: (v) => v == null || v.length < 6 ? 'Min 6 characters' : null,
-                ),
+                  const SizedBox(height: 16),
+                ],
                 
                 const SizedBox(height: 32),
                 ElevatedButton(
@@ -154,13 +187,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           width: 20,
                           child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                         )
-                      : const Text('Register'),
+                      : const Text('Save Profile'),
                 ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Already have an account? Sign In'),
-                ),
+                if (!isNewFromPhoneLogin) ...[
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Already have an account? Sign In'),
+                  ),
+                ],
               ],
             ),
           ),

@@ -40,7 +40,7 @@ router.post(
   }
 );
 
-// Worker profile update (online status, city, service type, experience)
+// User profile update (online status, city, service type, experience)
 router.patch(
   "/worker/profile",
   allowRoles(roles.WORKER),
@@ -53,6 +53,18 @@ router.patch(
   ],
   validate,
   controller.updateWorkerProfile
+);
+
+// User profile update (name, email)
+router.patch(
+  "/user/profile",
+  allowRoles(roles.USER),
+  [
+    body("name").optional().trim().notEmpty().withMessage("Name cannot be empty"),
+    body("email").optional().isEmail().withMessage("Must be a valid email").normalizeEmail(),
+  ],
+  validate,
+  controller.updateUserProfile
 );
 
 // User-only routes
