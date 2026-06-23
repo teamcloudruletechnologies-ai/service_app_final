@@ -1,12 +1,12 @@
 const db = require("../config/db");
 const { paged } = require("../utils/pagination");
 
-async function create({ category_id, name, description, image_url, status, icon, price }) {
+async function create({ name, image_url, status }) {
   const result = await db.query(
-    `INSERT INTO services (category_id, name, description, image_url, status, icon, price)
-     VALUES ($1, $2, $3, $4, COALESCE($5, 'active'), $6, $7)
+    `INSERT INTO services (name, image_url, status)
+     VALUES ($1, $2, COALESCE($3, 'active'))
      RETURNING *`,
-    [category_id || null, name, description || null, image_url || null, status, icon || null, price || 0]
+    [name, image_url || null, status]
   );
   return result.rows[0];
 }
@@ -27,18 +27,13 @@ async function findByName(name) {
   return result.rows[0];
 }
 
-async function list({ page, limit, offset, search, category_id, status }) {
+async function list({ page, limit, offset, search, status }) {
   const params = [];
   const where = [];
 
   if (search) {
     params.push(`%${search}%`);
-    where.push(`(s.name ILIKE $${params.length} OR s.description ILIKE $${params.length})`);
-  }
-
-  if (category_id) {
-    params.push(category_id);
-    where.push(`s.category_id = $${params.length}`);
+    where.push(`s.name ILIKE $${params.length}`);
   }
 
   if (status) {
@@ -54,9 +49,8 @@ async function list({ page, limit, offset, search, category_id, status }) {
 
   params.push(limit, offset);
   const result = await db.query(
-    `SELECT s.*, c.name AS category_name
+    `SELECT s.id, s.name, s.image_url, s.status, s.created_at, s.updated_at
      FROM services s
-     LEFT JOIN service_categories c ON s.category_id = c.id
      ${clause}
      ORDER BY s.name ASC
      LIMIT $${params.length - 1} OFFSET $${params.length}`,
@@ -67,7 +61,7 @@ async function list({ page, limit, offset, search, category_id, status }) {
 }
 
 async function update(id, values) {
-  const allowed = ["category_id", "name", "description", "image_url", "status", "icon", "price"];
+  const allowed = ["name", "image_url", "status"];
   const sets = [];
   const params = [];
 
