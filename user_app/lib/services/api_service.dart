@@ -107,6 +107,19 @@ class ApiService {
     return payload;
   }
 
+  Future<Map<String, dynamic>> phoneLogin(String phone, {String role = 'user'}) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/auth/phone-login'),
+      headers: _headers(),
+      body: jsonEncode({'phone': phone, 'role': role}),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final payload = data['data'] as Map<String, dynamic>;
+    final account = UserAccount.fromJson(payload['account']);
+    await _saveSession(payload['token'] as String, account);
+    return payload;
+  }
+
   Future<UserAccount> register({
     required String name,
     String? email,
@@ -125,6 +138,25 @@ class ApiService {
     );
     _decode(response);
     await login(email ?? phone ?? '', password, role: 'user');
+    return _account!;
+  }
+
+  Future<UserAccount> registerWithoutPassword({
+    required String name,
+    String? email,
+    String? phone,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/auth/user/register'),
+      headers: _headers(),
+      body: jsonEncode({
+        'name': name,
+        if (email != null && email.isNotEmpty) 'email': email,
+        if (phone != null && phone.isNotEmpty) 'phone': phone,
+      }),
+    );
+    _decode(response);
+    await phoneLogin(phone ?? email ?? '', role: 'user');
     return _account!;
   }
 
@@ -284,6 +316,39 @@ class ApiService {
       return rows.first as Map<String, dynamic>;
     }
     return null;
+  }
+
+  Future<UserAccount> updateUserProfile({
+    String? name,
+    String? email,
+  }) async {
+    final response = await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/app/user/profile'),
+      headers: _headers(auth: true),
+      body: jsonEncode({
+        if (name != null) 'name': name,
+        if (email != null) 'email': email,
+      }),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final account = UserAccount.fromJson(data['data']);
+    _account = account;
+    // Update local cache
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accountKey, jsonEncode({
+      'id': account.id,
+      'role': account.role,
+      'name': account.name,
+      'email': account.email,
+      'phone': account.phone,
+      'status': account.status,
+      'kyc_status': account.kycStatus,
+      'service_type': account.serviceType,
+      'experience_years': account.experienceYears,
+      'city': account.city,
+      'pincode': account.pincode,
+    }));
+    return account;
   }
 
   Future<UserAccount> updateWorkerProfile({

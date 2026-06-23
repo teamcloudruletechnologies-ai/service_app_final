@@ -125,24 +125,19 @@ class _LoginScreenState extends State<LoginScreen> {
             ? '+$enteredPhone'
             : '+91$enteredPhone';
 
-    // 1. Try Login / Register with try-catch to prevent crash if server is offline
     bool ok = false;
     String? localError;
-    try {
-      ok = await auth.login(cleanPhone, 'user123', role: 'user');
+    bool isUserNotFound = false;
 
-      // 2. If login fails and we are logging in as customer, try automatically Registering
-      if (!ok && auth.error != null && auth.error!.toLowerCase().contains('invalid')) {
-        final suffix = enteredPhone.length >= 4 ? enteredPhone.substring(enteredPhone.length - 4) : 'User';
-        ok = await auth.register(
-          name: 'Guest $suffix',
-          phone: cleanPhone,
-          password: 'user123',
-        );
-      }
+    try {
+      ok = await auth.phoneLogin(cleanPhone, role: 'user');
     } catch (e) {
       ok = false;
       localError = e.toString();
+    }
+
+    if (!ok && auth.error != null && (auth.error!.toLowerCase().contains('404') || auth.error!.toLowerCase().contains('not found') || auth.error!.contains('USER_NOT_FOUND'))) {
+      isUserNotFound = true;
     }
 
     if (!mounted) return;
@@ -150,16 +145,26 @@ class _LoginScreenState extends State<LoginScreen> {
       _localLoading = false;
     });
 
-    final String? errorText = auth.error ?? localError;
-    final bool isConnectionError = errorText != null &&
-        (errorText.toLowerCase().contains('connection') ||
-         errorText.toLowerCase().contains('socket') ||
-         errorText.toLowerCase().contains('refused') ||
-         errorText.toLowerCase().contains('unreachable') ||
-         errorText.toLowerCase().contains('failed to connect') ||
-         errorText.toLowerCase().contains('clientexception'));
+    if (ok) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainShell()),
+      );
+    } else if (isUserNotFound) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => RegisterScreen(initialPhone: cleanPhone),
+        ),
+      );
+    } else {
+      final String? errorText = auth.error ?? localError;
+      final bool isConnectionError = errorText != null &&
+          (errorText.toLowerCase().contains('connection') ||
+           errorText.toLowerCase().contains('socket') ||
+           errorText.toLowerCase().contains('refused') ||
+           errorText.toLowerCase().contains('unreachable') ||
+           errorText.toLowerCase().contains('failed to connect') ||
+           errorText.toLowerCase().contains('clientexception'));
 
-    if (ok || isConnectionError) {
       if (isConnectionError) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -167,14 +172,14 @@ class _LoginScreenState extends State<LoginScreen> {
             duration: Duration(seconds: 2),
           ),
         );
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainShell()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorText ?? 'Verification failed')),
+        );
       }
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorText ?? 'Verification failed')),
-      );
     }
   }
 
@@ -266,6 +271,25 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Align(
+            alignment: Alignment.topRight,
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const MainShell()),
+                );
+              },
+              child: const Text(
+                'Skip for now ➡️',
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           // Elegant Header Titles
           const Text(
             'Welcome Back',

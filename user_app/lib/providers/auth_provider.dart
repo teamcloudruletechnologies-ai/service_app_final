@@ -45,6 +45,23 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> phoneLogin(String phone, {String role = 'user'}) async {
+    error = null;
+    loading = true;
+    notifyListeners();
+    try {
+      await _api.phoneLogin(phone, role: role);
+      loading = false;
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      error = e.message;
+      loading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   Future<bool> register({
     required String name,
     String? email,
@@ -56,6 +73,27 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       await _api.register(name: name, email: email, phone: phone, password: password);
+      loading = false;
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      error = e.message;
+      loading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> registerWithoutPassword({
+    required String name,
+    String? email,
+    String? phone,
+  }) async {
+    error = null;
+    loading = true;
+    notifyListeners();
+    try {
+      await _api.registerWithoutPassword(name: name, email: email, phone: phone);
       loading = false;
       notifyListeners();
       return true;
@@ -89,6 +127,26 @@ class AuthProvider extends ChangeNotifier {
         experienceYears: experienceYears,
         city: city,
       );
+      loading = false;
+      notifyListeners();
+      return true;
+    } on ApiException catch (e) {
+      error = e.message;
+      loading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> updateUserProfile({
+    String? name,
+    String? email,
+  }) async {
+    error = null;
+    loading = true;
+    notifyListeners();
+    try {
+      await _api.updateUserProfile(name: name, email: email);
       loading = false;
       notifyListeners();
       return true;
