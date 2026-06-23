@@ -1,4 +1,7 @@
-const { Pool } = require("pg");
+const { Pool, types } = require("pg");
+
+// Parse NUMERIC (type OID 1700) as float to avoid type-cast errors on mobile client
+types.setTypeParser(types.builtins.NUMERIC, (val) => val === null ? null : parseFloat(val));
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
