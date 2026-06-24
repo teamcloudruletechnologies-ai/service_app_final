@@ -51,12 +51,29 @@ export default function Services() {
   // Form Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
+    category_id: '',
+    description: '',
+    price: '',
     image: '',
     status: 'active'
   });
   const [submitting, setSubmitting] = useState(false);
+
+  // Fetch categories
+  const fetchCategories = () => {
+    servicesAPI.getCategories()
+      .then(res => {
+        if (res && res.success) {
+          setCategories(res.data || []);
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching categories for dropdown:', err);
+      });
+  };
 
   // Fetch Services list
   const fetchServices = () => {
@@ -80,6 +97,7 @@ export default function Services() {
 
   useEffect(() => {
     fetchServices();
+    fetchCategories();
   }, []);
 
   // Handle open modal for create
@@ -87,6 +105,9 @@ export default function Services() {
     setEditingService(null);
     setFormData({
       name: '',
+      category_id: '',
+      description: '',
+      price: '499',
       image: '',
       status: 'active'
     });
@@ -98,6 +119,9 @@ export default function Services() {
     setEditingService(service);
     setFormData({
       name: service.name,
+      category_id: service.category_id || '',
+      description: service.description || '',
+      price: service.price ? String(service.price) : '0',
       image: service.image_url || '',
       status: service.status || 'active'
     });
@@ -110,9 +134,18 @@ export default function Services() {
     if (!formData.name) return alert('Service Name is required.');
 
     setSubmitting(true);
+    const payload = {
+      name: formData.name,
+      category_id: formData.category_id ? Number(formData.category_id) : null,
+      description: formData.description || null,
+      price: formData.price ? Number(formData.price) : 0,
+      image: formData.image || '',
+      status: formData.status
+    };
+
     const savePromise = editingService
-      ? servicesAPI.update(editingService.id, formData)
-      : servicesAPI.create(formData);
+      ? servicesAPI.update(editingService.id, payload)
+      : servicesAPI.create(payload);
 
     savePromise
       .then(res => {
@@ -163,6 +196,14 @@ export default function Services() {
   const totalCount = services.length;
   const activeCount = services.filter(s => s.status === 'active').length;
   const disabledCount = services.filter(s => s.status !== 'active').length;
+
+  const formatCurrency = (val) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(Number(val) || 0);
+  };
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#F9FAFB', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
@@ -250,6 +291,8 @@ export default function Services() {
               <tr style={{ borderBottom: '1px solid #E5E7EB', color: '#4B5563', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Image</th>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Service Name</th>
+                <th style={{ padding: '14px 8px', fontWeight: 600 }}>Category</th>
+                <th style={{ padding: '14px 8px', fontWeight: 600 }}>Price</th>
                 <th style={{ padding: '14px 8px', fontWeight: 600, textAlign: 'center' }}>Status</th>
                 <th style={{ padding: '14px 8px', textAlign: 'center', fontWeight: 600 }}>Actions</th>
               </tr>
@@ -259,17 +302,19 @@ export default function Services() {
                 [...Array(4)].map((_, idx) => (
                   <tr key={idx} style={{ borderBottom: '1px solid #F3F4F6' }}>
                     <td style={{ padding: '14px 8px' }}><Skeleton w="32px" h="32px" radius={8} /></td>
-                    <td style={{ padding: '14px 8px' }}><Skeleton w="200px" /></td>
+                    <td style={{ padding: '14px 8px' }}><Skeleton w="120px" /></td>
+                    <td style={{ padding: '14px 8px' }}><Skeleton w="280px" /></td>
+                    <td style={{ padding: '14px 8px', textAlign: 'right' }}><Skeleton w="60px" /></td>
                     <td style={{ padding: '14px 8px', textAlign: 'center' }}><Skeleton w="70px" radius={12} /></td>
                     <td style={{ padding: '14px 8px' }}><Skeleton w="120px" /></td>
                   </tr>
                 ))
               ) : services.length === 0 ? (
                 <tr>
-                  <td colSpan="4" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🗂️</div>
                     <div style={{ fontWeight: 600, color: '#4B5563' }}>No services configured</div>
-                    <div style={{ fontSize: 12 }}>Add a service to display here.</div>
+                    <div style={{ fontSize: 12 }}>Add a service category to display here.</div>
                   </td>
                 </tr>
               ) : (
@@ -285,6 +330,8 @@ export default function Services() {
                       </div>
                     </td>
                     <td style={{ padding: '14px 8px', fontWeight: 600, color: '#111827' }}>{s.name}</td>
+                    <td style={{ padding: '14px 8px', color: '#4B5563' }}>{s.category_name || <span style={{ color: '#9CA3AF', fontStyle: 'italic' }}>Unassigned</span>}</td>
+                    <td style={{ padding: '14px 8px', fontWeight: 600, color: '#111827' }}>{formatCurrency(s.price)}</td>
                     <td style={{ padding: '14px 8px', textAlign: 'center' }}>
                       <span style={{
                         display: 'inline-flex',
@@ -313,6 +360,7 @@ export default function Services() {
                             borderColor: s.status === 'active' ? '#D97706' : '#059669',
                             background: s.status === 'active' ? '#FFFBEB' : '#EFFDF5',
                             borderRadius: 6,
+                            borderColor: s.status === 'active' ? '#D97706' : '#059669',
                             padding: '4px 8px',
                             fontSize: 11,
                             fontWeight: 600,
@@ -372,7 +420,7 @@ export default function Services() {
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #E5E7EB' }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, color: '#111827', margin: 0 }}>
-                {editingService ? `Edit Service: ${editingService.name}` : 'Create New Service category'}
+                {editingService ? `Edit Service: ${editingService.name}` : 'Create New Service'}
               </h3>
               <button
                 type="button"
@@ -396,6 +444,46 @@ export default function Services() {
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none' }}
+                />
+              </div>
+
+              {/* Category selector */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase' }}>Category</label>
+                <select
+                  value={formData.category_id}
+                  onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
+                  style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none', background: '#fff', cursor: 'pointer' }}
+                >
+                  <option value="">Select Category</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Price */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase' }}>Price (INR)</label>
+                <input
+                  type="number"
+                  min="0"
+                  required
+                  placeholder="e.g. 499"
+                  value={formData.price}
+                  onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                  style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none' }}
+                />
+              </div>
+
+              {/* Description */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase' }}>Description</label>
+                <textarea
+                  placeholder="Describe the service..."
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none', resize: 'vertical', minHeight: 80, fontFamily: 'inherit' }}
                 />
               </div>
 

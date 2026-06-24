@@ -101,6 +101,12 @@ async function listServices(req, res, next) {
 
 async function createService(req, res, next) {
   try {
+    // Check if category exists (if provided)
+    if (req.body.category_id) {
+      const category = await Category.findById(req.body.category_id);
+      if (!category) return error(res, "Selected Category does not exist", 400);
+    }
+
     // Check duplicate service name
     const existing = await Service.findByName(req.body.name);
     if (existing) return error(res, "Service with this name already exists", 409);
@@ -112,7 +118,10 @@ async function createService(req, res, next) {
     }
 
     const service = await Service.create({
+      category_id: req.body.category_id ? parseInt(req.body.category_id, 10) : null,
       name: req.body.name,
+      description: req.body.description || null,
+      price: req.body.price ? parseFloat(req.body.price) : 0,
       image_url,
       status: req.body.status,
     });
@@ -128,6 +137,11 @@ async function updateService(req, res, next) {
     const serviceExists = await Service.findById(serviceId);
     if (!serviceExists) return error(res, "Service not found", 404);
 
+    if (req.body.category_id) {
+      const category = await Category.findById(req.body.category_id);
+      if (!category) return error(res, "Selected Category does not exist", 400);
+    }
+
     if (req.body.name) {
       const existing = await Service.findByName(req.body.name);
       if (existing && existing.id !== parseInt(serviceId)) {
@@ -135,11 +149,14 @@ async function updateService(req, res, next) {
       }
     }
 
-    // Build update data — only name, image_url, status
+    // Build update data
     const updateData = {};
-    if (req.body.name) updateData.name = req.body.name;
-    if (req.body.status) updateData.status = req.body.status;
-    if (req.body.image) updateData.image_url = req.body.image;
+    if (req.body.category_id !== undefined) updateData.category_id = req.body.category_id ? parseInt(req.body.category_id, 10) : null;
+    if (req.body.name !== undefined) updateData.name = req.body.name;
+    if (req.body.description !== undefined) updateData.description = req.body.description;
+    if (req.body.price !== undefined) updateData.price = req.body.price ? parseFloat(req.body.price) : 0;
+    if (req.body.status !== undefined) updateData.status = req.body.status;
+    if (req.body.image !== undefined) updateData.image_url = req.body.image;
     if (req.file) {
       updateData.image_url = await saveUpload(req.file, "services");
     }

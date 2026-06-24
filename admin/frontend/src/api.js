@@ -113,7 +113,7 @@ export const complaintsAPI = {
   getAll: (params) => api.get("/admin/complaints", { params }),
   getById: (id) => api.get(`/admin/complaints/${id}`),
   updateStatus: (id, status) => api.patch(`/admin/complaints/${id}/status`, { status }),
-  addNotes: (id, notes) => api.post(`/admin/complaints/${id}/notes`, { admin_notes: notes }),
+  addNotes: (id, notes) => api.post(`/admin/complaints/${id}/notes`, { note: notes }),
 };
 
 // ─── Locations ───────────────────────────────────────────────
