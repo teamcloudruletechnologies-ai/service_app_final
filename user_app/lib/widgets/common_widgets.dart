@@ -67,6 +67,11 @@ class ServiceCard extends StatelessWidget {
     final imageUrl = ApiConfig.resolveImageUrl(service.imageUrl);
     return Card(
       clipBehavior: Clip.antiAlias,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: Color(0xFFE3D0BA), width: 1.0),
+      ),
       child: InkWell(
         onTap: onTap,
         child: Column(
@@ -84,13 +89,13 @@ class ServiceCard extends StatelessWidget {
                   : _placeholder(),
             ),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     service.name,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17, letterSpacing: -0.3),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -98,16 +103,16 @@ class ServiceCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       service.categoryName!,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500),
                     ),
                   ],
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Text(
                     '₹${service.price.toStringAsFixed(0)}',
                     style: const TextStyle(
                       color: AppTheme.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 20,
                     ),
                   ),
                 ],

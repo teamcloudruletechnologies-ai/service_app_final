@@ -29,14 +29,17 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F5F3),
       body: IndexedStack(index: _index, children: _pages),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Color(0xFFE5E7EB), width: 1)),
+          color: Color(0xFFF5F5F3),
         ),
         child: NavigationBar(
+          height: 65,
+          backgroundColor: const Color(0xFFF5F5F3),
+          indicatorColor: const Color(0xFFE3D0BA),
+          elevation: 0,
           selectedIndex: _index,
           onDestinationSelected: (i) => setState(() => _index = i),
           destinations: _destinations,

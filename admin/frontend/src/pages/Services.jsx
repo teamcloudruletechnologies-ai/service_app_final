@@ -53,10 +53,7 @@ export default function Services() {
   const [editingService, setEditingService] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    icon: '',
-    description: '',
     image: '',
-    price: 0,
     status: 'active'
   });
   const [submitting, setSubmitting] = useState(false);
@@ -90,10 +87,7 @@ export default function Services() {
     setEditingService(null);
     setFormData({
       name: '',
-      icon: '🔧',
-      description: '',
-      image: 'https://homeservice-assets.s3.amazonaws.com/services/custom.png',
-      price: 499,
+      image: '',
       status: 'active'
     });
     setIsModalOpen(true);
@@ -104,10 +98,7 @@ export default function Services() {
     setEditingService(service);
     setFormData({
       name: service.name,
-      icon: service.icon || '🔧',
-      description: service.description || '',
-      image: service.image || 'https://homeservice-assets.s3.amazonaws.com/services/custom.png',
-      price: Number(service.price) || 0,
+      image: service.image_url || '',
       status: service.status || 'active'
     });
     setIsModalOpen(true);
@@ -172,17 +163,6 @@ export default function Services() {
   const totalCount = services.length;
   const activeCount = services.filter(s => s.status === 'active').length;
   const disabledCount = services.filter(s => s.status !== 'active').length;
-  const avgPrice = services.length > 0 
-    ? Math.round(services.reduce((acc, curr) => acc + Number(curr.price || 0), 0) / services.length) 
-    : 0;
-
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(Number(val) || 0);
-  };
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#F9FAFB', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
@@ -279,19 +259,17 @@ export default function Services() {
                 [...Array(4)].map((_, idx) => (
                   <tr key={idx} style={{ borderBottom: '1px solid #F3F4F6' }}>
                     <td style={{ padding: '14px 8px' }}><Skeleton w="32px" h="32px" radius={8} /></td>
-                    <td style={{ padding: '14px 8px' }}><Skeleton w="120px" /></td>
-                    <td style={{ padding: '14px 8px' }}><Skeleton w="280px" /></td>
-                    <td style={{ padding: '14px 8px', textAlign: 'right' }}><Skeleton w="60px" /></td>
+                    <td style={{ padding: '14px 8px' }}><Skeleton w="200px" /></td>
                     <td style={{ padding: '14px 8px', textAlign: 'center' }}><Skeleton w="70px" radius={12} /></td>
                     <td style={{ padding: '14px 8px' }}><Skeleton w="120px" /></td>
                   </tr>
                 ))
               ) : services.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
+                  <td colSpan="4" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🗂️</div>
                     <div style={{ fontWeight: 600, color: '#4B5563' }}>No services configured</div>
-                    <div style={{ fontSize: 12 }}>Add a service category to display here.</div>
+                    <div style={{ fontSize: 12 }}>Add a service to display here.</div>
                   </td>
                 </tr>
               ) : (
@@ -421,11 +399,9 @@ export default function Services() {
                 />
               </div>
 
-
-
               {/* Image URL */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase' }}>Service Image Asset URL</label>
+                <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase' }}>Service Image URL</label>
                 <input
                   type="text"
                   placeholder="https://..."

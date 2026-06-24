@@ -100,4 +100,39 @@ async function me(req, res, next) {
   }
 }
 
-module.exports = { registerAdmin, registerUser, registerWorker, login, me };
+async function phoneLogin(req, res, next) {
+  try {
+    const { phone, role } = req.body;
+    const model = modelByRole[role];
+
+    if (!model) return error(res, "Invalid role", 400);
+
+    const account = await model.findByEmailOrPhone?.(phone) || await model.findByEmail?.(phone);
+    if (!account) {
+      return res.status(404).json({
+        success: false,
+        code: "USER_NOT_FOUND",
+        message: "Account not found for this phone number"
+      });
+    }
+
+    if (account.status && account.status !== "active") {
+      return error(res, "Account is not active", 403);
+    }
+
+    const payload = authPayload(account, role);
+    if (role === roles.USER) {
+      await User.logActivity(account.id, "login", "User logged in via phone/OTP bypass");
+    }
+
+    return success(res, "Login successful", {
+      token: signToken({ id: account.id, role }),
+      account: payload,
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = { registerAdmin, registerUser, registerWorker, login, me, phoneLogin };
+

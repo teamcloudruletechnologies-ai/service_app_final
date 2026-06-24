@@ -45,54 +45,78 @@ class _HomeScreenState extends State<HomeScreen> {
     final catalog = context.watch<CatalogProvider>();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F5F3), // Crisp Milk White
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            expandedHeight: 130,
-            pinned: true,
-            backgroundColor: Colors.white,
-            surfaceTintColor: Colors.white,
-            elevation: 0,
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child: Container(height: 1, color: const Color(0xFFE5E7EB)),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
-              title: Text(
-                'Hi, ${auth.user?.name.split(' ').first ?? 'User'} 👋',
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                  letterSpacing: -0.3,
-                ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 24, 20, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hello, ${auth.user?.name.split(' ').first ?? 'User'} 👋',
+                    style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 26,
+                      letterSpacing: -1.0,
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Find trusted professionals near you',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-              background: Container(color: Colors.white),
             ),
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: TextField(
-                controller: _searchCtrl,
-                decoration: InputDecoration(
-                  hintText: 'Search services...',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _searchCtrl.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchCtrl.clear();
-                            _search('');
-                          },
-                        )
-                      : null,
-                  filled: true,
-                  fillColor: Colors.white,
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                onSubmitted: _search,
+                child: TextField(
+                  controller: _searchCtrl,
+                  cursorColor: const Color(0xFF1A1A1A),
+                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                  decoration: InputDecoration(
+                    hintText: 'Search services...',
+                    hintStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+                    prefixIcon: const Icon(Icons.search, color: Color(0xFF4A5343)),
+                    suffixIcon: _searchCtrl.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, color: Colors.grey),
+                            onPressed: () {
+                              _searchCtrl.clear();
+                              _search('');
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  ),
+                  onSubmitted: _search,
+                ),
               ),
             ),
           ),
@@ -113,6 +137,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       return FilterChip(
                         label: const Text('All'),
                         selected: selected,
+                        selectedColor: const Color(0xFF4A5343),
+                        backgroundColor: Colors.white,
+                        showCheckmark: false,
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        side: BorderSide(
+                          color: selected ? Colors.transparent : const Color(0xFFE3D0BA),
+                          width: 1.0,
+                        ),
+                        labelStyle: TextStyle(
+                          color: selected ? Colors.white : const Color(0xFF1A1A1A),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                         onSelected: (_) => catalog.loadServices(),
                       );
                     }
@@ -121,6 +161,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     return FilterChip(
                       label: Text(cat.name),
                       selected: selected,
+                      selectedColor: const Color(0xFF4A5343),
+                      backgroundColor: Colors.white,
+                      showCheckmark: false,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      side: BorderSide(
+                        color: selected ? Colors.transparent : const Color(0xFFE3D0BA),
+                        width: 1.0,
+                      ),
+                      labelStyle: TextStyle(
+                        color: selected ? Colors.white : const Color(0xFF1A1A1A),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                       onSelected: (_) => catalog.loadServices(categoryId: cat.id),
                     );
                   },
@@ -148,9 +204,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         : SliverGrid(
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
-                              childAspectRatio: 0.72,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
+                              childAspectRatio: 0.75,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
                             ),
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {

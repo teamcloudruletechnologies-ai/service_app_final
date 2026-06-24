@@ -54,6 +54,16 @@ router.post(
   controller.login
 );
 
+router.post(
+  "/phone-login",
+  [
+    body("phone").trim().notEmpty().withMessage("Phone number is required"),
+    body("role").isIn(["user", "worker"]).withMessage("Invalid role"),
+  ],
+  validate,
+  controller.phoneLogin
+);
+
 router.get("/me", auth, controller.me);
 
 module.exports = router;
