@@ -37,16 +37,12 @@ api.interceptors.response.use(
 // ─── Auth ────────────────────────────────────────────────────
 export const authAPI = {
   login: (email, password) => api.post("/auth/login", { login: email, password, role: "admin" }),
-  logout: () => api.post("/auth/logout"),
   me: () => api.get("/auth/me"),
 };
 
 // ─── Dashboard ───────────────────────────────────────────────
 export const dashboardAPI = {
   getStats: () => api.get("/dashboard/overview"), // ✅ Fixed: was /dashboard/stats
-  getRecentBookings: () => api.get("/dashboard/recent-bookings"),
-  getRevenueChart: () => api.get("/dashboard/revenue-chart"),
-  getActivity: () => api.get("/dashboard/activity"),
 };
 
 // ─── Users ───────────────────────────────────────────────────
@@ -77,8 +73,6 @@ export const workersAPI = {
 export const kycAPI = {
   getAll: (params) => api.get("/kyc", { params }),
   getById: (id) => api.get(`/kyc/${id}`),
-  approve: (id) => api.post(`/kyc/${id}/approve`),
-  reject: (id, reason) => api.post(`/kyc/${id}/reject`, { reason }),
   review: (id, data) => api.patch(`/kyc/${id}/review`, data),
 };
 

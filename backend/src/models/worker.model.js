@@ -2,14 +2,14 @@ const db = require("../config/db");
 const { paged } = require("../utils/pagination");
 
 const publicFields = `
-  id, name, email, phone, service_type, experience_years, city,
+  id, name, email, phone, service_type, experience_years, city, pincode,
   status, kyc_status, created_at, updated_at
 `;
 
 async function create(worker) {
   const result = await db.query(
-    `INSERT INTO workers (name, email, phone, password_hash, service_type, experience_years, city, status)
-     VALUES ($1, $2, $3, $4, $5, COALESCE($6, 0), $7, COALESCE($8, 'pending'))
+    `INSERT INTO workers (name, email, phone, password_hash, service_type, experience_years, city, pincode, status)
+     VALUES ($1, $2, $3, $4, $5, COALESCE($6, 0), $7, $8, COALESCE($9, 'pending'))
      RETURNING ${publicFields}`,
     [
       worker.name,
@@ -19,6 +19,7 @@ async function create(worker) {
       worker.serviceType || null,
       worker.experienceYears || 0,
       worker.city || null,
+      worker.pincode || null,
       worker.status,
     ]
   );
@@ -73,6 +74,7 @@ async function update(id, values) {
     serviceType: "service_type",
     experienceYears: "experience_years",
     city: "city",
+    pincode: "pincode",
     status: "status",
     kycStatus: "kyc_status",
   };

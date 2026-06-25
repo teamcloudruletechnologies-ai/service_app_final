@@ -55,13 +55,14 @@ router.patch(
   controller.updateWorkerProfile
 );
 
-// User profile update (name, email)
+// User profile update (name, email, phone)
 router.patch(
   "/user/profile",
   allowRoles(roles.USER),
   [
     body("name").optional().trim().notEmpty().withMessage("Name cannot be empty"),
     body("email").optional().isEmail().withMessage("Must be a valid email").normalizeEmail(),
+    body("phone").optional().trim().notEmpty().withMessage("Phone cannot be empty"),
   ],
   validate,
   controller.updateUserProfile

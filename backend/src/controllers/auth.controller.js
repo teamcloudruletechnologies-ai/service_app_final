@@ -13,7 +13,7 @@ const modelByRole = {
 };
 
 function authPayload(account, role) {
-  return {
+  const payload = {
     id: account.id,
     role,
     name: account.name,
@@ -21,6 +21,14 @@ function authPayload(account, role) {
     phone: account.phone,
     status: account.status,
   };
+  if (role === "worker") {
+    payload.kyc_status = account.kyc_status;
+    payload.service_type = account.service_type;
+    payload.experience_years = account.experience_years;
+    payload.city = account.city;
+    payload.pincode = account.pincode;
+  }
+  return payload;
 }
 
 async function registerAdmin(req, res, next) {
