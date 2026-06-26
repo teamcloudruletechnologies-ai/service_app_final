@@ -1,14 +1,14 @@
 const db = require("../config/db");
 const { paged } = require("../utils/pagination");
 
-const publicFields = "id, name, email, phone, status, created_at, updated_at";
+const publicFields = "id, name, email, phone, state, address, status, created_at, updated_at";
 
 async function create(user) {
   const result = await db.query(
-    `INSERT INTO users (name, email, phone, password_hash, status)
-     VALUES ($1, $2, $3, $4, COALESCE($5, 'active'))
+    `INSERT INTO users (name, email, phone, password_hash, state, address, status)
+     VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, 'active'))
      RETURNING ${publicFields}`,
-    [user.name, user.email || null, user.phone || null, user.passwordHash || null, user.status]
+    [user.name || '', user.email || null, user.phone || null, user.passwordHash || null, user.state || null, user.address || null, user.status]
   );
   return result.rows[0];
 }
@@ -73,7 +73,7 @@ async function list({ search, status, page, limit, offset, sortBy, sortOrder, cr
 }
 
 async function update(id, values) {
-  const allowed = ["name", "email", "phone", "status"];
+  const allowed = ["name", "email", "phone", "status", "state", "address"];
   const sets = [];
   const params = [];
 

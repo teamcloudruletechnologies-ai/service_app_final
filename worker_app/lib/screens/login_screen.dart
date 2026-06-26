@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import 'main_shell.dart';
-import 'register_screen.dart';
+import 'worker_onboarding_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -112,6 +112,13 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    if (otpStr != '123456') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid OTP. Use 123456 to bypass.')),
+      );
+      return;
+    }
+
     setState(() {
       _localLoading = true;
     });
@@ -125,13 +132,12 @@ class _LoginScreenState extends State<LoginScreen> {
             ? '+$enteredPhone'
             : '+91$enteredPhone';
 
-    // 1. Try Login / Register with try-catch to prevent crash if server is offline
-    bool ok = false;
+    // 1. Try Login / Register with phoneLoginOrRegister
+    Map<String, dynamic>? res;
     String? localError;
     try {
-      ok = await auth.login(cleanPhone, 'worker123', role: 'worker');
+      res = await auth.phoneLoginOrRegister(cleanPhone);
     } catch (e) {
-      ok = false;
       localError = e.toString();
     }
 
@@ -140,28 +146,21 @@ class _LoginScreenState extends State<LoginScreen> {
       _localLoading = false;
     });
 
-    final String? errorText = auth.error ?? localError;
-    final bool isConnectionError = errorText != null &&
-        (errorText.toLowerCase().contains('connection') ||
-         errorText.toLowerCase().contains('socket') ||
-         errorText.toLowerCase().contains('refused') ||
-         errorText.toLowerCase().contains('unreachable') ||
-         errorText.toLowerCase().contains('failed to connect') ||
-         errorText.toLowerCase().contains('clientexception'));
+    if (res != null) {
+      final isNew = res['is_new'] as bool? ?? false;
+      final account = res['account'] as UserAccount;
 
-    if (ok || isConnectionError) {
-      if (isConnectionError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Bypassing server connection for demo mode...'),
-            duration: Duration(seconds: 2),
-          ),
+      if (isNew || account.needsOnboarding) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const WorkerOnboardingScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainShell()),
         );
       }
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-      );
     } else {
+      final String? errorText = auth.error ?? localError;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorText ?? 'Verification failed')),
       );
@@ -392,32 +391,10 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Want to join us? ",
-                style: TextStyle(color: Color(0xFF6B7280), fontSize: 14),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const RegisterScreen(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Register as Partner',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ],
+          const Text(
+            "New partner? Enter your mobile number. We'll guide you through setting up your profile.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
           ),
         ],
       ),

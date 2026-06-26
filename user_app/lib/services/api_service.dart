@@ -53,6 +53,8 @@ class ApiService {
       'experience_years': account.experienceYears,
       'city': account.city,
       'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
     }));
   }
 
@@ -209,6 +211,8 @@ class ApiService {
       'experience_years': account.experienceYears,
       'city': account.city,
       'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
     }));
     return account;
   }
@@ -337,6 +341,8 @@ class ApiService {
     String? name,
     String? email,
     String? phone,
+    String? state,
+    String? address,
   }) async {
     final response = await http.patch(
       Uri.parse('${ApiConfig.baseUrl}/app/user/profile'),
@@ -345,6 +351,8 @@ class ApiService {
         if (name != null) 'name': name,
         if (email != null) 'email': email,
         if (phone != null) 'phone': phone,
+        if (state != null) 'state': state,
+        if (address != null) 'address': address,
       }),
     );
     final data = _decode(response) as Map<String, dynamic>;
@@ -364,6 +372,8 @@ class ApiService {
       'experience_years': account.experienceYears,
       'city': account.city,
       'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
     }));
     return account;
   }

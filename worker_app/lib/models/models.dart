@@ -11,6 +11,11 @@ class UserAccount {
   final int? experienceYears;
   final String? city;
   final String? pincode;
+  final String? state;
+  final String? address;
+
+  // True if this account was just auto-created (name is empty)
+  bool get needsOnboarding => name.trim().isEmpty;
 
   const UserAccount({
     required this.id,
@@ -24,6 +29,8 @@ class UserAccount {
     this.experienceYears,
     this.city,
     this.pincode,
+    this.state,
+    this.address,
   });
 
   factory UserAccount.fromJson(Map<String, dynamic> json) {
@@ -39,6 +46,8 @@ class UserAccount {
       experienceYears: json['experience_years'] as int? ?? json['experienceYears'] as int?,
       city: json['city'] as String?,
       pincode: json['pincode'] as String?,
+      state: json['state'] as String?,
+      address: json['address'] as String?,
     );
   }
 }

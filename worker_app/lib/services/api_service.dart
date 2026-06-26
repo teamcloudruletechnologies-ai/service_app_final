@@ -53,6 +53,8 @@ class ApiService {
       'experience_years': account.experienceYears,
       'city': account.city,
       'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
     }));
   }
 
@@ -105,6 +107,22 @@ class ApiService {
     final account = UserAccount.fromJson(payload['account']);
     await _saveSession(payload['token'] as String, account);
     return payload;
+  }
+
+  Future<Map<String, dynamic>> phoneLoginOrRegister(String phone) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/auth/phone-login'),
+      headers: _headers(),
+      body: jsonEncode({'phone': phone, 'role': 'worker'}),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final payload = data['data'] as Map<String, dynamic>;
+    final account = UserAccount.fromJson(payload['account']);
+    await _saveSession(payload['token'] as String, account);
+    return {
+      'account': account,
+      'is_new': payload['is_new'] as bool? ?? false,
+    };
   }
 
   Future<UserAccount> register({
@@ -178,6 +196,8 @@ class ApiService {
       'experience_years': account.experienceYears,
       'city': account.city,
       'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
     }));
     return account;
   }
@@ -303,8 +323,12 @@ class ApiService {
   }
 
   Future<UserAccount> updateWorkerProfile({
+    String? name,
+    String? email,
     String? status,
     String? city,
+    String? state,
+    String? address,
     String? pincode,
     String? serviceType,
     int? experienceYears,
@@ -313,8 +337,12 @@ class ApiService {
       Uri.parse('${ApiConfig.baseUrl}/app/worker/profile'),
       headers: _headers(auth: true),
       body: jsonEncode({
+        if (name != null) 'name': name,
+        if (email != null) 'email': email,
         if (status != null) 'status': status,
         if (city != null) 'city': city,
+        if (state != null) 'state': state,
+        if (address != null) 'address': address,
         if (pincode != null) 'pincode': pincode,
         if (serviceType != null) 'serviceType': serviceType,
         if (experienceYears != null) 'experienceYears': experienceYears,
@@ -337,6 +365,8 @@ class ApiService {
       'experience_years': account.experienceYears,
       'city': account.city,
       'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
     }));
     return account;
   }

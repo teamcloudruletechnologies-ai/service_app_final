@@ -40,13 +40,17 @@ router.post(
   }
 );
 
-// User profile update (online status, city, service type, experience)
+// Worker profile update (onboarding details + status)
 router.patch(
   "/worker/profile",
   allowRoles(roles.WORKER),
   [
+    body("name").optional().trim().notEmpty(),
+    body("email").optional().isEmail().normalizeEmail(),
     body("status").optional().isIn(["active", "inactive"]),
     body("city").optional().isString(),
+    body("state").optional().isString(),
+    body("address").optional().isString(),
     body("pincode").optional().isString(),
     body("serviceType").optional().isString(),
     body("experienceYears").optional().isInt({ min: 0 }),
@@ -55,7 +59,7 @@ router.patch(
   controller.updateWorkerProfile
 );
 
-// User profile update (name, email, phone)
+// User profile update (name, email, phone, state, address)
 router.patch(
   "/user/profile",
   allowRoles(roles.USER),
@@ -63,6 +67,8 @@ router.patch(
     body("name").optional().trim().notEmpty().withMessage("Name cannot be empty"),
     body("email").optional().isEmail().withMessage("Must be a valid email").normalizeEmail(),
     body("phone").optional().trim().notEmpty().withMessage("Phone cannot be empty"),
+    body("state").optional().trim().notEmpty(),
+    body("address").optional().trim().notEmpty(),
   ],
   validate,
   controller.updateUserProfile
