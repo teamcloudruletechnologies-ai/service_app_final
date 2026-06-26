@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../services/api_service.dart';
 import 'main_shell.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -20,9 +21,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   
   // Worker-specific controllers
   final _experienceCtrl = TextEditingController();
-  final _cityCtrl = TextEditingController();
   String? _selectedServiceType;
+  String? _selectedCity;
   bool _obscure = true;
+
+  // Dynamic cities fetched from backend
+  List<String> _availableCities = [];
+  bool _loadingCities = false;
 
   final List<String> _serviceTypes = [
     'Cleaning',
@@ -35,13 +40,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadServiceableCities();
+  }
+
+  Future<void> _loadServiceableCities() async {
+    setState(() => _loadingCities = true);
+    try {
+      final api = context.read<ApiService>();
+      final locations = await api.fetchServiceableLocations();
+      // Extract unique cities
+      final cities = locations
+          .map((l) => (l['city'] as String?)?.trim() ?? '')
+          .where((c) => c.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort();
+      setState(() {
+        _availableCities = cities;
+        _loadingCities = false;
+      });
+    } catch (_) {
+      // Fallback: allow free text input if API fails
+      setState(() => _loadingCities = false);
+    }
+  }
+
+  @override
   void dispose() {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _passwordCtrl.dispose();
     _experienceCtrl.dispose();
-    _cityCtrl.dispose();
     super.dispose();
   }
 
@@ -65,9 +97,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       return;
     }
+    if (_selectedCity == null || _selectedCity!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select your operating city')),
+      );
+      return;
+    }
     
     final exp = int.tryParse(_experienceCtrl.text.trim()) ?? 0;
-    final city = _cityCtrl.text.trim();
 
     final auth = context.read<AuthProvider>();
     final ok = await auth.registerWorker(
@@ -77,7 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       password: password,
       serviceType: _selectedServiceType!,
       experienceYears: exp,
-      city: city,
+      city: _selectedCity!,
     );
 
     if (!mounted) return;
@@ -199,15 +236,52 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                TextFormField(
-                  controller: _cityCtrl,
-                  cursorColor: Colors.black,
-                  decoration: const InputDecoration(
-                    labelText: 'Operating City',
-                    prefixIcon: Icon(Icons.location_city_outlined),
+                // Dynamic city dropdown from admin-configured locations
+                if (_loadingCities)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.location_city_outlined, color: Colors.grey),
+                        SizedBox(width: 12),
+                        SizedBox(
+                          width: 18, height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                        ),
+                        SizedBox(width: 12),
+                        Text('Loading available cities...', style: TextStyle(color: Colors.grey)),
+                      ],
+                    ),
+                  )
+                else if (_availableCities.isNotEmpty)
+                  DropdownButtonFormField<String>(
+                    value: _selectedCity,
+                    decoration: const InputDecoration(
+                      labelText: 'Operating City',
+                      prefixIcon: Icon(Icons.location_city_outlined),
+                    ),
+                    items: _availableCities.map((city) {
+                      return DropdownMenuItem(value: city, child: Text(city));
+                    }).toList(),
+                    onChanged: (val) => setState(() => _selectedCity = val),
+                    validator: (v) => v == null ? 'Please select your city' : null,
+                  )
+                else
+                  // Fallback to text input if no cities configured yet
+                  TextFormField(
+                    cursorColor: Colors.black,
+                    decoration: const InputDecoration(
+                      labelText: 'Operating City',
+                      prefixIcon: Icon(Icons.location_city_outlined),
+                      hintText: 'Enter your city',
+                    ),
+                    onChanged: (val) => _selectedCity = val.trim(),
+                    validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
                   ),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                ),
                 
                 const SizedBox(height: 32),
                 ElevatedButton(

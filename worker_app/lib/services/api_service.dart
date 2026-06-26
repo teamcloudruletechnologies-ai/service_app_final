@@ -163,6 +163,22 @@ class ApiService {
     final data = _decode(response) as Map<String, dynamic>;
     final account = UserAccount.fromJson(data['data']);
     _account = account;
+    // Persist updated account (including kyc_status) to SharedPreferences
+    // so next app launch doesn't load stale cached data
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accountKey, jsonEncode({
+      'id': account.id,
+      'role': account.role,
+      'name': account.name,
+      'email': account.email,
+      'phone': account.phone,
+      'status': account.status,
+      'kyc_status': account.kycStatus,
+      'service_type': account.serviceType,
+      'experience_years': account.experienceYears,
+      'city': account.city,
+      'pincode': account.pincode,
+    }));
     return account;
   }
 
@@ -345,5 +361,17 @@ class ApiService {
         if (pincode != null) 'pincode': pincode,
       }),
     );
+  }
+
+  /// Fetches active serviceable pincodes & cities from backend (no auth required).
+  /// Used to show available service areas in registration and home screens.
+  Future<List<Map<String, dynamic>>> fetchServiceableLocations() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/locations/serviceable'),
+      headers: _headers(),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final rows = data['data'] as List? ?? [];
+    return rows.cast<Map<String, dynamic>>();
   }
 }

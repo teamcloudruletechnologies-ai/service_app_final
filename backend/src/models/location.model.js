@@ -115,6 +115,20 @@ async function updateWorkerLocation(workerId, lat, lng, pincode = null) {
   return result.rows[0];
 }
 
+// --- PUBLIC: Active serviceable locations for apps ---
+async function getActiveLocations() {
+  const result = await db.query(`
+    SELECT p.id, p.code, p.lat, p.lng,
+           z.id as zone_id, z.name as zone_name, z.city
+    FROM pincodes p
+    LEFT JOIN zones z ON p.zone_id = z.id
+    WHERE p.status = 'active'
+      AND (z.status IS NULL OR z.status = 'active')
+    ORDER BY z.city, p.code
+  `);
+  return result.rows;
+}
+
 module.exports = {
   createZone,
   getZones,
@@ -128,4 +142,6 @@ module.exports = {
   deletePincode,
   getWorkerLiveLocation,
   updateWorkerLocation,
+  getActiveLocations,
 };
+
