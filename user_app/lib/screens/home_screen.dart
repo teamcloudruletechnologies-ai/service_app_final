@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 56,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(28),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.04),
@@ -204,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         : SliverGrid(
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
-                              childAspectRatio: 0.75,
+                              childAspectRatio: 0.8,
                               crossAxisSpacing: 16,
                               mainAxisSpacing: 16,
                             ),
