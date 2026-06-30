@@ -101,8 +101,12 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> updateWorkerProfile({
+    String? name,
+    String? email,
     String? status,
     String? city,
+    String? state,
+    String? address,
     String? pincode,
     String? serviceType,
     int? experienceYears,
@@ -112,8 +116,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       await _api.updateWorkerProfile(
+        name: name,
+        email: email,
         status: status,
         city: city,
+        state: state,
+        address: address,
         pincode: pincode,
         serviceType: serviceType,
         experienceYears: experienceYears,
@@ -126,6 +134,23 @@ class AuthProvider extends ChangeNotifier {
       loading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> phoneLoginOrRegister(String phone) async {
+    error = null;
+    loading = true;
+    notifyListeners();
+    try {
+      final res = await _api.phoneLoginOrRegister(phone);
+      loading = false;
+      notifyListeners();
+      return res;
+    } on ApiException catch (e) {
+      error = e.message;
+      loading = false;
+      notifyListeners();
+      return null;
     }
   }
 

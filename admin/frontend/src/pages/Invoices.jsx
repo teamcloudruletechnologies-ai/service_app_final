@@ -103,10 +103,10 @@ export default function Invoices() {
     invoicesAPI.getAll(params)
       .then(res => {
         if (res && res.success) {
-          // backend lists are structure: { success: true, data: { docs: [...], totalDocs, totalPages, page } }
+          // backend lists are structure: { success: true, data: { rows: [...], meta } }
           const payload = res.data;
-          setInvoices(payload.docs || []);
-          setTotalPages(payload.totalPages || 1);
+          setInvoices(payload.rows || []);
+          setTotalPages(payload.meta?.totalPages || 1);
         }
       })
       .catch(err => {

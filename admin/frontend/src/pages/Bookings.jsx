@@ -96,8 +96,8 @@ export default function Bookings() {
     bookingsAPI.getAll(params)
       .then(res => {
         if (res && res.success) {
-          setBookings(res.data.docs || []);
-          setTotalPages(res.data.totalPages || 1);
+          setBookings(res.data.rows || []);
+          setTotalPages(res.data.meta?.totalPages || 1);
         }
       })
       .catch(err => {

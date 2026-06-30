@@ -53,6 +53,8 @@ class ApiService {
       'experience_years': account.experienceYears,
       'city': account.city,
       'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
     }));
   }
 
@@ -195,6 +197,23 @@ class ApiService {
     final data = _decode(response) as Map<String, dynamic>;
     final account = UserAccount.fromJson(data['data']);
     _account = account;
+    // Persist updated account to SharedPreferences so next launch has fresh data
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accountKey, jsonEncode({
+      'id': account.id,
+      'role': account.role,
+      'name': account.name,
+      'email': account.email,
+      'phone': account.phone,
+      'status': account.status,
+      'kyc_status': account.kycStatus,
+      'service_type': account.serviceType,
+      'experience_years': account.experienceYears,
+      'city': account.city,
+      'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
+    }));
     return account;
   }
 
@@ -322,6 +341,8 @@ class ApiService {
     String? name,
     String? email,
     String? phone,
+    String? state,
+    String? address,
   }) async {
     final response = await http.patch(
       Uri.parse('${ApiConfig.baseUrl}/app/user/profile'),
@@ -330,6 +351,8 @@ class ApiService {
         if (name != null) 'name': name,
         if (email != null) 'email': email,
         if (phone != null) 'phone': phone,
+        if (state != null) 'state': state,
+        if (address != null) 'address': address,
       }),
     );
     final data = _decode(response) as Map<String, dynamic>;
@@ -349,6 +372,8 @@ class ApiService {
       'experience_years': account.experienceYears,
       'city': account.city,
       'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
     }));
     return account;
   }
@@ -412,5 +437,17 @@ class ApiService {
         if (pincode != null) 'pincode': pincode,
       }),
     );
+  }
+
+  /// Fetches active serviceable pincodes & cities (no auth required).
+  /// Used to show service availability areas to users.
+  Future<List<Map<String, dynamic>>> fetchServiceableLocations() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/locations/serviceable'),
+      headers: _headers(),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final rows = data['data'] as List? ?? [];
+    return rows.cast<Map<String, dynamic>>();
   }
 }

@@ -62,11 +62,13 @@ export default function Support() {
   };
 
   const getStatusBadge = (status) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case 'open':
         return <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">Open</span>;
+      case 'under review':
       case 'under_review':
         return <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">Under Review</span>;
+      case 'in progress':
       case 'in_progress':
         return <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">In Progress</span>;
       case 'resolved':
@@ -232,10 +234,10 @@ export default function Support() {
             <div className="p-6 border-t border-gray-100 bg-gray-50">
               <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Update Status</h4>
               <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => handleStatusUpdate('open')} className={`py-2 rounded-lg text-sm font-medium border ${selectedComplaint.status === 'open' ? 'bg-red-50 border-red-200 text-red-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>Open</button>
-                <button onClick={() => handleStatusUpdate('under_review')} className={`py-2 rounded-lg text-sm font-medium border ${selectedComplaint.status === 'under_review' ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>Under Review</button>
-                <button onClick={() => handleStatusUpdate('in_progress')} className={`py-2 rounded-lg text-sm font-medium border ${selectedComplaint.status === 'in_progress' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>In Progress</button>
-                <button onClick={() => handleStatusUpdate('resolved')} className={`py-2 rounded-lg text-sm font-medium border ${selectedComplaint.status === 'resolved' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>Resolved</button>
+                <button onClick={() => handleStatusUpdate('Open')} className={`py-2 rounded-lg text-sm font-medium border ${selectedComplaint.status?.toLowerCase() === 'open' ? 'bg-red-50 border-red-200 text-red-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>Open</button>
+                <button onClick={() => handleStatusUpdate('Under Review')} className={`py-2 rounded-lg text-sm font-medium border ${['under review', 'under_review'].includes(selectedComplaint.status?.toLowerCase()) ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>Under Review</button>
+                <button onClick={() => handleStatusUpdate('In Progress')} className={`py-2 rounded-lg text-sm font-medium border ${['in progress', 'in_progress'].includes(selectedComplaint.status?.toLowerCase()) ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>In Progress</button>
+                <button onClick={() => handleStatusUpdate('Resolved')} className={`py-2 rounded-lg text-sm font-medium border ${selectedComplaint.status?.toLowerCase() === 'resolved' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}>Resolved</button>
               </div>
             </div>
           </>

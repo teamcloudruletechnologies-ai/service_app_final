@@ -8,9 +8,11 @@ const controller = require("../controllers/user-location.controller");
 
 const router = express.Router();
 
-// Depending on your auth strategy for users, you might want to require 'auth' and 'allowRoles(roles.USER)'
-// For now, assuming these are accessible by authenticated users.
-// If roles.USER doesn't exist, we just check auth.
+// PUBLIC: Get all active serviceable pincodes/zones (no auth needed)
+// Used by user & worker apps to show available service areas
+router.get("/serviceable", controller.getServiceableLocations);
+
+// All routes below require authentication
 router.use(auth);
 
 router.get(
