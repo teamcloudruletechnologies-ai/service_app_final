@@ -8,9 +8,10 @@ import '../theme/app_theme.dart';
 import 'main_shell.dart';
 
 class BookingFormScreen extends StatefulWidget {
-  const BookingFormScreen({super.key, required this.service});
+  const BookingFormScreen({super.key, required this.service, this.initialAddress});
 
   final ServiceItem service;
+  final String? initialAddress;
 
   @override
   State<BookingFormScreen> createState() => _BookingFormScreenState();
@@ -21,6 +22,14 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   final _addressCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
   DateTime? _scheduledAt;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialAddress != null) {
+      _addressCtrl.text = widget.initialAddress!;
+    }
+  }
 
   @override
   void dispose() {

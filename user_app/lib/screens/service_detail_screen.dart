@@ -8,6 +8,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'booking_form_screen.dart';
+import 'location_picker_screen.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   const ServiceDetailScreen({super.key, required this.serviceId});
@@ -60,11 +61,21 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => BookingFormScreen(service: _service!),
-                    ),
-                  ),
+                  onPressed: () async {
+                    final selectedAddress = await Navigator.of(context).push<String>(
+                      MaterialPageRoute(
+                        builder: (_) => const LocationPickerScreen(),
+                      ),
+                    );
+                    if (selectedAddress != null) {
+                      if (!mounted) return;
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => BookingFormScreen(service: _service!, initialAddress: selectedAddress),
+                        ),
+                      );
+                    }
+                  },
                   child: Text('Book Now — ₹${_service!.price.toStringAsFixed(0)}'),
                 ),
               ),
