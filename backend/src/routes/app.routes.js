@@ -10,6 +10,7 @@ const upload = require("../middlewares/upload.middleware");
 const router = express.Router();
 
 router.get("/services/categories", controller.listCategories);
+router.get("/banners", controller.listActiveBanners);
 
 router.get(
   "/services",

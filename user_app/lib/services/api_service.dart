@@ -226,6 +226,15 @@ class ApiService {
     return _parsePaged(data['data'] as Map<String, dynamic>, ServiceCategory.fromJson);
   }
 
+  Future<PagedResult<BannerItem>> fetchBanners() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/banners?limit=10'),
+      headers: _headers(),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return _parsePaged(data['data'] as Map<String, dynamic>, BannerItem.fromJson);
+  }
+
   Future<PagedResult<ServiceItem>> fetchServices({int? categoryId, String? search}) async {
     final params = <String, String>{'limit': '50', 'status': 'active'};
     if (categoryId != null) params['category_id'] = '$categoryId';

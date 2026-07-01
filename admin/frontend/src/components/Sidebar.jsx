@@ -24,6 +24,7 @@ const NAV = [
       { icon: '⭐', label: 'Reviews', key: 'reviews', isNew: true },
       { icon: '💬', label: 'Support', key: 'support' },
       { icon: '🗂️', label: 'Services', key: 'services' },
+      { icon: '🖼️', label: 'Banners', key: 'banners' },
     ],
   },
   {

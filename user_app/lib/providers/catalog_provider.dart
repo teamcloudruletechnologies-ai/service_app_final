@@ -10,8 +10,10 @@ class CatalogProvider extends ChangeNotifier {
 
   List<ServiceCategory> categories = [];
   List<ServiceItem> services = [];
+  List<BannerItem> banners = [];
   bool loadingCategories = false;
   bool loadingServices = false;
+  bool loadingBanners = false;
   String? error;
   int? selectedCategoryId;
 
@@ -26,6 +28,21 @@ class CatalogProvider extends ChangeNotifier {
       error = e.message;
     } finally {
       loadingCategories = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadBanners() async {
+    loadingBanners = true;
+    error = null;
+    notifyListeners();
+    try {
+      final result = await _api.fetchBanners();
+      banners = result.items;
+    } on ApiException catch (e) {
+      error = e.message;
+    } finally {
+      loadingBanners = false;
       notifyListeners();
     }
   }
