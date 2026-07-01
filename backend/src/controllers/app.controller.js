@@ -3,6 +3,7 @@ const Service = require("../models/service.model");
 const Booking = require("../models/booking.model");
 const User = require("../models/user.model");
 const Worker = require("../models/worker.model");
+const Banner = require("../models/banner.model");
 const { getPagination } = require("../utils/pagination");
 const { success, error } = require("../utils/response");
 
@@ -201,6 +202,19 @@ async function updateUserProfile(req, res, next) {
   }
 }
 
+async function listActiveBanners(req, res, next) {
+  try {
+    const paging = getPagination(req.query);
+    const data = await Banner.list({
+      ...paging,
+      status: "active",
+    });
+    return success(res, "Active banners fetched successfully", data);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   listCategories,
   listServices,
@@ -212,4 +226,5 @@ module.exports = {
   updateWorkerProfile,
   updateMyBookingStatus,
   updateUserProfile,
+  listActiveBanners,
 };

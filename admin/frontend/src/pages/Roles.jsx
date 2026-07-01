@@ -51,6 +51,7 @@ const AVAILABLE_PERMISSIONS = [
   { key: 'bookings', label: 'Manage Bookings', desc: 'Monitor and modify booking states & assignments' },
   { key: 'invoices', label: 'Manage Invoices', desc: 'Process and view invoice details and payouts' },
   { key: 'services', label: 'Manage Services', desc: 'Create/update services, categories, and adjust service states' },
+  { key: 'banners', label: 'Manage Banners', desc: 'Create, edit and delete promotion/marketing banners' },
   { key: 'complaints', label: 'Manage Support', desc: 'Resolve client complaints and add admin notes' },
   { key: 'locations', label: 'Manage Locations', desc: 'Edit operational zones, pincodes, and tracking' },
   { key: 'dashboard', label: 'View Dashboard', desc: 'Access high-level overview metrics and stats charts' },

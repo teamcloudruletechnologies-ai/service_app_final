@@ -18,7 +18,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _bootstrap(); 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _bootstrap();
+    });
   }
 
   Future<void> _bootstrap() async {

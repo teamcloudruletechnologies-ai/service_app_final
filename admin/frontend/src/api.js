@@ -102,6 +102,18 @@ export const servicesAPI = {
   getCategories: () => api.get("/admin/services/categories"),
 };
 
+// ─── Banners ─────────────────────────────────────────────────
+export const bannersAPI = {
+  getAll: (params) => api.get("/admin/banners", { params }),
+  create: (formData) => api.post("/admin/banners", formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  }),
+  update: (id, formData) => api.put(`/admin/banners/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  }),
+  delete: (id) => api.delete(`/admin/banners/${id}`),
+};
+
 // ─── Complaints ──────────────────────────────────────────────
 export const complaintsAPI = {
   getAll: (params) => api.get("/admin/complaints", { params }),

@@ -192,6 +192,16 @@ async function initDb() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS banners (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(120),
+      image_url TEXT NOT NULL,
+      link_url TEXT,
+      status VARCHAR(30) NOT NULL DEFAULT 'active',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
   `);
 }
 

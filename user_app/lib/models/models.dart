@@ -188,3 +188,29 @@ class PagedResult<T> {
     required this.limit,
   });
 }
+
+class BannerItem {
+  final int id;
+  final String? title;
+  final String imageUrl;
+  final String? linkUrl;
+  final String status;
+
+  const BannerItem({
+    required this.id,
+    this.title,
+    required this.imageUrl,
+    this.linkUrl,
+    required this.status,
+  });
+
+  factory BannerItem.fromJson(Map<String, dynamic> json) {
+    return BannerItem(
+      id: json['id'] as int,
+      title: json['title'] as String?,
+      imageUrl: json['image_url'] as String? ?? '',
+      linkUrl: json['link_url'] as String?,
+      status: json['status'] as String? ?? 'active',
+    );
+  }
+}

@@ -13,6 +13,7 @@ import Support from './pages/Support';
 import Locations from './pages/Locations';
 import Notifications from './pages/Notifications';
 import Roles from './pages/Roles';
+import Banners from './pages/Banners';
 import { bookingsAPI } from './api';
 
 /* ── New Booking Toast Popup ── */
@@ -195,6 +196,8 @@ export default function App() {
         return <Users />;
       case 'services':
         return <Services />;
+      case 'banners':
+        return <Banners />;
       case 'kyc':
         return <Kyc />;
       case 'workers':
