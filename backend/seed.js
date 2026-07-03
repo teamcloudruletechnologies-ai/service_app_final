@@ -56,11 +56,13 @@ async function seed() {
 
     // 3. Seed Workers
     const workersData = [
-      { name: 'Rajesh Carpenter', email: 'rajesh@gmail.com', phone: '+918765432100', service_type: 'Plumbing', experience_years: 5, city: 'Chennai', status: 'active', kyc_status: 'approved' },
-      { name: 'Suresh Kumar', email: 'suresh@gmail.com', phone: '+918765432101', service_type: 'Cleaning', experience_years: 3, city: 'Bangalore', status: 'active', kyc_status: 'approved' },
-      { name: 'Vikram Electrician', email: 'vikram@gmail.com', phone: '+918765432102', service_type: 'Electrical', experience_years: 8, city: 'Hyderabad', status: 'active', kyc_status: 'approved' },
-      { name: 'Karan Sharma', email: 'karan@gmail.com', phone: '+918765432103', service_type: 'AC Service', experience_years: 4, city: 'Chennai', status: 'pending', kyc_status: 'pending' },
-      { name: 'Anil Painter', email: 'anil@gmail.com', phone: '+918765432104', service_type: 'Others', experience_years: 6, city: 'Mumbai', status: 'suspended', kyc_status: 'approved' },
+      { name: 'Rajesh Carpenter', email: 'rajesh@gmail.com', phone: '+918765432100', service_type: 'Plumbing', experience_years: 5, city: 'Chennai', status: 'active', kyc_status: 'approved', current_lat: 13.0827, current_lng: 80.2707, photo_url: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?w=150', rating: 4.8 },
+      { name: 'Suresh Cleaner', email: 'suresh@gmail.com', phone: '+918765432101', service_type: 'Cleaning', experience_years: 3, city: 'Chennai', status: 'active', kyc_status: 'approved', current_lat: 13.0900, current_lng: 80.2600, photo_url: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150', rating: 4.2 },
+      { name: 'Vikram Electrician', email: 'vikram@gmail.com', phone: '+918765432102', service_type: 'Electrical', experience_years: 8, city: 'Chennai', status: 'active', kyc_status: 'approved', current_lat: 13.0600, current_lng: 80.2500, photo_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', rating: 4.6 },
+      { name: 'Anita Beautician', email: 'anita@gmail.com', phone: '+918765432105', service_type: 'AC Service', experience_years: 4, city: 'Chennai', status: 'active', kyc_status: 'approved', current_lat: 13.0800, current_lng: 80.3200, photo_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', rating: 4.9 },
+      { name: 'Far Away Plumbing', email: 'faraway@gmail.com', phone: '+918765432106', service_type: 'Plumbing', experience_years: 6, city: 'Chennai', status: 'active', kyc_status: 'approved', current_lat: 13.2000, current_lng: 80.3500, photo_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', rating: 4.5 },
+      { name: 'Karan Sharma', email: 'karan@gmail.com', phone: '+918765432103', service_type: 'AC Service', experience_years: 4, city: 'Chennai', status: 'pending', kyc_status: 'pending', current_lat: 13.0400, current_lng: 80.2400, photo_url: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150', rating: 3.5 },
+      { name: 'Anil Painter', email: 'anil@gmail.com', phone: '+918765432104', service_type: 'Others', experience_years: 6, city: 'Mumbai', status: 'suspended', kyc_status: 'approved', current_lat: 19.0760, current_lng: 72.8777, photo_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150', rating: 4.0 },
     ];
 
     const seededWorkers = [];
@@ -69,14 +71,19 @@ async function seed() {
       if (check.rows.length === 0) {
         const hash = await hashPassword('worker123');
         const res = await pool.query(
-          `INSERT INTO workers (name, email, phone, password_hash, service_type, experience_years, city, status, kyc_status)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-           RETURNING id, name, phone, service_type, status, kyc_status`,
-          [w.name, w.email, w.phone, hash, w.service_type, w.experience_years, w.city, w.status, w.kyc_status]
+          `INSERT INTO workers (name, email, phone, password_hash, service_type, experience_years, city, status, kyc_status, current_lat, current_lng, last_location_update, photo_url, rating)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), $12, $13)
+           RETURNING id, name, phone, service_type, status, kyc_status, photo_url, rating`,
+          [w.name, w.email, w.phone, hash, w.service_type, w.experience_years, w.city, w.status, w.kyc_status, w.current_lat || null, w.current_lng || null, w.photo_url || null, w.rating || 4.5]
         );
         seededWorkers.push(res.rows[0]);
       } else {
-        seededWorkers.push(check.rows[0]);
+        // Update the location and info of existing worker for testing
+        const res = await pool.query(
+          `UPDATE workers SET current_lat = $1, current_lng = $2, last_location_update = NOW(), status = $3, kyc_status = $4, photo_url = $5, rating = $6 WHERE id = $7 RETURNING id, name, phone, service_type, status, kyc_status, photo_url, rating`,
+          [w.current_lat || null, w.current_lng || null, w.status, w.kyc_status, w.photo_url || null, w.rating || 4.5, check.rows[0].id]
+        );
+        seededWorkers.push(res.rows[0]);
       }
     }
     console.log(`Seeded/verified ${seededWorkers.length} workers.`);

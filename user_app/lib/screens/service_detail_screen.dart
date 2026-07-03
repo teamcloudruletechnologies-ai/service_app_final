@@ -9,6 +9,7 @@ import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'booking_form_screen.dart';
 import 'location_picker_screen.dart';
+import 'nearby_workers_screen.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   const ServiceDetailScreen({super.key, required this.serviceId});
@@ -62,16 +63,20 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 padding: const EdgeInsets.all(16),
                 child: ElevatedButton(
                   onPressed: () async {
-                    final selectedAddress = await Navigator.of(context).push<String>(
+                    final result = await Navigator.of(context).push<LocationPickerResult>(
                       MaterialPageRoute(
-                        builder: (_) => const LocationPickerScreen(),
+                        builder: (_) => LocationPickerScreen(serviceType: _service?.categoryName),
                       ),
                     );
-                    if (selectedAddress != null) {
+                    if (result != null) {
                       if (!mounted) return;
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => BookingFormScreen(service: _service!, initialAddress: selectedAddress),
+                          builder: (_) => NearbyWorkersScreen(
+                            service: _service!,
+                            address: result.address,
+                            workers: result.workers,
+                          ),
                         ),
                       );
                     }

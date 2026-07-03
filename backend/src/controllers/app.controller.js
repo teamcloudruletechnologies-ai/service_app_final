@@ -3,6 +3,7 @@ const Service = require("../models/service.model");
 const Booking = require("../models/booking.model");
 const User = require("../models/user.model");
 const Worker = require("../models/worker.model");
+const Banner = require("../models/banner.model");
 const { getPagination } = require("../utils/pagination");
 const { success, error } = require("../utils/response");
 
@@ -192,10 +193,23 @@ async function updateMyBookingStatus(req, res, next) {
 async function updateUserProfile(req, res, next) {
   try {
     const userId = req.auth.id;
-    const { name, email, phone } = req.body;
-    const updated = await User.update(userId, { name, email, phone });
+    const { name, email, phone, state, address } = req.body;
+    const updated = await User.update(userId, { name, email, phone, state, address });
     if (!updated) return error(res, "User profile not found", 404);
     return success(res, "User profile updated successfully", updated);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function listActiveBanners(req, res, next) {
+  try {
+    const paging = getPagination(req.query);
+    const data = await Banner.list({
+      ...paging,
+      status: "active",
+    });
+    return success(res, "Active banners fetched successfully", data);
   } catch (err) {
     return next(err);
   }
@@ -212,4 +226,5 @@ module.exports = {
   updateWorkerProfile,
   updateMyBookingStatus,
   updateUserProfile,
+  listActiveBanners,
 };

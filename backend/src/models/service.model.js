@@ -74,7 +74,7 @@ async function update(id, values) {
   for (const key of allowed) {
     if (values[key] !== undefined) {
       params.push(values[key]);
-      sets.push(`${key} = $${params.length}`);
+      sets.push(`${key === 'category_id' ? 'category_id' : key} = $${params.length}`);
     }
   }
 

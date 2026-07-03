@@ -13,14 +13,24 @@ const modelByRole = {
 };
 
 function authPayload(account, role) {
-  return {
+  const payload = {
     id: account.id,
     role,
     name: account.name,
     email: account.email,
     phone: account.phone,
+    state: account.state,
+    address: account.address,
     status: account.status,
   };
+  if (role === "worker") {
+    payload.kyc_status = account.kyc_status;
+    payload.service_type = account.service_type;
+    payload.experience_years = account.experience_years;
+    payload.city = account.city;
+    payload.pincode = account.pincode;
+  }
+  return payload;
 }
 
 async function registerAdmin(req, res, next) {
@@ -107,27 +117,50 @@ async function phoneLogin(req, res, next) {
 
     if (!model) return error(res, "Invalid role", 400);
 
-    const account = await model.findByEmailOrPhone?.(phone) || await model.findByEmail?.(phone);
+    let account = await model.findByEmailOrPhone?.(phone);
+    let isNew = false;
+
     if (!account) {
-      return res.status(404).json({
-        success: false,
-        code: "USER_NOT_FOUND",
-        message: "Account not found for this phone number"
-      });
+      // Auto-create minimal account — name/details filled in onboarding step
+      if (role === roles.WORKER) {
+        account = await model.create({
+          name: "",          // filled during onboarding
+          phone,
+          passwordHash: null,
+          serviceType: null,
+          experienceYears: 0,
+          city: null,
+          state: null,
+          address: null,
+          status: "pending",
+        });
+      } else if (role === roles.USER) {
+        account = await model.create({
+          name: "",          // filled during onboarding
+          phone,
+          passwordHash: null,
+          status: "active",
+        });
+        await model.logActivity?.(account.id, "register", "User auto-created via phone login");
+      } else {
+        return error(res, "Cannot auto-register this role", 400);
+      }
+      isNew = true;
     }
 
-    if (account.status && account.status !== "active") {
-      return error(res, "Account is not active", 403);
+    if (account.status && !["active", "pending"].includes(account.status)) {
+      return error(res, "Account is suspended. Contact support.", 403);
     }
 
     const payload = authPayload(account, role);
-    if (role === roles.USER) {
-      await User.logActivity(account.id, "login", "User logged in via phone/OTP bypass");
+    if (role === roles.USER && !isNew) {
+      await User.logActivity(account.id, "login", "User logged in via phone/OTP");
     }
 
-    return success(res, "Login successful", {
+    return success(res, isNew ? "Account created" : "Login successful", {
       token: signToken({ id: account.id, role }),
       account: payload,
+      is_new: isNew,
     });
   } catch (err) {
     return next(err);

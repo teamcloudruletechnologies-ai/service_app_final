@@ -90,7 +90,6 @@ async function listServices(req, res, next) {
     const data = await Service.list({
       ...paging,
       search: req.query.search,
-      category_id: req.query.category_id,
       status: req.query.status,
     });
     return success(res, "Services fetched successfully", data);
@@ -101,12 +100,6 @@ async function listServices(req, res, next) {
 
 async function createService(req, res, next) {
   try {
-    // Check if category exists (if provided)
-    if (req.body.category_id) {
-      const category = await Category.findById(req.body.category_id);
-      if (!category) return error(res, "Selected Category does not exist", 400);
-    }
-
     // Check duplicate service name
     const existing = await Service.findByName(req.body.name);
     if (existing) return error(res, "Service with this name already exists", 409);
@@ -118,8 +111,10 @@ async function createService(req, res, next) {
     }
 
     const service = await Service.create({
-      ...req.body,
+      name: req.body.name,
+      description: req.body.description || null,
       image_url,
+      status: req.body.status,
     });
     return success(res, "Service created successfully", service, 201);
   } catch (err) {
@@ -133,11 +128,6 @@ async function updateService(req, res, next) {
     const serviceExists = await Service.findById(serviceId);
     if (!serviceExists) return error(res, "Service not found", 404);
 
-    if (req.body.category_id) {
-      const category = await Category.findById(req.body.category_id);
-      if (!category) return error(res, "Selected Category does not exist", 400);
-    }
-
     if (req.body.name) {
       const existing = await Service.findByName(req.body.name);
       if (existing && existing.id !== parseInt(serviceId)) {
@@ -145,11 +135,12 @@ async function updateService(req, res, next) {
       }
     }
 
-    // Save image file if new one is uploaded
-    const updateData = { ...req.body };
-    if (req.body.image) {
-      updateData.image_url = req.body.image;
-    }
+    // Build update data
+    const updateData = {};
+    if (req.body.name !== undefined) updateData.name = req.body.name;
+    if (req.body.description !== undefined) updateData.description = req.body.description;
+    if (req.body.status !== undefined) updateData.status = req.body.status;
+    if (req.body.image !== undefined) updateData.image_url = req.body.image;
     if (req.file) {
       updateData.image_url = await saveUpload(req.file, "services");
     }

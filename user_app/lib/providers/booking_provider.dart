@@ -34,6 +34,7 @@ class BookingProvider extends ChangeNotifier {
     required String address,
     String? notes,
     DateTime? scheduledAt,
+    int? workerId,
   }) async {
     loading = true;
     error = null;
@@ -44,6 +45,7 @@ class BookingProvider extends ChangeNotifier {
         address: address,
         notes: notes,
         scheduledAt: scheduledAt,
+        workerId: workerId,
       );
       bookings = [booking, ...bookings];
       loading = false;

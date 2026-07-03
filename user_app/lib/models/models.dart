@@ -12,6 +12,12 @@ class UserAccount {
   final String? city;
   final String? pincode;
 
+  final String? state;
+  final String? address;
+
+  // True if this account was just auto-created (name is empty)
+  bool get needsOnboarding => name.trim().isEmpty;
+
   const UserAccount({
     required this.id,
     required this.role,
@@ -24,6 +30,8 @@ class UserAccount {
     this.experienceYears,
     this.city,
     this.pincode,
+    this.state,
+    this.address,
   });
 
   factory UserAccount.fromJson(Map<String, dynamic> json) {
@@ -39,6 +47,8 @@ class UserAccount {
       experienceYears: json['experience_years'] as int? ?? json['experienceYears'] as int?,
       city: json['city'] as String?,
       pincode: json['pincode'] as String?,
+      state: json['state'] as String?,
+      address: json['address'] as String?,
     );
   }
 }
@@ -177,4 +187,78 @@ class PagedResult<T> {
     required this.page,
     required this.limit,
   });
+}
+
+class BannerItem {
+  final int id;
+  final String? title;
+  final String imageUrl;
+  final String? linkUrl;
+  final String status;
+
+  const BannerItem({
+    required this.id,
+    this.title,
+    required this.imageUrl,
+    this.linkUrl,
+    required this.status,
+  });
+
+  factory BannerItem.fromJson(Map<String, dynamic> json) {
+    return BannerItem(
+      id: json['id'] as int,
+      title: json['title'] as String?,
+      imageUrl: json['image_url'] as String? ?? '',
+      linkUrl: json['link_url'] as String?,
+      status: json['status'] as String? ?? 'active',
+    );
+  }
+}
+
+class NearbyWorker {
+  final int id;
+  final String name;
+  final String? serviceType;
+  final int experienceYears;
+  final String? phone;
+  final double? latitude;
+  final double? longitude;
+  final double? distance;
+  final String? photoUrl;
+  final double rating;
+
+  const NearbyWorker({
+    required this.id,
+    required this.name,
+    this.serviceType,
+    required this.experienceYears,
+    this.phone,
+    this.latitude,
+    this.longitude,
+    this.distance,
+    this.photoUrl,
+    required this.rating,
+  });
+
+  factory NearbyWorker.fromJson(Map<String, dynamic> json) {
+    return NearbyWorker(
+      id: json['id'] as int,
+      name: json['name'] as String? ?? '',
+      serviceType: json['service_type'] as String?,
+      experienceYears: json['experience_years'] as int? ?? 0,
+      phone: json['phone'] as String?,
+      latitude: (json['current_lat'] as num?)?.toDouble(),
+      longitude: (json['current_lng'] as num?)?.toDouble(),
+      distance: (json['distance'] as num?)?.toDouble(),
+      photoUrl: json['photo_url'] as String?,
+      rating: (json['rating'] as num?)?.toDouble() ?? 4.5,
+    );
+  }
+}
+
+class LocationPickerResult {
+  final String address;
+  final List<NearbyWorker> workers;
+
+  const LocationPickerResult({required this.address, required this.workers});
 }

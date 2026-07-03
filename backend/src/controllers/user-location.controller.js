@@ -70,8 +70,21 @@ async function updateMyLocation(req, res) {
   }
 }
 
+// PUBLIC: Returns all active pincodes with zone/city info
+// Used by user/worker apps to display serviceable areas
+async function getServiceableLocations(req, res) {
+  try {
+    const locations = await locationModel.getActiveLocations();
+    res.json({ success: true, data: locations });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
 module.exports = {
   findNearbyWorkers,
   findWorkersByPincode,
   updateMyLocation,
+  getServiceableLocations,
 };
+

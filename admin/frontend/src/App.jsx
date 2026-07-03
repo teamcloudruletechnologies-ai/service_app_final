@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
@@ -13,10 +13,162 @@ import Support from './pages/Support';
 import Locations from './pages/Locations';
 import Notifications from './pages/Notifications';
 import Roles from './pages/Roles';
+import Banners from './pages/Banners';
+import { bookingsAPI } from './api';
+
+/* ── New Booking Toast Popup ── */
+function NewBookingToast({ bookings, onDismiss, onViewBookings }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (bookings.length > 0) {
+      setVisible(true);
+    }
+  }, [bookings]);
+
+  const handleDismiss = () => {
+    setVisible(false);
+    setTimeout(onDismiss, 300);
+  };
+
+  const handleView = () => {
+    setVisible(false);
+    setTimeout(() => { onDismiss(); onViewBookings(); }, 300);
+  };
+
+  if (bookings.length === 0) return null;
+
+  const latest = bookings[0];
+
+  return (
+    <div style={{
+      position: 'fixed', top: 20, right: 20, zIndex: 9999,
+      transform: visible ? 'translateX(0)' : 'translateX(120%)',
+      transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+      maxWidth: 340, width: '100%',
+    }}>
+      <div style={{
+        background: '#fff',
+        borderRadius: 16,
+        boxShadow: '0 8px 40px rgba(0,0,0,0.16)',
+        border: '1px solid #E5E7EB',
+        overflow: 'hidden',
+      }}>
+        {/* Header bar */}
+        <div style={{
+          background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)',
+          padding: '12px 16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: 'rgba(255,255,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 16,
+            }}>📋</div>
+            <div>
+              <div style={{ color: '#fff', fontWeight: 700, fontSize: 13 }}>
+                {bookings.length > 1 ? `${bookings.length} New Bookings!` : 'New Booking Received!'}
+              </div>
+              <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11 }}>Just now</div>
+            </div>
+          </div>
+          <button
+            onClick={handleDismiss}
+            style={{
+              background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff',
+              borderRadius: 6, width: 26, height: 26, cursor: 'pointer',
+              fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >✕</button>
+        </div>
+        {/* Body */}
+        <div style={{ padding: '14px 16px' }}>
+          <div style={{ fontSize: 13, color: '#111827', fontWeight: 600, marginBottom: 4 }}>
+            {latest.user_name || latest.name || 'A user'} booked a service
+          </div>
+          <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 12 }}>
+            {latest.service_type || latest.service || 'Service'} · ₹{Number(latest.amount || 0).toLocaleString()}
+          </div>
+          {bookings.length > 1 && (
+            <div style={{
+              background: '#EFF4FF', borderRadius: 8, padding: '6px 10px',
+              fontSize: 11, color: '#1E40AF', marginBottom: 12,
+            }}>
+              +{bookings.length - 1} more new booking{bookings.length > 2 ? 's' : ''} waiting
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={handleView}
+              style={{
+                flex: 1, background: '#1D4ED8', color: '#fff', border: 'none',
+                borderRadius: 8, padding: '8px 12px', cursor: 'pointer',
+                fontSize: 12, fontWeight: 600,
+              }}
+            >View Bookings</button>
+            <button
+              onClick={handleDismiss}
+              style={{
+                background: '#F3F4F6', color: '#374151', border: 'none',
+                borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
+                fontSize: 12, fontWeight: 600,
+              }}
+            >Dismiss</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem('admin_token'));
   const [activePage, setActivePage] = useState('dashboard');
+  const [newBookings, setNewBookings] = useState([]);
+  const lastSeenIdRef = useRef(null);
+  const pollingRef = useRef(null);
+
+  // Poll for new bookings every 30 seconds
+  useEffect(() => {
+    if (!token) return;
+
+    const checkForNewBookings = async () => {
+      try {
+        const res = await bookingsAPI.getAll({ status: 'pending', limit: 10 });
+        const rows = res?.data?.rows || res?.rows || [];
+        if (rows.length === 0) return;
+
+        const latestId = rows[0]?.id;
+
+        // First run — just remember the last known ID, don't alert
+        if (lastSeenIdRef.current === null) {
+          lastSeenIdRef.current = latestId;
+          return;
+        }
+
+        // Find bookings newer than last seen
+        const fresh = rows.filter(b => b.id > lastSeenIdRef.current);
+        if (fresh.length > 0) {
+          lastSeenIdRef.current = latestId;
+          setNewBookings(fresh);
+        }
+      } catch (_) {
+        // silently ignore polling errors
+      }
+    };
+
+    // Initial check after 3 seconds
+    const initialTimeout = setTimeout(checkForNewBookings, 3000);
+    // Then poll every 30 seconds
+    pollingRef.current = setInterval(checkForNewBookings, 30000);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(pollingRef.current);
+    };
+  }, [token]);
 
   if (!token) {
     return (
@@ -44,6 +196,8 @@ export default function App() {
         return <Users />;
       case 'services':
         return <Services />;
+      case 'banners':
+        return <Banners />;
       case 'kyc':
         return <Kyc />;
       case 'workers':
@@ -81,6 +235,17 @@ export default function App() {
         <Topbar activePage={activePage} />
         {renderPage()}
       </div>
+
+      {/* New Booking Popup Toast */}
+      {newBookings.length > 0 && (
+        <NewBookingToast
+          bookings={newBookings}
+          onDismiss={() => setNewBookings([])}
+          onViewBookings={() => setActivePage('bookings')}
+        />
+      )}
     </div>
   );
 }
+
+

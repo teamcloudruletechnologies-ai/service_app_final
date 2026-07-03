@@ -68,7 +68,6 @@ router.post(
   "/",
   upload.single("image"),
   [
-    body("category_id").optional().isInt().withMessage("Valid category_id is required"),
     body("name").trim().notEmpty().withMessage("Service name is required"),
     body("description").optional().trim(),
     body("status").optional().isIn(["active", "inactive"]),
@@ -82,7 +81,6 @@ router.put(
   upload.single("image"),
   [
     param("id").isInt().withMessage("Valid service ID is required"),
-    body("category_id").optional().isInt().withMessage("Category ID must be an integer"),
     body("name").optional().trim().notEmpty().withMessage("Service name cannot be empty"),
     body("description").optional().trim(),
     body("status").optional().isIn(["active", "inactive"]),

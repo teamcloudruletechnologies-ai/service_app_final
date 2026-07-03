@@ -47,6 +47,8 @@ async function initDb() {
       city VARCHAR(100),
       status VARCHAR(30) NOT NULL DEFAULT 'pending',
       kyc_status VARCHAR(30) NOT NULL DEFAULT 'not_submitted',
+      photo_url TEXT,
+      rating NUMERIC(3,2) DEFAULT 4.5,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
@@ -191,6 +193,16 @@ async function initDb() {
       description TEXT,
       status VARCHAR(50) NOT NULL DEFAULT 'pending',
       admin_notes TEXT DEFAULT '',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS banners (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(120),
+      image_url TEXT NOT NULL,
+      link_url TEXT,
+      status VARCHAR(30) NOT NULL DEFAULT 'active',
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
