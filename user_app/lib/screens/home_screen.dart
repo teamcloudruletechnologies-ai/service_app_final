@@ -1,4 +1,5 @@
 import 'dart:async' as async_timer;
+import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -292,26 +293,37 @@ class _BannerCarouselState extends State<BannerCarousel> {
                       fit: StackFit.expand,
                       children: [
                         imageUrl.isNotEmpty
-                            ? CachedNetworkImage(
-                                imageUrl: imageUrl,
-                                fit: BoxFit.cover,
-                                placeholder: (_, __) => Container(
-                                  color: Colors.grey.shade200,
-                                  child: const Center(
-                                    child: SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF4A5343)),
+                            ? (imageUrl.startsWith('data:image')
+                                ? Image.memory(
+                                    base64Decode(imageUrl.split(',').last),
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      color: const Color(0xFFE5E7EB),
+                                      child: const Center(
+                                        child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                errorWidget: (_, __, ___) => Container(
-                                  color: const Color(0xFFE5E7EB),
-                                  child: const Center(
-                                    child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
-                                  ),
-                                ),
-                              )
+                                  )
+                                : CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    fit: BoxFit.cover,
+                                    placeholder: (_, __) => Container(
+                                      color: Colors.grey.shade200,
+                                      child: const Center(
+                                        child: SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF4A5343)),
+                                        ),
+                                      ),
+                                    ),
+                                    errorWidget: (_, __, ___) => Container(
+                                      color: const Color(0xFFE5E7EB),
+                                      child: const Center(
+                                        child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
+                                      ),
+                                    ),
+                                  ))
                             : Container(color: Colors.grey.shade200),
                         if (banner.title != null && banner.title!.isNotEmpty)
                           Positioned.fill(

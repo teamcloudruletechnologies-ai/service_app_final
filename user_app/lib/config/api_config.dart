@@ -17,7 +17,7 @@ class ApiConfig {
 
   static String resolveImageUrl(String? path) {
     if (path == null || path.isEmpty) return '';
-    if (path.startsWith('http')) return path;
+    if (path.startsWith('http') || path.startsWith('data:')) return path;
     return '$uploadsBaseUrl$path';
   }
 }
