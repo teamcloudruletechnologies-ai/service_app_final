@@ -23,8 +23,9 @@ async function createBanner(req, res, next) {
       return error(res, "Banner image is required", 400);
     }
 
-    // Save image file
-    const image_url = await saveUpload(req.file, "banners");
+    // Convert file buffer to Base64 data URL
+    const base64Data = req.file.buffer.toString("base64");
+    const image_url = `data:${req.file.mimetype};base64,${base64Data}`;
 
     const banner = await Banner.create({
       title: req.body.title,
@@ -47,9 +48,10 @@ async function updateBanner(req, res, next) {
 
     const updateData = { ...req.body };
 
-    // If new image is uploaded, save it
+    // If new image is uploaded, convert it to Base64 data URL
     if (req.file) {
-      updateData.image_url = await saveUpload(req.file, "banners");
+      const base64Data = req.file.buffer.toString("base64");
+      updateData.image_url = `data:${req.file.mimetype};base64,${base64Data}`;
     }
 
     const banner = await Banner.update(bannerId, updateData);
