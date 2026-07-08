@@ -64,7 +64,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } catch (_) {
       // Fallback: allow free text input if API fails
       setState(() => _loadingCities = false);
-    }
+    }   
   }
 
   @override

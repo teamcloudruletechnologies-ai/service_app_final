@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
 import '../widgets/common_widgets.dart';
+import 'profile_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -45,13 +47,53 @@ class _BookingsScreenState extends State<BookingsScreen> {
     );
   }
 
+  Widget _buildProfileButton(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+    final user = auth.user;
+    final initial = (user?.name.isNotEmpty == true ? user!.name[0] : 'U').toUpperCase();
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        );
+      },
+      child: Hero(
+        tag: 'profile_avatar_hero',
+        child: CircleAvatar(
+          radius: 20,
+          backgroundColor: const Color(0xFFE3D0BA),
+          child: CircleAvatar(
+            radius: 18,
+            backgroundColor: const Color(0xFF1A1A1A),
+            child: Text(
+              initial,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final booking = context.watch<BookingProvider>();
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text('My Bookings')),
+      appBar: AppBar(
+        title: const Text('My Bookings'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: _buildProfileButton(context),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           SizedBox(

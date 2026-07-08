@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
-import '../services/api_service.dart';
 import 'main_shell.dart';
 
 class UserOnboardingScreen extends StatefulWidget {
@@ -16,43 +15,11 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
-  final _stateCtrl = TextEditingController(text: 'Tamil Nadu');
-  
-  String? _selectedCity;
-  List<String> _availableCities = [];
-  bool _loadingCities = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadServiceableCities();
-  }
-
-  Future<void> _loadServiceableCities() async {
-    setState(() => _loadingCities = true);
-    try {
-      final api = context.read<ApiService>();
-      final locations = await api.fetchServiceableLocations();
-      final cities = locations
-          .map((l) => (l['city'] as String?)?.trim() ?? '')
-          .where((c) => c.isNotEmpty)
-          .toSet()
-          .toList()
-        ..sort();
-      setState(() {
-        _availableCities = cities;
-        _loadingCities = false;
-      });
-    } catch (_) {
-      setState(() => _loadingCities = false);
-    }
-  }
 
   @override
   void dispose() {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
-    _stateCtrl.dispose();
     super.dispose();
   }
 
@@ -61,28 +28,11 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
 
     final name = _nameCtrl.text.trim();
     final email = _emailCtrl.text.trim();
-    final state = _stateCtrl.text.trim();
-    final city = _selectedCity;
-
-    if (city == null || city.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select your city/area')),
-      );
-      return;
-    }
 
     final auth = context.read<AuthProvider>();
-    // We update the user profile with name, email, state, and city (which we map to 'city' or 'address' field in updateUserProfile)
-    // Wait, let's pass state and address (or city as address). Let's pass city as the city and address!
-    // Wait, does updateUserProfile accept city?
-    // Let's check: updateUserProfile in backend's app.controller.js accepts { name, email, phone, state, address }
-    // Let's pass city/area as the address field, or combine city and state, or pass city as address.
-    // Yes! Let's pass city as the address.
     final ok = await auth.updateUserProfile(
       name: name,
       email: email.isEmpty ? null : email,
-      state: state,
-      address: city, // User's selected operating city/area
     );
 
     if (!mounted) return;
@@ -100,7 +50,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final isLoading = auth.loading || _loadingCities;
+    final isLoading = auth.loading;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -169,46 +119,6 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
-
-                // State
-                TextFormField(
-                  controller: _stateCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'State',
-                    hintText: 'Enter your state',
-                    prefixIcon: Icon(Icons.map_outlined),
-                  ),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return 'State is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // City dropdown
-                DropdownButtonFormField<String>(
-                  value: _selectedCity,
-                  hint: const Text('Select Operating City/Area'),
-                  decoration: const InputDecoration(
-                    labelText: 'Operating City/Area',
-                    prefixIcon: Icon(Icons.location_city_outlined),
-                  ),
-                  items: _availableCities.map((city) {
-                    return DropdownMenuItem<String>(
-                      value: city,
-                      child: Text(city),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      _selectedCity = val;
-                    });
-                  },
-                  validator: (v) => v == null ? 'Operating City/Area is required' : null,
-                ),
                 const SizedBox(height: 32),
 
                 // Submit Button
@@ -247,3 +157,4 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
     );
   }
 }
+

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'bookings_screen.dart';
 import 'home_screen.dart';
-import 'profile_screen.dart';
+import 'menu_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -17,13 +17,13 @@ class _MainShellState extends State<MainShell> {
   static const List<Widget> _pages = [
     HomeScreen(),
     BookingsScreen(),
-    ProfileScreen(),
+    MenuScreen(),
   ];
 
   static const List<NavigationDestination> _destinations = [
     NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
     NavigationDestination(icon: Icon(Icons.calendar_today_outlined), selectedIcon: Icon(Icons.calendar_today), label: 'Bookings'),
-    NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
+    NavigationDestination(icon: Icon(Icons.menu_outlined), selectedIcon: Icon(Icons.menu), label: 'Menu'),
   ];
 
   @override

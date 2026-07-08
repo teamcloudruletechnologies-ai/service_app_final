@@ -9,6 +9,7 @@ import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/catalog_provider.dart';
 import '../widgets/common_widgets.dart';
+import 'profile_screen.dart';
 import 'service_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -44,6 +45,36 @@ class _HomeScreenState extends State<HomeScreen> {
         );
   }
 
+  Widget _buildProfileButton(BuildContext context, UserAccount? user) {
+    final initial = (user?.name.isNotEmpty == true ? user!.name[0] : 'U').toUpperCase();
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        );
+      },
+      child: Hero(
+        tag: 'profile_avatar_hero',
+        child: CircleAvatar(
+          radius: 22,
+          backgroundColor: const Color(0xFFE3D0BA),
+          child: CircleAvatar(
+            radius: 20,
+            backgroundColor: const Color(0xFF1A1A1A),
+            child: Text(
+              initial,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -56,28 +87,36 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 24, 20, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    'Hello, ${auth.user?.name.split(' ').first ?? 'User'} 👋',
-                    style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 26,
-                      letterSpacing: -1.0,
-                      height: 1.2,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Hello, ${auth.user?.name.split(' ').first ?? 'User'} 👋',
+                          style: const TextStyle(
+                            color: Color(0xFF1A1A1A),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 26,
+                            letterSpacing: -1.0,
+                            height: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Find trusted professionals near you',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Find trusted professionals near you',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  const SizedBox(width: 12),
+                  _buildProfileButton(context, auth.user),
                 ],
               ),
             ),
