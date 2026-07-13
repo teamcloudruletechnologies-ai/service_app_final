@@ -7,7 +7,6 @@ import '../models/models.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
-import 'booking_form_screen.dart';
 import 'location_picker_screen.dart';
 import 'nearby_workers_screen.dart';
 
@@ -81,7 +80,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       );
                     }
                   },
-                  child: Text('Book Now — ₹${_service!.price.toStringAsFixed(0)}'),
+                  child: Text(_service!.price > 0
+                      ? 'Book Now — ₹${_service!.price.toStringAsFixed(0)}'
+                      : 'Book Now'),
                 ),
               ),
             ),
@@ -120,15 +121,17 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  '₹${service.price.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
+                if (service.price > 0) ...[
+                  Text(
+                    '₹${service.price.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
+                ],
                 const Text('About this service', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 const SizedBox(height: 8),
                 Text(

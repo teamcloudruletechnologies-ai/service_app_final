@@ -58,7 +58,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
         );
       },
       child: Hero(
-        tag: 'profile_avatar_hero',
+        tag: 'profile_avatar_hero_bookings',
         child: CircleAvatar(
           radius: 20,
           backgroundColor: const Color(0xFFE3D0BA),

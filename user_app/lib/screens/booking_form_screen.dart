@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/models.dart';
+import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
 import '../theme/app_theme.dart';
 import 'main_shell.dart';
@@ -23,6 +24,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _addressCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
   DateTime? _scheduledAt;
 
   @override
@@ -31,12 +33,21 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     if (widget.initialAddress != null) {
       _addressCtrl.text = widget.initialAddress!;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = context.read<AuthProvider>().user;
+      if (user?.phone != null && _phoneCtrl.text.isEmpty) {
+        setState(() {
+          _phoneCtrl.text = user!.phone!;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _addressCtrl.dispose();
     _notesCtrl.dispose();
+    _phoneCtrl.dispose();
     super.dispose();
   }
 
@@ -63,10 +74,14 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final phone = _phoneCtrl.text.trim();
+    final notes = _notesCtrl.text.trim();
+    final finalNotes = 'Contact: $phone${notes.isNotEmpty ? '\nNotes: $notes' : ''}';
+
     final booking = await context.read<BookingProvider>().createBooking(
           serviceId: widget.service.id,
           address: _addressCtrl.text.trim(),
-          notes: _notesCtrl.text.trim(),
+          notes: finalNotes,
           scheduledAt: _scheduledAt,
           workerId: widget.selectedWorker?.id,
         );
@@ -115,11 +130,13 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(widget.service.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                      const SizedBox(height: 8),
-                      Text(
-                        '₹${widget.service.price.toStringAsFixed(0)}',
-                        style: const TextStyle(color: AppTheme.primary, fontSize: 22, fontWeight: FontWeight.bold),
-                      ),
+                      if (widget.service.price > 0) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          '₹${widget.service.price.toStringAsFixed(0)}',
+                          style: const TextStyle(color: AppTheme.primary, fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -193,6 +210,26 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                   hintText: 'Any special instructions...',
                   prefixIcon: Icon(Icons.notes_outlined),
                 ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _phoneCtrl,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Contact Number',
+                  hintText: 'Enter your contact number',
+                  prefixIcon: Icon(Icons.phone_outlined),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return 'Contact number is required';
+                  }
+                  final cleaned = v.replaceAll(RegExp(r'\D'), '');
+                  if (cleaned.length < 10) {
+                    return 'Enter a valid contact number';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 24),
               ElevatedButton(

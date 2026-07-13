@@ -55,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
       child: Hero(
-        tag: 'profile_avatar_hero',
+        tag: 'profile_avatar_hero_home',
         child: CircleAvatar(
           radius: 22,
           backgroundColor: const Color(0xFFE3D0BA),
