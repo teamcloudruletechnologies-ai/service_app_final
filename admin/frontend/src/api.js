@@ -95,7 +95,7 @@ export const invoicesAPI = {
 
 // ─── Reviews ─────────────────────────────────────────────────
 export const reviewsAPI = {
-  getAll: (params) => api.get("/app/reviews", { params }),
+  getAll: (params) => api.get("/admin/reviews", { params }),
 };
 
 // ─── Services ────────────────────────────────────────────────

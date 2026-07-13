@@ -40,9 +40,10 @@ async function list({ workerId, rating, page = 1, limit = 10, offset = 0 }) {
 
   params.push(limit, offset);
   const result = await db.query(
-    `SELECT r.*, u.name as user_name
+    `SELECT r.*, u.name as user_name, w.name as worker_name
      FROM reviews r
      LEFT JOIN users u ON u.id = r.user_id
+     LEFT JOIN workers w ON w.id = r.worker_id
      ${clause}
      ORDER BY r.created_at DESC
      LIMIT $${params.length - 1} OFFSET $${params.length}`,
