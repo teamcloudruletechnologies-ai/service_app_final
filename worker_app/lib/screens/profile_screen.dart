@@ -52,11 +52,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _saveProfile() async {
     setState(() => _saving = true);
     try {
-      await _apiService.updateWorkerProfile({
-        'name': _nameCtrl.text.trim(),
-        'email': _emailCtrl.text.trim(),
-        'phone': _phoneCtrl.text.trim(),
-      });
+      await _apiService.updateWorkerProfile(
+        name: _nameCtrl.text.trim(),
+        email: _emailCtrl.text.trim(),
+      );
       if (mounted) {
         setState(() { _editMode = false; _saving = false; });
         ScaffoldMessenger.of(context).showSnackBar(
@@ -174,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const Icon(Icons.circle, size: 8, color: Colors.greenAccent),
                         const SizedBox(width: 6),
                         Text(
-                          user?.status?.toUpperCase() ?? 'ACTIVE',
+                          user?.status.toUpperCase() ?? 'ACTIVE',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 11,

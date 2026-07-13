@@ -87,46 +87,79 @@ class _HomeScreenState extends State<HomeScreen> {
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 24, 20, 24),
-              child: Row(
+              padding: EdgeInsets.fromLTRB(20, MediaQuery.paddingOf(context).top + 16, 20, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hello, ${auth.user?.name.split(' ').first ?? 'User'} 👋',
-                          style: const TextStyle(
-                            color: Color(0xFF1A1A1A),
-                            fontWeight: FontWeight.w800,
-                            fontSize: 26,
-                            letterSpacing: -1.0,
-                            height: 1.2,
-                          ),
+                  // Zomato style location + actions bar
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, color: Color(0xFFE23744), size: 28),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Text(
+                                  'Current Location',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Color(0xFF111827),
+                                  ),
+                                ),
+                                SizedBox(width: 4),
+                                Icon(Icons.arrow_drop_down, color: Color(0xFFE23744), size: 20),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              auth.user?.address ?? 'Detecting location...',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Find trusted professionals near you',
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                      ),
+                      const SizedBox(width: 12),
+                      IconButton(
+                        icon: const Icon(Icons.notifications_outlined, size: 28, color: Color(0xFF1A1A1A)),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      _buildProfileButton(context, auth.user),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Hello, ${auth.user?.name.split(' ').first ?? 'User'} 👋',
+                    style: const TextStyle(
+                      color: Color(0xFF1A1A1A),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 24,
+                      letterSpacing: -1.0,
+                      height: 1.2,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  IconButton(
-                    icon: const Icon(Icons.notifications_outlined, size: 28, color: Color(0xFF1A1A1A)),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const NotificationScreen()),
-                      );
-                    },
+                  const SizedBox(height: 4),
+                  Text(
+                    'Find trusted professionals near you',
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  _buildProfileButton(context, auth.user),
                 ],
               ),
             ),

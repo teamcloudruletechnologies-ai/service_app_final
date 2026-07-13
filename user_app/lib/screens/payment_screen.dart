@@ -51,7 +51,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       await Future.delayed(const Duration(seconds: 2));
 
       // 2. Verify payment on backend with mock values
-      final result = await _apiService.verifyPayment(
+      await _apiService.verifyPayment(
         bookingId: widget.booking.id,
         razorpayPaymentId: 'pay_${DateTime.now().millisecondsSinceEpoch}',
         razorpaySignature: 'mock_signature',
