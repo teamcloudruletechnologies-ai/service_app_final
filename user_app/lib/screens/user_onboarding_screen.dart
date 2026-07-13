@@ -11,7 +11,7 @@ import '../providers/catalog_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'payment_screen.dart';
-
+import '../config/api_config.dart';
 class UserOnboardingScreen extends StatefulWidget {
   const UserOnboardingScreen({super.key});
 
