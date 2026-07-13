@@ -11,6 +11,7 @@ import '../providers/catalog_provider.dart';
 import '../widgets/common_widgets.dart';
 import 'profile_screen.dart';
 import 'service_detail_screen.dart';
+import 'notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -116,6 +117,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined, size: 28, color: Color(0xFF1A1A1A)),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
                   _buildProfileButton(context, auth.user),
                 ],
               ),

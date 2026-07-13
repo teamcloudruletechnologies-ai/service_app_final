@@ -5,6 +5,9 @@ import 'package:intl/intl.dart';
 import '../config/api_config.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
+import '../screens/payment_screen.dart';
+import '../screens/rating_screen.dart';
+import '../screens/invoice_screen.dart';
 
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key, this.message});
@@ -200,14 +203,65 @@ class BookingCard extends StatelessWidget {
                   ),
                 ],
               ),
-              if (booking.canCancel && onCancel != null) ...[
+              if (booking.status == 'pending' || (booking.canCancel && onCancel != null) || booking.status == 'completed') ...[
                 const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: onCancel,
-                    child: const Text('Cancel Booking', style: TextStyle(color: Colors.red)),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (booking.canCancel && onCancel != null)
+                      TextButton(
+                        onPressed: onCancel,
+                        child: const Text('Cancel Booking', style: TextStyle(color: Colors.red)),
+                      ),
+                    if (booking.status == 'pending') ...[
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => PaymentScreen(booking: booking)),
+                          );
+                        },
+                        child: const Text('Pay Now', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                    if (booking.status == 'completed') ...[
+                      OutlinedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => InvoiceScreen(booking: booking)),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: AppTheme.primary),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        child: const Text('View Invoice', style: TextStyle(color: AppTheme.primary)),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber.shade700,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => RatingScreen(booking: booking)),
+                          );
+                        },
+                        child: const Text('Rate Provider', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ]
+                  ],
                 ),
               ],
             ],

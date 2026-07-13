@@ -90,6 +90,12 @@ export const invoicesAPI = {
   getById: (id) => api.get(`/admin/invoices/${id}`),
   getReports: () => api.get("/admin/invoices/reports"),
   getPayouts: () => api.get("/admin/invoices/payouts"),
+  getPayments: () => api.get("/admin/invoices/payments"),
+};
+
+// ─── Reviews ─────────────────────────────────────────────────
+export const reviewsAPI = {
+  getAll: (params) => api.get("/app/reviews", { params }),
 };
 
 // ─── Services ────────────────────────────────────────────────

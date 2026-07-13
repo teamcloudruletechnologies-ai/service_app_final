@@ -187,3 +187,38 @@ class PagedResult<T> {
     required this.limit,
   });
 }
+
+class ReviewItem {
+  final int id;
+  final int bookingId;
+  final int userId;
+  final String userName;
+  final int workerId;
+  final int rating;
+  final String? comment;
+  final DateTime createdAt;
+
+  const ReviewItem({
+    required this.id,
+    required this.bookingId,
+    required this.userId,
+    required this.userName,
+    required this.workerId,
+    required this.rating,
+    this.comment,
+    required this.createdAt,
+  });
+
+  factory ReviewItem.fromJson(Map<String, dynamic> json) {
+    return ReviewItem(
+      id: json['id'] as int,
+      bookingId: json['booking_id'] as int,
+      userId: json['user_id'] as int,
+      userName: json['user_name'] as String? ?? 'User',
+      workerId: json['worker_id'] as int,
+      rating: json['rating'] as int,
+      comment: json['comment'] as String?,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
+}

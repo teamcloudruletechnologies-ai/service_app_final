@@ -404,4 +404,28 @@ class ApiService {
     final rows = data['data'] as List? ?? [];
     return rows.cast<Map<String, dynamic>>();
   }
+
+  // --- REVIEWS ---
+
+  Future<PagedResult<ReviewItem>> fetchReviews({int? workerId, int? rating}) async {
+    final params = <String, String>{'limit': '50'};
+    if (workerId != null) params['workerId'] = '$workerId';
+    if (rating != null) params['rating'] = '$rating';
+
+    final uri = Uri.parse('${ApiConfig.baseUrl}/app/reviews').replace(queryParameters: params);
+    final response = await http.get(uri, headers: _headers(auth: true));
+    final data = _decode(response) as Map<String, dynamic>;
+    return _parsePaged(data['data'] as Map<String, dynamic>, ReviewItem.fromJson);
+  }
+
+  // --- WORKER EARNINGS ---
+
+  Future<Map<String, dynamic>> fetchWorkerEarnings() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/worker/earnings'),
+      headers: _headers(auth: true),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return data['data'] as Map<String, dynamic>;
+  }
 }

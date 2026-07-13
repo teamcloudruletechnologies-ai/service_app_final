@@ -206,6 +206,29 @@ async function initDb() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS reviews (
+      id SERIAL PRIMARY KEY,
+      booking_id INTEGER UNIQUE NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      worker_id INTEGER NOT NULL REFERENCES workers(id) ON DELETE CASCADE,
+      rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+      comment TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS payments (
+      id SERIAL PRIMARY KEY,
+      booking_id INTEGER UNIQUE NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      razorpay_order_id VARCHAR(255) NOT NULL,
+      razorpay_payment_id VARCHAR(255),
+      razorpay_signature VARCHAR(255),
+      amount NUMERIC(12,2) NOT NULL,
+      status VARCHAR(50) NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
   `);
 }
 

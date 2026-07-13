@@ -10,6 +10,9 @@ import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'worker_booking_detail_screen.dart';
 import 'worker_kyc_screen.dart';
+import 'earnings_screen.dart';
+import 'reviews_screen.dart';
+import 'notification_screen.dart';
 
 class WorkerDashboardScreen extends StatefulWidget {
   const WorkerDashboardScreen({super.key});
@@ -135,6 +138,35 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
       appBar: AppBar(
         title: const Text('Partner Dashboard'),
         actions: [
+          if (user != null) ...[
+            IconButton(
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const EarningsScreen()),
+                );
+              },
+              tooltip: 'My Earnings',
+            ),
+            IconButton(
+              icon: const Icon(Icons.rate_review_outlined),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => ReviewsScreen(workerId: user.id)),
+                );
+              },
+              tooltip: 'Ratings & Reviews',
+            ),
+            IconButton(
+              icon: const Icon(Icons.notifications_outlined),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                );
+              },
+              tooltip: 'Notifications',
+            ),
+          ],
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _loadData,

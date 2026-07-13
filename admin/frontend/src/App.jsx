@@ -14,6 +14,9 @@ import Locations from './pages/Locations';
 import Notifications from './pages/Notifications';
 import Roles from './pages/Roles';
 import Banners from './pages/Banners';
+import Payments from './pages/Payments';
+import Reviews from './pages/Reviews';
+import Settings from './pages/Settings';
 import { bookingsAPI } from './api';
 
 /* ── New Booking Toast Popup ── */
@@ -210,6 +213,12 @@ export default function App() {
         return <Notifications />;
       case 'roles':
         return <Roles />;
+      case 'payments':
+        return <Payments />;
+      case 'reviews':
+        return <Reviews />;
+      case 'settings':
+        return <Settings />;
       default:
         return (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, system-ui, sans-serif', color: '#9CA3AF', fontSize: 14 }}>

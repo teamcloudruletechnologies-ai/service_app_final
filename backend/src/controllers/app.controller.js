@@ -215,6 +215,48 @@ async function listActiveBanners(req, res, next) {
   }
 }
 
+async function getWorkerEarnings(req, res, next) {
+  try {
+    const workerId = req.auth.id;
+    const db = require("../config/db");
+
+    const statsResult = await db.query(
+      `SELECT
+        COALESCE(SUM(worker_payout), 0)::float AS total_earnings,
+        COALESCE(SUM(worker_payout) FILTER (WHERE status = 'paid'), 0)::float AS paid_earnings,
+        COALESCE(SUM(worker_payout) FILTER (WHERE status = 'pending'), 0)::float AS pending_earnings
+       FROM invoices
+       WHERE worker_id = $1`,
+      [workerId]
+    );
+
+    const historyResult = await db.query(
+      `SELECT
+        i.id,
+        i.invoice_number,
+        i.amount::float AS amount,
+        i.worker_payout::float AS worker_payout,
+        i.status,
+        i.paid_at,
+        b.created_at as booking_date,
+        s.name as service_name
+       FROM invoices i
+       LEFT JOIN bookings b ON b.id = i.booking_id
+       LEFT JOIN services s ON s.id = b.service_id
+       WHERE i.worker_id = $1
+       ORDER BY i.created_at DESC`,
+      [workerId]
+    );
+
+    return success(res, "Worker earnings fetched successfully", {
+      stats: statsResult.rows[0],
+      history: historyResult.rows,
+    });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   listCategories,
   listServices,
@@ -227,4 +269,5 @@ module.exports = {
   updateMyBookingStatus,
   updateUserProfile,
   listActiveBanners,
+  getWorkerEarnings,
 };

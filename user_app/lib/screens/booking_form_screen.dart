@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../providers/booking_provider.dart';
 import '../theme/app_theme.dart';
 import 'main_shell.dart';
+import 'payment_screen.dart';
 
 class BookingFormScreen extends StatefulWidget {
   const BookingFormScreen({super.key, required this.service, this.initialAddress, this.selectedWorker});
@@ -73,11 +74,16 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     if (!mounted) return;
     if (booking != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Booking placed successfully!')),
+        const SnackBar(
+          content: Text('Booking placed! Proceeding to payment...'),
+          backgroundColor: Colors.green,
+        ),
       );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-        (_) => false,
+      // Navigate to payment screen so user can pay immediately
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => PaymentScreen(booking: booking),
+        ),
       );
     } else {
       final error = context.read<BookingProvider>().error;
