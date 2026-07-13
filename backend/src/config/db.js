@@ -229,6 +229,30 @@ async function initDb() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    -- Add address fields to users if missing
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(100);
+
+    -- Seed realistic prices for services that still have price = 0
+    UPDATE services SET price = CASE
+      WHEN name ILIKE '%plumb%' THEN 499
+      WHEN name ILIKE '%paint%' THEN 799
+      WHEN name ILIKE '%clean%' THEN 399
+      WHEN name ILIKE '%electric%' THEN 599
+      WHEN name ILIKE '%ac%' THEN 699
+      WHEN name ILIKE '%carpent%' THEN 549
+      WHEN name ILIKE '%pest%' THEN 449
+      WHEN name ILIKE '%appliance%' THEN 649
+      WHEN name ILIKE '%laundry%' THEN 299
+      WHEN name ILIKE '%movers%' OR name ILIKE '%shifting%' THEN 1499
+      WHEN name ILIKE '%beauty%' OR name ILIKE '%salon%' THEN 599
+      WHEN name ILIKE '%massage%' THEN 799
+      WHEN name ILIKE '%tutor%' THEN 499
+      WHEN name ILIKE '%repair%' THEN 549
+      ELSE 499
+    END
+    WHERE price = 0 OR price IS NULL;
   `);
 }
 

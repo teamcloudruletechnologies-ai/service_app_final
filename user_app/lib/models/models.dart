@@ -259,8 +259,15 @@ class NearbyWorker {
 class LocationPickerResult {
   final String address;
   final List<NearbyWorker> workers;
+  final double? latitude;
+  final double? longitude;
 
-  const LocationPickerResult({required this.address, required this.workers});
+  const LocationPickerResult({
+    required this.address,
+    required this.workers,
+    this.latitude,
+    this.longitude,
+  });
 }
 
 class ReviewItem {

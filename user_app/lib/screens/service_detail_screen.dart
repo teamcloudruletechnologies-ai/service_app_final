@@ -80,7 +80,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       );
                     }
                   },
-                  child: Text('Book Now — ₹${_service!.price.toStringAsFixed(0)}'),
+                  child: Text(
+                    _service!.price > 0
+                        ? 'Book Now — ₹${_service!.price.toStringAsFixed(0)}'
+                        : 'Book Now',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
@@ -119,14 +124,35 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  '₹${service.price.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primary,
-                  ),
-                ),
+                service.price > 0
+                    ? Text(
+                        '₹${service.price.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFFE23744),
+                        ),
+                      )
+                    : Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.orange.shade200),
+                            ),
+                            child: Text(
+                              'Price set by admin',
+                              style: TextStyle(
+                                color: Colors.orange.shade800,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                 const SizedBox(height: 20),
                 const Text('About this service', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 const SizedBox(height: 8),

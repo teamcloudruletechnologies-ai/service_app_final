@@ -1,15 +1,13 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
+import '../config/api_config.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
 import '../providers/catalog_provider.dart';
 import '../services/api_service.dart';
-import '../theme/app_theme.dart';
+import 'location_picker_screen.dart';
 import 'payment_screen.dart';
 
 class UserOnboardingScreen extends StatefulWidget {
@@ -23,26 +21,25 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
-  
-  String _currentAddress = 'Detecting location...';
+
+  // Location picked from the confirm-location screen
+  String _currentAddress = 'Tap to set your location';
   double? _latitude;
   double? _longitude;
-  bool _isLocating = false;
+  bool _locationPicked = false;
+
   String _searchQuery = '';
+
+  static const _red = Color(0xFFE23744);
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
-      _detectLocation();
+      final catalog = context.read<CatalogProvider>();
+      catalog.loadCategories();
+      catalog.loadServices();
     });
-  }
-
-  void _loadData() {
-    final catalog = context.read<CatalogProvider>();
-    catalog.loadCategories();
-    catalog.loadServices();
   }
 
   @override
@@ -52,100 +49,42 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
     super.dispose();
   }
 
-  Future<void> _detectLocation() async {
-    setState(() {
-      _isLocating = true;
-      _currentAddress = 'Detecting location...';
-    });
-
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        setState(() {
-          _currentAddress = 'Location services disabled';
-          _isLocating = false;
-        });
-        return;
-      }
-
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          setState(() {
-            _currentAddress = 'Location permission denied';
-            _isLocating = false;
-          });
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          _currentAddress = 'Location permission permanently denied';
-          _isLocating = false;
-        });
-        return;
-      }
-
-      final position = await Geolocator.getCurrentPosition();
-      _latitude = position.latitude;
-      _longitude = position.longitude;
-
-      // Reverse geocode via OpenStreetMap Nominatim
-      final url = Uri.parse(
-        'https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.latitude}&lon=${position.longitude}'
-      );
-      final response = await http.get(url, headers: {
-        'User-Agent': 'com.urban.service_app',
-      });
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final displayName = data['display_name'] as String?;
-        if (displayName != null) {
-          setState(() {
-            _currentAddress = displayName;
-          });
-        } else {
-          setState(() {
-            _currentAddress = '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
-          });
-        }
-      } else {
-        setState(() {
-          _currentAddress = '${position.latitude.toStringAsFixed(4)}, ${position.longitude.toStringAsFixed(4)}';
-        });
-      }
-    } catch (e) {
+  // Open the existing LocationPickerScreen to confirm location
+  Future<void> _openLocationPicker() async {
+    final result = await Navigator.of(context).push<LocationPickerResult>(
+      MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+    );
+    if (result != null && mounted) {
       setState(() {
-        _currentAddress = 'Failed to get location';
-      });
-    } finally {
-      setState(() {
-        _isLocating = false;
+        _currentAddress = result.address;
+        _latitude = result.latitude;
+        _longitude = result.longitude;
+        _locationPicked = true;
       });
     }
   }
 
   Future<void> _showNearbyWorkers(ServiceItem service) async {
+    // Validate name first
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter your name first to complete setup'),
+          content: Text('Please enter your name first'),
           backgroundColor: Colors.redAccent,
         ),
       );
       return;
     }
 
-    if (_latitude == null || _longitude == null) {
+    // Must have location
+    if (!_locationPicked || _latitude == null || _longitude == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please wait until we get your location, or re-detect it'),
+          content: Text('Please set your location first (tap the location bar above)'),
           backgroundColor: Colors.orangeAccent,
         ),
       );
+      _openLocationPicker();
       return;
     }
 
@@ -153,7 +92,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _NearbyWorkersBottomSheet(
+      builder: (context) => _NearbyWorkersSheet(
         service: service,
         latitude: _latitude!,
         longitude: _longitude!,
@@ -173,49 +112,38 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
           (s.categoryName ?? '').toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
 
-    const zomatoColor = Color(0xFFE23744); // Zomato Red
-
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Top Zomato-style location & profile bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  const Icon(Icons.location_on, color: zomatoColor, size: 28),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _detectLocation,
+            // ─── LOCATION BAR (Zomato-style top-left) ───
+            GestureDetector(
+              onTap: _openLocationPicker,
+              child: Container(
+                color: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on, color: _red, size: 26),
+                    const SizedBox(width: 8),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              const Text(
-                                'Current Location',
-                                style: TextStyle(
+                              Text(
+                                _locationPicked ? 'Your Location' : 'Set Location',
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                   color: Color(0xFF111827),
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              if (_isLocating)
-                                const SizedBox(
-                                  width: 12,
-                                  height: 12,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: zomatoColor,
-                                  ),
-                                )
-                              else
-                                const Icon(Icons.arrow_drop_down, color: zomatoColor, size: 20),
+                              const Icon(Icons.arrow_drop_down, color: _red, size: 20),
                             ],
                           ),
                           const SizedBox(height: 2),
@@ -225,90 +153,100 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey.shade600,
+                              color: _locationPicked
+                                  ? Colors.grey.shade700
+                                  : _red,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ],
+                    if (!_locationPicked)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _red.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Text(
+                          'Set →',
+                          style: TextStyle(color: _red, fontWeight: FontWeight.bold, fontSize: 12),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
 
-            // Profile Fields Section (Collapsible/Sleek card)
+            // ─── USER NAME + EMAIL (below location) ───
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
               child: Card(
                 color: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(14),
                   side: BorderSide(color: Colors.grey.shade200),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(14),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Let\'s complete your profile 🚀',
+                          '👤 Complete your profile',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                            fontSize: 14,
                             color: Color(0xFF111827),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
                         TextFormField(
                           controller: _nameCtrl,
+                          textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
-                            labelText: 'Full Name',
-                            hintText: 'Enter your name to start',
+                            labelText: 'Full Name *',
+                            hintText: 'Enter your name',
                             prefixIcon: const Icon(Icons.person_outline, size: 20),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(color: Colors.grey.shade300),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: zomatoColor),
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: _red),
                             ),
                           ),
                           validator: (v) {
-                            if (v == null || v.trim().isEmpty) {
-                              return 'Name is required';
-                            }
+                            if (v == null || v.trim().isEmpty) return 'Name is required';
                             return null;
                           },
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 8),
                         TextFormField(
                           controller: _emailCtrl,
                           keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.done,
                           decoration: InputDecoration(
-                            labelText: 'Email Address (Optional)',
-                            hintText: 'For sending billing invoices',
+                            labelText: 'Email (optional)',
+                            hintText: 'For billing invoices',
                             prefixIcon: const Icon(Icons.email_outlined, size: 20),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(color: Colors.grey.shade300),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: zomatoColor),
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: _red),
                             ),
                           ),
                         ),
@@ -319,43 +257,40 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-            // Zomato style search bar
+            // ─── SEARCH BAR ───
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Container(
-                height: 50,
+                height: 46,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(25),
+                  borderRadius: BorderRadius.circular(23),
                   border: Border.all(color: Colors.grey.shade200),
                 ),
                 child: TextField(
-                  onChanged: (v) {
-                    setState(() {
-                      _searchQuery = v;
-                    });
-                  },
+                  onChanged: (v) => setState(() => _searchQuery = v),
                   decoration: const InputDecoration(
-                    hintText: 'Search for home services, cleaning, repair...',
-                    prefixIcon: Icon(Icons.search, color: zomatoColor),
+                    hintText: 'Search services, plumbing, cleaning...',
+                    hintStyle: TextStyle(fontSize: 13),
+                    prefixIcon: Icon(Icons.search, color: _red, size: 20),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 13),
                   ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // Header for services list
+            // ─── SECTION HEADER ───
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 'WHAT ARE YOU LOOKING FOR?',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey,
                   letterSpacing: 1.2,
@@ -363,26 +298,35 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
 
-            // Services Grid
+            // ─── SERVICES GRID ───
             Expanded(
               child: catalog.loadingServices
-                  ? const Center(child: CircularProgressIndicator(color: zomatoColor))
+                  ? const Center(child: CircularProgressIndicator(color: _red))
                   : services.isEmpty
                       ? Center(
-                          child: Text(
-                            'No services found matching "$_searchQuery"',
-                            style: const TextStyle(color: Colors.grey),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.home_repair_service, size: 48, color: Colors.grey),
+                              const SizedBox(height: 12),
+                              Text(
+                                _searchQuery.isEmpty
+                                    ? 'No services available'
+                                    : 'No services match "$_searchQuery"',
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                            ],
                           ),
                         )
                       : GridView.builder(
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
-                            childAspectRatio: 0.85,
+                            childAspectRatio: 0.82,
                           ),
                           itemCount: services.length,
                           itemBuilder: (context, index) {
@@ -395,7 +339,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                                 color: Colors.white,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(14),
                                   side: BorderSide(color: Colors.grey.shade200),
                                 ),
                                 clipBehavior: Clip.antiAlias,
@@ -407,23 +351,9 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                                           ? Image.network(
                                               imageUrl,
                                               fit: BoxFit.cover,
-                                              errorBuilder: (_, __, ___) => Container(
-                                                color: const Color(0xFFFEE2E2),
-                                                child: const Icon(
-                                                  Icons.home_repair_service,
-                                                  color: zomatoColor,
-                                                  size: 32,
-                                                ),
-                                              ),
+                                              errorBuilder: (_, __, ___) => _servicePlaceholder(),
                                             )
-                                          : Container(
-                                              color: const Color(0xFFFEE2E2),
-                                              child: const Icon(
-                                                Icons.home_repair_service,
-                                                color: zomatoColor,
-                                                size: 32,
-                                              ),
-                                            ),
+                                          : _servicePlaceholder(),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(10),
@@ -436,18 +366,40 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 14,
+                                              fontSize: 13,
                                               color: Color(0xFF111827),
                                             ),
                                           ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '₹${service.price.toStringAsFixed(0)}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w800,
-                                              color: zomatoColor,
-                                              fontSize: 15,
-                                            ),
+                                          const SizedBox(height: 3),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                service.price > 0
+                                                    ? '₹${service.price.toStringAsFixed(0)}'
+                                                    : 'Free',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w800,
+                                                  color: service.price > 0 ? _red : Colors.green,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: _red.withValues(alpha: 0.08),
+                                                  borderRadius: BorderRadius.circular(6),
+                                                ),
+                                                child: const Text(
+                                                  'Book',
+                                                  style: TextStyle(
+                                                    color: _red,
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
@@ -464,10 +416,19 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
       ),
     );
   }
+
+  Widget _servicePlaceholder() {
+    return Container(
+      color: const Color(0xFFFEE2E2),
+      child: const Icon(Icons.home_repair_service, color: _red, size: 32),
+    );
+  }
 }
 
-class _NearbyWorkersBottomSheet extends StatefulWidget {
-  const _NearbyWorkersBottomSheet({
+// ─── NEARBY WORKERS BOTTOM SHEET ───
+
+class _NearbyWorkersSheet extends StatefulWidget {
+  const _NearbyWorkersSheet({
     required this.service,
     required this.latitude,
     required this.longitude,
@@ -484,13 +445,16 @@ class _NearbyWorkersBottomSheet extends StatefulWidget {
   final String? userEmail;
 
   @override
-  State<_NearbyWorkersBottomSheet> createState() => _NearbyWorkersBottomSheetState();
+  State<_NearbyWorkersSheet> createState() => _NearbyWorkersSheetState();
 }
 
-class _NearbyWorkersBottomSheetState extends State<_NearbyWorkersBottomSheet> {
+class _NearbyWorkersSheetState extends State<_NearbyWorkersSheet> {
   List<NearbyWorker> _workers = [];
   bool _loading = true;
+  bool _booking = false;
   String? _error;
+
+  static const _red = Color(0xFFE23744);
 
   @override
   void initState() {
@@ -507,35 +471,39 @@ class _NearbyWorkersBottomSheetState extends State<_NearbyWorkersBottomSheet> {
         radius: 10.0,
         serviceType: widget.service.categoryName,
       );
-      setState(() {
-        _workers = result;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _workers = result;
+          _loading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = 'Failed to find providers nearby: $e';
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Could not load nearby workers';
+          _loading = false;
+        });
+      }
     }
   }
 
-  Future<void> _directBook(NearbyWorker? worker) async {
-    setState(() => _loading = true);
+  Future<void> _book(NearbyWorker? worker) async {
+    if (_booking) return;
+    setState(() => _booking = true);
 
     try {
       final auth = context.read<AuthProvider>();
-      
-      // Update profile first (Name, Email, Address, State)
+
+      // 1. Save user profile
       await auth.updateUserProfile(
         name: widget.userName,
         email: widget.userEmail,
         address: widget.address,
-        state: 'Karnataka',
       );
 
       if (!mounted) return;
-      
-      // Create Booking directly (using DB Service Item Price)
+
+      // 2. Create booking with the service's actual DB price
       final booking = await context.read<BookingProvider>().createBooking(
             serviceId: widget.service.id,
             address: widget.address,
@@ -545,179 +513,253 @@ class _NearbyWorkersBottomSheetState extends State<_NearbyWorkersBottomSheet> {
       if (!mounted) return;
 
       if (booking != null) {
-        // Success: Redirect straight to Payment Screen
-        Navigator.pop(context); // Close bottom sheet
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Booking placed! Opening payment window...'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
+        Navigator.pop(context); // close sheet
+        // 3. Go straight to payment
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (_) => PaymentScreen(booking: booking),
-          ),
+          MaterialPageRoute(builder: (_) => PaymentScreen(booking: booking)),
         );
       } else {
         setState(() {
           _error = auth.error ?? 'Failed to place booking';
-          _loading = false;
+          _booking = false;
         });
       }
     } catch (e) {
-      setState(() {
-        _error = 'Booking error: $e';
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Booking error: $e';
+          _booking = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    const zomatoColor = Color(0xFFE23744);
+    final screenH = MediaQuery.of(context).size.height;
 
     return Container(
+      height: screenH * 0.7,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: FractionallySizedBox(
-        heightFactor: 0.65,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Handle bar
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              width: 40, height: 4,
+              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.service.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          if (widget.service.price > 0)
+                            Text(
+                              '₹${widget.service.price.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                color: _red,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 20,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.green.shade200),
+                      ),
+                      child: Text(
+                        '${_workers.length} nearby',
+                        style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on, color: _red, size: 14),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        widget.address,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+          Divider(height: 1, color: Colors.grey.shade100),
+          const SizedBox(height: 8),
+
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
-                width: 48,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(10),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
+                child: Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+              ),
+            ),
+
+          // Content
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: _red))
+                : _workers.isEmpty
+                    ? _buildEmpty()
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: _workers.length,
+                        itemBuilder: (context, i) => _buildWorkerCard(_workers[i]),
+                      ),
+          ),
+
+          // Bottom: Book any worker CTA
+          if (!_loading && !_booking)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  side: const BorderSide(color: _red),
+                ),
+                onPressed: () => _book(null),
+                child: const Text(
+                  'Book Any Available Worker',
+                  style: TextStyle(color: _red, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Providers within limit for ${widget.service.name}',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-                color: Color(0xFF111827),
-              ),
-            ),
-            Text(
-              'Location: ${widget.address}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade500,
-              ),
-            ),
-            const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
 
-            Expanded(
-              child: _loading
-                  ? const Center(child: CircularProgressIndicator(color: zomatoColor))
-                  : _error != null
-                      ? Center(child: Text(_error!, style: const TextStyle(color: Colors.red)))
-                      : _workers.isEmpty
-                          ? Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.people_outline, size: 64, color: Colors.grey.shade300),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'No providers active in your location limit',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                                ),
-                                const SizedBox(height: 20),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: zomatoColor,
-                                    minimumSize: const Size.fromHeight(48),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  ),
-                                  onPressed: () => _directBook(null),
-                                  child: const Text('Book Anyway (System Auto-Assign)'),
-                                ),
-                              ],
-                            )
-                          : ListView.builder(
-                              itemCount: _workers.length,
-                              itemBuilder: (context, index) {
-                                final w = _workers[index];
-                                return Card(
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    side: const BorderSide(color: Color(0xFFF3F4F6)),
-                                  ),
-                                  elevation: 0,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                          radius: 26,
-                                          backgroundColor: zomatoColor.withOpacity(0.1),
-                                          backgroundImage: (w.photoUrl != null && w.photoUrl!.isNotEmpty)
-                                              ? NetworkImage(w.photoUrl!)
-                                              : null,
-                                          child: (w.photoUrl == null || w.photoUrl!.isEmpty)
-                                              ? const Icon(Icons.person, color: zomatoColor)
-                                              : null,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                w.name,
-                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Row(
-                                                children: [
-                                                  const Icon(Icons.star, color: Colors.amber, size: 14),
-                                                  const SizedBox(width: 2),
-                                                  Text(
-                                                    w.rating.toStringAsFixed(1),
-                                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Text(
-                                                    '${w.experienceYears} yrs exp',
-                                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: zomatoColor,
-                                            foregroundColor: Colors.white,
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                          ),
-                                          onPressed: () => _directBook(w),
-                                          child: const Text('Book'),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-            ),
-          ],
+  Widget _buildEmpty() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.people_outline, size: 56, color: Colors.grey.shade300),
+        const SizedBox(height: 12),
+        const Text(
+          'No workers nearby (10km radius)',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
         ),
+        const SizedBox(height: 6),
+        Text(
+          'We can still assign the next available worker',
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+        ),
+        const SizedBox(height: 20),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _red,
+              minimumSize: const Size.fromHeight(48),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: _booking ? null : () => _book(null),
+            child: _booking
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : const Text('Confirm Booking Anyway'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWorkerCard(NearbyWorker w) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 26,
+            backgroundColor: _red.withValues(alpha: 0.08),
+            backgroundImage: (w.photoUrl?.isNotEmpty ?? false) ? NetworkImage(w.photoUrl!) : null,
+            child: (w.photoUrl?.isEmpty ?? true)
+                ? const Icon(Icons.person, color: _red)
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(w.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.amber, size: 13),
+                    const SizedBox(width: 2),
+                    Text(
+                      w.rating.toStringAsFixed(1),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${w.experienceYears} yrs • ${w.distance?.toStringAsFixed(1) ?? "—"} km',
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _booking
+              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: _red, strokeWidth: 2))
+              : ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _red,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    elevation: 0,
+                  ),
+                  onPressed: () => _book(w),
+                  child: const Text('Book', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                ),
+        ],
       ),
     );
   }
