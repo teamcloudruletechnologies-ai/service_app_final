@@ -3,12 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../config/api_config.dart';
 import '../models/models.dart';
-import '../providers/auth_provider.dart';
-import '../providers/booking_provider.dart';
 import '../providers/catalog_provider.dart';
-import '../services/api_service.dart';
 import 'location_picker_screen.dart';
-import 'payment_screen.dart';
+import 'service_detail_screen.dart';
 
 class UserOnboardingScreen extends StatefulWidget {
   const UserOnboardingScreen({super.key});
@@ -64,8 +61,8 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
     }
   }
 
-  Future<void> _showNearbyWorkers(ServiceItem service) async {
-    // Validate name first
+  void _navigateToService(ServiceItem service) {
+    // Validate name
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -88,17 +85,16 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
       return;
     }
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _NearbyWorkersSheet(
-        service: service,
-        latitude: _latitude!,
-        longitude: _longitude!,
-        address: _currentAddress,
-        userName: _nameCtrl.text.trim(),
-        userEmail: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
+    // Navigate to ServiceDetailScreen — like tapping a restaurant in Zomato
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ServiceDetailScreen(
+          serviceId: service.id,
+          address: _currentAddress,
+          latitude: _latitude,
+          longitude: _longitude,
+          userName: _nameCtrl.text.trim(),
+        ),
       ),
     );
   }
@@ -334,7 +330,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                             final imageUrl = ApiConfig.resolveImageUrl(service.imageUrl);
 
                             return GestureDetector(
-                              onTap: () => _showNearbyWorkers(service),
+                              onTap: () => _navigateToService(service),
                               child: Card(
                                 color: Colors.white,
                                 elevation: 0,
@@ -372,29 +368,19 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                                           ),
                                           const SizedBox(height: 3),
                                           Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            mainAxisAlignment: MainAxisAlignment.end,
                                             children: [
-                                              Text(
-                                                service.price > 0
-                                                    ? '₹${service.price.toStringAsFixed(0)}'
-                                                    : 'Free',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w800,
-                                                  color: service.price > 0 ? _red : Colors.green,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
                                               Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                                 decoration: BoxDecoration(
-                                                  color: _red.withValues(alpha: 0.08),
-                                                  borderRadius: BorderRadius.circular(6),
+                                                  color: _red,
+                                                  borderRadius: BorderRadius.circular(8),
                                                 ),
                                                 child: const Text(
-                                                  'Book',
+                                                  'Book Now',
                                                   style: TextStyle(
-                                                    color: _red,
-                                                    fontSize: 10,
+                                                    color: Colors.white,
+                                                    fontSize: 11,
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
@@ -421,346 +407,6 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
     return Container(
       color: const Color(0xFFFEE2E2),
       child: const Icon(Icons.home_repair_service, color: _red, size: 32),
-    );
-  }
-}
-
-// ─── NEARBY WORKERS BOTTOM SHEET ───
-
-class _NearbyWorkersSheet extends StatefulWidget {
-  const _NearbyWorkersSheet({
-    required this.service,
-    required this.latitude,
-    required this.longitude,
-    required this.address,
-    required this.userName,
-    this.userEmail,
-  });
-
-  final ServiceItem service;
-  final double latitude;
-  final double longitude;
-  final String address;
-  final String userName;
-  final String? userEmail;
-
-  @override
-  State<_NearbyWorkersSheet> createState() => _NearbyWorkersSheetState();
-}
-
-class _NearbyWorkersSheetState extends State<_NearbyWorkersSheet> {
-  List<NearbyWorker> _workers = [];
-  bool _loading = true;
-  bool _booking = false;
-  String? _error;
-
-  static const _red = Color(0xFFE23744);
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchWorkers();
-  }
-
-  Future<void> _fetchWorkers() async {
-    try {
-      final api = context.read<ApiService>();
-      final result = await api.fetchNearbyWorkers(
-        widget.latitude,
-        widget.longitude,
-        radius: 10.0,
-        serviceType: widget.service.categoryName,
-      );
-      if (mounted) {
-        setState(() {
-          _workers = result;
-          _loading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = 'Could not load nearby workers';
-          _loading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _book(NearbyWorker? worker) async {
-    if (_booking) return;
-    setState(() => _booking = true);
-
-    try {
-      final auth = context.read<AuthProvider>();
-
-      // 1. Save user profile
-      await auth.updateUserProfile(
-        name: widget.userName,
-        email: widget.userEmail,
-        address: widget.address,
-      );
-
-      if (!mounted) return;
-
-      // 2. Create booking with the service's actual DB price
-      final booking = await context.read<BookingProvider>().createBooking(
-            serviceId: widget.service.id,
-            address: widget.address,
-            workerId: worker?.id,
-          );
-
-      if (!mounted) return;
-
-      if (booking != null) {
-        Navigator.pop(context); // close sheet
-        // 3. Go straight to payment
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => PaymentScreen(booking: booking)),
-        );
-      } else {
-        setState(() {
-          _error = auth.error ?? 'Failed to place booking';
-          _booking = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = 'Booking error: $e';
-          _booking = false;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenH = MediaQuery.of(context).size.height;
-
-    return Container(
-      height: screenH * 0.7,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Handle bar
-          const SizedBox(height: 12),
-          Center(
-            child: Container(
-              width: 40, height: 4,
-              decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.service.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                          ),
-                          if (widget.service.price > 0)
-                            Text(
-                              '₹${widget.service.price.toStringAsFixed(0)}',
-                              style: const TextStyle(
-                                color: _red,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 20,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.green.shade200),
-                      ),
-                      child: Text(
-                        '${_workers.length} nearby',
-                        style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold, fontSize: 12),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, color: _red, size: 14),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        widget.address,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
-          Divider(height: 1, color: Colors.grey.shade100),
-          const SizedBox(height: 8),
-
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
-                child: Text(_error!, style: const TextStyle(color: Colors.red, fontSize: 13)),
-              ),
-            ),
-
-          // Content
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator(color: _red))
-                : _workers.isEmpty
-                    ? _buildEmpty()
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: _workers.length,
-                        itemBuilder: (context, i) => _buildWorkerCard(_workers[i]),
-                      ),
-          ),
-
-          // Bottom: Book any worker CTA
-          if (!_loading && !_booking)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  side: const BorderSide(color: _red),
-                ),
-                onPressed: () => _book(null),
-                child: const Text(
-                  'Book Any Available Worker',
-                  style: TextStyle(color: _red, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmpty() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.people_outline, size: 56, color: Colors.grey.shade300),
-        const SizedBox(height: 12),
-        const Text(
-          'No workers nearby (10km radius)',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'We can still assign the next available worker',
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-        ),
-        const SizedBox(height: 20),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _red,
-              minimumSize: const Size.fromHeight(48),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: _booking ? null : () => _book(null),
-            child: _booking
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Text('Confirm Booking Anyway'),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWorkerCard(NearbyWorker w) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: _red.withValues(alpha: 0.08),
-            backgroundImage: (w.photoUrl?.isNotEmpty ?? false) ? NetworkImage(w.photoUrl!) : null,
-            child: (w.photoUrl?.isEmpty ?? true)
-                ? const Icon(Icons.person, color: _red)
-                : null,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(w.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                const SizedBox(height: 3),
-                Row(
-                  children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 13),
-                    const SizedBox(width: 2),
-                    Text(
-                      w.rating.toStringAsFixed(1),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${w.experienceYears} yrs • ${w.distance?.toStringAsFixed(1) ?? "—"} km',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          _booking
-              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: _red, strokeWidth: 2))
-              : ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _red,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 0,
-                  ),
-                  onPressed: () => _book(w),
-                  child: const Text('Book', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                ),
-        ],
-      ),
     );
   }
 }
