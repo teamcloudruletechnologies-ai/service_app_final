@@ -10,8 +10,8 @@ const resolveImageUrl = (url) => {
 function StatCard({ label, value, icon, bg, fg, loading }) {
   return (
     <div style={{
-      background: '#fff',
-      border: '0.5px solid #E5E7EB',
+      background: 'var(--bg-card)',
+      border: '0.5px solid var(--border-color)',
       borderRadius: 16,
       padding: '16px 20px',
       display: 'flex',
@@ -21,18 +21,18 @@ function StatCard({ label, value, icon, bg, fg, loading }) {
       animation: 'fadeIn 0.25s ease-out forwards'
     }}>
       <div>
-        <div style={{ fontSize: 12, fontWeight: 500, color: '#6B7280', marginBottom: 6 }}>{label}</div>
+        <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)', marginBottom: 6 }}>{label}</div>
         {loading ? (
           <div style={{
             width: 50,
             height: 24,
-            background: 'linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%)',
+            background: 'linear-gradient(90deg, var(--bg-muted) 25%, var(--border-color) 50%, var(--bg-muted) 75%)',
             backgroundSize: '200% 100%',
             animation: 'shimmer 1.5s infinite linear',
             borderRadius: 4
           }} />
         ) : (
-          <div style={{ fontSize: 22, fontWeight: 800, color: '#111827', letterSpacing: '-0.5px' }}>{value}</div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px' }}>{value}</div>
         )}
       </div>
       <div style={{
@@ -185,7 +185,7 @@ export default function Banners() {
   const inactiveCount = banners.filter(b => b.status !== 'active').length;
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#F9FAFB', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: 'var(--bg-app)', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <style>{`
         @keyframes shimmer {
           0%   { background-position: 200% 0; }
@@ -203,16 +203,16 @@ export default function Banners() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0 }}>Promo Banners</h2>
-          <p style={{ fontSize: 12, color: '#6B7280', margin: '4px 0 0' }}>Upload and configure promotional banners to showcase as a carousel in the user app home screen.</p>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Promo Banners</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>Upload and configure promotional banners to showcase as a carousel in the user app home screen.</p>
         </div>
         <button
           onClick={handleOpenCreate}
           style={{
-            background: '#1A56DB',
+            background: 'var(--accent-color)',
             border: 'none',
             borderRadius: 8,
-            color: '#fff',
+            color: 'var(--bg-card)',
             padding: '8px 16px',
             fontSize: 12,
             fontWeight: 600,
@@ -220,8 +220,8 @@ export default function Banners() {
             boxShadow: '0 4px 12px rgba(26, 86, 219, 0.15)',
             transition: 'all 0.15s'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = '#1e40af'}
-          onMouseLeave={(e) => e.currentTarget.style.background = '#1A56DB'}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--accent-dark)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent-color)'}
         >
           ➕ Add New Banner
         </button>
@@ -233,52 +233,52 @@ export default function Banners() {
           label="Total Banners"
           value={totalCount}
           icon="🖼️"
-          bg="#EFF4FF"
-          fg="#1A56DB"
+          bg="var(--accent-light)"
+          fg="var(--accent-color)"
           loading={loading}
         />
         <StatCard
           label="Active Banners"
           value={activeCount}
           icon="🟢"
-          bg="#F0FDF4"
-          fg="#059669"
+          bg="var(--status-green-bg)"
+          fg="var(--status-green-fg)"
           loading={loading}
         />
         <StatCard
           label="Inactive Banners"
           value={inactiveCount}
           icon="🔴"
-          bg="#FEE2E2"
-          fg="#DC2626"
+          bg="var(--status-red-bg)"
+          fg="var(--status-red-fg)"
           loading={loading}
         />
       </div>
 
       {/* Main Table Container */}
-      <div style={{ background: '#fff', borderRadius: 16, border: '0.5px solid #E5E7EB', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-        <div style={{ padding: '16px 20px', borderBottom: '0.5px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontWeight: 700, fontSize: 14, color: '#111827' }}>All Banners</span>
+      <div style={{ background: 'var(--bg-card)', borderRadius: 16, border: '0.5px solid var(--border-color)', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '0.5px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>All Banners</span>
           <button
             onClick={fetchBanners}
-            style={{ background: 'none', border: 'none', color: '#1A56DB', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+            style={{ background: 'none', border: 'none', color: 'var(--accent-color)', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
           >
             🔄 Refresh
           </button>
         </div>
 
         {loading ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280', fontSize: 13 }}>
+          <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: 13 }}>
             Loading promotional banners...
           </div>
         ) : banners.length === 0 ? (
           <div style={{ padding: '60px 40px', textAlign: 'center' }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>🖼️</div>
-            <div style={{ fontWeight: 600, color: '#374151', fontSize: 14, marginBottom: 4 }}>No Banners Found</div>
-            <div style={{ color: '#6B7280', fontSize: 12, marginBottom: 16 }}>Get started by adding your first promotional banner.</div>
+            <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 14, marginBottom: 4 }}>No Banners Found</div>
+            <div style={{ color: 'var(--text-secondary)', fontSize: 12, marginBottom: 16 }}>Get started by adding your first promotional banner.</div>
             <button
               onClick={handleOpenCreate}
-              style={{ background: '#1A56DB', border: 'none', borderRadius: 6, color: '#fff', padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+              style={{ background: 'var(--accent-color)', border: 'none', borderRadius: 6, color: 'var(--bg-card)', padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
             >
               Add Banner
             </button>
@@ -287,7 +287,7 @@ export default function Banners() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 13 }}>
               <thead>
-                <tr style={{ background: '#F9FAFB', borderBottom: '0.5px solid #E5E7EB', color: '#4B5563' }}>
+                <tr style={{ background: 'var(--bg-app)', borderBottom: '0.5px solid var(--border-color)', color: 'var(--text-secondary)' }}>
                   <th style={{ padding: '14px 20px', fontWeight: 600, width: 140 }}>Image</th>
                   <th style={{ padding: '14px 20px', fontWeight: 600 }}>Title</th>
                   <th style={{ padding: '14px 20px', fontWeight: 600 }}>Action Link</th>
@@ -297,9 +297,9 @@ export default function Banners() {
               </thead>
               <tbody>
                 {banners.map((b) => (
-                  <tr key={b.id} style={{ borderBottom: '0.5px solid #F3F4F6', transition: 'background 0.15s' }}>
+                  <tr key={b.id} style={{ borderBottom: '0.5px solid var(--bg-muted)', transition: 'background 0.15s' }}>
                     <td style={{ padding: '12px 20px' }}>
-                      <div style={{ width: 100, height: 50, borderRadius: 8, background: '#F3F4F6', overflow: 'hidden', border: '0.5px solid #E5E7EB' }}>
+                      <div style={{ width: 100, height: 50, borderRadius: 8, background: 'var(--bg-muted)', overflow: 'hidden', border: '0.5px solid var(--border-color)' }}>
                         <img
                           src={resolveImageUrl(b.image_url)}
                           alt={b.title || 'Banner'}
@@ -311,11 +311,11 @@ export default function Banners() {
                         />
                       </div>
                     </td>
-                    <td style={{ padding: '12px 20px', fontWeight: 600, color: '#111827' }}>
-                      {b.title || <span style={{ color: '#9CA3AF', fontStyle: 'italic', fontWeight: 400 }}>No Title</span>}
+                    <td style={{ padding: '12px 20px', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {b.title || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontWeight: 400 }}>No Title</span>}
                     </td>
-                    <td style={{ padding: '12px 20px', color: '#4B5563', fontFamily: 'monospace', fontSize: 12 }}>
-                      {b.link_url || <span style={{ color: '#9CA3AF', fontStyle: 'italic' }}>None</span>}
+                    <td style={{ padding: '12px 20px', color: 'var(--text-secondary)', fontFamily: 'monospace', fontSize: 12 }}>
+                      {b.link_url || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>None</span>}
                     </td>
                     <td style={{ padding: '12px 20px' }}>
                       <span
@@ -329,24 +329,24 @@ export default function Banners() {
                           fontSize: 11,
                           fontWeight: 600,
                           cursor: 'pointer',
-                          background: b.status === 'active' ? '#D1FAE5' : '#F3F4F6',
-                          color: b.status === 'active' ? '#065F46' : '#4B5563',
+                          background: b.status === 'active' ? 'var(--status-green-bg)' : 'var(--bg-muted)',
+                          color: b.status === 'active' ? 'var(--status-green-fg)' : 'var(--text-secondary)',
                         }}
                       >
-                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: b.status === 'active' ? '#10B981' : '#6B7280' }} />
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: b.status === 'active' ? '#10B981' : 'var(--text-secondary)' }} />
                         {b.status === 'active' ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td style={{ padding: '12px 20px', textAlign: 'right' }}>
                       <button
                         onClick={() => handleOpenEdit(b)}
-                        style={{ background: 'none', border: 'none', color: '#2563EB', marginRight: 12, cursor: 'pointer', fontWeight: 600, fontSize: 12 }}
+                        style={{ background: 'none', border: 'none', color: 'var(--accent-color)', marginRight: 12, cursor: 'pointer', fontWeight: 600, fontSize: 12 }}
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(b)}
-                        style={{ background: 'none', border: 'none', color: '#DC2626', cursor: 'pointer', fontWeight: 600, fontSize: 12 }}
+                        style={{ background: 'none', border: 'none', color: 'var(--status-red-fg)', cursor: 'pointer', fontWeight: 600, fontSize: 12 }}
                       >
                         Delete
                       </button>
@@ -369,19 +369,19 @@ export default function Banners() {
           <div
             className="animate-fade"
             style={{
-              background: '#fff', borderRadius: 20, width: '100%', maxWidth: 480,
+              background: 'var(--bg-card)', borderRadius: 20, width: '100%', maxWidth: 480,
               boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)',
-              border: '0.5px solid #E5E7EB', overflow: 'hidden'
+              border: '0.5px solid var(--border-color)', overflow: 'hidden'
             }}
           >
             {/* Modal Header */}
-            <div style={{ padding: '20px 24px', borderBottom: '0.5px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#111827' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '0.5px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
                 {editingBanner ? 'Edit Promo Banner' : 'Add New Promo Banner'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                style={{ background: 'none', border: 'none', fontSize: 18, color: '#9CA3AF', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', fontSize: 18, color: 'var(--text-muted)', cursor: 'pointer' }}
               >
                 ✕
               </button>
@@ -392,7 +392,7 @@ export default function Banners() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {/* Title */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', marginBottom: 6 }}>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
                     Banner Title (Optional)
                   </label>
                   <input
@@ -406,7 +406,7 @@ export default function Banners() {
 
                 {/* Action Link */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', marginBottom: 6 }}>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
                     Action Link URL (Optional)
                   </label>
                   <input
@@ -420,13 +420,13 @@ export default function Banners() {
 
                 {/* Status */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', marginBottom: 6 }}>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
                     Status
                   </label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, background: '#fff', boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, background: 'var(--bg-card)', boxSizing: 'border-box' }}
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -435,13 +435,13 @@ export default function Banners() {
 
                 {/* Image Upload */}
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', marginBottom: 6 }}>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
                     Banner Image
                   </label>
                   <div style={{
                     border: '2px dashed #D1D5DB', borderRadius: 12, padding: '16px',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    background: '#F9FAFB', cursor: 'pointer', position: 'relative'
+                    background: 'var(--bg-app)', cursor: 'pointer', position: 'relative'
                   }}>
                     <input
                       type="file"
@@ -456,13 +456,13 @@ export default function Banners() {
                           alt="Preview"
                           style={{ width: '100%', maxHeight: 120, objectFit: 'contain', borderRadius: 6 }}
                         />
-                        <span style={{ fontSize: 11, color: '#2563EB', fontWeight: 600 }}>Click or drag to replace image</span>
+                        <span style={{ fontSize: 11, color: 'var(--accent-color)', fontWeight: 600 }}>Click or drag to replace image</span>
                       </div>
                     ) : (
-                      <div style={{ textAlign: 'center', color: '#6B7280' }}>
+                      <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
                         <div style={{ fontSize: 24, marginBottom: 6 }}>📤</div>
                         <div style={{ fontSize: 12, fontWeight: 600 }}>Upload Image File</div>
-                        <div style={{ fontSize: 10, color: '#9CA3AF', marginTop: 2 }}>Drag & drop or click to browse</div>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>Drag & drop or click to browse</div>
                       </div>
                     )}
                   </div>
@@ -470,11 +470,11 @@ export default function Banners() {
               </div>
 
               {/* Modal Footer / Actions */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 28, borderTop: '0.5px solid #E5E7EB', paddingTop: 16 }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 28, borderTop: '0.5px solid var(--border-color)', paddingTop: 16 }}>
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  style={{ background: '#F3F4F6', border: 'none', borderRadius: 8, color: '#374151', padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                  style={{ background: 'var(--bg-muted)', border: 'none', borderRadius: 8, color: 'var(--text-primary)', padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                 >
                   Cancel
                 </button>
@@ -482,7 +482,7 @@ export default function Banners() {
                   type="submit"
                   disabled={submitting}
                   style={{
-                    background: '#1A56DB', border: 'none', borderRadius: 8, color: '#fff',
+                    background: 'var(--accent-color)', border: 'none', borderRadius: 8, color: 'var(--bg-card)',
                     padding: '8px 20px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
                     opacity: submitting ? 0.7 : 1, display: 'flex', alignItems: 'center', gap: 6
                   }}

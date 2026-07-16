@@ -1,6 +1,65 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+:root {
+  /* Cream / Off-white workspace */
+  --bg-app: #FAF7F0;
+  --bg-card: #FFFFFF;
+  --bg-muted: #F5EFE4;
+  --border-color: #EBE5D8;
+
+  /* Sidebar — now white (not dark) */
+  --bg-sidebar: #FFFFFF;
+  --bg-sidebar-hover: #FAF7F0;
+  --bg-sidebar-active: #F5EFE4;
+
+  /* Accent — warm brown/bronze */
+  --accent-color: #8B7355;
+  --accent-dark: #6B5740;
+  --accent-light: #F5EFE4;
+  --accent-border: #D1C4A5;
+
+  /* Text */
+  --text-primary: #1C1917;
+  --text-secondary: #78716C;
+  --text-muted: #A8A29E;
+
+  /* Sidebar text */
+  --sidebar-text-active: #1C1917;
+  --sidebar-text-inactive: #78716C;
+
+  /* Status */
+  --status-green-bg: #E6F4EA;
+  --status-green-fg: #137333;
+  --status-red-bg: #FCE8E6;
+  --status-red-fg: #C5221F;
+  --status-amber-bg: #FEF7E0;
+  --status-amber-fg: #B06000;
+}
+
 * {
   font-family: 'DM Sans', system-ui, sans-serif;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(28,25,23,0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(28,25,23,0.2);
 }

@@ -1,117 +1,21 @@
-            import { useState } from 'react';
+import { useState } from 'react';
 
 const PAGE_META = {
-  dashboard:     { title: 'Dashboard',       crumb: 'Admin Panel › Dashboard' },
-  users:         { title: 'Users',           crumb: 'Admin Panel › Management › Users' },
-  workers:       { title: 'Workers',         crumb: 'Admin Panel › Management › Workers' },
-  kyc:           { title: 'KYC',             crumb: 'Admin Panel › Management › KYC' },
-  bookings:      { title: 'Bookings',        crumb: 'Admin Panel › Management › Bookings' },
-  invoices:      { title: 'Invoices',        crumb: 'Admin Panel › Management › Invoices' },
-  payments:      { title: 'Payments',        crumb: 'Admin Panel › Platform › Payments' },
-  reviews:       { title: 'Reviews',         crumb: 'Admin Panel › Platform › Reviews' },
-  support:       { title: 'Support',         crumb: 'Admin Panel › Platform › Support' },
-  services:      { title: 'Services',        crumb: 'Admin Panel › Platform › Services' },
-  notifications: { title: 'Notifications',  crumb: 'Admin Panel › Config › Notifications' },
-  locations:     { title: 'Locations',       crumb: 'Admin Panel › Config › Locations' },
-  roles:         { title: 'Roles & Perms',   crumb: 'Admin Panel › Config › Roles & Perms' },
-  settings:      { title: 'Settings',        crumb: 'Admin Panel › Config › Settings' },
-};
-
-
-
-const s = {
-  topbar: {
-    background: '#fff',
-    borderBottom: '0.5px solid #E5E7EB',
-    padding: '0 20px',
-    height: 52,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexShrink: 0,
-    fontFamily: "'DM Sans', system-ui, sans-serif",
-  },
-  left: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 15,
-    fontWeight: 600,
-    color: '#111827',
-    lineHeight: 1.3,
-  },
-  crumb: {
-    fontSize: 11,
-    color: '#9CA3AF',
-  },
-  right: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-  },
-  iconBtn: (active) => ({
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    border: '0.5px solid #E5E7EB',
-    background: active ? '#EFF4FF' : '#fff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    fontSize: 15,
-    position: 'relative',
-    transition: 'background 0.15s',
-    flexShrink: 0,
-  }),
-  notifDot: {
-    width: 6,
-    height: 6,
-    background: '#EF4444',
-    borderRadius: '50%',
-    position: 'absolute',
-    top: 5,
-    right: 5,
-  },
-  searchBox: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    background: '#F9FAFB',
-    border: '0.5px solid #E5E7EB',
-    borderRadius: 8,
-    padding: '0 10px',
-    height: 32,
-    fontSize: 12,
-    color: '#9CA3AF',
-    cursor: 'pointer',
-    width: 180,
-    transition: 'border-color 0.15s',
-  },
-  divider: {
-    width: 1,
-    height: 20,
-    background: '#E5E7EB',
-    margin: '0 2px',
-  },
-  avatarBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: '50%',
-    background: '#EFF4FF',
-    color: '#1A56DB',
-    fontSize: 12,
-    fontWeight: 700,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    border: '2px solid #BFDBFE',
-    flexShrink: 0,
-    fontFamily: "'DM Sans', system-ui, sans-serif",
-  },
+  dashboard:     { title: 'Dashboard',       crumb: 'Admin Panel > Dashboard' },
+  users:         { title: 'Users',           crumb: 'Admin Panel > Management > Users' },
+  workers:       { title: 'Workers',         crumb: 'Admin Panel > Management > Workers' },
+  kyc:           { title: 'KYC',             crumb: 'Admin Panel > Management > KYC' },
+  bookings:      { title: 'Bookings',        crumb: 'Admin Panel > Management > Bookings' },
+  invoices:      { title: 'Invoices',        crumb: 'Admin Panel > Management > Invoices' },
+  payments:      { title: 'Payments',        crumb: 'Admin Panel > Platform > Payments' },
+  reviews:       { title: 'Reviews',         crumb: 'Admin Panel > Platform > Reviews' },
+  support:       { title: 'Support',         crumb: 'Admin Panel > Platform > Support' },
+  services:      { title: 'Services',        crumb: 'Admin Panel > Platform > Services' },
+  banners:       { title: 'Banners',         crumb: 'Admin Panel > Platform > Banners' },
+  notifications: { title: 'Notifications',  crumb: 'Admin Panel > Config > Notifications' },
+  locations:     { title: 'Locations',       crumb: 'Admin Panel > Config > Locations' },
+  roles:         { title: 'Roles & Perms',   crumb: 'Admin Panel > Config > Roles & Perms' },
+  settings:      { title: 'Settings',        crumb: 'Admin Panel > Config > Settings' },
 };
 
 export default function Topbar({ activePage }) {
@@ -120,80 +24,121 @@ export default function Topbar({ activePage }) {
   const meta = PAGE_META[activePage] || PAGE_META.dashboard;
 
   return (
-    <header style={s.topbar}>
+    <header style={{
+      background: '#FAF7F0',
+      borderBottom: '1px solid #EBE5D8',
+      padding: '0 28px',
+      height: 64,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      flexShrink: 0,
+      fontFamily: "'DM Sans', system-ui, sans-serif",
+    }}>
       {/* Left: title + breadcrumb */}
-      <div style={s.left}>
-        <span style={s.title}>{meta.title}</span>
-        <span style={s.crumb}>{meta.crumb}</span>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <span style={{ fontSize: 18, fontWeight: 800, color: '#1C1917', lineHeight: 1.2, letterSpacing: '-0.02em' }}>{meta.title}</span>
+        <span style={{ fontSize: 11, color: '#A8A29E', fontWeight: 500, marginTop: 2, letterSpacing: '0.02em' }}>{meta.crumb}</span>
       </div>
 
       {/* Right: actions */}
-      <div style={s.right}>
-        {/* Inline search */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Search */}
         {searchOpen ? (
-          <div
-            style={{
-              ...s.searchBox,
-              borderColor: '#93C5FD',
-              background: '#fff',
-              width: 220,
-            }}
-          >
-            <span style={{ fontSize: 14 }}>🔍</span>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: '#FFFFFF', border: '1.5px solid #1C1917',
+            borderRadius: 12, padding: '0 12px', height: 38, width: 240,
+            boxShadow: '0 0 0 3px rgba(28,25,23,0.06)',
+            transition: 'all 0.2s',
+          }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1C1917" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
             <input
               autoFocus
               value={searchVal}
               onChange={(e) => setSearchVal(e.target.value)}
               onBlur={() => { setSearchOpen(false); setSearchVal(''); }}
-              placeholder="Search..."
+              placeholder="Search platform..."
               style={{
-                border: 'none',
-                outline: 'none',
-                background: 'transparent',
-                fontSize: 12,
-                color: '#111827',
-                width: '100%',
+                border: 'none', outline: 'none', background: 'transparent',
+                fontSize: 13, color: '#1C1917', width: '100%',
                 fontFamily: "'DM Sans', system-ui, sans-serif",
+                fontWeight: 500,
               }}
             />
           </div>
         ) : (
-          <div style={s.searchBox} onClick={() => setSearchOpen(true)}>
-            <span style={{ fontSize: 14 }}>🔍</span>
+          <div
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: '#FFFFFF', border: '1px solid #EBE5D8',
+              borderRadius: 12, padding: '0 12px', height: 38,
+              fontSize: 13, color: '#A8A29E', cursor: 'pointer', width: 200,
+              transition: 'border-color 0.15s, box-shadow 0.15s',
+              boxShadow: '0 2px 4px rgba(28,25,23,0.02)',
+              fontWeight: 500,
+            }}
+            onClick={() => setSearchOpen(true)}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#D1C4A5'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(181,154,87,0.08)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#EBE5D8'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(28,25,23,0.02)'; }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
             <span>Search...</span>
-            <span
-              style={{
-                marginLeft: 'auto',
-                fontSize: 10,
-                background: '#E5E7EB',
-                borderRadius: 4,
-                padding: '1px 5px',
-                color: '#6B7280',
-                fontWeight: 500,
-              }}
-            >
-              ⌘K
+            <span style={{
+              marginLeft: 'auto', fontSize: 10,
+              background: '#F5EFE4', borderRadius: 4,
+              padding: '2px 6px', color: '#78716C', fontWeight: 700,
+            }}>
+              ⌘ K
             </span>
           </div>
         )}
 
-        <div style={s.divider} />
+        <div style={{ width: 1, height: 20, background: '#EBE5D8', margin: '0 4px' }} />
 
         {/* Notification bell */}
-        <div style={s.iconBtn(false)} title="Notifications">
-          🔔
-          <span style={s.notifDot} />
-        </div>
-
-        {/* Refresh */}
-        <div style={s.iconBtn(false)} title="Refresh">
-          🔄
-        </div>
-
-        <div style={s.divider} />
+        <button
+          style={{
+            width: 38, height: 38, borderRadius: 12,
+            border: '1px solid #EBE5D8', background: '#FFFFFF',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', position: 'relative',
+            transition: 'all 0.15s',
+            boxShadow: '0 2px 4px rgba(28,25,23,0.02)',
+          }}
+          title="Notifications"
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#D1C4A5'; e.currentTarget.style.color = '#1C1917'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#EBE5D8'; e.currentTarget.style.color = '#78716C'; }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'inherit' }}>
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          <span style={{
+            width: 8, height: 8, background: '#EF4444',
+            borderRadius: '50%', position: 'absolute', top: 8, right: 8,
+            border: '1.5px solid #FFFFFF'
+          }} />
+        </button>
 
         {/* Avatar */}
-        <div style={s.avatarBtn} title="Prakash A. — Super Admin">
+        <div
+          style={{
+            width: 38, height: 38, borderRadius: '50%',
+            background: '#1C1917', color: '#FAF7F0',
+            fontSize: 12, fontWeight: 800,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', border: '2px solid #FFFFFF',
+            boxShadow: '0 2px 8px rgba(28,25,23,0.15)',
+            flexShrink: 0, fontFamily: "'DM Sans', system-ui, sans-serif",
+            marginLeft: 4,
+          }}
+          title="Prakash A. — Super Admin"
+        >
           PA
         </div>
       </div>

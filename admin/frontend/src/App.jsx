@@ -51,22 +51,23 @@ function NewBookingToast({ bookings, onDismiss, onViewBookings }) {
       maxWidth: 340, width: '100%',
     }}>
       <div style={{
-        background: '#fff',
+        background: 'var(--bg-card)',
         borderRadius: 16,
-        boxShadow: '0 8px 40px rgba(0,0,0,0.16)',
-        border: '1px solid #E5E7EB',
+        boxShadow: '0 8px 40px rgba(181, 154, 87, 0.12), 0 12px 30px rgba(0,0,0,0.06)',
+        border: '1px solid var(--border-color)',
         overflow: 'hidden',
       }}>
-        {/* Header bar */}
+        {/* Header bar - charcoal black background with gold border line */}
         <div style={{
-          background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)',
+          background: 'linear-gradient(135deg, #1A1A1A, #121212)',
           padding: '12px 16px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          borderBottom: '2px solid var(--accent-color)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{
               width: 32, height: 32, borderRadius: 8,
-              background: 'rgba(255,255,255,0.2)',
+              background: 'rgba(181, 154, 87, 0.2)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 16,
             }}>📋</div>
@@ -74,13 +75,13 @@ function NewBookingToast({ bookings, onDismiss, onViewBookings }) {
               <div style={{ color: '#fff', fontWeight: 700, fontSize: 13 }}>
                 {bookings.length > 1 ? `${bookings.length} New Bookings!` : 'New Booking Received!'}
               </div>
-              <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: 11 }}>Just now</div>
+              <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11 }}>Just now</div>
             </div>
           </div>
           <button
             onClick={handleDismiss}
             style={{
-              background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff',
+              background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff',
               borderRadius: 6, width: 26, height: 26, cursor: 'pointer',
               fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
@@ -88,16 +89,17 @@ function NewBookingToast({ bookings, onDismiss, onViewBookings }) {
         </div>
         {/* Body */}
         <div style={{ padding: '14px 16px' }}>
-          <div style={{ fontSize: 13, color: '#111827', fontWeight: 600, marginBottom: 4 }}>
+          <div style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 600, marginBottom: 4 }}>
             {latest.user_name || latest.name || 'A user'} booked a service
           </div>
-          <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 12 }}>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
             {latest.service_type || latest.service || 'Service'} · ₹{Number(latest.amount || 0).toLocaleString()}
           </div>
           {bookings.length > 1 && (
             <div style={{
-              background: '#EFF4FF', borderRadius: 8, padding: '6px 10px',
-              fontSize: 11, color: '#1E40AF', marginBottom: 12,
+              background: 'var(--accent-light)', borderRadius: 8, padding: '6px 10px',
+              fontSize: 11, color: 'var(--accent-dark)', marginBottom: 12,
+              border: '1px solid var(--accent-border)',
             }}>
               +{bookings.length - 1} more new booking{bookings.length > 2 ? 's' : ''} waiting
             </div>
@@ -106,15 +108,17 @@ function NewBookingToast({ bookings, onDismiss, onViewBookings }) {
             <button
               onClick={handleView}
               style={{
-                flex: 1, background: '#1D4ED8', color: '#fff', border: 'none',
+                flex: 1, background: 'var(--accent-color)', color: '#fff', border: 'none',
                 borderRadius: 8, padding: '8px 12px', cursor: 'pointer',
-                fontSize: 12, fontWeight: 600,
+                fontSize: 12, fontWeight: 600, transition: 'background 0.2s',
               }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'var(--accent-dark)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent-color)'}
             >View Bookings</button>
             <button
               onClick={handleDismiss}
               style={{
-                background: '#F3F4F6', color: '#374151', border: 'none',
+                background: 'var(--bg-muted)', color: 'var(--text-primary)', border: 'none',
                 borderRadius: 8, padding: '8px 14px', cursor: 'pointer',
                 fontSize: 12, fontWeight: 600,
               }}
@@ -221,10 +225,10 @@ export default function App() {
         return <Settings />;
       default:
         return (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, system-ui, sans-serif', color: '#9CA3AF', fontSize: 14 }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, system-ui, sans-serif', color: 'var(--text-muted)', fontSize: 14 }}>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 40, marginBottom: 12 }}>🚧</div>
-              <div style={{ fontWeight: 600, color: '#374151', marginBottom: 4 }}>Page coming soon</div>
+              <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>Page coming soon</div>
               <div>"{activePage}" module not built yet</div>
             </div>
           </div>
@@ -238,7 +242,7 @@ export default function App() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F9FAFB' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-app)', color: 'var(--text-primary)' }}>
       <Sidebar activeKey={activePage} onNav={setActivePage} onLogout={handleLogout} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <Topbar activePage={activePage} />
