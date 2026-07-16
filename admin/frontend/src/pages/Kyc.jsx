@@ -174,7 +174,7 @@ export default function Kyc() {
       panStatus: panState,
       bankPassbookStatus: bankPassbookState,
       selfieStatus: selfieState,
-      rejectionReason: isAnyRejected ? rejectionReason.trim() : null
+      ...(isAnyRejected ? { rejectionReason: rejectionReason.trim() } : {}),
     };
 
     kycAPI.review(selectedRecord.id, payload)

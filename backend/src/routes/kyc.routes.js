@@ -39,7 +39,7 @@ router.patch(
     body("panStatus").optional().isIn(["pending", "approved", "rejected"]),
     body("bankPassbookStatus").optional().isIn(["pending", "approved", "rejected"]),
     body("selfieStatus").optional().isIn(["pending", "approved", "rejected"]),
-    body("rejectionReason").optional().isString(),
+    body("rejectionReason").optional({ nullable: true }).isString(),
   ],
   validate,
   controller.reviewKyc
