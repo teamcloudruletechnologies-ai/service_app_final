@@ -79,6 +79,9 @@ class ApiService {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return body;
     }
+    if (response.statusCode == 401) {
+      logout();
+    }
     final message = body is Map ? (body['message'] as String? ?? 'Request failed') : 'Request failed';
     throw ApiException(message, statusCode: response.statusCode);
   }

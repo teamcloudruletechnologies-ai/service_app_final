@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'login_screen.dart';
 import 'main_shell.dart';
+import 'worker_onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -25,9 +26,18 @@ class _SplashScreenState extends State<SplashScreen> {
     final auth = context.read<AuthProvider>();
     await auth.init();
     if (!mounted) return;
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => auth.isLoggedIn ? const MainShell() : const LoginScreen(),
+        builder: (_) {
+          if (auth.isLoggedIn) {
+            if (auth.user?.needsOnboarding == true) {
+              return const WorkerOnboardingScreen();
+            }
+            return const MainShell();
+          }
+          return const LoginScreen();
+        },
       ),
     );
   }

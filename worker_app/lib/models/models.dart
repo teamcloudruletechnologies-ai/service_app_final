@@ -14,8 +14,12 @@ class UserAccount {
   final String? state;
   final String? address;
 
-  // True if this account was just auto-created (name is empty)
-  bool get needsOnboarding => name.trim().isEmpty;
+  // True if this account was just auto-created or is missing operational details
+  bool get needsOnboarding =>
+      name.trim().isEmpty ||
+      (role == 'worker' &&
+          (serviceType == null ||
+              serviceType!.trim().isEmpty));
 
   const UserAccount({
     required this.id,
