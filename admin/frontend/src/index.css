@@ -1,41 +1,48 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
 @import "tailwindcss";
 
 :root {
-  /* Cream / Off-white workspace */
-  --bg-app: #FAF7F0;
-  --bg-card: #FFFFFF;
-  --bg-muted: #F5EFE4;
-  --border-color: #EBE5D8;
+  /* ─── Brand Palette ──────────────────────────────────────────── */
+  --black:   #1A1A1A;   /* Pure Matte Black  */
+  --white:   #F5F5F3;   /* Crisp Milk White  */
+  --sandal:  #E3D0BA;   /* Warm Sandal       */
+  --olive:   #4A5343;   /* Muted Olive Green */
 
-  /* Sidebar — now white (not dark) */
-  --bg-sidebar: #FFFFFF;
-  --bg-sidebar-hover: #FAF7F0;
-  --bg-sidebar-active: #F5EFE4;
+  /* ─── Background ─────────────────────────────────────────────── */
+  --bg-app:           #F5F5F3;   /* Milk White canvas      */
+  --bg-card:          #FFFFFF;   /* Pure white cards       */
+  --bg-muted:         #EDE8E0;   /* Slightly warm muted    */
+  --border-color:     #D9CFBF;   /* Sandal-tinted border   */
 
-  /* Accent — warm brown/bronze */
-  --accent-color: #8B7355;
-  --accent-dark: #6B5740;
-  --accent-light: #F5EFE4;
-  --accent-border: #D1C4A5;
+  /* ─── Sidebar ────────────────────────────────────────────────── */
+  --bg-sidebar:        #1A1A1A;  /* Matte Black sidebar    */
+  --bg-sidebar-hover:  #2A2A28;  /* Slightly lighter black */
+  --bg-sidebar-active: #4A5343;  /* Olive green active row */
 
-  /* Text */
-  --text-primary: #1C1917;
-  --text-secondary: #78716C;
-  --text-muted: #A8A29E;
+  /* ─── Accent (Olive Green primary) ───────────────────────────── */
+  --accent-color:   #4A5343;     /* Muted Olive Green      */
+  --accent-dark:    #353C30;     /* Darker olive           */
+  --accent-light:   #EDF0EB;     /* Very light olive tint  */
+  --accent-border:  #8E9E84;     /* Mid olive border       */
 
-  /* Sidebar text */
-  --sidebar-text-active: #1C1917;
-  --sidebar-text-inactive: #78716C;
+  /* ─── Text ───────────────────────────────────────────────────── */
+  --text-primary:   #1A1A1A;     /* Matte Black            */
+  --text-secondary: #5C5C5A;     /* Softer dark grey       */
+  --text-muted:     #9A978F;     /* Warm muted grey        */
 
-  /* Status */
-  --status-green-bg: #E6F4EA;
-  --status-green-fg: #137333;
-  --status-red-bg: #FCE8E6;
-  --status-red-fg: #C5221F;
-  --status-amber-bg: #FEF7E0;
-  --status-amber-fg: #B06000;
+  /* ─── Sidebar Text ───────────────────────────────────────────── */
+  --sidebar-text-active:   #F5F5F3;  /* Milk White on active   */
+  --sidebar-text-inactive: #B8B4AC;  /* Muted sandal on idle   */
+
+  /* ─── Status badges ──────────────────────────────────────────── */
+  --status-green-bg:  #E6EDDF;
+  --status-green-fg:  #2E5226;
+  --status-red-bg:    #F5E0DC;
+  --status-red-fg:    #8B2218;
+  --status-amber-bg:  #F5EDD8;
+  --status-amber-fg:  #7A4F00;
 }
+
 
 * {
   font-family: 'DM Sans', system-ui, sans-serif;

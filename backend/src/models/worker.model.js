@@ -108,39 +108,83 @@ async function remove(id) {
 }
 
 async function findNearbyWorkers(lat, lng, radiusKm = 10, serviceType = null) {
-  const params = [lat, lng, radiusKm];
-  let where = "status = 'active' AND kyc_status = 'approved' AND current_lat IS NOT NULL AND current_lng IS NOT NULL";
-  
+  // ── Stage 1: GPS-based radius query ────────────────────────────────────────
+  const params1 = [lat, lng, radiusKm];
+  let where1 = "status = 'active' AND kyc_status = 'approved' AND current_lat IS NOT NULL AND current_lng IS NOT NULL";
+
   if (serviceType) {
-    params.push(serviceType);
-    where += ` AND service_type = $${params.length}`;
+    params1.push(serviceType);
+    where1 += ` AND service_type = $${params1.length}`;
   }
 
-  // Haversine formula for distance in kilometers
-  const query = `
-    SELECT ${publicFields}, current_lat, current_lng, last_location_update,
-    (6371 * acos(cos(radians($1)) * cos(radians(current_lat)) * cos(radians(current_lng) - radians($2)) + sin(radians($1)) * sin(radians(current_lat)))) AS distance
-    FROM workers
-    WHERE ${where}
-    HAVING (6371 * acos(cos(radians($1)) * cos(radians(current_lat)) * cos(radians(current_lng) - radians($2)) + sin(radians($1)) * sin(radians(current_lat)))) <= $3
-    ORDER BY distance ASC
-  `;
-  
-  // Note: HAVING requires GROUP BY or aggregate in Postgres if not using subquery.
-  // We'll use a subquery to make it standard and clean.
-  const properQuery = `
+  const gpsQuery = `
     SELECT * FROM (
       SELECT ${publicFields}, current_lat, current_lng, last_location_update,
-      (6371 * acos(cos(radians($1)) * cos(radians(current_lat)) * cos(radians(current_lng) - radians($2)) + sin(radians($1)) * sin(radians(current_lat)))) AS distance
+      (6371 * acos(LEAST(1.0, cos(radians($1)) * cos(radians(current_lat)) * cos(radians(current_lng) - radians($2)) + sin(radians($1)) * sin(radians(current_lat))))) AS distance
       FROM workers
-      WHERE ${where}
-    ) AS nearby_workers
+      WHERE ${where1}
+    ) AS sub
     WHERE distance <= $3
     ORDER BY distance ASC
   `;
 
-  const result = await db.query(properQuery, params);
-  return result.rows;
+  const gpsResult = await db.query(gpsQuery, params1);
+
+  // ── Stage 2: City-name fallback ─────────────────────────────────────────────
+  // Detect nearest known city from query coordinates (within 100 km)
+  const knownCities = [
+    { name: 'chennai',   lat: 13.0827, lng: 80.2707 },
+    { name: 'bangalore', lat: 12.9716, lng: 77.5946 },
+    { name: 'mumbai',    lat: 19.0760, lng: 72.8777 },
+    { name: 'delhi',     lat: 28.6139, lng: 77.2090 },
+    { name: 'hyderabad', lat: 17.3850, lng: 78.4867 },
+    { name: 'kolkata',   lat: 22.5726, lng: 88.3639 },
+    { name: 'pune',      lat: 18.5204, lng: 73.8567 },
+  ];
+
+  const toRad = (d) => (d * Math.PI) / 180;
+  let nearestCity = null;
+  let minDist = Infinity;
+  for (const c of knownCities) {
+    const dLat = toRad(lat - c.lat);
+    const dLng = toRad(lng - c.lng);
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat)) * Math.cos(toRad(c.lat)) * Math.sin(dLng / 2) ** 2;
+    const d = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    if (d < minDist) { minDist = d; nearestCity = c.name; }
+  }
+
+  let allWorkers = [...gpsResult.rows];
+
+  if (nearestCity && minDist <= 100) {
+    // Fetch active+approved workers whose registered city matches the detected city
+    const params2 = [nearestCity.toLowerCase()];
+    let where2 = "status = 'active' AND kyc_status = 'approved' AND LOWER(city) = $1";
+
+    if (serviceType) {
+      params2.push(serviceType);
+      where2 += ` AND service_type = $${params2.length}`;
+    }
+
+    const cityQuery = `
+      SELECT ${publicFields}, current_lat, current_lng, last_location_update,
+             NULL::numeric AS distance
+      FROM workers
+      WHERE ${where2}
+    `;
+
+    const cityResult = await db.query(cityQuery, params2);
+
+    // Merge — de-duplicate by id (GPS-matched workers take priority)
+    const existingIds = new Set(allWorkers.map((r) => r.id));
+    for (const w of cityResult.rows) {
+      if (!existingIds.has(w.id)) {
+        allWorkers.push(w);
+      }
+    }
+  }
+
+  return allWorkers;
 }
+
 
 module.exports = { create, findByEmailOrPhone, findById, list, update, remove, findNearbyWorkers };
