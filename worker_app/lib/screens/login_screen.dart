@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
+import '../theme/app_theme.dart';
 import 'main_shell.dart';
 import 'worker_onboarding_screen.dart';
 
@@ -340,7 +341,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Colors.black, width: 1.5),
+                borderSide: const BorderSide(color: AppTheme.olive, width: 1.5),
               ),
             ),
             validator: (v) {
@@ -467,7 +468,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Colors.black, width: 1.5),
+                    borderSide: const BorderSide(color: AppTheme.olive, width: 1.5),
                   ),
                 ),
                 onChanged: (v) {

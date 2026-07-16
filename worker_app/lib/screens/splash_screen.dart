@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'main_shell.dart';
 import 'worker_onboarding_screen.dart';
@@ -47,20 +48,38 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        color: Colors.white,
-        child: const Column(
+        color: AppTheme.milkWhite,
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.home_repair_service_rounded, size: 72, color: Colors.black),
-            SizedBox(height: 16),
-            Text(
-              'Urban Service',
-              style: TextStyle(color: Colors.black, fontSize: 28, fontWeight: FontWeight.bold),
+            Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                color: AppTheme.olive,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: const Icon(Icons.home_repair_service_rounded, size: 48, color: AppTheme.milkWhite),
             ),
-            SizedBox(height: 8),
-            Text('Home services at your doorstep', style: TextStyle(color: Colors.black54)),
-            SizedBox(height: 32),
-            CircularProgressIndicator(color: Colors.black),
+            const SizedBox(height: 20),
+            const Text(
+              'Urban Service',
+              style: TextStyle(color: AppTheme.primary, fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -0.5),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Home services at your doorstep',
+              style: TextStyle(color: Color(0xFF9A978F)),
+            ),
+            const SizedBox(height: 36),
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: AppTheme.olive,
+              ),
+            ),
           ],
         ),
       ),

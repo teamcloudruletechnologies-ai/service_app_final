@@ -376,8 +376,8 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
             Switch(
               value: _isOnline,
               onChanged: _toggleOnlineStatus,
-              activeColor: Colors.black,
-              activeTrackColor: Colors.grey.shade300,
+              activeColor: AppTheme.olive,
+              activeTrackColor: const Color(0xFFD0D9CC),
               inactiveThumbColor: Colors.white,
               inactiveTrackColor: Colors.grey.shade200,
             ),
@@ -392,17 +392,17 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: AppTheme.olive,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           children: const [
-            Icon(Icons.verified_user_rounded, color: Colors.white),
+            Icon(Icons.verified_user_rounded, color: AppTheme.milkWhite),
             SizedBox(width: 12),
             Expanded(
               child: Text(
                 'Verified Service Partner',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(color: AppTheme.milkWhite, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -416,14 +416,14 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.black),
+          border: Border.all(color: AppTheme.sandal, width: 1.5),
         ),
         child: Row(
           children: [
             const SizedBox(
               width: 18,
               height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+              child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.olive),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -496,7 +496,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
   Widget _buildTabToggle() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: const Color(0xFFEDE8E0),
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.all(3),
@@ -532,13 +532,13 @@ class _TabBtn extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? Colors.black : Colors.transparent,
+          color: active ? AppTheme.olive : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: active ? Colors.white : const Color(0xFF6B7280),
+            color: active ? AppTheme.milkWhite : const Color(0xFF6B7280),
             fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
