@@ -7,7 +7,8 @@ import '../providers/catalog_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'payment_screen.dart';
-
+import 'service_detail_screen.dart';
+import 'location_picker_screen.dart';
 class UserOnboardingScreen extends StatefulWidget {
   const UserOnboardingScreen({super.key});
 
@@ -50,7 +51,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
   // Open the existing LocationPickerScreen to confirm location
   Future<void> _openLocationPicker() async {
     final result = await Navigator.of(context).push<LocationPickerResult>(
-      MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+      MaterialPageRoute(builder: (_) => LocationPickerScreen()),
     );
     if (result != null && mounted) {
       setState(() {
