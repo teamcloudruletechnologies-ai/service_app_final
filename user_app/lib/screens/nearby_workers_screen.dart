@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/models.dart';
@@ -60,13 +61,35 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
         radius: 10.0,
         serviceType: widget.service.categoryName,
       );
-      if (mounted) setState(() { _workers = result; _loading = false; });
+      if (mounted) {
+        setState(() {
+          _workers = result;
+          _loading = false;
+        });
+      }
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  Future<void> _book(NearbyWorker? worker) async {
+  Future<void> _showScheduleAndBook(NearbyWorker? worker) async {
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ScheduleBottomSheet(service: widget.service),
+    );
+
+    if (result != null && mounted) {
+      _book(
+        worker,
+        scheduledAt: result['scheduledAt'] as DateTime?,
+        notes: result['notes'] as String?,
+      );
+    }
+  }
+
+  Future<void> _book(NearbyWorker? worker, {DateTime? scheduledAt, String? notes}) async {
     if (_bookingWorkerId != null) return; // already booking
     setState(() {
       _bookingWorkerId = worker?.id ?? -1;
@@ -88,6 +111,8 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
             serviceId: widget.service.id,
             address: widget.address,
             workerId: worker?.id,
+            notes: notes,
+            scheduledAt: scheduledAt,
           );
 
       if (!mounted) return;
@@ -262,7 +287,7 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               side: const BorderSide(color: _red, width: 1.5),
             ),
-            onPressed: _bookingWorkerId != null ? null : () => _book(null),
+            onPressed: _bookingWorkerId != null ? null : () => _showScheduleAndBook(null),
             child: _bookingWorkerId == -1
                 ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: _red, strokeWidth: 2.5))
                 : const Text(
@@ -365,7 +390,7 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   elevation: 0,
                 ),
-                onPressed: (_bookingWorkerId != null) ? null : () => _book(w),
+                onPressed: (_bookingWorkerId != null) ? null : () => _showScheduleAndBook(w),
                 child: isBookingThis
                     ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Text('Book', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
@@ -404,12 +429,244 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              onPressed: _bookingWorkerId != null ? null : () => _book(null),
+              onPressed: _bookingWorkerId != null ? null : () => _showScheduleAndBook(null),
               child: _bookingWorkerId != null
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                   : const Text('Confirm Booking', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── SCHEDULE SELECTION BOTTOM SHEET ───
+
+class _ScheduleBottomSheet extends StatefulWidget {
+  const _ScheduleBottomSheet({required this.service});
+  final ServiceItem service;
+
+  @override
+  State<_ScheduleBottomSheet> createState() => _ScheduleBottomSheetState();
+}
+
+class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
+  bool _isScheduled = false; // false = Instant, true = Scheduled
+  int _selectedDayIndex = 0;
+  int _selectedSlotIndex = 0;
+  final _notesCtrl = TextEditingController();
+
+  static const _red = Color(0xFFE23744);
+
+  // Time slot configurations
+  final List<String> _timeSlots = [
+    '09:00 AM - 11:00 AM',
+    '11:00 AM - 01:00 PM',
+    '01:00 PM - 03:00 PM',
+    '03:00 PM - 05:00 PM',
+    '05:00 PM - 07:00 PM',
+  ];
+
+  @override
+  void dispose() {
+    _notesCtrl.dispose();
+    super.dispose();
+  }
+
+  DateTime _calculateSelectedDateTime() {
+    final now = DateTime.now();
+    final chosenDate = now.add(Duration(days: _selectedDayIndex));
+    
+    // Parse slot time (e.g. '09:00 AM - 11:00 AM' -> 9 hours)
+    final slotString = _timeSlots[_selectedSlotIndex];
+    final hourPart = int.parse(slotString.substring(0, 2));
+    final isPm = slotString.substring(6, 8).toUpperCase() == 'PM';
+    final hour = isPm ? (hourPart == 12 ? 12 : hourPart + 12) : (hourPart == 12 ? 0 : hourPart);
+
+    return DateTime(chosenDate.year, chosenDate.month, chosenDate.day, hour, 0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final days = List.generate(5, (index) => DateTime.now().add(Duration(days: index)));
+
+    return Container(
+      padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Pull bar
+              Center(
+                child: Container(
+                  width: 40, height: 4,
+                  decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              const Text(
+                'Select Booking Schedule',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF111827)),
+              ),
+              const SizedBox(height: 16),
+
+              // Booking Mode Options
+              Row(
+                children: [
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Text('⚡ Instant Now', style: TextStyle(fontWeight: FontWeight.bold)),
+                      selected: !_isScheduled,
+                      selectedColor: _red.withValues(alpha: 0.1),
+                      labelStyle: TextStyle(color: !_isScheduled ? _red : Colors.grey.shade700),
+                      onSelected: (val) => setState(() => _isScheduled = false),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ChoiceChip(
+                      label: const Text('📅 Schedule Later', style: TextStyle(fontWeight: FontWeight.bold)),
+                      selected: _isScheduled,
+                      selectedColor: _red.withValues(alpha: 0.1),
+                      labelStyle: TextStyle(color: _isScheduled ? _red : Colors.grey.shade700),
+                      onSelected: (val) => setState(() => _isScheduled = true),
+                    ),
+                  ),
+                ],
+              ),
+
+              if (_isScheduled) ...[
+                const SizedBox(height: 20),
+                const Text(
+                  'Select Date',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF374151)),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 64,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: days.length,
+                    itemBuilder: (context, index) {
+                      final day = days[index];
+                      final isSelected = _selectedDayIndex == index;
+                      final isToday = index == 0;
+                      return GestureDetector(
+                        onTap: () => setState(() => _selectedDayIndex = index),
+                        child: Container(
+                          width: 80,
+                          margin: const EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(
+                            color: isSelected ? _red : Colors.white,
+                            border: Border.all(color: isSelected ? _red : Colors.grey.shade200),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                isToday ? 'Today' : DateFormat('EEE').format(day),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: isSelected ? Colors.white : Colors.grey.shade500,
+                                ),
+                              ),
+                              Text(
+                                DateFormat('dd MMM').format(day),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 13,
+                                  color: isSelected ? Colors.white : Color(0xFF111827),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+                const Text(
+                  'Select Time Slot',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF374151)),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: List.generate(_timeSlots.length, (index) {
+                    final isSelected = _selectedSlotIndex == index;
+                    return ChoiceChip(
+                      label: Text(_timeSlots[index]),
+                      selected: isSelected,
+                      selectedColor: _red.withValues(alpha: 0.1),
+                      labelStyle: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isSelected ? _red : Color(0xFF374151),
+                      ),
+                      onSelected: (val) => setState(() => _selectedSlotIndex = index),
+                    );
+                  }),
+                ),
+              ],
+
+              const SizedBox(height: 20),
+              const Text(
+                'Booking Notes (Optional)',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF374151)),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _notesCtrl,
+                decoration: InputDecoration(
+                  hintText: 'e.g. Please bring a ladder, contact gatekeeper...',
+                  hintStyle: const TextStyle(fontSize: 13),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: _red),
+                  ),
+                ),
+                maxLines: 2,
+              ),
+
+              const SizedBox(height: 24),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _red,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
+                ),
+                onPressed: () {
+                  final scheduledAt = _isScheduled ? _calculateSelectedDateTime() : null;
+                  Navigator.pop(context, {
+                    'scheduledAt': scheduledAt,
+                    'notes': _notesCtrl.text.trim(),
+                  });
+                },
+                child: const Text(
+                  'Confirm & Proceed',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
