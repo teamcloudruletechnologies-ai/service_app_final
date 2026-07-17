@@ -215,19 +215,37 @@ class MenuScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
 
-          // Logout Button
-          OutlinedButton.icon(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout, color: Colors.red),
-            label: const Text('Logout', style: TextStyle(color: Colors.red)),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(52),
-              side: const BorderSide(color: Colors.red, width: 1.5),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-            ),
-          ),
+          // Login / Logout Button
+          auth.isLoggedIn
+              ? OutlinedButton.icon(
+                  onPressed: () => _logout(context),
+                  icon: const Icon(Icons.logout, color: Colors.red),
+                  label: const Text('Logout', style: TextStyle(color: Colors.red)),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    side: const BorderSide(color: Colors.red, width: 1.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                )
+              : ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      (_) => false,
+                    );
+                  },
+                  icon: const Icon(Icons.login, color: Colors.white),
+                  label: const Text('Log In / Register', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
         ],
       ),
     );
