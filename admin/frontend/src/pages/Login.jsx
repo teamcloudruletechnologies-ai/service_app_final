@@ -1,12 +1,54 @@
 import { useState } from 'react';
 import { authAPI } from '../api';
 
+function IconMail() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="M2 7l10 7 10-7" />
+    </svg>
+  );
+}
+
+function IconLock() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+function IconEye({ open }) {
+  return open ? (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  ) : (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+  );
+}
+
+function IconArrow() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
+
 export default function Login({ onLoginSuccess }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail]               = useState('');
+  const [password, setPassword]         = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState('');
+  const [focusedField, setFocusedField] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,169 +56,298 @@ export default function Login({ onLoginSuccess }) {
       setError('Please enter your email and password.');
       return;
     }
-
-
-    
     setError('');
     setLoading(true);
-
     try {
       const response = await authAPI.login(email.trim(), password);
       if (response && response.success && response.data?.token) {
         onLoginSuccess(response.data.token);
       } else {
-        setError('Login failed. Invalid response structure.');
+        setError('Invalid credentials. Please try again.');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      // backend returns error response like: { success: false, message: "Invalid credentials" }
-      const errMsg = err?.message || 'Unable to connect to the server. Please try again.';
-      setError(errMsg);
+      setError(err?.message || 'Unable to connect. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const inputStyle = (field) => ({
+    width: '100%',
+    boxSizing: 'border-box',
+    paddingLeft: 42,
+    paddingRight: field === 'password' ? 42 : 14,
+    paddingTop: 13,
+    paddingBottom: 13,
+    background: '#FAFAF9',
+    border: `1.5px solid ${focusedField === field ? '#1C1917' : '#E7E2DA'}`,
+    borderRadius: 12,
+    fontSize: 14,
+    color: '#1C1917',
+    outline: 'none',
+    fontFamily: "'DM Sans', system-ui, sans-serif",
+    transition: 'border-color 0.2s, box-shadow 0.2s',
+    boxShadow: focusedField === field ? '0 0 0 3px rgba(28,25,23,0.07)' : 'none',
+  });
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#0B0F19] overflow-hidden font-sans">
-      {/* Decorative ambient background glows */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[60%] rounded-full bg-blue-600/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[60%] rounded-full bg-purple-600/10 blur-[120px] pointer-events-none" />
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(145deg, #F5EDE0 0%, #FAF7F0 40%, #EFE5D4 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily: "'DM Sans', system-ui, sans-serif",
+      padding: '40px 20px',
+      position: 'relative',
+    }}>
 
-      {/* Grid Pattern overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f29370a_1px,transparent_1px),linear-gradient(to_bottom,#1f29370a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none opacity-20" />
+      {/* Soft background blobs */}
+      <div style={{
+        position: 'absolute', top: '10%', left: '5%', width: 300, height: 300,
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(181,154,87,0.08) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '10%', right: '5%', width: 250, height: 250,
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(181,154,87,0.06) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
 
-      {/* Glass Login Card */}
-      <div className="relative w-full max-w-md mx-4 p-8 bg-[#161D30]/80 backdrop-blur-xl border border-gray-800/80 rounded-2xl shadow-2xl transition-all duration-300">
-        
-        {/* Header & Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center mb-4 transition-transform hover:scale-105 duration-300">
-            <svg width="48" height="48" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="shadow-lg shadow-blue-500/20 rounded-xl">
-              <defs>
-                <linearGradient id="logoGradLogin" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#2563EB" />
-                  <stop offset="100%" stopColor="#3B82F6" />
-                </linearGradient>
-              </defs>
-              <rect width="32" height="32" rx="8" fill="url(#logoGradLogin)" />
-              <path d="M16 7L24 13.5V23.5H8V13.5L16 7Z" fill="white" fillOpacity="0.2" />
-              <path d="M16 7L24 13.5M16 7L8 13.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M12 18L15 21L21 14" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Centered Card */}
+      <div style={{
+        width: '100%',
+        maxWidth: 440,
+        background: '#FFFFFF',
+        borderRadius: 24,
+        padding: '44px 40px 36px',
+        boxShadow: '0 8px 48px rgba(120,100,60,0.10), 0 2px 8px rgba(120,100,60,0.06)',
+        border: '1px solid rgba(181,154,87,0.12)',
+        position: 'relative',
+        zIndex: 1,
+      }}>
+
+        {/* Logo */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: 16,
+            background: 'linear-gradient(135deg, #2C2921 0%, #1C1917 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginBottom: 12,
+            boxShadow: '0 4px 20px rgba(28,25,23,0.20)',
+          }}>
+            <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <path d="M16 7L24 13.5V23.5H8V13.5L16 7Z" fill="#B59A57" fillOpacity="0.3" />
+              <path d="M16 7L24 13.5M16 7L8 13.5" stroke="#B59A57" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M12 18L15 21L21 14" stroke="#FAF7F0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">UrbanServe</h1>
-          <p className="text-sm text-gray-400 mt-1">Super Admin Panel Control Center</p>
+          <div style={{ fontSize: 17, fontWeight: 700, color: '#1C1917', letterSpacing: '-0.02em', lineHeight: 1 }}>
+            UrbanServe
+          </div>
         </div>
 
-        {/* Error Alert Banner */}
+        {/* Admin portal pill */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: '#FAF7F0',
+            border: '1px solid #EBE5D8',
+            borderRadius: 999, padding: '5px 14px',
+          }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#B59A57" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span style={{
+              fontSize: 10, fontWeight: 700, color: '#9A7E3F',
+              letterSpacing: '0.12em', textTransform: 'uppercase',
+            }}>
+              Admin Portal
+            </span>
+          </div>
+        </div>
+
+        {/* Heading */}
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <h1 style={{
+            fontSize: 26, fontWeight: 800, color: '#1C1917',
+            letterSpacing: '-0.03em', margin: '0 0 8px',
+            lineHeight: 1.2,
+          }}>
+            Welcome to UrbanServe
+          </h1>
+          <p style={{ fontSize: 13, color: '#78716C', margin: 0, lineHeight: 1.5 }}>
+            Sign in to your admin control center
+          </p>
+        </div>
+
+        {/* Error banner */}
         {error && (
-          <div className="mb-5 p-3.5 bg-red-950/40 border border-red-500/30 rounded-xl flex items-start gap-2.5 text-sm text-red-300 animate-shake">
-            <span className="text-base leading-none">⚠️</span>
-            <span className="flex-1">{error}</span>
+          <div style={{
+            marginBottom: 18, padding: '11px 14px',
+            background: '#FEF2F2', border: '1px solid #FECACA',
+            borderRadius: 10, display: 'flex', alignItems: 'center', gap: 9,
+            fontSize: 12, color: '#B91C1C', fontWeight: 500,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2.5" strokeLinecap="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            {error}
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Email */}
           <div>
-            <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+            <label style={{
+              display: 'block', fontSize: 11, fontWeight: 700,
+              color: '#1C1917', letterSpacing: '0.08em',
+              textTransform: 'uppercase', marginBottom: 8,
+            }}>
               Email Address
             </label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm">📧</span>
+            <div style={{ position: 'relative' }}>
+              <span style={{
+                position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+                color: '#A8A29E', display: 'flex', alignItems: 'center', pointerEvents: 'none',
+              }}>
+                <IconMail />
+              </span>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@urbanserve.com"
+                onFocus={() => setFocusedField('email')}
+                onBlur={() => setFocusedField(null)}
+                placeholder="name@example.com"
                 disabled={loading}
-                className="w-full pl-10 pr-4 py-3 bg-[#0E1322]/80 border border-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-100 rounded-xl text-sm outline-none transition-all placeholder:text-gray-600 disabled:opacity-50"
+                style={inputStyle('email')}
               />
             </div>
           </div>
 
+          {/* Password */}
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <label style={{
+                fontSize: 11, fontWeight: 700, color: '#1C1917',
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+              }}>
                 Password
               </label>
-              <a href="#" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">
+              <a
+                href="#"
+                style={{ fontSize: 11, color: '#9A7E3F', fontWeight: 600, textDecoration: 'none' }}
+                onMouseEnter={(e) => e.target.style.color = '#B59A57'}
+                onMouseLeave={(e) => e.target.style.color = '#9A7E3F'}
+              >
                 Forgot password?
               </a>
             </div>
-            <div className="relative">
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm">🔐</span>
+            <div style={{ position: 'relative' }}>
+              <span style={{
+                position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+                color: '#A8A29E', display: 'flex', alignItems: 'center', pointerEvents: 'none',
+              }}>
+                <IconLock />
+              </span>
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                onFocus={() => setFocusedField('password')}
+                onBlur={() => setFocusedField(null)}
+                placeholder="Enter your password"
                 disabled={loading}
-                className="w-full pl-10 pr-12 py-3 bg-[#0E1322]/80 border border-gray-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-100 rounded-xl text-sm outline-none transition-all placeholder:text-gray-600 disabled:opacity-50"
+                style={inputStyle('password')}
               />
               <button
                 type="button"
                 tabIndex="-1"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 text-sm p-1 rounded transition-colors focus:outline-none"
+                style={{
+                  position: 'absolute', right: 13, top: '50%', transform: 'translateY(-50%)',
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: '#A8A29E', display: 'flex', alignItems: 'center',
+                  padding: 4, borderRadius: 6, transition: 'color 0.15s',
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#1C1917'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#A8A29E'}
               >
-                {showPassword ? '👁️' : '🙈'}
+                <IconEye open={showPassword} />
               </button>
             </div>
           </div>
 
-          <div className="flex items-center">
-            <input
-              id="remember_me"
-              type="checkbox"
-              className="w-4 h-4 rounded border-gray-800 bg-[#0E1322]/80 text-blue-600 focus:ring-blue-500/20"
-            />
-            <label htmlFor="remember_me" className="ml-2.5 text-xs text-gray-400 select-none">
-              Keep me logged in for 7 days
-            </label>
-          </div>
-
-          {/* Submit Button */}
+          {/* Submit button */}
           <button
             type="submit"
             disabled={loading}
-            className="relative w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/50 active:scale-[0.99] disabled:opacity-75 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/25"
+            style={{
+              width: '100%', padding: '14px 20px', marginTop: 4,
+              background: '#1C1917', color: '#FAF7F0',
+              border: 'none', borderRadius: 12,
+              fontSize: 14, fontWeight: 700, letterSpacing: '0.02em',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              fontFamily: 'inherit', opacity: loading ? 0.72 : 1,
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 16px rgba(28,25,23,0.22)',
+            }}
+            onMouseEnter={(e) => {
+              if (!loading) {
+                e.currentTarget.style.background = '#2C2921';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 6px 24px rgba(28,25,23,0.30)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#1C1917';
+              e.currentTarget.style.transform = 'none';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(28,25,23,0.22)';
+            }}
           >
             {loading ? (
               <>
-                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <svg style={{ animation: 'spin 1s linear infinite' }} width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="10" stroke="rgba(250,247,240,0.25)" strokeWidth="3" />
+                  <path d="M12 2a10 10 0 0 1 10 10" stroke="#FAF7F0" strokeWidth="3" strokeLinecap="round" />
                 </svg>
-                <span>Verifying credentials...</span>
+                Signing in...
               </>
             ) : (
-              <span>Sign In to Dashboard</span>
+              <>
+                Sign In to Dashboard
+                <IconArrow />
+              </>
             )}
           </button>
         </form>
-
-        {/* Card footer details */}
-        <div className="mt-8 text-center border-t border-gray-800/60 pt-6">
-          <p className="text-xs text-gray-500">
-            For security purposes, all sessions are monitored and logged. By signing in, you agree to our Terms of Use.
-          </p>
-        </div>
       </div>
-      
-      {/* Keyframe animation injected inline */}
+
+      {/* Footer */}
+      <div style={{ marginTop: 28, textAlign: 'center' }}>
+        <p style={{ fontSize: 12, color: '#A8A29E', margin: 0 }}>
+          &copy; {new Date().getFullYear()} UrbanServe. All rights reserved.
+        </p>
+      </div>
+
       <style>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-4px); }
-          75% { transform: translateX(4px); }
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
         }
-        .animate-shake {
-          animation: shake 0.2s ease-in-out 2;
-        }
+        input::placeholder { color: #C4B9AB; }
       `}</style>
     </div>
   );

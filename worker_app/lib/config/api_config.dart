@@ -12,8 +12,8 @@ class ApiConfig {
     return const String.fromEnvironment('API_HOST', defaultValue: _defaultIp);
   }
 
-  static String get baseUrl => 'http://$host:5000/api';
-  static String get uploadsBaseUrl => 'http://$host:5000';
+  static String get baseUrl => 'https://service-app-hsu6.onrender.com/api';
+  static String get uploadsBaseUrl => 'https://service-app-hsu6.onrender.com';
 
   static String resolveImageUrl(String? path) {
     if (path == null || path.isEmpty) return '';

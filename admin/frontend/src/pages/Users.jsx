@@ -5,7 +5,7 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
     <div style={{
       width: w, height: h, borderRadius: radius,
-      background: 'linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%)',
+      background: 'linear-gradient(90deg,var(--bg-muted) 25%,var(--border-color) 50%,var(--bg-muted) 75%)',
       backgroundSize: '200% 100%',
       animation: 'shimmer 1.4s infinite',
     }} />
@@ -15,8 +15,8 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
 function StatCard({ label, value, icon, bg, fg, loading }) {
   return (
     <div style={{
-      background: '#fff',
-      border: '0.5px solid #E5E7EB',
+      background: 'var(--bg-card)',
+      border: '0.5px solid var(--border-color)',
       borderRadius: 12,
       padding: '16px 20px',
       display: 'flex',
@@ -24,11 +24,11 @@ function StatCard({ label, value, icon, bg, fg, loading }) {
       justifyContent: 'space-between',
     }}>
       <div>
-        <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>{label}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>{label}</div>
         {loading ? (
           <Skeleton w="70px" h={24} />
         ) : (
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>{value}</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
         )}
       </div>
       <div style={{
@@ -200,7 +200,7 @@ export default function Users() {
   };
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#F9FAFB', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: 'var(--bg-app)', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <style>{`
         @keyframes shimmer {
           0%   { background-position: 200% 0; }
@@ -222,8 +222,8 @@ export default function Users() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0 }}>Customer Accounts Management</h2>
-          <p style={{ fontSize: 12, color: '#6B7280', margin: '4px 0 0' }}>Search customer profiles, track service requests history, and flag or delete security accounts.</p>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Customer Accounts Management</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>Search customer profiles, track service requests history, and flag or delete security accounts.</p>
         </div>
       </div>
 
@@ -233,33 +233,33 @@ export default function Users() {
           label="Total Customers"
           value={totalUsersCount}
           icon="👥"
-          bg="#EFF4FF"
-          fg="#1A56DB"
+          bg="var(--accent-light)"
+          fg="var(--accent-color)"
           loading={loading}
         />
         <StatCard
           label="Active Accounts"
           value={activeCount}
           icon="🟢"
-          bg="#F0FDF4"
-          fg="#059669"
+          bg="var(--status-green-bg)"
+          fg="var(--status-green-fg)"
           loading={loading}
         />
         <StatCard
           label="Suspended Accounts"
           value={blockedCount}
           icon="🔴"
-          bg="#FEE2E2"
-          fg="#DC2626"
+          bg="var(--status-red-bg)"
+          fg="var(--status-red-fg)"
           loading={loading}
         />
       </div>
 
       {/* Table Card */}
-      <div style={{ background: '#fff', border: '0.5px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+      <div style={{ background: 'var(--bg-card)', border: '0.5px solid var(--border-color)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
         
         {/* Controls */}
-        <div style={{ padding: '20px 24px', borderBottom: '0.5px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '0.5px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           
           {/* Search bar */}
           <div style={{ position: 'relative', flex: 1, minWidth: 260, maxWidth: 400 }}>
@@ -278,7 +278,7 @@ export default function Users() {
                 fontFamily: "'DM Sans', sans-serif"
               }}
             />
-            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontSize: 15 }}>🔍</span>
+            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: 15 }}>🔍</span>
           </div>
 
           {/* Filters */}
@@ -286,7 +286,7 @@ export default function Users() {
             <select
               value={filterStatus}
               onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-              style={{ padding: '7px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 12, color: '#374151', outline: 'none', fontWeight: 500 }}
+              style={{ padding: '7px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 12, color: 'var(--text-primary)', outline: 'none', fontWeight: 500 }}
             >
               <option value="">All Statuses</option>
               <option value="active">Active Accounts</option>
@@ -296,7 +296,7 @@ export default function Users() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              style={{ padding: '7px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 12, color: '#374151', outline: 'none', fontWeight: 500 }}
+              style={{ padding: '7px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 12, color: 'var(--text-primary)', outline: 'none', fontWeight: 500 }}
             >
               <option value="name">Sort by Name</option>
               <option value="email">Sort by Email</option>
@@ -309,7 +309,7 @@ export default function Users() {
                 padding: '6px 10px',
                 borderRadius: 8,
                 border: '1px solid #D1D5DB',
-                backgroundColor: '#fff',
+                backgroundColor: 'var(--bg-card)',
                 cursor: 'pointer',
                 fontSize: 14,
                 display: 'flex',
@@ -325,7 +325,7 @@ export default function Users() {
         </div>
 
         {error && (
-          <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '12px 16px', borderRadius: 8, margin: '20px 24px 0', fontSize: 13 }}>
+          <div style={{ background: 'var(--status-red-bg)', border: '1px solid #FCA5A5', color: 'var(--status-red-fg)', padding: '12px 16px', borderRadius: 8, margin: '20px 24px 0', fontSize: 13 }}>
             ⚠️ <strong>Error:</strong> {error}
           </div>
         )}
@@ -334,7 +334,7 @@ export default function Users() {
         <div style={{ overflowX: 'auto', padding: '0 24px 20px' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 800 }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #E5E7EB', color: '#4B5563', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Customer Info</th>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Email Address</th>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Phone Number</th>
@@ -343,10 +343,10 @@ export default function Users() {
                 <th style={{ padding: '14px 8px', textAlign: 'center', fontWeight: 600 }}>Actions</th>
               </tr>
             </thead>
-            <tbody style={{ fontSize: 13, color: '#374151' }}>
+            <tbody style={{ fontSize: 13, color: 'var(--text-primary)' }}>
               {loading ? (
                 [...Array(6)].map((_, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
                     <td style={{ padding: '14px 8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Skeleton w="32px" h="32px" radius={16} />
@@ -362,26 +362,26 @@ export default function Users() {
                 ))
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan="6" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
-                    <div style={{ fontWeight: 600, color: '#4B5563' }}>No customers found</div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>No customers found</div>
                     <div style={{ fontSize: 12 }}>Try adjusting your search query or status filter.</div>
                   </td>
                 </tr>
               ) : (
                 users.map(u => (
-                  <tr key={u.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                  <tr key={u.id} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
                     <td style={{ padding: '14px 8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#EFF4FF', color: '#1A56DB', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, border: '1px solid #E5E7EB' }}>
+                        <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--accent-light)', color: 'var(--accent-color)', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, border: '1px solid var(--border-color)' }}>
                           {u.name.substring(0,2).toUpperCase()}
                         </div>
-                        <span style={{ fontWeight: 600, color: '#111827' }}>{u.name}</span>
+                        <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{u.name}</span>
                       </div>
                     </td>
-                    <td style={{ padding: '14px 8px', color: '#111827' }}>{u.email || '—'}</td>
-                    <td style={{ padding: '14px 8px', color: '#4B5563' }}>{u.phone || '—'}</td>
-                    <td style={{ padding: '14px 8px', color: '#6B7280' }}>{formatDate(u.created_at)}</td>
+                    <td style={{ padding: '14px 8px', color: 'var(--text-primary)' }}>{u.email || '—'}</td>
+                    <td style={{ padding: '14px 8px', color: 'var(--text-secondary)' }}>{u.phone || '—'}</td>
+                    <td style={{ padding: '14px 8px', color: 'var(--text-secondary)' }}>{formatDate(u.created_at)}</td>
                     <td style={{ padding: '14px 8px' }}>
                       <span style={{
                         display: 'inline-flex',
@@ -390,8 +390,8 @@ export default function Users() {
                         borderRadius: 12,
                         padding: '1px 8px',
                         fontWeight: 700,
-                        backgroundColor: u.status === 'suspended' ? '#FEE2E2' : '#D1FAE5',
-                        color: u.status === 'suspended' ? '#991B1B' : '#065F46'
+                        backgroundColor: u.status === 'suspended' ? 'var(--status-red-bg)' : 'var(--status-green-bg)',
+                        color: u.status === 'suspended' ? 'var(--status-red-fg)' : 'var(--status-green-fg)'
                       }}>
                         {u.status === 'suspended' ? '🔴 Suspended' : '🟢 Active'}
                       </span>
@@ -400,7 +400,7 @@ export default function Users() {
                       <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
                         <button
                           onClick={() => handleViewDetails(u.id)}
-                          style={{ border: '1px solid #E5E7EB', background: '#fff', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 500, color: '#374151', cursor: 'pointer' }}
+                          style={{ border: '1px solid var(--border-color)', background: 'var(--bg-card)', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 500, color: 'var(--text-primary)', cursor: 'pointer' }}
                         >
                           👁️ View
                         </button>
@@ -408,13 +408,13 @@ export default function Users() {
                           onClick={() => handleToggleBlock(u)}
                           style={{
                             border: '1px solid',
-                            borderColor: u.status === 'suspended' ? '#059669' : '#D97706',
-                            background: u.status === 'suspended' ? '#EFFDF5' : '#FFFBEB',
+                            borderColor: u.status === 'suspended' ? 'var(--status-green-fg)' : 'var(--status-amber-fg)',
+                            background: u.status === 'suspended' ? '#EFFDF5' : 'var(--status-amber-bg)',
                             borderRadius: 6,
                             padding: '4px 8px',
                             fontSize: 11,
                             fontWeight: 600,
-                            color: u.status === 'suspended' ? '#059669' : '#D97706',
+                            color: u.status === 'suspended' ? 'var(--status-green-fg)' : 'var(--status-amber-fg)',
                             cursor: 'pointer'
                           }}
                         >
@@ -422,7 +422,7 @@ export default function Users() {
                         </button>
                         <button
                           onClick={() => handleDeleteUser(u)}
-                          style={{ border: '1px solid #FCA5A5', background: '#FEE2E2', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 600, color: '#DC2626', cursor: 'pointer' }}
+                          style={{ border: '1px solid #FCA5A5', background: 'var(--status-red-bg)', borderRadius: 6, padding: '4px 8px', fontSize: 11, fontWeight: 600, color: 'var(--status-red-fg)', cursor: 'pointer' }}
                         >
                           🗑️ Delete
                         </button>
@@ -437,8 +437,8 @@ export default function Users() {
 
         {/* Pagination Controls */}
         {!loading && users.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderTop: '0.5px solid #F3F4F6' }}>
-            <span style={{ fontSize: 12, color: '#6B7280' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderTop: '0.5px solid var(--bg-muted)' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               Showing page <strong>{currentPage}</strong> of <strong>{totalPages}</strong> (<strong>{totalDocs}</strong> total accounts)
             </span>
             <div style={{ display: 'flex', gap: 6 }}>
@@ -448,9 +448,9 @@ export default function Users() {
                 style={{
                   padding: '6px 12px',
                   borderRadius: 6,
-                  border: '1px solid #E5E7EB',
-                  background: '#fff',
-                  color: currentPage === 1 ? '#9CA3AF' : '#374151',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card)',
+                  color: currentPage === 1 ? 'var(--text-muted)' : 'var(--text-primary)',
                   fontSize: 12,
                   fontWeight: 500,
                   cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
@@ -464,9 +464,9 @@ export default function Users() {
                 style={{
                   padding: '6px 12px',
                   borderRadius: 6,
-                  border: '1px solid #E5E7EB',
-                  background: '#fff',
-                  color: currentPage === totalPages ? '#9CA3AF' : '#374151',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card)',
+                  color: currentPage === totalPages ? 'var(--text-muted)' : 'var(--text-primary)',
                   fontSize: 12,
                   fontWeight: 500,
                   cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
@@ -499,8 +499,8 @@ export default function Users() {
               width: '100%',
               maxWidth: 520,
               height: '100%',
-              background: '#fff',
-              borderLeft: '1px solid #E5E7EB',
+              background: 'var(--bg-card)',
+              borderLeft: '1px solid var(--border-color)',
               display: 'flex',
               flexDirection: 'column',
               boxShadow: '-4px 0 24px rgba(0,0,0,0.08)',
@@ -508,14 +508,14 @@ export default function Users() {
             }}
           >
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid #E5E7EB' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' }}>
               <div>
-                <span style={{ fontSize: 11, background: '#EFF4FF', color: '#1A56DB', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>CUSTOMER OVERVIEW</span>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: '4px 0 0' }}>Profile details</h3>
+                <span style={{ fontSize: 11, background: 'var(--accent-light)', color: 'var(--accent-color)', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>CUSTOMER OVERVIEW</span>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0' }}>Profile details</h3>
               </div>
               <button
                 onClick={() => setSelectedUser(null)}
-                style={{ background: 'none', border: 'none', fontSize: 20, color: '#9CA3AF', cursor: 'pointer', padding: 4 }}
+                style={{ background: 'none', border: 'none', fontSize: 20, color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
               >
                 ✕
               </button>
@@ -524,8 +524,8 @@ export default function Users() {
             {/* Scroll Body */}
             <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
               {drawerLoading ? (
-                <div style={{ padding: 20, textAlign: 'center', color: '#6B7280' }}>
-                  <div style={{ border: '3px solid #f3f3f3', borderTop: '3px solid #1A56DB', borderRadius: '50%', width: 24, height: 24, animation: 'spin 1s linear infinite', margin: '0 auto 10px' }} />
+                <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  <div style={{ border: '3px solid #f3f3f3', borderTop: '3px solid var(--accent-color)', borderRadius: '50%', width: 24, height: 24, animation: 'spin 1s linear infinite', margin: '0 auto 10px' }} />
                   <span>Loading full profiles...</span>
                   <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                 </div>
@@ -534,21 +534,21 @@ export default function Users() {
               ) : (
                 <div className="animate-fade">
                   {/* Avatar Profile Grid */}
-                  <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 24, paddingBottom: 20, borderBottom: '1px solid #E5E7EB' }}>
-                    <div style={{ width: 64, height: 64, borderRadius: 16, background: '#EFF4FF', color: '#1A56DB', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, border: '2px solid #1A56DB' }}>
+                  <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 24, paddingBottom: 20, borderBottom: '1px solid var(--border-color)' }}>
+                    <div style={{ width: 64, height: 64, borderRadius: 16, background: 'var(--accent-light)', color: 'var(--accent-color)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, border: '2px solid var(--accent-color)' }}>
                       {selectedUser.name.substring(0,2).toUpperCase()}
                     </div>
                     <div>
-                      <h4 style={{ fontSize: 16, fontWeight: 700, color: '#111827', margin: 0 }}>{selectedUser.name}</h4>
-                      <p style={{ fontSize: 12, color: '#6B7280', margin: '4px 0 6px' }}>Joined on {formatDate(selectedUser.created_at)}</p>
+                      <h4 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>{selectedUser.name}</h4>
+                      <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 6px' }}>Joined on {formatDate(selectedUser.created_at)}</p>
                       <span style={{
                         display: 'inline-flex',
                         fontSize: 9,
                         borderRadius: 10,
                         padding: '1px 6px',
                         fontWeight: 700,
-                        backgroundColor: selectedUser.status === 'suspended' ? '#FEE2E2' : '#D1FAE5',
-                        color: selectedUser.status === 'suspended' ? '#991B1B' : '#065F46'
+                        backgroundColor: selectedUser.status === 'suspended' ? 'var(--status-red-bg)' : 'var(--status-green-bg)',
+                        color: selectedUser.status === 'suspended' ? 'var(--status-red-fg)' : 'var(--status-green-fg)'
                       }}>
                         {selectedUser.status === 'suspended' ? '🔴 Suspended' : '🟢 Active'}
                       </span>
@@ -557,51 +557,51 @@ export default function Users() {
 
                   {/* Core details list */}
                   <div style={{ marginBottom: 28 }}>
-                    <h5 style={{ fontSize: 11, fontWeight: 700, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Contact details</h5>
+                    <h5 style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Contact details</h5>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
-                      <div><span style={{ color: '#6B7280' }}>Email Address:</span> <strong style={{ color: '#111827' }}>{selectedUser.email || '—'}</strong></div>
-                      <div><span style={{ color: '#6B7280' }}>Phone Number:</span> <strong style={{ color: '#111827' }}>{selectedUser.phone || '—'}</strong></div>
-                      <div><span style={{ color: '#6B7280' }}>Database User ID:</span> <strong style={{ color: '#111827', fontFamily: 'monospace' }}>#{selectedUser.id}</strong></div>
+                      <div><span style={{ color: 'var(--text-secondary)' }}>Email Address:</span> <strong style={{ color: 'var(--text-primary)' }}>{selectedUser.email || '—'}</strong></div>
+                      <div><span style={{ color: 'var(--text-secondary)' }}>Phone Number:</span> <strong style={{ color: 'var(--text-primary)' }}>{selectedUser.phone || '—'}</strong></div>
+                      <div><span style={{ color: 'var(--text-secondary)' }}>Database User ID:</span> <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>#{selectedUser.id}</strong></div>
                     </div>
                   </div>
 
                   {/* Booking list */}
                   <div style={{ marginBottom: 28 }}>
-                    <h5 style={{ fontSize: 11, fontWeight: 700, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Booking list history</h5>
+                    <h5 style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Booking list history</h5>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {selectedUser.bookings && selectedUser.bookings.length > 0 ? (
                         selectedUser.bookings.map(b => (
-                          <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8 }}>
+                          <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: 8 }}>
                             <div>
-                              <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{b.service_name || 'Service Booking'}</div>
-                              <div style={{ fontSize: 11, color: '#6B7280' }}>ID: #{b.id.substring(0,8)} • {formatDate(b.booking_date)}</div>
+                              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{b.service_name || 'Service Booking'}</div>
+                              <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>ID: #{b.id.substring(0,8)} • {formatDate(b.booking_date)}</div>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                              <strong style={{ fontSize: 13, color: '#111827' }}>{formatCurrency(b.amount)}</strong>
-                              <span style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, color: b.status === 'completed' ? '#059669' : '#D97706' }}>{b.status}</span>
+                              <strong style={{ fontSize: 13, color: 'var(--text-primary)' }}>{formatCurrency(b.amount)}</strong>
+                              <span style={{ fontSize: 9, textTransform: 'uppercase', fontWeight: 700, color: b.status === 'completed' ? 'var(--status-green-fg)' : 'var(--status-amber-fg)' }}>{b.status}</span>
                             </div>
                           </div>
                         ))
                       ) : (
-                        <div style={{ border: '1px dashed #E5E7EB', borderRadius: 8, padding: 16, textAlign: 'center', fontSize: 12, color: '#9CA3AF' }}>No bookings found.</div>
+                        <div style={{ border: '1px dashed var(--border-color)', borderRadius: 8, padding: 16, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>No bookings found.</div>
                       )}
                     </div>
                   </div>
 
                   {/* System activity logs */}
                   <div>
-                    <h5 style={{ fontSize: 11, fontWeight: 700, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>System Activity log</h5>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 12, borderLeft: '1px solid #E5E7EB', marginLeft: 6 }}>
+                    <h5 style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>System Activity log</h5>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingLeft: 12, borderLeft: '1px solid var(--border-color)', marginLeft: 6 }}>
                       {selectedUser.activity_logs && selectedUser.activity_logs.length > 0 ? (
                         selectedUser.activity_logs.map(l => (
                           <div key={l.id} style={{ position: 'relative' }}>
-                            <div style={{ position: 'absolute', left: -16, top: 4, width: 7, height: 7, borderRadius: '50%', backgroundColor: '#1A56DB' }} />
-                            <div style={{ fontSize: 13, color: '#111827', fontWeight: 500 }}>{l.action}</div>
-                            <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>IP: {l.ip_address || '—'} • {new Date(l.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
+                            <div style={{ position: 'absolute', left: -16, top: 4, width: 7, height: 7, borderRadius: '50%', backgroundColor: 'var(--accent-color)' }} />
+                            <div style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 500 }}>{l.action}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>IP: {l.ip_address || '—'} • {new Date(l.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>
                           </div>
                         ))
                       ) : (
-                        <div style={{ fontSize: 12, color: '#9CA3AF', fontStyle: 'italic' }}>No activity records found.</div>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>No activity records found.</div>
                       )}
                     </div>
                   </div>
@@ -610,7 +610,7 @@ export default function Users() {
             </div>
 
             {/* Footer */}
-            <div style={{ borderTop: '1px solid #E5E7EB', padding: '16px 24px', backgroundColor: '#FAFAFB', display: 'flex', gap: 10 }}>
+            <div style={{ borderTop: '1px solid var(--border-color)', padding: '16px 24px', backgroundColor: '#FAFAFB', display: 'flex', gap: 10 }}>
               <button
                 onClick={() => setSelectedUser(null)}
                 style={{
@@ -618,8 +618,8 @@ export default function Users() {
                   padding: '10px 14px',
                   borderRadius: 8,
                   border: 'none',
-                  background: '#1A56DB',
-                  color: '#fff',
+                  background: 'var(--accent-color)',
+                  color: 'var(--bg-card)',
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: 'pointer',

@@ -1,12 +1,29 @@
 import axios from "axios";
 
+const getBaseURL = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("api") === "local") {
+    localStorage.setItem("use_local_api", "true");
+    return "http://localhost:5000/api";
+  } else if (urlParams.get("api") === "live") {
+    localStorage.removeItem("use_local_api");
+    return "https://service-app-hsu6.onrender.com/api";
+  }
+
+  if (localStorage.getItem("use_local_api") === "true") {
+    return "http://localhost:5000/api";
+  }
+  return "https://service-app-hsu6.onrender.com/api";
+};
+
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
-  timeout: 10000,
+  baseURL: getBaseURL(),
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
 
 
 
