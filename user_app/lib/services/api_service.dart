@@ -22,6 +22,7 @@ class ApiService {
 
   String? _token;
   UserAccount? _account;
+  void Function()? onUnauthorized;
 
   String? get token => _token;
   UserAccount? get account => _account;
@@ -81,6 +82,7 @@ class ApiService {
     }
     if (response.statusCode == 401) {
       logout();
+      onUnauthorized?.call();
     }
     final message = body is Map ? (body['message'] as String? ?? 'Request failed') : 'Request failed';
     throw ApiException(message, statusCode: response.statusCode);

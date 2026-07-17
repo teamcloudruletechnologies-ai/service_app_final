@@ -4,7 +4,11 @@ import '../models/models.dart';
 import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  AuthProvider(this._api);
+  AuthProvider(this._api) {
+    _api.onUnauthorized = () {
+      notifyListeners();
+    };
+  }
 
   final ApiService _api;
   bool loading = true;
