@@ -10,6 +10,7 @@ const upload = require("../middlewares/upload.middleware");
 const router = express.Router();
 
 router.get("/services/categories", controller.listCategories);
+router.get("/banners", controller.listActiveBanners);
 
 router.get(
   "/services",
@@ -40,13 +41,17 @@ router.post(
   }
 );
 
-// User profile update (online status, city, service type, experience)
+// Worker profile update (onboarding details + status)
 router.patch(
   "/worker/profile",
   allowRoles(roles.WORKER),
   [
+    body("name").optional().trim().notEmpty(),
+    body("email").optional().isEmail().normalizeEmail(),
     body("status").optional().isIn(["active", "inactive"]),
     body("city").optional().isString(),
+    body("state").optional().isString(),
+    body("address").optional().isString(),
     body("pincode").optional().isString(),
     body("serviceType").optional().isString(),
     body("experienceYears").optional().isInt({ min: 0 }),
@@ -55,13 +60,22 @@ router.patch(
   controller.updateWorkerProfile
 );
 
-// User profile update (name, email)
+router.get(
+  "/worker/earnings",
+  allowRoles(roles.WORKER),
+  controller.getWorkerEarnings
+);
+
+// User profile update (name, email, phone, state, address)
 router.patch(
   "/user/profile",
   allowRoles(roles.USER),
   [
     body("name").optional().trim().notEmpty().withMessage("Name cannot be empty"),
     body("email").optional().isEmail().withMessage("Must be a valid email").normalizeEmail(),
+    body("phone").optional().trim().notEmpty().withMessage("Phone cannot be empty"),
+    body("state").optional().trim().notEmpty(),
+    body("address").optional().trim().notEmpty(),
   ],
   validate,
   controller.updateUserProfile
@@ -116,6 +130,52 @@ router.patch(
   ],
   validate,
   controller.updateMyBookingStatus
+);
+
+const paymentController = require("../controllers/payment.controller");
+const reviewController = require("../controllers/review.controller");
+
+router.post(
+  "/payments/order",
+  allowRoles(roles.USER),
+  [body("bookingId").isInt()],
+  validate,
+  paymentController.createOrder
+);
+
+router.post(
+  "/payments/verify",
+  allowRoles(roles.USER),
+  [
+    body("bookingId").isInt(),
+    body("razorpayPaymentId").trim().notEmpty(),
+    body("razorpaySignature").trim().notEmpty(),
+    body("razorpayOrderId").trim().notEmpty(),
+  ],
+  validate,
+  paymentController.verifyPayment
+);
+
+router.post(
+  "/reviews",
+  allowRoles(roles.USER),
+  [
+    body("bookingId").isInt(),
+    body("rating").isInt({ min: 1, max: 5 }),
+    body("comment").optional().trim(),
+  ],
+  validate,
+  reviewController.createReview
+);
+
+router.get(
+  "/reviews",
+  [
+    query("workerId").optional().isInt(),
+    query("rating").optional().isInt({ min: 1, max: 5 }),
+  ],
+  validate,
+  reviewController.listReviews
 );
 
 module.exports = router;

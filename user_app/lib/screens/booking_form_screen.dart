@@ -5,12 +5,14 @@ import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../providers/booking_provider.dart';
 import '../theme/app_theme.dart';
-import 'main_shell.dart';
+import 'payment_screen.dart';
 
 class BookingFormScreen extends StatefulWidget {
-  const BookingFormScreen({super.key, required this.service});
+  const BookingFormScreen({super.key, required this.service, this.initialAddress, this.selectedWorker});
 
   final ServiceItem service;
+  final String? initialAddress;
+  final NearbyWorker? selectedWorker;
 
   @override
   State<BookingFormScreen> createState() => _BookingFormScreenState();
@@ -21,6 +23,14 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   final _addressCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
   DateTime? _scheduledAt;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialAddress != null) {
+      _addressCtrl.text = widget.initialAddress!;
+    }
+  }
 
   @override
   void dispose() {
@@ -57,16 +67,22 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
           address: _addressCtrl.text.trim(),
           notes: _notesCtrl.text.trim(),
           scheduledAt: _scheduledAt,
+          workerId: widget.selectedWorker?.id,
         );
 
     if (!mounted) return;
     if (booking != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Booking placed successfully!')),
+        const SnackBar(
+          content: Text('Booking placed! Proceeding to payment...'),
+          backgroundColor: Colors.green,
+        ),
       );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-        (_) => false,
+      // Navigate to payment screen so user can pay immediately
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => PaymentScreen(booking: booking),
+        ),
       );
     } else {
       final error = context.read<BookingProvider>().error;
@@ -107,6 +123,40 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                   ),
                 ),
               ),
+              if (widget.selectedWorker != null) ...[
+                const SizedBox(height: 12),
+                Card(
+                  color: Colors.grey.shade50,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: (widget.selectedWorker!.photoUrl != null && widget.selectedWorker!.photoUrl!.isNotEmpty)
+                          ? NetworkImage(widget.selectedWorker!.photoUrl!)
+                          : null,
+                      child: (widget.selectedWorker!.photoUrl == null || widget.selectedWorker!.photoUrl!.isEmpty)
+                          ? const Icon(Icons.person)
+                          : null,
+                    ),
+                    title: Text(widget.selectedWorker!.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text('Selected Professional (${widget.selectedWorker!.serviceType ?? "Service"})'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star, color: Colors.amber, size: 16),
+                        const SizedBox(width: 2),
+                        Text(
+                          widget.selectedWorker!.rating.toStringAsFixed(1),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
               TextFormField(
                 controller: _addressCtrl,

@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import 'main_shell.dart';
-import 'register_screen.dart';
-
+import 'user_onboarding_screen.dart';
+import '../models/models.dart';
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -112,6 +112,13 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    if (otpStr != '123456') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid OTP. Use 123456 for local testing.')),
+      );
+      return;
+    }
+
     setState(() {
       _localLoading = true;
     });
@@ -125,19 +132,13 @@ class _LoginScreenState extends State<LoginScreen> {
             ? '+$enteredPhone'
             : '+91$enteredPhone';
 
-    bool ok = false;
+    Map<String, dynamic>? res;
     String? localError;
-    bool isUserNotFound = false;
 
     try {
-      ok = await auth.phoneLogin(cleanPhone, role: 'user');
+      res = await auth.phoneLogin(cleanPhone, role: 'user');
     } catch (e) {
-      ok = false;
       localError = e.toString();
-    }
-
-    if (!ok && auth.error != null && (auth.error!.toLowerCase().contains('404') || auth.error!.toLowerCase().contains('not found') || auth.error!.contains('USER_NOT_FOUND'))) {
-      isUserNotFound = true;
     }
 
     if (!mounted) return;
@@ -145,41 +146,24 @@ class _LoginScreenState extends State<LoginScreen> {
       _localLoading = false;
     });
 
-    if (ok) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-      );
-    } else if (isUserNotFound) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => RegisterScreen(initialPhone: cleanPhone),
-        ),
-      );
-    } else {
-      final String? errorText = auth.error ?? localError;
-      final bool isConnectionError = errorText != null &&
-          (errorText.toLowerCase().contains('connection') ||
-           errorText.toLowerCase().contains('socket') ||
-           errorText.toLowerCase().contains('refused') ||
-           errorText.toLowerCase().contains('unreachable') ||
-           errorText.toLowerCase().contains('failed to connect') ||
-           errorText.toLowerCase().contains('clientexception'));
+    if (res != null) {
+      final isNew = res['is_new'] as bool? ?? false;
+      final account = UserAccount.fromJson(res['account'] as Map<String, dynamic>);
 
-      if (isConnectionError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Bypassing server connection for demo mode...'),
-            duration: Duration(seconds: 2),
-          ),
+      if (isNew || account.needsOnboarding) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const UserOnboardingScreen()),
         );
+      } else {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const MainShell()),
         );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorText ?? 'Verification failed')),
-        );
       }
+    } else {
+      final String? errorText = auth.error ?? localError;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorText ?? 'Verification failed')),
+      );
     }
   }
 
@@ -426,32 +410,10 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "Don't have an account? ",
-                style: TextStyle(color: Color(0xFF6B7280), fontSize: 14),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const RegisterScreen(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Sign Up',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ],
+          const Text(
+            "New to ServiceApp? Enter your phone number. We'll set up your account on verification.",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
           ),
         ],
       ),

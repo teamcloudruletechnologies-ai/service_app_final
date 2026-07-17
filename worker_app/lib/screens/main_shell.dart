@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/auth_provider.dart';
 import 'profile_screen.dart';
 import 'worker_dashboard_screen.dart';
+import 'earnings_screen.dart';
+import 'reviews_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -13,21 +17,31 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _index = 0;
 
-  static const List<Widget> _pages = [
-    WorkerDashboardScreen(),
-    ProfileScreen(),
-  ];
-
-  static const List<NavigationDestination> _destinations = [
-    NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Dashboard'),
-    NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final user = auth.user;
+    final workerId = user?.id ?? 0;
+
+    final pages = <Widget>[
+      const WorkerDashboardScreen(),
+      const EarningsScreen(),
+      workerId > 0
+          ? ReviewsScreen(workerId: workerId)
+          : const _ReviewsPlaceholder(),
+      const ProfileScreen(),
+    ];
+
+    final destinations = const [
+      NavigationDestination(icon: Icon(Icons.receipt_long_outlined), selectedIcon: Icon(Icons.receipt_long), label: 'Orders'),
+      NavigationDestination(icon: Icon(Icons.account_balance_wallet_outlined), selectedIcon: Icon(Icons.account_balance_wallet), label: 'Earnings'),
+      NavigationDestination(icon: Icon(Icons.star_outline), selectedIcon: Icon(Icons.star), label: 'Activity'),
+      NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
+    ];
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: IndexedStack(index: _index, children: _pages),
+      body: IndexedStack(index: _index, children: pages),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -36,9 +50,20 @@ class _MainShellState extends State<MainShell> {
         child: NavigationBar(
           selectedIndex: _index,
           onDestinationSelected: (i) => setState(() => _index = i),
-          destinations: _destinations,
+          destinations: destinations,
         ),
       ),
+    );
+  }
+}
+
+class _ReviewsPlaceholder extends StatelessWidget {
+  const _ReviewsPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(child: Text('No reviews available')),
     );
   }
 }

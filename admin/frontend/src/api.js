@@ -1,12 +1,29 @@
 import axios from "axios";
 
+const getBaseURL = () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("api") === "local") {
+    localStorage.setItem("use_local_api", "true");
+    return "http://localhost:5000/api";
+  } else if (urlParams.get("api") === "live") {
+    localStorage.removeItem("use_local_api");
+    return "https://service-app-hsu6.onrender.com/api";
+  }
+
+  if (localStorage.getItem("use_local_api") === "true") {
+    return "http://localhost:5000/api";
+  }
+  return "https://service-app-hsu6.onrender.com/api";
+};
+
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
-  timeout: 10000,
+  baseURL: getBaseURL(),
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
 
 
 
@@ -37,16 +54,12 @@ api.interceptors.response.use(
 // ─── Auth ────────────────────────────────────────────────────
 export const authAPI = {
   login: (email, password) => api.post("/auth/login", { login: email, password, role: "admin" }),
-  logout: () => api.post("/auth/logout"),
   me: () => api.get("/auth/me"),
 };
 
 // ─── Dashboard ───────────────────────────────────────────────
 export const dashboardAPI = {
   getStats: () => api.get("/dashboard/overview"), // ✅ Fixed: was /dashboard/stats
-  getRecentBookings: () => api.get("/dashboard/recent-bookings"),
-  getRevenueChart: () => api.get("/dashboard/revenue-chart"),
-  getActivity: () => api.get("/dashboard/activity"),
 };
 
 // ─── Users ───────────────────────────────────────────────────
@@ -77,8 +90,6 @@ export const workersAPI = {
 export const kycAPI = {
   getAll: (params) => api.get("/kyc", { params }),
   getById: (id) => api.get(`/kyc/${id}`),
-  approve: (id) => api.post(`/kyc/${id}/approve`),
-  reject: (id, reason) => api.post(`/kyc/${id}/reject`, { reason }),
   review: (id, data) => api.patch(`/kyc/${id}/review`, data),
 };
 
@@ -96,6 +107,12 @@ export const invoicesAPI = {
   getById: (id) => api.get(`/admin/invoices/${id}`),
   getReports: () => api.get("/admin/invoices/reports"),
   getPayouts: () => api.get("/admin/invoices/payouts"),
+  getPayments: () => api.get("/admin/invoices/payments"),
+};
+
+// ─── Reviews ─────────────────────────────────────────────────
+export const reviewsAPI = {
+  getAll: (params) => api.get("/admin/reviews", { params }),
 };
 
 // ─── Services ────────────────────────────────────────────────
@@ -108,12 +125,24 @@ export const servicesAPI = {
   getCategories: () => api.get("/admin/services/categories"),
 };
 
+// ─── Banners ─────────────────────────────────────────────────
+export const bannersAPI = {
+  getAll: (params) => api.get("/admin/banners", { params }),
+  create: (formData) => api.post("/admin/banners", formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  }),
+  update: (id, formData) => api.put(`/admin/banners/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" }
+  }),
+  delete: (id) => api.delete(`/admin/banners/${id}`),
+};
+
 // ─── Complaints ──────────────────────────────────────────────
 export const complaintsAPI = {
   getAll: (params) => api.get("/admin/complaints", { params }),
   getById: (id) => api.get(`/admin/complaints/${id}`),
   updateStatus: (id, status) => api.patch(`/admin/complaints/${id}/status`, { status }),
-  addNotes: (id, notes) => api.post(`/admin/complaints/${id}/notes`, { admin_notes: notes }),
+  addNotes: (id, notes) => api.post(`/admin/complaints/${id}/notes`, { note: notes }),
 };
 
 // ─── Locations ───────────────────────────────────────────────

@@ -3,40 +3,40 @@ import { dashboardAPI } from '../api';
 
 /* ─── colour tokens ─── */
 const C = {
-  blue:   { bg: '#EFF4FF', fg: '#1A56DB' },
-  green:  { bg: '#F0FDF4', fg: '#059669' },
-  amber:  { bg: '#FFFBEB', fg: '#D97706' },
+  blue:   { bg: 'var(--accent-light)', fg: 'var(--accent-color)' },
+  green:  { bg: 'var(--status-green-bg)', fg: 'var(--status-green-fg)' },
+  amber:  { bg: 'var(--status-amber-bg)', fg: 'var(--status-amber-fg)' },
   purple: { bg: '#F5F3FF', fg: '#7C3AED' },
-  red:    { bg: '#FFF1F2', fg: '#DC2626' },
+  red:    { bg: 'var(--status-red-bg)', fg: 'var(--status-red-fg)' },
 };
 
 
 const STATUS_STYLE = {
-  Completed:     { background: '#D1FAE5', color: '#065F46' },
-  completed:     { background: '#D1FAE5', color: '#065F46' },
-  'In Progress': { background: '#FEF3C7', color: '#92400E' },
-  in_progress:   { background: '#FEF3C7', color: '#92400E' },
-  Pending:       { background: '#EFF4FF', color: '#1E40AF' },
-  pending:       { background: '#EFF4FF', color: '#1E40AF' },
-  Cancelled:     { background: '#FEE2E2', color: '#991B1B' },
-  cancelled:     { background: '#FEE2E2', color: '#991B1B' },
+  Completed:     { background: 'var(--status-green-bg)', color: 'var(--status-green-fg)' },
+  completed:     { background: 'var(--status-green-bg)', color: 'var(--status-green-fg)' },
+  'In Progress': { background: 'var(--status-amber-bg)', color: 'var(--status-amber-fg)' },
+  in_progress:   { background: 'var(--status-amber-bg)', color: 'var(--status-amber-fg)' },
+  Pending:       { background: 'var(--accent-light)', color: 'var(--accent-dark)' },
+  pending:       { background: 'var(--accent-light)', color: 'var(--accent-dark)' },
+  Cancelled:     { background: 'var(--status-red-bg)', color: 'var(--status-red-fg)' },
+  cancelled:     { background: 'var(--status-red-bg)', color: 'var(--status-red-fg)' },
 };
 
-const BAR_COLORS = ['#BFDBFE','#93C5FD','#60A5FA','#3B82F6','#2563EB','#1D4ED8','#1E40AF'];
+const BAR_COLORS = ['var(--accent-border)','var(--accent-border)','#60A5FA','var(--accent-color)','var(--accent-color)','var(--accent-dark)','var(--accent-dark)'];
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
 const SERVICE_DONUT = [
-  { label: 'Plumbing',   val: '34%', color: '#3B82F6' },
+  { label: 'Plumbing',   val: '34%', color: 'var(--accent-color)' },
   { label: 'Cleaning',   val: '27%', color: '#10B981' },
   { label: 'Electrical', val: '19%', color: '#F59E0B' },
   { label: 'AC Service', val: '12%', color: '#8B5CF6' },
-  { label: 'Others',     val: '8%',  color: '#6B7280' },
+  { label: 'Others',     val: '8%',  color: 'var(--text-secondary)' },
 ];
 
 const font = "'DM Sans', system-ui, sans-serif";
 const card = {
-  background: '#fff',
-  border: '0.5px solid #E5E7EB',
+  background: 'var(--bg-card)',
+  border: '0.5px solid var(--border-color)',
   borderRadius: 12,
   padding: '14px 16px',
 };
@@ -59,7 +59,7 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
     <div style={{
       width: w, height: h, borderRadius: radius,
-      background: 'linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%)',
+      background: 'linear-gradient(90deg,var(--bg-muted) 25%,var(--border-color) 50%,var(--bg-muted) 75%)',
       backgroundSize: '200% 100%',
       animation: 'shimmer 1.4s infinite',
     }} />
@@ -68,24 +68,51 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
 
 /* ─── sub-components ─── */
 function StatCard({ label, value, trend, note, up, bg, fg, loading }) {
+  // Select generic simple icons based on label keyword
+  const isUsers = label.toLowerCase().includes('user') || label.toLowerCase().includes('worker');
+  const isMoney = label.toLowerCase().includes('revenue');
+  const isDoc = label.toLowerCase().includes('kyc');
+  const isCheck = label.toLowerCase().includes('complete');
+  const isCross = label.toLowerCase().includes('cancel');
+
+  let Icon = (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    </svg>
+  );
+  if (isUsers) Icon = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+  if (isMoney) Icon = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>;
+  if (isDoc) Icon = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>;
+  if (isCheck) Icon = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>;
+  if (isCross) Icon = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>;
+
   return (
-    <div style={card}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
+    <div style={{
+      ...card, 
+      border: '1px solid var(--border-color)', 
+      boxShadow: '0 2px 8px rgba(28,25,23,0.03)',
+      transition: 'all 0.2s ease',
+      cursor: 'pointer'
+    }}
+    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#F87171'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(226,55,68,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(28,25,23,0.03)'; e.currentTarget.style.transform = 'none'; }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6 }}>{label}</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 8, letterSpacing: '0.02em', textTransform: 'uppercase' }}>{label}</div>
           {loading
-            ? <Skeleton w="60%" h={22} />
-            : <div style={{ fontSize: 22, fontWeight: 700, color: '#111827', lineHeight: 1 }}>{value}</div>
+            ? <Skeleton w="60%" h={26} />
+            : <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.02em' }}>{value}</div>
           }
         </div>
-        <div style={{ width: 34, height: 34, borderRadius: 8, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <span style={{ color: fg, fontSize: 17 }}>●</span>
+        <div style={{ width: 42, height: 42, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <span style={{ color: fg, display: 'flex' }}>{Icon}</span>
         </div>
       </div>
       {(trend || note) && (
         loading
-          ? <Skeleton w="70%" h={11} />
-          : <div style={{ fontSize: 11, color: up === false ? '#DC2626' : up ? '#059669' : '#9CA3AF' }}>
+          ? <Skeleton w="70%" h={12} />
+          : <div style={{ fontSize: 12, fontWeight: 500, color: up === false ? 'var(--status-red-fg)' : up ? 'var(--status-green-fg)' : 'var(--text-muted)' }}>
               {up === true && '↑ '}{up === false && '↓ '}{trend || note}
             </div>
       )}
@@ -111,7 +138,7 @@ function BarChart({ data }) {
             onMouseLeave={() => setHov(null)}
           >
             {hov === i && (
-              <div style={{ fontSize: 10, color: '#1A56DB', fontWeight: 700, position: 'absolute', bottom: 32 + h, background: '#EFF4FF', borderRadius: 4, padding: '2px 6px' }}>
+              <div style={{ fontSize: 10, color: 'var(--accent-color)', fontWeight: 700, position: 'absolute', bottom: 32 + h, background: 'var(--accent-light)', borderRadius: 4, padding: '2px 6px' }}>
                 {formatRevenue(v)}
               </div>
             )}
@@ -121,7 +148,7 @@ function BarChart({ data }) {
               opacity: hov === null || hov === i ? 1 : 0.5,
               transition: 'opacity 0.15s',
             }} />
-            <span style={{ fontSize: 10, color: '#9CA3AF', position: 'absolute', bottom: 4 }}>{labels[i]}</span>
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', position: 'absolute', bottom: 4 }}>{labels[i]}</span>
           </div>
         );
       })}
@@ -155,12 +182,12 @@ function DonutSVG({ totalBookings }) {
         return (
           <path key={i}
             d={`M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${inner} ${inner} 0 ${large} 0 ${ix1} ${iy1} Z`}
-            fill={seg.color} stroke="#fff" strokeWidth={1.5}
+            fill={seg.color} stroke="var(--bg-card)" strokeWidth={1.5}
           />
         );
       })}
-      <text x={cx} y={cy-5} textAnchor="middle" fontSize={11} fontWeight={700} fill="#111827">{totalBookings || '—'}</text>
-      <text x={cx} y={cy+9} textAnchor="middle" fontSize={8} fill="#9CA3AF">bookings</text>
+      <text x={cx} y={cy-5} textAnchor="middle" fontSize={11} fontWeight={700} fill="var(--text-primary)">{totalBookings || '—'}</text>
+      <text x={cx} y={cy+9} textAnchor="middle" fontSize={8} fill="var(--text-muted)">bookings</text>
     </svg>
   );
 }
@@ -200,6 +227,9 @@ export default function Dashboard() {
   const recentBookings = data?.recentBookings || [];
   const revenueChart   = data?.revenueChart   || [];
   const activity       = data?.activity       || [];
+  const todayStats     = data?.todayStats     || {};
+  const activeWorkers  = data?.activeWorkers  || 0;
+  const topServices    = data?.topServices    || [];
 
   const totalBookings   = bookings.reduce((s, b) => s + Number(b.total), 0);
   const completedCount  = getBookingCount(bookings, 'completed');
@@ -217,14 +247,22 @@ export default function Dashboard() {
         }
       `}</style>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '18px 20px', background: '#F9FAFB', fontFamily: font }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '18px 20px', background: 'var(--bg-app)', fontFamily: font }}>
 
         {/* Error banner */}
         {error && (
-          <div style={{ background: '#FEE2E2', color: '#991B1B', padding: '10px 14px', borderRadius: 8, marginBottom: 14, fontSize: 13 }}>
+          <div style={{ background: 'var(--status-red-bg)', color: 'var(--status-red-fg)', padding: '10px 14px', borderRadius: 8, marginBottom: 14, fontSize: 13 }}>
             ⚠️ API Error: {error} — showing cached data
           </div>
         )}
+
+        {/* Today's Overview */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 14 }}>
+          <StatCard label="Today's Bookings"    value={todayStats.today_bookings ?? 0}                  note="Booked today"      up={null} loading={loading} bg="var(--accent-light)" fg="var(--accent-color)" />
+          <StatCard label="Today's Revenue"     value={todayStats.today_revenue != null ? formatRevenue(todayStats.today_revenue) : '₹0'} note="Earned today"      up={null} loading={loading} bg="var(--accent-light)" fg="var(--accent-color)" />
+          <StatCard label="Today Completed"     value={todayStats.today_completed ?? 0}                 note="Jobs finished"     up={null} loading={loading} bg="var(--status-green-bg)" fg="var(--status-green-fg)" />
+          <StatCard label="Workers Online"      value={activeWorkers}                                   note="Active right now"  up={null} loading={loading} bg="#EFF6FF" fg="#2563EB" />
+        </div>
 
         {/* Primary stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 14 }}>
@@ -246,24 +284,24 @@ export default function Dashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
           <div style={card}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Revenue this week</span>
-              <span style={{ fontSize: 12, color: '#1A56DB', cursor: 'pointer' }}>View report →</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Revenue this week</span>
+              <span style={{ fontSize: 12, color: 'var(--accent-color)', cursor: 'pointer' }}>View report →</span>
             </div>
             <BarChart data={revenueChart} />
           </div>
           <div style={card}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Service breakdown</span>
-              <span style={{ fontSize: 12, color: '#1A56DB', cursor: 'pointer' }}>Details →</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Service breakdown</span>
+              <span style={{ fontSize: 12, color: 'var(--accent-color)', cursor: 'pointer' }}>Details →</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <DonutSVG totalBookings={totalBookings} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {SERVICE_DONUT.map(d => (
-                  <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: '#6B7280' }}>
+                  <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-secondary)' }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, flexShrink: 0 }} />
                     <span style={{ flex: 1 }}>{d.label}</span>
-                    <span style={{ fontWeight: 700, color: '#111827', paddingLeft: 10 }}>{d.val}</span>
+                    <span style={{ fontWeight: 700, color: 'var(--text-primary)', paddingLeft: 10 }}>{d.val}</span>
                   </div>
                 ))}
               </div>
@@ -271,14 +309,40 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Top Services */}
+        {topServices.length > 0 && (
+          <div style={{ ...card, marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Top Services</span>
+              <span style={{ fontSize: 12, color: 'var(--accent-color)', cursor: 'pointer' }}>View all →</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
+              {topServices.slice(0, 6).map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'var(--bg-muted)', transition: 'all 0.15s', cursor: 'pointer' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-muted)'; }}
+                >
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--accent-light)', color: 'var(--accent-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, flexShrink: 0 }}>
+                    #{i + 1}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.bookings} bookings · {formatRevenue(s.revenue)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Bookings + KYC/Activity */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
 
           {/* Recent bookings */}
           <div style={card}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Recent bookings</span>
-              <span style={{ fontSize: 12, color: '#1A56DB', cursor: 'pointer' }}>View all →</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Recent bookings</span>
+              <span style={{ fontSize: 12, color: 'var(--accent-color)', cursor: 'pointer' }}>View all →</span>
             </div>
             {loading ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -294,19 +358,19 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : recentBookings.length === 0 ? (
-              <div style={{ fontSize: 13, color: '#9CA3AF', padding: '12px 0' }}>No bookings yet</div>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '12px 0' }}>No bookings yet</div>
             ) : (
               recentBookings.map((b, i) => {
                 const init = (b.user_name || b.name || '??').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
                 return (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '0.5px solid #F3F4F6' }}>
-                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#EFF4FF', color: '#1A56DB', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{init}</div>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '0.5px solid var(--bg-muted)' }}>
+                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--accent-light)', color: 'var(--accent-color)', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{init}</div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.user_name || b.name || 'Unknown'}</div>
-                      <div style={{ fontSize: 11, color: '#9CA3AF' }}>{b.service_type || b.service || '—'} · {b.worker_name || b.worker || '—'}</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.user_name || b.name || 'Unknown'}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{b.service_type || b.service || '—'} · {b.worker_name || b.worker || '—'}</div>
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>₹{Number(b.amount).toLocaleString()}</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>₹{Number(b.amount).toLocaleString()}</div>
                       <div style={{ display: 'inline-flex', fontSize: 11, borderRadius: 4, padding: '2px 7px', fontWeight: 600, marginTop: 2, ...(STATUS_STYLE[b.status] || STATUS_STYLE.pending) }}>
                         {b.status}
                       </div>
@@ -321,13 +385,13 @@ export default function Dashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div style={card}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
                   KYC queue
                   {kycPending && Number(kycPending.total) > 0 && (
-                    <span style={{ background: '#FEF3C7', color: '#92400E', fontSize: 11, borderRadius: 10, padding: '1px 7px', marginLeft: 6, fontWeight: 600 }}>{kycPending.total}</span>
+                    <span style={{ background: 'var(--status-amber-bg)', color: 'var(--status-amber-fg)', fontSize: 11, borderRadius: 10, padding: '1px 7px', marginLeft: 6, fontWeight: 600 }}>{kycPending.total}</span>
                   )}
                 </span>
-                <span style={{ fontSize: 12, color: '#1A56DB', cursor: 'pointer' }}>Manage →</span>
+                <span style={{ fontSize: 12, color: 'var(--accent-color)', cursor: 'pointer' }}>Manage →</span>
               </div>
               {loading ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -343,18 +407,18 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : kyc.length === 0 ? (
-                <div style={{ fontSize: 13, color: '#9CA3AF' }}>No KYC pending 🎉</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>No KYC pending 🎉</div>
               ) : (
                 kyc.filter(k => k.status === 'pending').slice(0,3).map((k, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '0.5px solid #F3F4F6' }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🪪</div>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '0.5px solid var(--bg-muted)' }}>
+                    <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--status-amber-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>🪪</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{k.worker_name || `Worker #${k.worker_id}`}</div>
-                      <div style={{ fontSize: 11, color: '#9CA3AF' }}>{k.service_type || '—'} · {k.status}</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{k.worker_name || `Worker #${k.worker_id}`}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{k.service_type || '—'} · {k.status}</div>
                     </div>
                     <div style={{ display: 'flex', gap: 5 }}>
-                      <button style={{ fontSize: 11, background: '#D1FAE5', color: '#065F46', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontWeight: 600, fontFamily: font }}>Approve</button>
-                      <button style={{ fontSize: 11, background: '#FEE2E2', color: '#991B1B', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontWeight: 600, fontFamily: font }}>Reject</button>
+                      <button style={{ fontSize: 11, background: 'var(--status-green-bg)', color: 'var(--status-green-fg)', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontWeight: 600, fontFamily: font }}>Approve</button>
+                      <button style={{ fontSize: 11, background: 'var(--status-red-bg)', color: 'var(--status-red-fg)', border: 'none', borderRadius: 6, padding: '4px 10px', cursor: 'pointer', fontWeight: 600, fontFamily: font }}>Reject</button>
                     </div>
                   </div>
                 ))
@@ -362,7 +426,7 @@ export default function Dashboard() {
             </div>
 
             <div style={card}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#111827', marginBottom: 10 }}>Platform activity</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 10 }}>Platform activity</div>
               {loading ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {[1,2,3].map(i => (
@@ -374,13 +438,13 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : activity.length === 0 ? (
-                <div style={{ fontSize: 13, color: '#9CA3AF' }}>No recent activity</div>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>No recent activity</div>
               ) : (
                 activity.slice(0,4).map((a, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '7px 0', borderBottom: i < activity.length - 1 ? '0.5px solid #F3F4F6' : 'none' }}>
-                    <div style={{ width: 28, height: 28, borderRadius: 8, background: '#F0FDF4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>📋</div>
-                    <div style={{ flex: 1, fontSize: 12, color: '#6B7280', lineHeight: 1.5 }}>{a.action || a.details || a.message}</div>
-                    <div style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>{a.time || a.created_at?.slice(11,16)}</div>
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '7px 0', borderBottom: i < activity.length - 1 ? '0.5px solid var(--bg-muted)' : 'none' }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'var(--status-green-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>📋</div>
+                    <div style={{ flex: 1, fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>{a.action || a.details || a.message}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{a.time || a.created_at?.slice(11,16)}</div>
                   </div>
                 ))
               )}

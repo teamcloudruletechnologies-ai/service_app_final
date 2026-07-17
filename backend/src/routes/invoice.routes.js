@@ -23,6 +23,7 @@ router.get(
   controller.listInvoices
 );
 
+router.get("/payments", controller.listPayments);
 router.get("/reports", controller.getInvoiceReports);
 router.get("/payouts", controller.getInvoicePayouts);
 router.get("/:id", [param("id").isInt()], validate, controller.getInvoice);

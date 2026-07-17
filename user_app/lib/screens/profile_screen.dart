@@ -205,12 +205,15 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         children: [
           Center(
-            child: CircleAvatar(
-              radius: 48,
-              backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
-              child: Text(
-                (user?.name.isNotEmpty == true ? user!.name[0] : 'U').toUpperCase(),
-                style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: AppTheme.primary),
+            child: Hero(
+              tag: 'profile_avatar_hero',
+              child: CircleAvatar(
+                radius: 48,
+                backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
+                child: Text(
+                  (user?.name.isNotEmpty == true ? user!.name[0] : 'U').toUpperCase(),
+                  style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                ),
               ),
             ),
           ),

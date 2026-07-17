@@ -69,6 +69,7 @@ router.post(
   upload.single("image"),
   [
     body("name").trim().notEmpty().withMessage("Service name is required"),
+    body("description").optional().trim(),
     body("status").optional().isIn(["active", "inactive"]),
   ],
   validate,
@@ -81,6 +82,7 @@ router.put(
   [
     param("id").isInt().withMessage("Valid service ID is required"),
     body("name").optional().trim().notEmpty().withMessage("Service name cannot be empty"),
+    body("description").optional().trim(),
     body("status").optional().isIn(["active", "inactive"]),
   ],
   validate,

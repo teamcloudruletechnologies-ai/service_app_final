@@ -47,6 +47,8 @@ async function initDb() {
       city VARCHAR(100),
       status VARCHAR(30) NOT NULL DEFAULT 'pending',
       kyc_status VARCHAR(30) NOT NULL DEFAULT 'not_submitted',
+      photo_url TEXT,
+      rating NUMERIC(3,2) DEFAULT 4.5,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
@@ -128,7 +130,9 @@ async function initDb() {
     );
 
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
-    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS service_id INTEGER REFERENCES services(id);
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS service_id INTEGER REFERENCES services(id) ON DELETE SET NULL;
+    ALTER TABLE bookings DROP CONSTRAINT IF EXISTS bookings_service_id_fkey;
+    ALTER TABLE bookings ADD CONSTRAINT bookings_service_id_fkey FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE SET NULL;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS address TEXT;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS notes TEXT;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS scheduled_at TIMESTAMPTZ;
@@ -192,6 +196,65 @@ async function initDb() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS banners (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(120),
+      image_url TEXT NOT NULL,
+      link_url TEXT,
+      status VARCHAR(30) NOT NULL DEFAULT 'active',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS reviews (
+      id SERIAL PRIMARY KEY,
+      booking_id INTEGER UNIQUE NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      worker_id INTEGER NOT NULL REFERENCES workers(id) ON DELETE CASCADE,
+      rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+      comment TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS payments (
+      id SERIAL PRIMARY KEY,
+      booking_id INTEGER UNIQUE NOT NULL REFERENCES bookings(id) ON DELETE CASCADE,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      razorpay_order_id VARCHAR(255) NOT NULL,
+      razorpay_payment_id VARCHAR(255),
+      razorpay_signature VARCHAR(255),
+      amount NUMERIC(12,2) NOT NULL,
+      status VARCHAR(50) NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    -- Add address fields to users if missing
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(100);
+
+    ALTER TABLE services ADD COLUMN IF NOT EXISTS estimated_time INTEGER DEFAULT 60;
+
+    -- Seed realistic prices for services that still have price = 0
+    UPDATE services SET price = CASE
+      WHEN name ILIKE '%plumb%' THEN 499
+      WHEN name ILIKE '%paint%' THEN 799
+      WHEN name ILIKE '%clean%' THEN 399
+      WHEN name ILIKE '%electric%' THEN 599
+      WHEN name ILIKE '%ac%' THEN 699
+      WHEN name ILIKE '%carpent%' THEN 549
+      WHEN name ILIKE '%pest%' THEN 449
+      WHEN name ILIKE '%appliance%' THEN 649
+      WHEN name ILIKE '%laundry%' THEN 299
+      WHEN name ILIKE '%movers%' OR name ILIKE '%shifting%' THEN 1499
+      WHEN name ILIKE '%beauty%' OR name ILIKE '%salon%' THEN 599
+      WHEN name ILIKE '%massage%' THEN 799
+      WHEN name ILIKE '%tutor%' THEN 499
+      WHEN name ILIKE '%repair%' THEN 549
+      ELSE 499
+    END
+    WHERE price = 0 OR price IS NULL;
   `);
 }
 

@@ -4,7 +4,11 @@ import '../models/models.dart';
 import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  AuthProvider(this._api);
+  AuthProvider(this._api) {
+    _api.onUnauthorized = () {
+      notifyListeners();
+    };
+  }
 
   final ApiService _api;
   bool loading = true;
@@ -45,20 +49,20 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> phoneLogin(String phone, {String role = 'user'}) async {
+  Future<Map<String, dynamic>?> phoneLogin(String phone, {String role = 'user'}) async {
     error = null;
     loading = true;
     notifyListeners();
     try {
-      await _api.phoneLogin(phone, role: role);
+      final res = await _api.phoneLogin(phone, role: role);
       loading = false;
       notifyListeners();
-      return true;
+      return res;
     } on ApiException catch (e) {
       error = e.message;
       loading = false;
       notifyListeners();
-      return false;
+      return null;
     }
   }
 
@@ -142,12 +146,20 @@ class AuthProvider extends ChangeNotifier {
     String? name,
     String? email,
     String? phone,
+    String? state,
+    String? address,
   }) async {
     error = null;
     loading = true;
     notifyListeners();
     try {
-      await _api.updateUserProfile(name: name, email: email, phone: phone);
+      await _api.updateUserProfile(
+        name: name,
+        email: email,
+        phone: phone,
+        state: state,
+        address: address,
+      );
       loading = false;
       notifyListeners();
       return true;

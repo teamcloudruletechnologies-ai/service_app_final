@@ -118,4 +118,18 @@ async function payouts() {
   return result.rows;
 }
 
-module.exports = { list, findById, reports, payouts };
+async function create({ bookingId, userId, workerId, amount, status = 'paid' }) {
+  const invoiceNumber = `INV-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const platformFee = amount * 0.1; // 10% platform fee
+  const workerPayout = amount - platformFee;
+
+  const result = await db.query(
+    `INSERT INTO invoices (booking_id, user_id, worker_id, invoice_number, status, amount, platform_fee, worker_payout, paid_at, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW(), NOW())
+     RETURNING *`,
+    [bookingId, userId, workerId, invoiceNumber, status, amount, platformFee, workerPayout]
+  );
+  return result.rows[0];
+}
+
+module.exports = { list, findById, reports, payouts, create };

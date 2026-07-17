@@ -90,7 +90,6 @@ async function listServices(req, res, next) {
     const data = await Service.list({
       ...paging,
       search: req.query.search,
-      category_id: req.query.category_id,
       status: req.query.status,
     });
     return success(res, "Services fetched successfully", data);
@@ -113,6 +112,7 @@ async function createService(req, res, next) {
 
     const service = await Service.create({
       name: req.body.name,
+      description: req.body.description || null,
       image_url,
       status: req.body.status,
     });
@@ -135,11 +135,12 @@ async function updateService(req, res, next) {
       }
     }
 
-    // Build update data — only name, image_url, status
+    // Build update data
     const updateData = {};
-    if (req.body.name) updateData.name = req.body.name;
-    if (req.body.status) updateData.status = req.body.status;
-    if (req.body.image) updateData.image_url = req.body.image;
+    if (req.body.name !== undefined) updateData.name = req.body.name;
+    if (req.body.description !== undefined) updateData.description = req.body.description;
+    if (req.body.status !== undefined) updateData.status = req.body.status;
+    if (req.body.image !== undefined) updateData.image_url = req.body.image;
     if (req.file) {
       updateData.image_url = await saveUpload(req.file, "services");
     }

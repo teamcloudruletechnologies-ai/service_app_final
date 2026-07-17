@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { invoicesAPI } from '../api';
 
 const STATUS_BADGES = {
-  paid: { bg: '#D1FAE5', fg: '#065F46', text: 'Paid' },
-  pending: { bg: '#EFF4FF', fg: '#1E40AF', text: 'Pending' },
-  failed: { bg: '#FEE2E2', fg: '#991B1B', text: 'Failed' },
-  cancelled: { bg: '#F3F4F6', fg: '#374151', text: 'Cancelled' },
-  refunded: { bg: '#FEF3C7', fg: '#92400E', text: 'Refunded' },
+  paid: { bg: 'var(--status-green-bg)', fg: 'var(--status-green-fg)', text: 'Paid' },
+  pending: { bg: 'var(--accent-light)', fg: 'var(--accent-dark)', text: 'Pending' },
+  failed: { bg: 'var(--status-red-bg)', fg: 'var(--status-red-fg)', text: 'Failed' },
+  cancelled: { bg: 'var(--bg-muted)', fg: 'var(--text-primary)', text: 'Cancelled' },
+  refunded: { bg: 'var(--status-amber-bg)', fg: 'var(--status-amber-fg)', text: 'Refunded' },
 };
 
 
@@ -17,7 +17,7 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
     <div style={{
       width: w, height: h, borderRadius: radius,
-      background: 'linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%)',
+      background: 'linear-gradient(90deg,var(--bg-muted) 25%,var(--border-color) 50%,var(--bg-muted) 75%)',
       backgroundSize: '200% 100%',
       animation: 'shimmer 1.4s infinite',
     }} />
@@ -27,8 +27,8 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
 function StatCard({ label, value, icon, bg, fg, loading }) {
   return (
     <div style={{
-      background: '#fff',
-      border: '0.5px solid #E5E7EB',
+      background: 'var(--bg-card)',
+      border: '0.5px solid var(--border-color)',
       borderRadius: 12,
       padding: '16px 20px',
       display: 'flex',
@@ -36,11 +36,11 @@ function StatCard({ label, value, icon, bg, fg, loading }) {
       justifyContent: 'space-between',
     }}>
       <div>
-        <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>{label}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>{label}</div>
         {loading ? (
           <Skeleton w="110px" h={24} />
         ) : (
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>{value}</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
         )}
       </div>
       <div style={{
@@ -103,10 +103,10 @@ export default function Invoices() {
     invoicesAPI.getAll(params)
       .then(res => {
         if (res && res.success) {
-          // backend lists are structure: { success: true, data: { docs: [...], totalDocs, totalPages, page } }
+          // backend lists are structure: { success: true, data: { rows: [...], meta } }
           const payload = res.data;
-          setInvoices(payload.docs || []);
-          setTotalPages(payload.totalPages || 1);
+          setInvoices(payload.rows || []);
+          setTotalPages(payload.meta?.totalPages || 1);
         }
       })
       .catch(err => {
@@ -180,7 +180,7 @@ export default function Invoices() {
   const totalInvoicesCount = summary.total_invoices || 0;
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#F9FAFB', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: 'var(--bg-app)', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       {/* Keyframe animation injected inline */}
       <style>{`
         @keyframes shimmer {
@@ -203,8 +203,8 @@ export default function Invoices() {
       {/* Header and Page Actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0 }}>Invoice Ledger</h2>
-          <p style={{ fontSize: 12, color: '#6B7280', margin: '4px 0 0' }}>Monitor transactions, compute commissions, and manage worker payouts.</p>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Invoice Ledger</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>Monitor transactions, compute commissions, and manage worker payouts.</p>
         </div>
       </div>
 
@@ -214,8 +214,8 @@ export default function Invoices() {
           label="Gross Transactions (Paid)"
           value={formatCurrency(paidAmount)}
           icon="💳"
-          bg="#EFF4FF"
-          fg="#1A56DB"
+          bg="var(--accent-light)"
+          fg="var(--accent-color)"
           loading={reportsLoading}
         />
         <StatCard
@@ -230,33 +230,33 @@ export default function Invoices() {
           label="Professional Payouts"
           value={formatCurrency(workerPayout)}
           icon="💼"
-          bg="#F0FDF4"
-          fg="#059669"
+          bg="var(--status-green-bg)"
+          fg="var(--status-green-fg)"
           loading={reportsLoading}
         />
         <StatCard
           label="Ledger Volume"
           value={reportsLoading ? '—' : `${totalInvoicesCount.toLocaleString()} Invoices`}
           icon="🧾"
-          bg="#FFFBEB"
-          fg="#D97706"
+          bg="var(--status-amber-bg)"
+          fg="var(--status-amber-fg)"
           loading={reportsLoading}
         />
       </div>
 
       {/* Primary Container card */}
-      <div style={{ background: '#fff', border: '0.5px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+      <div style={{ background: 'var(--bg-card)', border: '0.5px solid var(--border-color)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
         
         {/* Navigation Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid #E5E7EB', background: '#FAFAFB', padding: '0 20px' }}>
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', background: '#FAFAFB', padding: '0 20px' }}>
           <button
             onClick={() => setActiveTab('invoices')}
             style={{
               padding: '16px 20px',
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === 'invoices' ? '2.5px solid #1A56DB' : '2.5px solid transparent',
-              color: activeTab === 'invoices' ? '#1A56DB' : '#6B7280',
+              borderBottom: activeTab === 'invoices' ? '2.5px solid var(--accent-color)' : '2.5px solid transparent',
+              color: activeTab === 'invoices' ? 'var(--accent-color)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'invoices' ? 600 : 500,
               fontSize: 13,
               cursor: 'pointer',
@@ -271,8 +271,8 @@ export default function Invoices() {
               padding: '16px 20px',
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === 'payouts' ? '2.5px solid #1A56DB' : '2.5px solid transparent',
-              color: activeTab === 'payouts' ? '#1A56DB' : '#6B7280',
+              borderBottom: activeTab === 'payouts' ? '2.5px solid var(--accent-color)' : '2.5px solid transparent',
+              color: activeTab === 'payouts' ? 'var(--accent-color)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'payouts' ? 600 : 500,
               fontSize: 13,
               cursor: 'pointer',
@@ -303,9 +303,9 @@ export default function Invoices() {
                     padding: '6px 14px',
                     borderRadius: 20,
                     border: '1px solid',
-                    borderColor: filterStatus === opt.key ? '#1A56DB' : '#E5E7EB',
-                    backgroundColor: filterStatus === opt.key ? '#EFF4FF' : '#fff',
-                    color: filterStatus === opt.key ? '#1A56DB' : '#4B5563',
+                    borderColor: filterStatus === opt.key ? 'var(--accent-color)' : 'var(--border-color)',
+                    backgroundColor: filterStatus === opt.key ? 'var(--accent-light)' : 'var(--bg-card)',
+                    color: filterStatus === opt.key ? 'var(--accent-color)' : 'var(--text-secondary)',
                     fontSize: 12,
                     fontWeight: 500,
                     cursor: 'pointer',
@@ -319,7 +319,7 @@ export default function Invoices() {
 
             {/* Error Message */}
             {error && (
-              <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '12px 16px', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
+              <div style={{ background: 'var(--status-red-bg)', border: '1px solid #FCA5A5', color: 'var(--status-red-fg)', padding: '12px 16px', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
                 ⚠️ <strong>Error loading data:</strong> {error}
               </div>
             )}
@@ -328,7 +328,7 @@ export default function Invoices() {
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 800 }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #E5E7EB', color: '#4B5563', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     <th style={{ padding: '12px 16px', fontWeight: 600 }}>Invoice Code</th>
                     <th style={{ padding: '12px 16px', fontWeight: 600 }}>Client</th>
                     <th style={{ padding: '12px 16px', fontWeight: 600 }}>Professional</th>
@@ -340,10 +340,10 @@ export default function Invoices() {
                     <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600 }}>Actions</th>
                   </tr>
                 </thead>
-                <tbody style={{ fontSize: 13, color: '#374151' }}>
+                <tbody style={{ fontSize: 13, color: 'var(--text-primary)' }}>
                   {loading ? (
                     [...Array(limit)].map((_, index) => (
-                      <tr key={index} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                      <tr key={index} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
                         <td style={{ padding: '14px 16px' }}><Skeleton w="80px" /></td>
                         <td style={{ padding: '14px 16px' }}><Skeleton w="120px" /></td>
                         <td style={{ padding: '14px 16px' }}><Skeleton w="120px" /></td>
@@ -357,23 +357,23 @@ export default function Invoices() {
                     ))
                   ) : invoices.length === 0 ? (
                     <tr>
-                      <td colSpan="9" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
+                      <td colSpan="9" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
                         <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
-                        <div style={{ fontWeight: 600, color: '#4B5563' }}>No invoices found</div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>No invoices found</div>
                         <div style={{ fontSize: 12 }}>Try adjusting your filters.</div>
                       </td>
                     </tr>
                   ) : (
                     invoices.map((inv) => {
-                      const badge = STATUS_BADGES[inv.status.toLowerCase()] || { bg: '#E5E7EB', fg: '#374151', text: inv.status };
+                      const badge = STATUS_BADGES[inv.status.toLowerCase()] || { bg: 'var(--border-color)', fg: 'var(--text-primary)', text: inv.status };
                       return (
-                        <tr key={inv.id} style={{ borderBottom: '1px solid #F3F4F6', transition: 'background-color 0.15s' }} className="hover:bg-gray-50/50">
-                          <td style={{ padding: '14px 16px', fontWeight: 600, color: '#111827' }}>{inv.invoice_number}</td>
+                        <tr key={inv.id} style={{ borderBottom: '1px solid var(--bg-muted)', transition: 'background-color 0.15s' }} className="hover:bg-gray-50/50">
+                          <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--text-primary)' }}>{inv.invoice_number}</td>
                           <td style={{ padding: '14px 16px' }}>{inv.user_name || `Client #${inv.user_id}`}</td>
                           <td style={{ padding: '14px 16px' }}>{inv.worker_name || `Pro #${inv.worker_id}`}</td>
                           <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 600 }}>{formatCurrency(inv.amount)}</td>
-                          <td style={{ padding: '14px 16px', textAlign: 'right', color: '#6B7280' }}>{formatCurrency(inv.platform_fee)}</td>
-                          <td style={{ padding: '14px 16px', textAlign: 'right', color: '#059669', fontWeight: 500 }}>{formatCurrency(inv.worker_payout)}</td>
+                          <td style={{ padding: '14px 16px', textAlign: 'right', color: 'var(--text-secondary)' }}>{formatCurrency(inv.platform_fee)}</td>
+                          <td style={{ padding: '14px 16px', textAlign: 'right', color: 'var(--status-green-fg)', fontWeight: 500 }}>{formatCurrency(inv.worker_payout)}</td>
                           <td style={{ padding: '14px 16px', textAlign: 'center' }}>
                             <span style={{
                               display: 'inline-flex',
@@ -387,28 +387,28 @@ export default function Invoices() {
                               {badge.text}
                             </span>
                           </td>
-                          <td style={{ padding: '14px 16px', color: '#6B7280' }}>{formatDate(inv.created_at)}</td>
+                          <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }}>{formatDate(inv.created_at)}</td>
                           <td style={{ padding: '14px 16px', textAlign: 'center' }}>
                             <button
                               onClick={() => handleViewInvoice(inv.id)}
                               style={{
-                                background: '#EFF4FF',
+                                background: 'var(--accent-light)',
                                 border: 'none',
                                 borderRadius: 6,
                                 padding: '4px 10px',
-                                color: '#1A56DB',
+                                color: 'var(--accent-color)',
                                 fontSize: 11,
                                 fontWeight: 600,
                                 cursor: 'pointer',
                                 transition: 'all 0.15s'
                               }}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#1A56DB';
-                                e.currentTarget.style.color = '#fff';
+                                e.currentTarget.style.background = 'var(--accent-color)';
+                                e.currentTarget.style.color = 'var(--bg-card)';
                               }}
                               onMouseLeave={(e) => {
-                                e.currentTarget.style.background = '#EFF4FF';
-                                e.currentTarget.style.color = '#1A56DB';
+                                e.currentTarget.style.background = 'var(--accent-light)';
+                                e.currentTarget.style.color = 'var(--accent-color)';
                               }}
                             >
                               Details
@@ -424,8 +424,8 @@ export default function Invoices() {
 
             {/* Pagination Row */}
             {!loading && invoices.length > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, paddingTop: 16, borderTop: '0.5px solid #F3F4F6' }}>
-                <span style={{ fontSize: 12, color: '#6B7280' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, paddingTop: 16, borderTop: '0.5px solid var(--bg-muted)' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                   Showing page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
                 </span>
                 <div style={{ display: 'flex', gap: 6 }}>
@@ -435,9 +435,9 @@ export default function Invoices() {
                     style={{
                       padding: '6px 12px',
                       borderRadius: 6,
-                      border: '1px solid #E5E7EB',
-                      background: '#fff',
-                      color: currentPage === 1 ? '#9CA3AF' : '#374151',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-card)',
+                      color: currentPage === 1 ? 'var(--text-muted)' : 'var(--text-primary)',
                       fontSize: 12,
                       fontWeight: 500,
                       cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
@@ -451,9 +451,9 @@ export default function Invoices() {
                     style={{
                       padding: '6px 12px',
                       borderRadius: 6,
-                      border: '1px solid #E5E7EB',
-                      background: '#fff',
-                      color: currentPage === totalPages ? '#9CA3AF' : '#374151',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-card)',
+                      color: currentPage === totalPages ? 'var(--text-muted)' : 'var(--text-primary)',
                       fontSize: 12,
                       fontWeight: 500,
                       cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
@@ -474,7 +474,7 @@ export default function Invoices() {
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 800 }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #E5E7EB', color: '#4B5563', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     <th style={{ padding: '12px 16px', fontWeight: 600 }}>Professional ID</th>
                     <th style={{ padding: '12px 16px', fontWeight: 600 }}>Name</th>
                     <th style={{ padding: '12px 16px', fontWeight: 600 }}>Phone</th>
@@ -483,10 +483,10 @@ export default function Invoices() {
                     <th style={{ padding: '12px 16px', fontWeight: 600, textAlign: 'right' }}>Total Net Payout</th>
                   </tr>
                 </thead>
-                <tbody style={{ fontSize: 13, color: '#374151' }}>
+                <tbody style={{ fontSize: 13, color: 'var(--text-primary)' }}>
                   {payoutsLoading ? (
                     [...Array(4)].map((_, idx) => (
-                      <tr key={idx} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                      <tr key={idx} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
                         <td style={{ padding: '14px 16px' }}><Skeleton w="80px" /></td>
                         <td style={{ padding: '14px 16px' }}><Skeleton w="150px" /></td>
                         <td style={{ padding: '14px 16px' }}><Skeleton w="100px" /></td>
@@ -497,21 +497,21 @@ export default function Invoices() {
                     ))
                   ) : payouts.length === 0 ? (
                     <tr>
-                      <td colSpan="6" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
                         <div style={{ fontSize: 32, marginBottom: 8 }}>💼</div>
-                        <div style={{ fontWeight: 600, color: '#4B5563' }}>No payouts registered</div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>No payouts registered</div>
                         <div style={{ fontSize: 12 }}>Completed paid jobs populate this list.</div>
                       </td>
                     </tr>
                   ) : (
                     payouts.map((p) => (
-                      <tr key={p.worker_id} style={{ borderBottom: '1px solid #F3F4F6' }}>
-                        <td style={{ padding: '14px 16px', color: '#6B7280', fontWeight: 600 }}>#{p.worker_id}</td>
-                        <td style={{ padding: '14px 16px', fontWeight: 600, color: '#111827' }}>{p.worker_name || 'Professional'}</td>
+                      <tr key={p.worker_id} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
+                        <td style={{ padding: '14px 16px', color: 'var(--text-secondary)', fontWeight: 600 }}>#{p.worker_id}</td>
+                        <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--text-primary)' }}>{p.worker_name || 'Professional'}</td>
                         <td style={{ padding: '14px 16px' }}>{p.worker_phone || '—'}</td>
                         <td style={{ padding: '14px 16px', textAlign: 'center', fontWeight: 600 }}>{p.invoice_count}</td>
                         <td style={{ padding: '14px 16px', textAlign: 'right', color: '#7C3AED' }}>{formatCurrency(p.platform_fee)}</td>
-                        <td style={{ padding: '14px 16px', textAlign: 'right', color: '#059669', fontWeight: 700 }}>{formatCurrency(p.payout_amount)}</td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right', color: 'var(--status-green-fg)', fontWeight: 700 }}>{formatCurrency(p.payout_amount)}</td>
                       </tr>
                     ))
                   )}
@@ -545,8 +545,8 @@ export default function Invoices() {
               width: '100%',
               maxWidth: 500,
               height: '100%',
-              background: '#fff',
-              borderLeft: '1px solid #E5E7EB',
+              background: 'var(--bg-card)',
+              borderLeft: '1px solid var(--border-color)',
               display: 'flex',
               flexDirection: 'column',
               boxShadow: '-4px 0 24px rgba(0,0,0,0.08)',
@@ -554,10 +554,10 @@ export default function Invoices() {
             }}
           >
             {/* Modal Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid #E5E7EB' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' }}>
               <div>
-                <span style={{ fontSize: 11, background: '#EFF4FF', color: '#1A56DB', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>INVOICE TRANSACTION</span>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: '4px 0 0' }}>{selectedInvoice.invoice_number}</h3>
+                <span style={{ fontSize: 11, background: 'var(--accent-light)', color: 'var(--accent-color)', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>INVOICE TRANSACTION</span>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0' }}>{selectedInvoice.invoice_number}</h3>
               </div>
               <button
                 onClick={() => setSelectedInvoice(null)}
@@ -565,7 +565,7 @@ export default function Invoices() {
                   background: 'none',
                   border: 'none',
                   fontSize: 20,
-                  color: '#9CA3AF',
+                  color: 'var(--text-muted)',
                   cursor: 'pointer',
                   padding: 4,
                   lineHeight: '1',
@@ -594,50 +594,50 @@ export default function Invoices() {
               </div>
 
               {/* Transaction Metadata Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 28, borderBottom: '1px dashed #E5E7EB', paddingBottom: 24 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 28, borderBottom: '1px dashed var(--border-color)', paddingBottom: 24 }}>
                 <div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', fontWeight: 500, letterSpacing: '0.02em' }}>Client (User)</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginTop: 4 }}>{selectedInvoice.user_name || `User ID #${selectedInvoice.user_id}`}</div>
-                  <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>Consumer Node ID: #{selectedInvoice.user_id}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 500, letterSpacing: '0.02em' }}>Client (User)</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginTop: 4 }}>{selectedInvoice.user_name || `User ID #${selectedInvoice.user_id}`}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>Consumer Node ID: #{selectedInvoice.user_id}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', fontWeight: 500, letterSpacing: '0.02em' }}>Professional (Worker)</div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginTop: 4 }}>{selectedInvoice.worker_name || `Worker ID #${selectedInvoice.worker_id}`}</div>
-                  <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>Provider Node ID: #{selectedInvoice.worker_id}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 500, letterSpacing: '0.02em' }}>Professional (Worker)</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginTop: 4 }}>{selectedInvoice.worker_name || `Worker ID #${selectedInvoice.worker_id}`}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>Provider Node ID: #{selectedInvoice.worker_id}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', fontWeight: 500, letterSpacing: '0.02em' }}>Booking Reference</div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#111827', marginTop: 4 }}>Booking Ref: #{selectedInvoice.booking_id}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 500, letterSpacing: '0.02em' }}>Booking Reference</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginTop: 4 }}>Booking Ref: #{selectedInvoice.booking_id}</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: 11, color: '#9CA3AF', textTransform: 'uppercase', fontWeight: 500, letterSpacing: '0.02em' }}>Issued Date</div>
-                  <div style={{ fontSize: 13, color: '#111827', marginTop: 4 }}>{formatDate(selectedInvoice.created_at)}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 500, letterSpacing: '0.02em' }}>Issued Date</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-primary)', marginTop: 4 }}>{formatDate(selectedInvoice.created_at)}</div>
                 </div>
               </div>
 
               {/* Fee breakdown list */}
               <div style={{ marginBottom: 28 }}>
-                <h4 style={{ fontSize: 12, fontWeight: 600, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Receipt Ledger Breakdown</h4>
+                <h4 style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>Receipt Ledger Breakdown</h4>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                    <span style={{ color: '#4B5563' }}>Service Charge (Gross)</span>
-                    <span style={{ fontWeight: 600, color: '#111827' }}>{formatCurrency(selectedInvoice.amount)}</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>Service Charge (Gross)</span>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{formatCurrency(selectedInvoice.amount)}</span>
                   </div>
                   
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-                    <span style={{ color: '#4B5563' }}>Platform Commission (deducted)</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>Platform Commission (deducted)</span>
                     <span style={{ fontWeight: 600, color: '#7C3AED' }}>— {formatCurrency(selectedInvoice.platform_fee)}</span>
                   </div>
                   
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid #E5E7EB', paddingBottom: 12 }}>
-                    <span style={{ color: '#059669' }}>Net Payout to Professional</span>
-                    <span style={{ fontWeight: 700, color: '#059669' }}>{formatCurrency(selectedInvoice.worker_payout)}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, borderBottom: '1px solid var(--border-color)', paddingBottom: 12 }}>
+                    <span style={{ color: 'var(--status-green-fg)' }}>Net Payout to Professional</span>
+                    <span style={{ fontWeight: 700, color: 'var(--status-green-fg)' }}>{formatCurrency(selectedInvoice.worker_payout)}</span>
                   </div>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, paddingTop: 4 }}>
-                    <span style={{ fontWeight: 700, color: '#111827' }}>Total Billing Value</span>
-                    <span style={{ fontWeight: 800, color: '#1A56DB' }}>{formatCurrency(selectedInvoice.amount)}</span>
+                    <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>Total Billing Value</span>
+                    <span style={{ fontWeight: 800, color: 'var(--accent-color)' }}>{formatCurrency(selectedInvoice.amount)}</span>
                   </div>
                 </div>
               </div>
@@ -663,16 +663,16 @@ export default function Invoices() {
             </div>
 
             {/* Modal Footer */}
-            <div style={{ borderTop: '1px solid #E5E7EB', padding: '16px 24px', backgroundColor: '#FAFAFB', display: 'flex', gap: 10 }}>
+            <div style={{ borderTop: '1px solid var(--border-color)', padding: '16px 24px', backgroundColor: '#FAFAFB', display: 'flex', gap: 10 }}>
               <button
                 onClick={() => window.print()}
                 style={{
                   flex: 1,
                   padding: '10px 14px',
                   borderRadius: 8,
-                  border: '1px solid #E5E7EB',
-                  background: '#fff',
-                  color: '#374151',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-primary)',
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -687,8 +687,8 @@ export default function Invoices() {
                   padding: '10px 14px',
                   borderRadius: 8,
                   border: 'none',
-                  background: '#1A56DB',
-                  color: '#fff',
+                  background: 'var(--accent-color)',
+                  color: 'var(--bg-card)',
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: 'pointer',

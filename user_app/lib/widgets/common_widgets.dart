@@ -5,6 +5,9 @@ import 'package:intl/intl.dart';
 import '../config/api_config.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
+import '../screens/payment_screen.dart';
+import '../screens/rating_screen.dart';
+import '../screens/invoice_screen.dart';
 
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key, this.message});
@@ -65,55 +68,167 @@ class ServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = ApiConfig.resolveImageUrl(service.imageUrl);
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFE3D0BA), width: 1.0),
-      ),
-      child: InkWell(
-        onTap: onTap,
+    final discountText = service.price > 500 ? '₹100 OFF' : '20% OFF';
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: imageUrl.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(color: Colors.grey.shade200),
-                      errorWidget: (_, __, ___) => _placeholder(),
-                    )
-                  : _placeholder(),
+            // Image at top
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => Container(color: Colors.grey.shade200),
+                            errorWidget: (_, __, ___) => _placeholder(),
+                          )
+                        : _placeholder(),
+                    // Top-Left Discount Badge
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary, // Matte Black
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          discountText,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 10,
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Bottom-Left Rating Badge (Zomato-style green)
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2E5226), // Zomato green
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              service.avgRating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            const Icon(Icons.star, color: Colors.white, size: 10),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Price badge at bottom-right of image
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                          ],
+                        ),
+                        child: Text(
+                          '₹${service.price.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
+            // Info below image
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Service name
                   Text(
                     service.name,
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17, letterSpacing: -0.3),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      color: Color(0xFF1A1A1A),
+                      letterSpacing: -0.2,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (service.categoryName != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      service.categoryName!,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Text(
-                    '₹${service.price.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      color: AppTheme.primary,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 20,
-                    ),
+                  const SizedBox(height: 6),
+                  // Category & Delivery Time Row
+                  Row(
+                    children: [
+                      if (service.categoryName != null) ...[
+                        Text(
+                          service.categoryName!,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '•',
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      const Icon(Icons.flash_on, color: AppTheme.secondary, size: 12),
+                      const SizedBox(width: 2),
+                      Text(
+                        '${service.estimatedTime} mins',
+                        style: const TextStyle(
+                          color: AppTheme.secondary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -126,9 +241,9 @@ class ServiceCard extends StatelessWidget {
 
   Widget _placeholder() {
     return Container(
-      color: AppTheme.primary.withValues(alpha: 0.1),
+      color: AppTheme.primary.withValues(alpha: 0.08),
       child: const Center(
-        child: Icon(Icons.home_repair_service, size: 40, color: AppTheme.primary),
+        child: Icon(Icons.home_repair_service, size: 36, color: AppTheme.primary),
       ),
     );
   }
@@ -148,21 +263,97 @@ class BookingCard extends StatelessWidget {
       case 'cancelled':
         return Colors.red;
       case 'in_progress':
-        return Colors.blue;
+        return Colors.purple;
       case 'confirmed':
-        return AppTheme.primary;
+        return Colors.blue;
       default:
         return Colors.orange;
     }
   }
 
+  int _statusStep(String status) {
+    switch (status) {
+      case 'pending':
+        return 0;
+      case 'confirmed':
+        return 1;
+      case 'in_progress':
+        return 2;
+      case 'completed':
+        return 3;
+      case 'cancelled':
+        return -1;
+      default:
+        return 0;
+    }
+  }
+
+  Widget _buildTimeline() {
+    final currentStep = _statusStep(booking.status);
+    final steps = ['Booked', 'Confirmed', 'In Progress', 'Completed'];
+    final isCancelled = booking.status == 'cancelled';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: List.generate(steps.length * 2 - 1, (index) {
+          if (index.isOdd) {
+            final stepBefore = (index - 1) ~/ 2;
+            final filled = !isCancelled && stepBefore < currentStep;
+            return Expanded(
+              child: Container(
+                height: 2,
+                color: filled ? AppTheme.secondary : Colors.grey.shade300,
+              ),
+            );
+          }
+          final step = index ~/ 2;
+          final filled = !isCancelled && step <= currentStep;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: filled ? AppTheme.secondary : Colors.grey.shade300,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                steps[step],
+                style: TextStyle(
+                  fontSize: 8,
+                  fontWeight: filled ? FontWeight.bold : FontWeight.w500,
+                  color: filled ? const Color(0xFF1A1A1A) : Colors.grey.shade400,
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final dateFmt = DateFormat('dd MMM yyyy, hh:mm a');
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -193,37 +384,112 @@ class BookingCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              if (booking.address != null)
+              if (booking.workerName != null) ...[
+                const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(Icons.location_on_outlined, size: 16, color: Colors.grey.shade600),
+                    Icon(Icons.person_outline, size: 14, color: Colors.grey.shade500),
                     const SizedBox(width: 4),
-                    Expanded(child: Text(booking.address!, style: TextStyle(color: Colors.grey.shade700))),
+                    Text(
+                      booking.workerName!,
+                      style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                    ),
                   ],
                 ),
+              ],
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    dateFmt.format(booking.scheduledAt ?? booking.createdAt),
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey.shade500),
+                      const SizedBox(width: 4),
+                      Text(
+                        dateFmt.format(booking.scheduledAt ?? booking.createdAt),
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                      ),
+                    ],
                   ),
                   Text(
                     '₹${booking.amount.toStringAsFixed(0)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
+              // Progress timeline
+              _buildTimeline(),
+              // Action buttons
               if (booking.canCancel && onCancel != null) ...[
-                const SizedBox(height: 12),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: onCancel,
-                    child: const Text('Cancel Booking', style: TextStyle(color: Colors.red)),
-                  ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (booking.status == 'pending') ...[
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => PaymentScreen(booking: booking)),
+                          );
+                        },
+                        child: const Text('Pay Now', style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    TextButton(
+                      onPressed: onCancel,
+                      child: const Text('Cancel', style: TextStyle(color: Colors.red, fontSize: 13)),
+                    ),
+                  ],
+                ),
+              ],
+              if (booking.status == 'completed') ...[
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => InvoiceScreen(booking: booking)),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppTheme.primary),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      ),
+                      child: const Text('Invoice', style: TextStyle(color: AppTheme.primary, fontSize: 13)),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber.shade700,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => RatingScreen(booking: booking)),
+                        );
+                      },
+                      child: const Text('Rate', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    ),
+                  ],
                 ),
               ],
             ],

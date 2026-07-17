@@ -48,4 +48,21 @@ async function getInvoicePayouts(req, res, next) {
   }
 }
 
-module.exports = { listInvoices, getInvoice, getInvoiceReports, getInvoicePayouts };
+async function listPayments(req, res, next) {
+  try {
+    const db = require("../config/db");
+    const result = await db.query(
+      `SELECT p.*, u.name as user_name, b.status as booking_status, s.name as service_name
+       FROM payments p
+       LEFT JOIN users u ON u.id = p.user_id
+       LEFT JOIN bookings b ON b.id = p.booking_id
+       LEFT JOIN services s ON s.id = b.service_id
+       ORDER BY p.created_at DESC`
+    );
+    return success(res, "Payments fetched successfully", result.rows);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = { listInvoices, getInvoice, getInvoiceReports, getInvoicePayouts, listPayments };

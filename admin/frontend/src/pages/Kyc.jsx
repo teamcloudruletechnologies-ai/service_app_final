@@ -5,7 +5,7 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
     <div style={{
       width: w, height: h, borderRadius: radius,
-      background: 'linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%)',
+      background: 'linear-gradient(90deg,var(--bg-muted) 25%,var(--border-color) 50%,var(--bg-muted) 75%)',
       backgroundSize: '200% 100%',
       animation: 'shimmer 1.4s infinite',
     }} />
@@ -15,8 +15,8 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
 function StatCard({ label, value, icon, bg, fg, loading }) {
   return (
     <div style={{
-      background: '#fff',
-      border: '0.5px solid #E5E7EB',
+      background: 'var(--bg-card)',
+      border: '0.5px solid var(--border-color)',
       borderRadius: 12,
       padding: '16px 20px',
       display: 'flex',
@@ -25,11 +25,11 @@ function StatCard({ label, value, icon, bg, fg, loading }) {
       boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
     }}>
       <div>
-        <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>{label}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>{label}</div>
         {loading ? (
           <Skeleton w="60px" h={24} />
         ) : (
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>{value}</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
         )}
       </div>
       <div style={{
@@ -174,7 +174,7 @@ export default function Kyc() {
       panStatus: panState,
       bankPassbookStatus: bankPassbookState,
       selfieStatus: selfieState,
-      rejectionReason: isAnyRejected ? rejectionReason.trim() : null
+      ...(isAnyRejected ? { rejectionReason: rejectionReason.trim() } : {}),
     };
 
     kycAPI.review(selectedRecord.id, payload)
@@ -206,13 +206,13 @@ export default function Kyc() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'approved':
-        return { text: '🟢 Approved', bg: '#D1FAE5', fg: '#065F46' };
+        return { text: '🟢 Approved', bg: 'var(--status-green-bg)', fg: 'var(--status-green-fg)' };
       case 'rejected':
-        return { text: '🔴 Rejected', bg: '#FEE2E2', fg: '#991B1B' };
+        return { text: '🔴 Rejected', bg: 'var(--status-red-bg)', fg: 'var(--status-red-fg)' };
       case 'pending_correction':
         return { text: '🔵 Pending Fixes', bg: '#E0F2FE', fg: '#0369A1' };
       default:
-        return { text: '🟡 Pending Review', bg: '#FFFBEB', fg: '#D97706' };
+        return { text: '🟡 Pending Review', bg: 'var(--status-amber-bg)', fg: 'var(--status-amber-fg)' };
     }
   };
 
@@ -239,7 +239,7 @@ export default function Kyc() {
   });
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#F9FAFB', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: 'var(--bg-app)', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <style>{`
         @keyframes shimmer {
           0%   { background-position: 200% 0; }
@@ -257,14 +257,14 @@ export default function Kyc() {
           animation: fadeIn 0.2s ease-out forwards;
         }
         .doc-card {
-          border: 1.5px solid #F3F4F6;
+          border: 1.5px solid var(--bg-muted);
           border-radius: 12px;
           padding: 16px;
-          background: #fff;
+          background: var(--bg-card);
           transition: all 0.2s ease;
         }
         .doc-card:hover {
-          border-color: #E5E7EB;
+          border-color: var(--border-color);
           box-shadow: 0 4px 12px rgba(0,0,0,0.02);
         }
         .toggle-btn {
@@ -273,20 +273,20 @@ export default function Kyc() {
           font-size: 12px;
           font-weight: 600;
           border-radius: 8px;
-          border: 1px solid #E5E7EB;
-          background: #fff;
-          color: #4B5563;
+          border: 1px solid var(--border-color);
+          background: var(--bg-card);
+          color: var(--text-secondary);
           cursor: pointer;
           transition: all 0.15s ease;
         }
         .toggle-btn.approve-active {
-          background: #D1FAE5;
-          color: #065F46;
+          background: var(--status-green-bg);
+          color: var(--status-green-fg);
           border-color: #A7F3D0;
         }
         .toggle-btn.reject-active {
-          background: #FEE2E2;
-          color: #991B1B;
+          background: var(--status-red-bg);
+          color: var(--status-red-fg);
           border-color: #FCA5A5;
         }
       `}</style>
@@ -294,8 +294,8 @@ export default function Kyc() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0 }}>KYC Document Verifications</h2>
-          <p style={{ fontSize: 12, color: '#6B7280', margin: '4px 0 0' }}>Review worker identity credentials, bank details, and selfies to activate operational profiles.</p>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>KYC Document Verifications</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>Review worker identity credentials, bank details, and selfies to activate operational profiles.</p>
         </div>
       </div>
 
@@ -305,16 +305,16 @@ export default function Kyc() {
           label="Total KYC Submissions"
           value={stats.total}
           icon="🪪"
-          bg="#EFF4FF"
-          fg="#1A56DB"
+          bg="var(--accent-light)"
+          fg="var(--accent-color)"
           loading={loading}
         />
         <StatCard
           label="Pending Review"
           value={stats.pending}
           icon="⏳"
-          bg="#FFFBEB"
-          fg="#D97706"
+          bg="var(--status-amber-bg)"
+          fg="var(--status-amber-fg)"
           loading={loading}
         />
         <StatCard
@@ -329,17 +329,17 @@ export default function Kyc() {
           label="Approved Profiles"
           value={stats.approved}
           icon="✅"
-          bg="#F0FDF4"
-          fg="#059669"
+          bg="var(--status-green-bg)"
+          fg="var(--status-green-fg)"
           loading={loading}
         />
       </div>
 
       {/* Controls Container */}
-      <div style={{ background: '#fff', border: '0.5px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+      <div style={{ background: 'var(--bg-card)', border: '0.5px solid var(--border-color)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
         
         {/* Top Controls */}
-        <div style={{ padding: '20px 24px', borderBottom: '0.5px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '0.5px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           {/* Search bar */}
           <div style={{ position: 'relative', flex: 1, minWidth: 260, maxWidth: 400 }}>
             <input
@@ -357,7 +357,7 @@ export default function Kyc() {
                 fontFamily: "'DM Sans', sans-serif"
               }}
             />
-            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontSize: 15 }}>🔍</span>
+            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: 15 }}>🔍</span>
           </div>
 
           {/* Filters */}
@@ -365,7 +365,7 @@ export default function Kyc() {
             <select
               value={filterStatus}
               onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-              style={{ padding: '7px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 12, color: '#374151', outline: 'none', fontWeight: 500, fontFamily: 'inherit' }}
+              style={{ padding: '7px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 12, color: 'var(--text-primary)', outline: 'none', fontWeight: 500, fontFamily: 'inherit' }}
             >
               <option value="">All Statuses</option>
               <option value="pending">Pending Review</option>
@@ -377,7 +377,7 @@ export default function Kyc() {
         </div>
 
         {error && (
-          <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '12px 16px', borderRadius: 8, margin: '20px 24px 0', fontSize: 13 }}>
+          <div style={{ background: 'var(--status-red-bg)', border: '1px solid #FCA5A5', color: 'var(--status-red-fg)', padding: '12px 16px', borderRadius: 8, margin: '20px 24px 0', fontSize: 13 }}>
             ⚠️ <strong>Error:</strong> {error}
           </div>
         )}
@@ -386,7 +386,7 @@ export default function Kyc() {
         <div style={{ overflowX: 'auto', padding: '0 24px 20px' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 850 }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #E5E7EB', color: '#4B5563', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Worker Name</th>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Service Type</th>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Submitted Date</th>
@@ -398,10 +398,10 @@ export default function Kyc() {
                 <th style={{ padding: '14px 8px', textAlign: 'center', fontWeight: 600 }}>Actions</th>
               </tr>
             </thead>
-            <tbody style={{ fontSize: 13, color: '#374151' }}>
+            <tbody style={{ fontSize: 13, color: 'var(--text-primary)' }}>
               {loading ? (
                 [...Array(6)].map((_, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
                     <td style={{ padding: '14px 8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Skeleton w="30px" h="30px" radius={15} />
@@ -420,9 +420,9 @@ export default function Kyc() {
                 ))
               ) : filteredRecords.length === 0 ? (
                 <tr>
-                  <td colSpan="9" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
+                  <td colSpan="9" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>📁</div>
-                    <div style={{ fontWeight: 600, color: '#4B5563' }}>No KYC submissions found</div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>No KYC submissions found</div>
                     <div style={{ fontSize: 12 }}>Check your filters or try a different status search.</div>
                   </td>
                 </tr>
@@ -430,22 +430,22 @@ export default function Kyc() {
                 filteredRecords.map(r => {
                   const badge = getStatusBadge(r.status);
                   return (
-                    <tr key={r.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                    <tr key={r.id} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
                       <td style={{ padding: '14px 8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#EFF4FF', color: '#1A56DB', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, border: '1px solid #E5E7EB' }}>
+                          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--accent-light)', color: 'var(--accent-color)', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, border: '1px solid var(--border-color)' }}>
                             {r.worker_name ? r.worker_name.substring(0, 2).toUpperCase() : 'W'}
                           </div>
                           <div>
-                            <span style={{ fontWeight: 600, color: '#111827', display: 'block' }}>{r.worker_name || 'Worker'}</span>
-                            <span style={{ fontSize: 10, color: '#6B7280' }}>{r.worker_phone || 'No phone'}</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'block' }}>{r.worker_name || 'Worker'}</span>
+                            <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{r.worker_phone || 'No phone'}</span>
                           </div>
                         </div>
                       </td>
-                      <td style={{ padding: '14px 8px', color: '#111827', fontWeight: 500 }}>
+                      <td style={{ padding: '14px 8px', color: 'var(--text-primary)', fontWeight: 500 }}>
                         {r.service_type ? r.service_type.charAt(0).toUpperCase() + r.service_type.slice(1) : '—'}
                       </td>
-                      <td style={{ padding: '14px 8px', color: '#6B7280' }}>{formatDate(r.created_at)}</td>
+                      <td style={{ padding: '14px 8px', color: 'var(--text-secondary)' }}>{formatDate(r.created_at)}</td>
                       <td style={{ padding: '14px 8px', textAlign: 'center' }}>{getDocStatusIcon(r.aadhaar_status)}</td>
                       <td style={{ padding: '14px 8px', textAlign: 'center' }}>{getDocStatusIcon(r.pan_status)}</td>
                       <td style={{ padding: '14px 8px', textAlign: 'center' }}>{getDocStatusIcon(r.bank_passbook_status)}</td>
@@ -468,13 +468,13 @@ export default function Kyc() {
                         <button
                           onClick={() => handleOpenReview(r.id)}
                           style={{
-                            border: '1px solid #E5E7EB',
-                            background: '#fff',
+                            border: '1px solid var(--border-color)',
+                            background: 'var(--bg-card)',
                             borderRadius: 6,
                             padding: '4px 10px',
                             fontSize: 11,
                             fontWeight: 600,
-                            color: '#1A56DB',
+                            color: 'var(--accent-color)',
                             cursor: 'pointer',
                             transition: 'all 0.1s'
                           }}
@@ -492,8 +492,8 @@ export default function Kyc() {
 
         {/* Pagination bar */}
         {!loading && filteredRecords.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderTop: '0.5px solid #F3F4F6' }}>
-            <span style={{ fontSize: 12, color: '#6B7280' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderTop: '0.5px solid var(--bg-muted)' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               Showing page <strong>{currentPage}</strong> of <strong>{totalPages}</strong> (<strong>{totalDocs}</strong> submissions)
             </span>
             <div style={{ display: 'flex', gap: 6 }}>
@@ -503,9 +503,9 @@ export default function Kyc() {
                 style={{
                   padding: '6px 12px',
                   borderRadius: 6,
-                  border: '1px solid #E5E7EB',
-                  background: '#fff',
-                  color: currentPage === 1 ? '#9CA3AF' : '#374151',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card)',
+                  color: currentPage === 1 ? 'var(--text-muted)' : 'var(--text-primary)',
                   fontSize: 12,
                   fontWeight: 500,
                   cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
@@ -519,9 +519,9 @@ export default function Kyc() {
                 style={{
                   padding: '6px 12px',
                   borderRadius: 6,
-                  border: '1px solid #E5E7EB',
-                  background: '#fff',
-                  color: currentPage === totalPages ? '#9CA3AF' : '#374151',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card)',
+                  color: currentPage === totalPages ? 'var(--text-muted)' : 'var(--text-primary)',
                   fontSize: 12,
                   fontWeight: 500,
                   cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
@@ -554,8 +554,8 @@ export default function Kyc() {
               width: '100%',
               maxWidth: 600,
               height: '100%',
-              background: '#fff',
-              borderLeft: '1px solid #E5E7EB',
+              background: 'var(--bg-card)',
+              borderLeft: '1px solid var(--border-color)',
               display: 'flex',
               flexDirection: 'column',
               boxShadow: '-4px 0 24px rgba(0,0,0,0.08)',
@@ -563,15 +563,15 @@ export default function Kyc() {
             }}
           >
             {/* Drawer Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid #E5E7EB' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' }}>
               <div>
-                <span style={{ fontSize: 10, background: '#EFF4FF', color: '#1A56DB', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>KYC DOCUMENT VERIFIER</span>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: '4px 0 0' }}>Review Submission</h3>
+                <span style={{ fontSize: 10, background: 'var(--accent-light)', color: 'var(--accent-color)', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>KYC DOCUMENT VERIFIER</span>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0' }}>Review Submission</h3>
               </div>
               <button
                 disabled={submittingReview}
                 onClick={() => setSelectedRecord(null)}
-                style={{ background: 'none', border: 'none', fontSize: 20, color: '#9CA3AF', cursor: 'pointer', padding: 4 }}
+                style={{ background: 'none', border: 'none', fontSize: 20, color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
               >
                 ✕
               </button>
@@ -580,8 +580,8 @@ export default function Kyc() {
             {/* Scroll Content Body */}
             <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
               {drawerLoading ? (
-                <div style={{ padding: 40, textAlign: 'center', color: '#6B7280' }}>
-                  <div style={{ border: '3px solid #f3f3f3', borderTop: '3px solid #1A56DB', borderRadius: '50%', width: 24, height: 24, animation: 'spin 1s linear infinite', margin: '0 auto 10px' }} />
+                <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  <div style={{ border: '3px solid #f3f3f3', borderTop: '3px solid var(--accent-color)', borderRadius: '50%', width: 24, height: 24, animation: 'spin 1s linear infinite', margin: '0 auto 10px' }} />
                   <span>Loading full submission files...</span>
                   <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                 </div>
@@ -590,13 +590,13 @@ export default function Kyc() {
               ) : (
                 <div className="animate-fade">
                   {/* Worker Metadata summary */}
-                  <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 12, padding: 16, marginBottom: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#1A56DB', color: '#fff', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: 12, padding: 16, marginBottom: 24, display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--accent-color)', color: 'var(--bg-card)', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {selectedRecord.worker_name.substring(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <strong style={{ fontSize: 15, color: '#111827', display: 'block' }}>{selectedRecord.worker_name}</strong>
-                      <span style={{ fontSize: 12, color: '#4B5563' }}>
+                      <strong style={{ fontSize: 15, color: 'var(--text-primary)', display: 'block' }}>{selectedRecord.worker_name}</strong>
+                      <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                         {selectedRecord.service_type ? selectedRecord.service_type.charAt(0).toUpperCase() + selectedRecord.service_type.slice(1) : 'General'} Worker • Phone: {selectedRecord.worker_phone}
                       </span>
                     </div>
@@ -607,15 +607,15 @@ export default function Kyc() {
                     {/* 1. Aadhaar Card */}
                     <div className="doc-card">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>1. Aadhaar Card Detail</span>
-                        <span style={{ fontSize: 11, color: '#6B7280' }}>Number: <strong>{selectedRecord.aadhaar_number}</strong></span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>1. Aadhaar Card Detail</span>
+                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Number: <strong>{selectedRecord.aadhaar_number}</strong></span>
                       </div>
                       
                       {selectedRecord.aadhaar_url && (
-                        <div style={{ width: '100%', height: 160, borderRadius: 8, overflow: 'hidden', background: '#F3F4F6', border: '1px solid #E5E7EB', position: 'relative', marginBottom: 12, cursor: 'pointer' }}
+                        <div style={{ width: '100%', height: 160, borderRadius: 8, overflow: 'hidden', background: 'var(--bg-muted)', border: '1px solid var(--border-color)', position: 'relative', marginBottom: 12, cursor: 'pointer' }}
                              onClick={() => setActiveLightboxImage(selectedRecord.aadhaar_url)}>
                           <img src={selectedRecord.aadhaar_url} alt="Aadhaar Scan" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)', opacity: 0, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 600 }}
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)', opacity: 0, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg-card)', fontSize: 12, fontWeight: 600 }}
                                onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
                                onMouseLeave={(e) => e.currentTarget.style.opacity = 0}>
                             🔍 Click to Zoom
@@ -638,15 +638,15 @@ export default function Kyc() {
                     {/* 2. PAN Card */}
                     <div className="doc-card">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>2. PAN Card Detail</span>
-                        <span style={{ fontSize: 11, color: '#6B7280' }}>Number: <strong>{selectedRecord.pan_number}</strong></span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>2. PAN Card Detail</span>
+                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Number: <strong>{selectedRecord.pan_number}</strong></span>
                       </div>
 
                       {selectedRecord.pan_url && (
-                        <div style={{ width: '100%', height: 160, borderRadius: 8, overflow: 'hidden', background: '#F3F4F6', border: '1px solid #E5E7EB', position: 'relative', marginBottom: 12, cursor: 'pointer' }}
+                        <div style={{ width: '100%', height: 160, borderRadius: 8, overflow: 'hidden', background: 'var(--bg-muted)', border: '1px solid var(--border-color)', position: 'relative', marginBottom: 12, cursor: 'pointer' }}
                              onClick={() => setActiveLightboxImage(selectedRecord.pan_url)}>
                           <img src={selectedRecord.pan_url} alt="PAN Scan" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)', opacity: 0, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 600 }}
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)', opacity: 0, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg-card)', fontSize: 12, fontWeight: 600 }}
                                onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
                                onMouseLeave={(e) => e.currentTarget.style.opacity = 0}>
                             🔍 Click to Zoom
@@ -669,15 +669,15 @@ export default function Kyc() {
                     {/* 3. Bank Passbook */}
                     <div className="doc-card">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>3. Bank Passbook Detail</span>
-                        <span style={{ fontSize: 11, color: '#6B7280' }}>Account No: <strong>{selectedRecord.bank_account_number}</strong></span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>3. Bank Passbook Detail</span>
+                        <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Account No: <strong>{selectedRecord.bank_account_number}</strong></span>
                       </div>
 
                       {selectedRecord.bank_passbook_url && (
-                        <div style={{ width: '100%', height: 160, borderRadius: 8, overflow: 'hidden', background: '#F3F4F6', border: '1px solid #E5E7EB', position: 'relative', marginBottom: 12, cursor: 'pointer' }}
+                        <div style={{ width: '100%', height: 160, borderRadius: 8, overflow: 'hidden', background: 'var(--bg-muted)', border: '1px solid var(--border-color)', position: 'relative', marginBottom: 12, cursor: 'pointer' }}
                              onClick={() => setActiveLightboxImage(selectedRecord.bank_passbook_url)}>
                           <img src={selectedRecord.bank_passbook_url} alt="Passbook Scan" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)', opacity: 0, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 600 }}
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)', opacity: 0, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg-card)', fontSize: 12, fontWeight: 600 }}
                                onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
                                onMouseLeave={(e) => e.currentTarget.style.opacity = 0}>
                             🔍 Click to Zoom
@@ -700,14 +700,14 @@ export default function Kyc() {
                     {/* 4. Selfie */}
                     <div className="doc-card">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>4. Selfie Picture</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>4. Selfie Picture</span>
                       </div>
 
                       {selectedRecord.selfie_url && (
-                        <div style={{ width: '100%', height: 160, borderRadius: 8, overflow: 'hidden', background: '#F3F4F6', border: '1px solid #E5E7EB', position: 'relative', marginBottom: 12, cursor: 'pointer' }}
+                        <div style={{ width: '100%', height: 160, borderRadius: 8, overflow: 'hidden', background: 'var(--bg-muted)', border: '1px solid var(--border-color)', position: 'relative', marginBottom: 12, cursor: 'pointer' }}
                              onClick={() => setActiveLightboxImage(selectedRecord.selfie_url)}>
                           <img src={selectedRecord.selfie_url} alt="Selfie Scan" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)', opacity: 0, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 12, fontWeight: 600 }}
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.2)', opacity: 0, transition: 'opacity 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--bg-card)', fontSize: 12, fontWeight: 600 }}
                                onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
                                onMouseLeave={(e) => e.currentTarget.style.opacity = 0}>
                             🔍 Click to Zoom
@@ -744,7 +744,7 @@ export default function Kyc() {
                           borderRadius: 8,
                           fontSize: 13,
                           outline: 'none',
-                          color: '#374151',
+                          color: 'var(--text-primary)',
                           fontFamily: "inherit"
                         }}
                       />
@@ -755,7 +755,7 @@ export default function Kyc() {
             </div>
 
             {/* Drawer Footer Actions */}
-            <div style={{ borderTop: '1px solid #E5E7EB', padding: '16px 24px', backgroundColor: '#FAFAFB', display: 'flex', gap: 12 }}>
+            <div style={{ borderTop: '1px solid var(--border-color)', padding: '16px 24px', backgroundColor: '#FAFAFB', display: 'flex', gap: 12 }}>
               <button
                 disabled={submittingReview || drawerLoading}
                 onClick={() => setSelectedRecord(null)}
@@ -764,8 +764,8 @@ export default function Kyc() {
                   padding: '10px 14px',
                   borderRadius: 8,
                   border: '1px solid #D1D5DB',
-                  background: '#fff',
-                  color: '#4B5563',
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-secondary)',
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: submittingReview || drawerLoading ? 'not-allowed' : 'pointer',
@@ -781,8 +781,8 @@ export default function Kyc() {
                   padding: '10px 14px',
                   borderRadius: 8,
                   border: 'none',
-                  background: submittingReview || drawerLoading ? '#9CA3AF' : '#1A56DB',
-                  color: '#fff',
+                  background: submittingReview || drawerLoading ? 'var(--text-muted)' : 'var(--accent-color)',
+                  color: 'var(--bg-card)',
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: submittingReview || drawerLoading ? 'not-allowed' : 'pointer',
@@ -794,7 +794,7 @@ export default function Kyc() {
               >
                 {submittingReview ? (
                   <>
-                    <div style={{ border: '2px solid #fff', borderTop: '2px solid transparent', borderRadius: '50%', width: 12, height: 12, animation: 'spin 1s linear infinite' }} />
+                    <div style={{ border: '2px solid var(--bg-card)', borderTop: '2px solid transparent', borderRadius: '50%', width: 12, height: 12, animation: 'spin 1s linear infinite' }} />
                     Submitting...
                   </>
                 ) : 'Submit Review Decisions'}
@@ -832,7 +832,7 @@ export default function Kyc() {
               borderRadius: '50%',
               width: 40,
               height: 40,
-              color: '#fff',
+              color: 'var(--bg-card)',
               fontSize: 20,
               cursor: 'pointer',
               display: 'flex',

@@ -5,7 +5,7 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
     <div style={{
       width: w, height: h, borderRadius: radius,
-      background: 'linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%)',
+      background: 'linear-gradient(90deg,var(--bg-muted) 25%,var(--border-color) 50%,var(--bg-muted) 75%)',
       backgroundSize: '200% 100%',
       animation: 'shimmer 1.4s infinite',
     }} />
@@ -15,8 +15,8 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
 function StatCard({ label, value, icon, bg, fg, loading }) {
   return (
     <div style={{
-      background: '#fff',
-      border: '0.5px solid #E5E7EB',
+      background: 'var(--bg-card)',
+      border: '0.5px solid var(--border-color)',
       borderRadius: 12,
       padding: '16px 20px',
       display: 'flex',
@@ -25,11 +25,11 @@ function StatCard({ label, value, icon, bg, fg, loading }) {
       boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
     }}>
       <div>
-        <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>{label}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>{label}</div>
         {loading ? (
           <Skeleton w="60px" h={24} />
         ) : (
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>{value}</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
         )}
       </div>
       <div style={{
@@ -51,6 +51,7 @@ const AVAILABLE_PERMISSIONS = [
   { key: 'bookings', label: 'Manage Bookings', desc: 'Monitor and modify booking states & assignments' },
   { key: 'invoices', label: 'Manage Invoices', desc: 'Process and view invoice details and payouts' },
   { key: 'services', label: 'Manage Services', desc: 'Create/update services, categories, and adjust service states' },
+  { key: 'banners', label: 'Manage Banners', desc: 'Create, edit and delete promotion/marketing banners' },
   { key: 'complaints', label: 'Manage Support', desc: 'Resolve client complaints and add admin notes' },
   { key: 'locations', label: 'Manage Locations', desc: 'Edit operational zones, pincodes, and tracking' },
   { key: 'dashboard', label: 'View Dashboard', desc: 'Access high-level overview metrics and stats charts' },
@@ -255,13 +256,13 @@ export default function Roles() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'active':
-        return { text: '🟢 Active', bg: '#D1FAE5', fg: '#065F46' };
+        return { text: '🟢 Active', bg: 'var(--status-green-bg)', fg: 'var(--status-green-fg)' };
       case 'inactive':
-        return { text: '🟡 Inactive', bg: '#FFFBEB', fg: '#D97706' };
+        return { text: '🟡 Inactive', bg: 'var(--status-amber-bg)', fg: 'var(--status-amber-fg)' };
       case 'suspended':
-        return { text: '🔴 Suspended', bg: '#FEE2E2', fg: '#991B1B' };
+        return { text: '🔴 Suspended', bg: 'var(--status-red-bg)', fg: 'var(--status-red-fg)' };
       default:
-        return { text: status || 'Unknown', bg: '#E5E7EB', fg: '#374151' };
+        return { text: status || 'Unknown', bg: 'var(--border-color)', fg: 'var(--text-primary)' };
     }
   };
 
@@ -288,7 +289,7 @@ export default function Roles() {
   }, [search, filterStatus]);
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#F9FAFB', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: 'var(--bg-app)', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <style>{`
         @keyframes shimmer {
           0%   { background-position: 200% 0; }
@@ -311,18 +312,18 @@ export default function Roles() {
           font-size: 10px;
           border-radius: 4px;
           padding: 1px 6px;
-          background: #EFF4FF;
-          color: #1A56DB;
+          background: var(--accent-light);
+          color: var(--accent-color);
           font-weight: 600;
           margin-right: 4px;
           margin-bottom: 4px;
           border: 0.5px solid #D1E2FF;
         }
         .perm-card {
-          border: 1px solid #E5E7EB;
+          border: 1px solid var(--border-color);
           border-radius: 8px;
           padding: 10px 12px;
-          background: #F9FAFB;
+          background: var(--bg-app);
           cursor: pointer;
           transition: all 0.15s ease;
           display: flex;
@@ -331,16 +332,16 @@ export default function Roles() {
           user-select: none;
         }
         .perm-card:hover {
-          border-color: #3B82F6;
+          border-color: var(--accent-color);
           background: #EFF6FF;
         }
         .perm-card.active {
-          border-color: #1A56DB;
-          background: #EFF4FF;
+          border-color: var(--accent-color);
+          background: var(--accent-light);
         }
         .action-btn {
-          border: 1px solid #E5E7EB;
-          background: #fff;
+          border: 1px solid var(--border-color);
+          background: var(--bg-card);
           border-radius: 6px;
           padding: 4px 10px;
           fontSize: 11px;
@@ -349,14 +350,14 @@ export default function Roles() {
           transition: all 0.1s;
         }
         .action-btn.edit {
-          color: #1A56DB;
+          color: var(--accent-color);
         }
         .action-btn.edit:hover {
-          background: #EFF4FF;
-          border-color: #3B82F6;
+          background: var(--accent-light);
+          border-color: var(--accent-color);
         }
         .action-btn.delete {
-          color: #DC2626;
+          color: var(--status-red-fg);
           margin-left: 6px;
         }
         .action-btn.delete:hover {
@@ -376,7 +377,7 @@ export default function Roles() {
           transition: border-color 0.15s;
         }
         .form-input:focus {
-          border-color: #1A56DB;
+          border-color: var(--accent-color);
           box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
         }
       `}</style>
@@ -384,14 +385,14 @@ export default function Roles() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0 }}>Roles & Permissions</h2>
-          <p style={{ fontSize: 12, color: '#6B7280', margin: '4px 0 0' }}>Configure administration access, allocate operational scopes, and create sub-admins.</p>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Roles & Permissions</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>Configure administration access, allocate operational scopes, and create sub-admins.</p>
         </div>
         <button
           onClick={handleOpenCreate}
           style={{
-            background: '#1A56DB',
-            color: '#fff',
+            background: 'var(--accent-color)',
+            color: 'var(--bg-card)',
             border: 'none',
             borderRadius: 8,
             padding: '8px 16px',
@@ -403,8 +404,8 @@ export default function Roles() {
             gap: 6,
             transition: 'background 0.15s',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = '#1e40af'}
-          onMouseLeave={(e) => e.currentTarget.style.background = '#1A56DB'}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--accent-dark)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'var(--accent-color)'}
         >
           <span>➕</span> Add Sub-Admin
         </button>
@@ -416,41 +417,41 @@ export default function Roles() {
           label="Total Sub-Admins"
           value={stats.total}
           icon="🔐"
-          bg="#EFF4FF"
-          fg="#1A56DB"
+          bg="var(--accent-light)"
+          fg="var(--accent-color)"
           loading={loading}
         />
         <StatCard
           label="Active Accounts"
           value={stats.active}
           icon="🟢"
-          bg="#F0FDF4"
-          fg="#059669"
+          bg="var(--status-green-bg)"
+          fg="var(--status-green-fg)"
           loading={loading}
         />
         <StatCard
           label="Inactive Accounts"
           value={stats.inactive}
           icon="🟡"
-          bg="#FFFBEB"
-          fg="#D97706"
+          bg="var(--status-amber-bg)"
+          fg="var(--status-amber-fg)"
           loading={loading}
         />
         <StatCard
           label="Suspended Accounts"
           value={stats.suspended}
           icon="🔴"
-          bg="#FEE2E2"
-          fg="#991B1B"
+          bg="var(--status-red-bg)"
+          fg="var(--status-red-fg)"
           loading={loading}
         />
       </div>
 
       {/* Controls Container */}
-      <div style={{ background: '#fff', border: '0.5px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+      <div style={{ background: 'var(--bg-card)', border: '0.5px solid var(--border-color)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
         
         {/* Top Controls */}
-        <div style={{ padding: '20px 24px', borderBottom: '0.5px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '0.5px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           {/* Search bar */}
           <div style={{ position: 'relative', flex: 1, minWidth: 260, maxWidth: 400 }}>
             <input
@@ -468,7 +469,7 @@ export default function Roles() {
                 fontFamily: "'DM Sans', sans-serif"
               }}
             />
-            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontSize: 15 }}>🔍</span>
+            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: 15 }}>🔍</span>
           </div>
 
           {/* Filters */}
@@ -476,7 +477,7 @@ export default function Roles() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              style={{ padding: '7px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 12, color: '#374151', outline: 'none', fontWeight: 500, fontFamily: 'inherit' }}
+              style={{ padding: '7px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 12, color: 'var(--text-primary)', outline: 'none', fontWeight: 500, fontFamily: 'inherit' }}
             >
               <option value="">All Statuses</option>
               <option value="active">Active Only</option>
@@ -487,7 +488,7 @@ export default function Roles() {
         </div>
 
         {error && (
-          <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '12px 16px', borderRadius: 8, margin: '20px 24px 0', fontSize: 13 }}>
+          <div style={{ background: 'var(--status-red-bg)', border: '1px solid #FCA5A5', color: 'var(--status-red-fg)', padding: '12px 16px', borderRadius: 8, margin: '20px 24px 0', fontSize: 13 }}>
             ⚠️ <strong>Error:</strong> {error}
           </div>
         )}
@@ -496,7 +497,7 @@ export default function Roles() {
         <div style={{ overflowX: 'auto', padding: '0 24px 20px' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 850 }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #E5E7EB', color: '#4B5563', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Sub-Admin Details</th>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Active Scopes / Permissions</th>
                 <th style={{ padding: '14px 8px', fontWeight: 600 }}>Global Status</th>
@@ -504,10 +505,10 @@ export default function Roles() {
                 <th style={{ padding: '14px 8px', textAlign: 'center', fontWeight: 600 }}>Actions</th>
               </tr>
             </thead>
-            <tbody style={{ fontSize: 13, color: '#374151' }}>
+            <tbody style={{ fontSize: 13, color: 'var(--text-primary)' }}>
               {loading ? (
                 [...Array(4)].map((_, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                  <tr key={idx} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
                     <td style={{ padding: '14px 8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Skeleton w="30px" h="30px" radius={15} />
@@ -531,9 +532,9 @@ export default function Roles() {
                 ))
               ) : paginatedAdmins.length === 0 ? (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
+                  <td colSpan="5" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🔐</div>
-                    <div style={{ fontWeight: 600, color: '#4B5563' }}>No sub-admins found</div>
+                    <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>No sub-admins found</div>
                     <div style={{ fontSize: 12 }}>Create a new sub-admin or try editing your filters.</div>
                   </td>
                 </tr>
@@ -546,16 +547,16 @@ export default function Roles() {
                     try { perms = JSON.parse(perms); } catch (e) { perms = []; }
                   }
                   return (
-                    <tr key={admin.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                    <tr key={admin.id} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
                       {/* Sub-Admin details */}
                       <td style={{ padding: '14px 8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#EFF4FF', color: '#1A56DB', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, border: '1px solid #E5E7EB', flexShrink: 0 }}>
+                          <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--accent-light)', color: 'var(--accent-color)', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, border: '1px solid var(--border-color)', flexShrink: 0 }}>
                             {admin.name ? admin.name.substring(0, 2).toUpperCase() : 'SA'}
                           </div>
                           <div>
-                            <span style={{ fontWeight: 600, color: '#111827', display: 'block' }}>{admin.name}</span>
-                            <span style={{ fontSize: 11, color: '#6B7280' }}>{admin.email}</span>
+                            <span style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'block' }}>{admin.name}</span>
+                            <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{admin.email}</span>
                           </div>
                         </div>
                       </td>
@@ -563,7 +564,7 @@ export default function Roles() {
                       {/* Permissions list */}
                       <td style={{ padding: '14px 8px', maxWidth: 350 }}>
                         {perms.length === 0 ? (
-                          <span style={{ fontSize: 11, color: '#9CA3AF', fontStyle: 'italic' }}>None allocated</span>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>None allocated</span>
                         ) : (
                           <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                             {perms.map(pKey => {
@@ -595,7 +596,7 @@ export default function Roles() {
                       </td>
 
                       {/* Created date */}
-                      <td style={{ padding: '14px 8px', color: '#6B7280' }}>{formatDate(admin.created_at)}</td>
+                      <td style={{ padding: '14px 8px', color: 'var(--text-secondary)' }}>{formatDate(admin.created_at)}</td>
 
                       {/* Actions */}
                       <td style={{ padding: '14px 8px', textAlign: 'center' }}>
@@ -622,8 +623,8 @@ export default function Roles() {
 
         {/* Pagination bar */}
         {!loading && filteredSubAdmins.length > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderTop: '0.5px solid #F3F4F6' }}>
-            <span style={{ fontSize: 12, color: '#6B7280' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderTop: '0.5px solid var(--bg-muted)' }}>
+            <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               Showing page <strong>{currentPage}</strong> of <strong>{totalPages}</strong> (<strong>{totalDocs}</strong> sub-admins)
             </span>
             <div style={{ display: 'flex', gap: 6 }}>
@@ -633,9 +634,9 @@ export default function Roles() {
                 style={{
                   padding: '6px 12px',
                   borderRadius: 6,
-                  border: '1px solid #E5E7EB',
-                  background: '#fff',
-                  color: currentPage === 1 ? '#9CA3AF' : '#374151',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card)',
+                  color: currentPage === 1 ? 'var(--text-muted)' : 'var(--text-primary)',
                   fontSize: 12,
                   fontWeight: 500,
                   cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
@@ -649,9 +650,9 @@ export default function Roles() {
                 style={{
                   padding: '6px 12px',
                   borderRadius: 6,
-                  border: '1px solid #E5E7EB',
-                  background: '#fff',
-                  color: currentPage === totalPages ? '#9CA3AF' : '#374151',
+                  border: '1px solid var(--border-color)',
+                  background: 'var(--bg-card)',
+                  color: currentPage === totalPages ? 'var(--text-muted)' : 'var(--text-primary)',
                   fontSize: 12,
                   fontWeight: 500,
                   cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
@@ -674,8 +675,8 @@ export default function Roles() {
           width: 50,
           height: 50,
           borderRadius: 25,
-          background: '#1A56DB',
-          color: '#fff',
+          background: 'var(--accent-color)',
+          color: 'var(--bg-card)',
           border: 'none',
           boxShadow: '0 4px 12px rgba(26,86,219,0.3)',
           display: 'flex',
@@ -688,11 +689,11 @@ export default function Roles() {
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'scale(1.05)';
-          e.currentTarget.style.background = '#1e40af';
+          e.currentTarget.style.background = 'var(--accent-dark)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'scale(1)';
-          e.currentTarget.style.background = '#1A56DB';
+          e.currentTarget.style.background = 'var(--accent-color)';
         }}
         title="Add New Sub-Admin"
       >
@@ -719,8 +720,8 @@ export default function Roles() {
               width: '100%',
               maxWidth: 620,
               height: '100%',
-              background: '#fff',
-              borderLeft: '1px solid #E5E7EB',
+              background: 'var(--bg-card)',
+              borderLeft: '1px solid var(--border-color)',
               display: 'flex',
               flexDirection: 'column',
               boxShadow: '-4px 0 24px rgba(0,0,0,0.08)',
@@ -728,19 +729,19 @@ export default function Roles() {
             }}
           >
             {/* Drawer Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid #E5E7EB' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' }}>
               <div>
-                <span style={{ fontSize: 10, background: '#EFF4FF', color: '#1A56DB', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>
+                <span style={{ fontSize: 10, background: 'var(--accent-light)', color: 'var(--accent-color)', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>
                   SUB-ADMIN MANAGEMENT
                 </span>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: '4px 0 0' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0' }}>
                   {editingAdmin ? 'Update Sub-Admin Profile' : 'Configure New Sub-Admin'}
                 </h3>
               </div>
               <button
                 disabled={saving}
                 onClick={() => setDrawerOpen(false)}
-                style={{ background: 'none', border: 'none', fontSize: 20, color: '#9CA3AF', cursor: 'pointer', padding: 4 }}
+                style={{ background: 'none', border: 'none', fontSize: 20, color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
               >
                 ✕
               </button>
@@ -750,8 +751,8 @@ export default function Roles() {
             <form onSubmit={handleSave} style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
               <div style={{ flex: 1, padding: 24 }}>
                 {drawerLoading ? (
-                  <div style={{ padding: 40, textAlign: 'center', color: '#6B7280' }}>
-                    <div style={{ border: '3px solid #f3f3f3', borderTop: '3px solid #1A56DB', borderRadius: '50%', width: 24, height: 24, animation: 'spin 1s linear infinite', margin: '0 auto 10px' }} />
+                  <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    <div style={{ border: '3px solid #f3f3f3', borderTop: '3px solid var(--accent-color)', borderRadius: '50%', width: 24, height: 24, animation: 'spin 1s linear infinite', margin: '0 auto 10px' }} />
                     <span>Fetching profile records...</span>
                     <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                   </div>
@@ -761,7 +762,7 @@ export default function Roles() {
                     {/* Basic Info Fields */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                       <div>
-                        <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Name *</label>
+                        <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Name *</label>
                         <input
                           type="text"
                           required
@@ -772,7 +773,7 @@ export default function Roles() {
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Address *</label>
+                        <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Address *</label>
                         <input
                           type="email"
                           required
@@ -786,7 +787,7 @@ export default function Roles() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                       <div>
-                        <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Password {editingAdmin ? '(Optional)' : '*'}
                         </label>
                         <input
@@ -799,7 +800,7 @@ export default function Roles() {
                         />
                       </div>
                       <div>
-                        <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Global Status</label>
+                        <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Global Status</label>
                         <select
                           value={formStatus}
                           onChange={(e) => setFormStatus(e.target.value)}
@@ -813,13 +814,13 @@ export default function Roles() {
                     </div>
 
                     {/* Permissions Section */}
-                    <div style={{ borderTop: '0.5px solid #E5E7EB', paddingTop: 18, marginTop: 6 }}>
+                    <div style={{ borderTop: '0.5px solid var(--border-color)', paddingTop: 18, marginTop: 6 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                         <div>
-                          <label style={{ fontSize: 11, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block' }}>
+                          <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block' }}>
                             Access Scopes & Permissions
                           </label>
-                          <span style={{ fontSize: 11, color: '#6B7280' }}>
+                          <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
                             Select the module capabilities assigned to this sub-admin.
                           </span>
                         </div>
@@ -828,12 +829,12 @@ export default function Roles() {
                           onClick={handleSelectAll}
                           style={{
                             border: '1px solid #D1D5DB',
-                            background: '#fff',
+                            background: 'var(--bg-card)',
                             borderRadius: 6,
                             padding: '4px 10px',
                             fontSize: 11,
                             fontWeight: 600,
-                            color: '#374151',
+                            color: 'var(--text-primary)',
                             cursor: 'pointer'
                           }}
                         >
@@ -858,10 +859,10 @@ export default function Roles() {
                                 style={{ marginTop: 3, cursor: 'pointer' }}
                               />
                               <div>
-                                <span style={{ fontSize: 12, fontWeight: 600, color: '#111827', display: 'block' }}>
+                                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', display: 'block' }}>
                                   {p.label}
                                 </span>
-                                <span style={{ fontSize: 10, color: '#6B7280', display: 'block', lineHeight: 1.25, marginTop: 2 }}>
+                                <span style={{ fontSize: 10, color: 'var(--text-secondary)', display: 'block', lineHeight: 1.25, marginTop: 2 }}>
                                   {p.desc}
                                 </span>
                               </div>
@@ -876,7 +877,7 @@ export default function Roles() {
               </div>
 
               {/* Drawer Footer actions */}
-              <div style={{ padding: '16px 24px', borderTop: '1px solid #E5E7EB', display: 'flex', justifyContent: 'flex-end', gap: 10, background: '#F9FAFB' }}>
+              <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: 10, background: 'var(--bg-app)' }}>
                 <button
                   type="button"
                   disabled={saving}
@@ -884,9 +885,9 @@ export default function Roles() {
                   style={{
                     padding: '8px 16px',
                     borderRadius: 8,
-                    border: '1px solid #E5E7EB',
-                    background: '#fff',
-                    color: '#4B5563',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-card)',
+                    color: 'var(--text-secondary)',
                     fontSize: 13,
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -901,8 +902,8 @@ export default function Roles() {
                     padding: '8px 18px',
                     borderRadius: 8,
                     border: 'none',
-                    background: '#1A56DB',
-                    color: '#fff',
+                    background: 'var(--accent-color)',
+                    color: 'var(--bg-card)',
                     fontSize: 13,
                     fontWeight: 600,
                     cursor: 'pointer',
@@ -912,7 +913,7 @@ export default function Roles() {
                   }}
                 >
                   {saving && (
-                    <div style={{ border: '2px solid #fff', borderTop: '2px solid transparent', borderRadius: '50%', width: 12, height: 12, animation: 'spin 1s linear infinite' }} />
+                    <div style={{ border: '2px solid var(--bg-card)', borderTop: '2px solid transparent', borderRadius: '50%', width: 12, height: 12, animation: 'spin 1s linear infinite' }} />
                   )}
                   {editingAdmin ? 'Save Changes' : 'Create Profile'}
                 </button>

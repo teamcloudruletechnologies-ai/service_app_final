@@ -53,6 +53,8 @@ class ApiService {
       'experience_years': account.experienceYears,
       'city': account.city,
       'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
     }));
   }
 
@@ -76,6 +78,9 @@ class ApiService {
     final body = response.body.isEmpty ? {} : jsonDecode(response.body);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return body;
+    }
+    if (response.statusCode == 401) {
+      logout();
     }
     final message = body is Map ? (body['message'] as String? ?? 'Request failed') : 'Request failed';
     throw ApiException(message, statusCode: response.statusCode);
@@ -105,6 +110,22 @@ class ApiService {
     final account = UserAccount.fromJson(payload['account']);
     await _saveSession(payload['token'] as String, account);
     return payload;
+  }
+
+  Future<Map<String, dynamic>> phoneLoginOrRegister(String phone) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/auth/phone-login'),
+      headers: _headers(),
+      body: jsonEncode({'phone': phone, 'role': 'worker'}),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final payload = data['data'] as Map<String, dynamic>;
+    final account = UserAccount.fromJson(payload['account']);
+    await _saveSession(payload['token'] as String, account);
+    return {
+      'account': account,
+      'is_new': payload['is_new'] as bool? ?? false,
+    };
   }
 
   Future<UserAccount> register({
@@ -163,6 +184,24 @@ class ApiService {
     final data = _decode(response) as Map<String, dynamic>;
     final account = UserAccount.fromJson(data['data']);
     _account = account;
+    // Persist updated account (including kyc_status) to SharedPreferences
+    // so next app launch doesn't load stale cached data
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accountKey, jsonEncode({
+      'id': account.id,
+      'role': account.role,
+      'name': account.name,
+      'email': account.email,
+      'phone': account.phone,
+      'status': account.status,
+      'kyc_status': account.kycStatus,
+      'service_type': account.serviceType,
+      'experience_years': account.experienceYears,
+      'city': account.city,
+      'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
+    }));
     return account;
   }
 
@@ -287,8 +326,12 @@ class ApiService {
   }
 
   Future<UserAccount> updateWorkerProfile({
+    String? name,
+    String? email,
     String? status,
     String? city,
+    String? state,
+    String? address,
     String? pincode,
     String? serviceType,
     int? experienceYears,
@@ -297,8 +340,12 @@ class ApiService {
       Uri.parse('${ApiConfig.baseUrl}/app/worker/profile'),
       headers: _headers(auth: true),
       body: jsonEncode({
+        if (name != null) 'name': name,
+        if (email != null) 'email': email,
         if (status != null) 'status': status,
         if (city != null) 'city': city,
+        if (state != null) 'state': state,
+        if (address != null) 'address': address,
         if (pincode != null) 'pincode': pincode,
         if (serviceType != null) 'serviceType': serviceType,
         if (experienceYears != null) 'experienceYears': experienceYears,
@@ -321,6 +368,8 @@ class ApiService {
       'experience_years': account.experienceYears,
       'city': account.city,
       'pincode': account.pincode,
+      'state': account.state,
+      'address': account.address,
     }));
     return account;
   }
@@ -345,5 +394,41 @@ class ApiService {
         if (pincode != null) 'pincode': pincode,
       }),
     );
+  }
+
+  /// Fetches active serviceable pincodes & cities from backend (no auth required).
+  /// Used to show available service areas in registration and home screens.
+  Future<List<Map<String, dynamic>>> fetchServiceableLocations() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/locations/serviceable'),
+      headers: _headers(),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final rows = data['data'] as List? ?? [];
+    return rows.cast<Map<String, dynamic>>();
+  }
+
+  // --- REVIEWS ---
+
+  Future<PagedResult<ReviewItem>> fetchReviews({int? workerId, int? rating}) async {
+    final params = <String, String>{'limit': '50'};
+    if (workerId != null) params['workerId'] = '$workerId';
+    if (rating != null) params['rating'] = '$rating';
+
+    final uri = Uri.parse('${ApiConfig.baseUrl}/app/reviews').replace(queryParameters: params);
+    final response = await http.get(uri, headers: _headers(auth: true));
+    final data = _decode(response) as Map<String, dynamic>;
+    return _parsePaged(data['data'] as Map<String, dynamic>, ReviewItem.fromJson);
+  }
+
+  // --- WORKER EARNINGS ---
+
+  Future<Map<String, dynamic>> fetchWorkerEarnings() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/worker/earnings'),
+      headers: _headers(auth: true),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return data['data'] as Map<String, dynamic>;
   }
 }

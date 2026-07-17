@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { bookingsAPI } from '../api';
 
 const STATUS_BADGES = {
-  pending: { bg: '#EFF4FF', fg: '#1E40AF', text: 'Pending' },
+  pending: { bg: 'var(--accent-light)', fg: 'var(--accent-dark)', text: 'Pending' },
   confirmed: { bg: '#F5F3FF', fg: '#7C3AED', text: 'Confirmed' },
-  in_progress: { bg: '#FEF3C7', fg: '#92400E', text: 'In Progress' },
-  completed: { bg: '#D1FAE5', fg: '#065F46', text: 'Completed' },
-  cancelled: { bg: '#FEE2E2', fg: '#991B1B', text: 'Cancelled' },
+  in_progress: { bg: 'var(--status-amber-bg)', fg: 'var(--status-amber-fg)', text: 'In Progress' },
+  completed: { bg: 'var(--status-green-bg)', fg: 'var(--status-green-fg)', text: 'Completed' },
+  cancelled: { bg: 'var(--status-red-bg)', fg: 'var(--status-red-fg)', text: 'Cancelled' },
 };
 
 
@@ -15,7 +15,7 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
     <div style={{
       width: w, height: h, borderRadius: radius,
-      background: 'linear-gradient(90deg,#F3F4F6 25%,#E5E7EB 50%,#F3F4F6 75%)',
+      background: 'linear-gradient(90deg,var(--bg-muted) 25%,var(--border-color) 50%,var(--bg-muted) 75%)',
       backgroundSize: '200% 100%',
       animation: 'shimmer 1.4s infinite',
     }} />
@@ -25,8 +25,8 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
 function StatCard({ label, value, icon, bg, fg, loading }) {
   return (
     <div style={{
-      background: '#fff',
-      border: '0.5px solid #E5E7EB',
+      background: 'var(--bg-card)',
+      border: '0.5px solid var(--border-color)',
       borderRadius: 12,
       padding: '16px 20px',
       display: 'flex',
@@ -34,11 +34,11 @@ function StatCard({ label, value, icon, bg, fg, loading }) {
       justifyContent: 'space-between',
     }}>
       <div>
-        <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 6, fontWeight: 500 }}>{label}</div>
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>{label}</div>
         {loading ? (
           <Skeleton w="90px" h={24} />
         ) : (
-          <div style={{ fontSize: 24, fontWeight: 700, color: '#111827' }}>{value}</div>
+          <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
         )}
       </div>
       <div style={{
@@ -96,8 +96,8 @@ export default function Bookings() {
     bookingsAPI.getAll(params)
       .then(res => {
         if (res && res.success) {
-          setBookings(res.data.docs || []);
-          setTotalPages(res.data.totalPages || 1);
+          setBookings(res.data.rows || []);
+          setTotalPages(res.data.meta?.totalPages || 1);
         }
       })
       .catch(err => {
@@ -158,7 +158,7 @@ export default function Bookings() {
   const summary = analytics?.summary || {};
 
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#F9FAFB', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: 'var(--bg-app)', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       {/* CSS Animations */}
       <style>{`
         @keyframes shimmer {
@@ -181,8 +181,8 @@ export default function Bookings() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0 }}>Bookings Management</h2>
-          <p style={{ fontSize: 12, color: '#6B7280', margin: '4px 0 0' }}>Track customer service orders, assign jobs, and manage task lifecycles.</p>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Bookings Management</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>Track customer service orders, assign jobs, and manage task lifecycles.</p>
         </div>
       </div>
 
@@ -192,16 +192,16 @@ export default function Bookings() {
           label="Total Orders"
           value={summary.total_bookings?.toLocaleString()}
           icon="📅"
-          bg="#EFF4FF"
-          fg="#1A56DB"
+          bg="var(--accent-light)"
+          fg="var(--accent-color)"
           loading={statsLoading}
         />
         <StatCard
           label="Pending Assign"
           value={summary.pending_bookings?.toLocaleString()}
           icon="⏳"
-          bg="#FFFBEB"
-          fg="#D97706"
+          bg="var(--status-amber-bg)"
+          fg="var(--status-amber-fg)"
           loading={statsLoading}
         />
         <StatCard
@@ -216,22 +216,22 @@ export default function Bookings() {
           label="Completed Tasks"
           value={summary.completed_bookings?.toLocaleString()}
           icon="🎉"
-          bg="#F0FDF4"
-          fg="#059669"
+          bg="var(--status-green-bg)"
+          fg="var(--status-green-fg)"
           loading={statsLoading}
         />
         <StatCard
           label="Cancelled Orders"
           value={summary.cancelled_bookings?.toLocaleString()}
           icon="❌"
-          bg="#FEE2E2"
-          fg="#DC2626"
+          bg="var(--status-red-bg)"
+          fg="var(--status-red-fg)"
           loading={statsLoading}
         />
       </div>
 
       {/* Table Container Card */}
-      <div style={{ background: '#fff', border: '0.5px solid #E5E7EB', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+      <div style={{ background: 'var(--bg-card)', border: '0.5px solid var(--border-color)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
         
         {/* Filters and List view padding */}
         <div style={{ padding: '20px 24px' }}>
@@ -253,9 +253,9 @@ export default function Bookings() {
                   padding: '6px 14px',
                   borderRadius: 20,
                   border: '1px solid',
-                  borderColor: filterStatus === opt.key ? '#1A56DB' : '#E5E7EB',
-                  backgroundColor: filterStatus === opt.key ? '#EFF4FF' : '#fff',
-                  color: filterStatus === opt.key ? '#1A56DB' : '#4B5563',
+                  borderColor: filterStatus === opt.key ? 'var(--accent-color)' : 'var(--border-color)',
+                  backgroundColor: filterStatus === opt.key ? 'var(--accent-light)' : 'var(--bg-card)',
+                  color: filterStatus === opt.key ? 'var(--accent-color)' : 'var(--text-secondary)',
                   fontSize: 12,
                   fontWeight: 500,
                   cursor: 'pointer',
@@ -268,7 +268,7 @@ export default function Bookings() {
           </div>
 
           {error && (
-            <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', color: '#991B1B', padding: '12px 16px', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
+            <div style={{ background: 'var(--status-red-bg)', border: '1px solid #FCA5A5', color: 'var(--status-red-fg)', padding: '12px 16px', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
               ⚠️ <strong>Error loading bookings:</strong> {error}
             </div>
           )}
@@ -277,7 +277,7 @@ export default function Bookings() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 800 }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #E5E7EB', color: '#4B5563', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   <th style={{ padding: '12px 16px', fontWeight: 600 }}>Booking ID</th>
                   <th style={{ padding: '12px 16px', fontWeight: 600 }}>Customer</th>
                   <th style={{ padding: '12px 16px', fontWeight: 600 }}>Professional</th>
@@ -288,10 +288,10 @@ export default function Bookings() {
                   <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600 }}>Actions</th>
                 </tr>
               </thead>
-              <tbody style={{ fontSize: 13, color: '#374151' }}>
+              <tbody style={{ fontSize: 13, color: 'var(--text-primary)' }}>
                 {loading ? (
                   [...Array(limit)].map((_, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #F3F4F6' }}>
+                    <tr key={idx} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
                       <td style={{ padding: '14px 16px' }}><Skeleton w="60px" /></td>
                       <td style={{ padding: '14px 16px' }}><Skeleton w="120px" /></td>
                       <td style={{ padding: '14px 16px' }}><Skeleton w="120px" /></td>
@@ -304,18 +304,18 @@ export default function Bookings() {
                   ))
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan="8" style={{ textAlign: 'center', padding: '40px 0', color: '#9CA3AF' }}>
+                    <td colSpan="8" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
                       <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
-                      <div style={{ fontWeight: 600, color: '#4B5563' }}>No bookings found</div>
+                      <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>No bookings found</div>
                       <div style={{ fontSize: 12 }}>Check your filters or add new bookings.</div>
                     </td>
                   </tr>
                 ) : (
                   bookings.map(book => {
-                    const badge = STATUS_BADGES[book.status.toLowerCase()] || { bg: '#E5E7EB', fg: '#374151', text: book.status };
+                    const badge = STATUS_BADGES[book.status.toLowerCase()] || { bg: 'var(--border-color)', fg: 'var(--text-primary)', text: book.status };
                     return (
-                      <tr key={book.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
-                        <td style={{ padding: '14px 16px', fontWeight: 600, color: '#111827' }}>#{book.id}</td>
+                      <tr key={book.id} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
+                        <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--text-primary)' }}>#{book.id}</td>
                         <td style={{ padding: '14px 16px' }}>{book.user_name || `Customer #${book.user_id}`}</td>
                         <td style={{ padding: '14px 16px' }}>{book.worker_name || 'Unassigned ⏳'}</td>
                         <td style={{ padding: '14px 16px', textTransform: 'capitalize' }}>{book.service_type || '—'}</td>
@@ -333,28 +333,28 @@ export default function Bookings() {
                             {badge.text}
                           </span>
                         </td>
-                        <td style={{ padding: '14px 16px', color: '#6B7280' }}>{formatDate(book.created_at)}</td>
+                        <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }}>{formatDate(book.created_at)}</td>
                         <td style={{ padding: '14px 16px', textAlign: 'center' }}>
                           <button
                             onClick={() => setSelectedBooking(book)}
                             style={{
-                              background: '#EFF4FF',
+                              background: 'var(--accent-light)',
                               border: 'none',
                               borderRadius: 6,
                               padding: '4px 10px',
-                              color: '#1A56DB',
+                              color: 'var(--accent-color)',
                               fontSize: 11,
                               fontWeight: 600,
                               cursor: 'pointer',
                               transition: 'all 0.15s'
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.background = '#1A56DB';
-                              e.currentTarget.style.color = '#fff';
+                              e.currentTarget.style.background = 'var(--accent-color)';
+                              e.currentTarget.style.color = 'var(--bg-card)';
                             }}
                             onMouseLeave={(e) => {
-                              e.currentTarget.style.background = '#EFF4FF';
-                              e.currentTarget.style.color = '#1A56DB';
+                              e.currentTarget.style.background = 'var(--accent-light)';
+                              e.currentTarget.style.color = 'var(--accent-color)';
                             }}
                           >
                             Manage
@@ -370,8 +370,8 @@ export default function Bookings() {
 
           {/* Pagination */}
           {!loading && bookings.length > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, paddingTop: 16, borderTop: '0.5px solid #F3F4F6' }}>
-              <span style={{ fontSize: 12, color: '#6B7280' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, paddingTop: 16, borderTop: '0.5px solid var(--bg-muted)' }}>
+              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                 Showing page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
               </span>
               <div style={{ display: 'flex', gap: 6 }}>
@@ -381,9 +381,9 @@ export default function Bookings() {
                   style={{
                     padding: '6px 12px',
                     borderRadius: 6,
-                    border: '1px solid #E5E7EB',
-                    background: '#fff',
-                    color: currentPage === 1 ? '#9CA3AF' : '#374151',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-card)',
+                    color: currentPage === 1 ? 'var(--text-muted)' : 'var(--text-primary)',
                     fontSize: 12,
                     fontWeight: 500,
                     cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
@@ -397,9 +397,9 @@ export default function Bookings() {
                   style={{
                     padding: '6px 12px',
                     borderRadius: 6,
-                    border: '1px solid #E5E7EB',
-                    background: '#fff',
-                    color: currentPage === totalPages ? '#9CA3AF' : '#374151',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-card)',
+                    color: currentPage === totalPages ? 'var(--text-muted)' : 'var(--text-primary)',
                     fontSize: 12,
                     fontWeight: 500,
                     cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
@@ -436,8 +436,8 @@ export default function Bookings() {
               width: '100%',
               maxWidth: 480,
               height: '100%',
-              background: '#fff',
-              borderLeft: '1px solid #E5E7EB',
+              background: 'var(--bg-card)',
+              borderLeft: '1px solid var(--border-color)',
               display: 'flex',
               flexDirection: 'column',
               boxShadow: '-4px 0 24px rgba(0,0,0,0.08)',
@@ -445,14 +445,14 @@ export default function Bookings() {
             }}
           >
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid #E5E7EB' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' }}>
               <div>
-                <span style={{ fontSize: 11, background: '#EFF4FF', color: '#1A56DB', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>BOOKING OVERVIEW</span>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: '4px 0 0' }}>Order ID: #{selectedBooking.id}</h3>
+                <span style={{ fontSize: 11, background: 'var(--accent-light)', color: 'var(--accent-color)', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>BOOKING OVERVIEW</span>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0' }}>Order ID: #{selectedBooking.id}</h3>
               </div>
               <button
                 onClick={() => setSelectedBooking(null)}
-                style={{ background: 'none', border: 'none', fontSize: 20, color: '#9CA3AF', cursor: 'pointer', padding: 4 }}
+                style={{ background: 'none', border: 'none', fontSize: 20, color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
               >
                 ✕
               </button>
@@ -462,8 +462,8 @@ export default function Bookings() {
             <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
               
               {/* Dynamic Status Dropdown Control */}
-              <div style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 12, padding: 16, marginBottom: 24 }}>
-                <label style={{ block: 'block', fontSize: 11, color: '#4B5563', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, display: 'block' }}>
+              <div style={{ background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: 12, padding: 16, marginBottom: 24 }}>
+                <label style={{ block: 'block', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, display: 'block' }}>
                   Update Action Status
                 </label>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -476,10 +476,10 @@ export default function Bookings() {
                       padding: '10px 12px',
                       borderRadius: 8,
                       border: '1px solid #D1D5DB',
-                      backgroundColor: '#fff',
+                      backgroundColor: 'var(--bg-card)',
                       fontSize: 13,
                       fontWeight: 600,
-                      color: '#111827',
+                      color: 'var(--text-primary)',
                       outline: 'none',
                       cursor: 'pointer'
                     }}
@@ -490,46 +490,46 @@ export default function Bookings() {
                     <option value="completed">Completed</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
-                  {updatingStatus && <span style={{ fontSize: 12, color: '#6B7280' }}>Saving...</span>}
+                  {updatingStatus && <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Saving...</span>}
                 </div>
               </div>
 
               {/* Section 1: Customer Details */}
-              <div style={{ borderBottom: '1px dashed #E5E7EB', paddingBottom: 18, marginBottom: 18 }}>
-                <h4 style={{ fontSize: 12, fontWeight: 700, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>👤 Customer Node Details</h4>
+              <div style={{ borderBottom: '1px dashed var(--border-color)', paddingBottom: 18, marginBottom: 18 }}>
+                <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>👤 Customer Node Details</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <div style={{ fontSize: 13 }}>
-                    <span style={{ color: '#6B7280' }}>Name:</span> <strong style={{ color: '#111827' }}>{selectedBooking.user_name || 'Customer'}</strong>
+                    <span style={{ color: 'var(--text-secondary)' }}>Name:</span> <strong style={{ color: 'var(--text-primary)' }}>{selectedBooking.user_name || 'Customer'}</strong>
                   </div>
                   <div style={{ fontSize: 13 }}>
-                    <span style={{ color: '#6B7280' }}>Phone No:</span> <strong style={{ color: '#111827' }}>{selectedBooking.user_phone || '—'}</strong>
+                    <span style={{ color: 'var(--text-secondary)' }}>Phone No:</span> <strong style={{ color: 'var(--text-primary)' }}>{selectedBooking.user_phone || '—'}</strong>
                   </div>
                   <div style={{ fontSize: 13 }}>
-                    <span style={{ color: '#6B7280' }}>Customer Node ID:</span> <strong style={{ color: '#111827' }}>#{selectedBooking.user_id}</strong>
+                    <span style={{ color: 'var(--text-secondary)' }}>Customer Node ID:</span> <strong style={{ color: 'var(--text-primary)' }}>#{selectedBooking.user_id}</strong>
                   </div>
                 </div>
               </div>
 
               {/* Section 2: Worker Details */}
-              <div style={{ borderBottom: '1px dashed #E5E7EB', paddingBottom: 18, marginBottom: 18 }}>
-                <h4 style={{ fontSize: 12, fontWeight: 700, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>💼 Professional Service Node</h4>
+              <div style={{ borderBottom: '1px dashed var(--border-color)', paddingBottom: 18, marginBottom: 18 }}>
+                <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>💼 Professional Service Node</h4>
                 {selectedBooking.worker_id ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <div style={{ fontSize: 13 }}>
-                      <span style={{ color: '#6B7280' }}>Name:</span> <strong style={{ color: '#111827' }}>{selectedBooking.worker_name}</strong>
+                      <span style={{ color: 'var(--text-secondary)' }}>Name:</span> <strong style={{ color: 'var(--text-primary)' }}>{selectedBooking.worker_name}</strong>
                     </div>
                     <div style={{ fontSize: 13 }}>
-                      <span style={{ color: '#6B7280' }}>Phone No:</span> <strong style={{ color: '#111827' }}>{selectedBooking.worker_phone}</strong>
+                      <span style={{ color: 'var(--text-secondary)' }}>Phone No:</span> <strong style={{ color: 'var(--text-primary)' }}>{selectedBooking.worker_phone}</strong>
                     </div>
                     <div style={{ fontSize: 13 }}>
-                      <span style={{ color: '#6B7280' }}>Specialization:</span> <strong style={{ color: '#111827', textTransform: 'capitalize' }}>{selectedBooking.service_type}</strong>
+                      <span style={{ color: 'var(--text-secondary)' }}>Specialization:</span> <strong style={{ color: 'var(--text-primary)', textTransform: 'capitalize' }}>{selectedBooking.service_type}</strong>
                     </div>
                     <div style={{ fontSize: 13 }}>
-                      <span style={{ color: '#6B7280' }}>Worker Node ID:</span> <strong style={{ color: '#111827' }}>#{selectedBooking.worker_id}</strong>
+                      <span style={{ color: 'var(--text-secondary)' }}>Worker Node ID:</span> <strong style={{ color: 'var(--text-primary)' }}>#{selectedBooking.worker_id}</strong>
                     </div>
                   </div>
                 ) : (
-                  <div style={{ fontSize: 13, color: '#DC2626', backgroundColor: '#FEE2E2', padding: '10px 14px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ fontSize: 13, color: 'var(--status-red-fg)', backgroundColor: 'var(--status-red-bg)', padding: '10px 14px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span>⏳</span>
                     <span>No professional has been assigned yet. Waiting to assign.</span>
                   </div>
@@ -538,17 +538,17 @@ export default function Bookings() {
 
               {/* Section 3: Financial Overview */}
               <div>
-                <h4 style={{ fontSize: 12, fontWeight: 700, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>💰 Financial breakdown</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#EFF4FF', padding: '12px 16px', borderRadius: 8 }}>
-                  <span style={{ fontSize: 13, color: '#1E40AF', fontWeight: 500 }}>Total Service Charge</span>
-                  <span style={{ fontSize: 18, fontWeight: 700, color: '#1E40AF' }}>{formatCurrency(selectedBooking.amount)}</span>
+                <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>💰 Financial breakdown</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--accent-light)', padding: '12px 16px', borderRadius: 8 }}>
+                  <span style={{ fontSize: 13, color: 'var(--accent-dark)', fontWeight: 500 }}>Total Service Charge</span>
+                  <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent-dark)' }}>{formatCurrency(selectedBooking.amount)}</span>
                 </div>
               </div>
 
             </div>
 
             {/* Footer */}
-            <div style={{ borderTop: '1px solid #E5E7EB', padding: '16px 24px', backgroundColor: '#FAFAFB', display: 'flex', gap: 10 }}>
+            <div style={{ borderTop: '1px solid var(--border-color)', padding: '16px 24px', backgroundColor: '#FAFAFB', display: 'flex', gap: 10 }}>
               <button
                 onClick={() => setSelectedBooking(null)}
                 style={{
@@ -556,8 +556,8 @@ export default function Bookings() {
                   padding: '10px 14px',
                   borderRadius: 8,
                   border: 'none',
-                  background: '#1A56DB',
-                  color: '#fff',
+                  background: 'var(--accent-color)',
+                  color: 'var(--bg-card)',
                   fontSize: 13,
                   fontWeight: 600,
                   cursor: 'pointer',

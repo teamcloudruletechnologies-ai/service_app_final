@@ -3,6 +3,7 @@ const Service = require("../models/service.model");
 const Booking = require("../models/booking.model");
 const User = require("../models/user.model");
 const Worker = require("../models/worker.model");
+const Banner = require("../models/banner.model");
 const { getPagination } = require("../utils/pagination");
 const { success, error } = require("../utils/response");
 
@@ -192,10 +193,88 @@ async function updateMyBookingStatus(req, res, next) {
 async function updateUserProfile(req, res, next) {
   try {
     const userId = req.auth.id;
-    const { name, email, phone } = req.body;
-    const updated = await User.update(userId, { name, email, phone });
+    const { name, email, phone, state, address } = req.body;
+    const updated = await User.update(userId, { name, email, phone, state, address });
     if (!updated) return error(res, "User profile not found", 404);
     return success(res, "User profile updated successfully", updated);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function listActiveBanners(req, res, next) {
+  try {
+    const paging = getPagination(req.query);
+    const data = await Banner.list({
+      ...paging,
+      status: "active",
+    });
+    return success(res, "Active banners fetched successfully", data);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getWorkerEarnings(req, res, next) {
+  try {
+    const workerId = req.auth.id;
+    const db = require("../config/db");
+
+    const statsResult = await db.query(
+      `SELECT
+        COALESCE(SUM(worker_payout), 0)::float AS total_earnings,
+        COALESCE(SUM(worker_payout) FILTER (WHERE status = 'paid'), 0)::float AS paid_earnings,
+        COALESCE(SUM(worker_payout) FILTER (WHERE status = 'pending'), 0)::float AS pending_earnings
+       FROM invoices
+       WHERE worker_id = $1`,
+      [workerId]
+    );
+
+    const todayStatsResult = await db.query(
+      `SELECT
+        COUNT(*)::int AS today_jobs,
+        COALESCE(SUM(amount) FILTER (WHERE status = 'completed'), 0)::float AS today_earnings,
+        COUNT(*) FILTER (WHERE status = 'completed')::int AS today_completed,
+        COUNT(*) FILTER (WHERE status = 'in_progress')::int AS today_in_progress
+       FROM bookings
+       WHERE worker_id = $1 AND DATE(created_at) = CURRENT_DATE`,
+      [workerId]
+    );
+
+    const totalJobsResult = await db.query(
+      `SELECT
+        COUNT(*)::int AS total_jobs,
+        COUNT(*) FILTER (WHERE status = 'completed')::int AS completed_jobs,
+        COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled_jobs
+       FROM bookings
+       WHERE worker_id = $1`,
+      [workerId]
+    );
+
+    const historyResult = await db.query(
+      `SELECT
+        i.id,
+        i.invoice_number,
+        i.amount::float AS amount,
+        i.worker_payout::float AS worker_payout,
+        i.status,
+        i.paid_at,
+        b.created_at as booking_date,
+        s.name as service_name
+       FROM invoices i
+       LEFT JOIN bookings b ON b.id = i.booking_id
+       LEFT JOIN services s ON s.id = b.service_id
+       WHERE i.worker_id = $1
+       ORDER BY i.created_at DESC`,
+      [workerId]
+    );
+
+    return success(res, "Worker earnings fetched successfully", {
+      stats: statsResult.rows[0],
+      todayStats: todayStatsResult.rows[0],
+      totalJobs: totalJobsResult.rows[0],
+      history: historyResult.rows,
+    });
   } catch (err) {
     return next(err);
   }
@@ -212,4 +291,6 @@ module.exports = {
   updateWorkerProfile,
   updateMyBookingStatus,
   updateUserProfile,
+  listActiveBanners,
+  getWorkerEarnings,
 };
