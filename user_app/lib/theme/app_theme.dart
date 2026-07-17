@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const primary = Color(0xFFE23744); // Zomato Red
-  static const primaryDark = Color(0xFFC12030);
-  static const accent = Color(0xFFE23744); // Zomato Red
+  static const primary = Color(0xFF1A1A1A); // Pure Matte Black
+  static const primaryDark = Color(0xFF1A1A1A);
+  static const accent = Color(0xFFE3D0BA); // Warm Sandal
   static const secondary = Color(0xFF4A5343); // Muted Olive Green
-  static const surface = Color(0xFFF8F8F8); // Light gray background
+  static const surface = Color(0xFFF5F5F3); // Crisp Milk White
   static const card = Colors.white;
   static const textPrimary = Color(0xFF1A1A1A);
   static const textSecondary = Color(0xFF6B7280);

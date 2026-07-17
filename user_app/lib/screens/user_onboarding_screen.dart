@@ -29,7 +29,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
 
   String _searchQuery = '';
 
-  static const _red = Color(0xFFE23744);
+  static const _red = Color(0xFF4A5343);
 
   @override
   void initState() {

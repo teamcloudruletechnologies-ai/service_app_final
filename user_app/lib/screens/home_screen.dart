@@ -8,6 +8,7 @@ import '../config/api_config.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/catalog_provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'profile_screen.dart';
 import 'service_detail_screen.dart';
@@ -114,15 +115,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Zomato style location + actions bar
                   Row(
                     children: [
-                      const Icon(Icons.location_on, color: Color(0xFFE23744), size: 28),
+                      Icon(Icons.location_on, color: AppTheme.secondary, size: 28),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Row(
+                            Row(
                               children: [
-                                Text(
+                                const Text(
                                   'Current Location',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
@@ -130,8 +131,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     color: Color(0xFF111827),
                                   ),
                                 ),
-                                SizedBox(width: 4),
-                                Icon(Icons.arrow_drop_down, color: Color(0xFFE23744), size: 20),
+                                const SizedBox(width: 4),
+                                Icon(Icons.arrow_drop_down, color: AppTheme.secondary, size: 20),
                               ],
                             ),
                             const SizedBox(height: 2),
@@ -560,14 +561,14 @@ class _CategoryChip extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFE23744) : Colors.white,
+          color: selected ? AppTheme.secondary : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? const Color(0xFFE23744) : Colors.grey.shade300,
+            color: selected ? AppTheme.secondary : Colors.grey.shade300,
             width: 1,
           ),
           boxShadow: selected
-              ? [BoxShadow(color: const Color(0xFFE23744).withOpacity(0.2), blurRadius: 6)]
+              ? [BoxShadow(color: AppTheme.secondary.withOpacity(0.2), blurRadius: 6)]
               : null,
         ),
         child: Text(
@@ -597,17 +598,17 @@ class _SortButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFFE23744).withOpacity(0.1) : Colors.white,
+          color: active ? AppTheme.secondary.withOpacity(0.1) : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: active ? const Color(0xFFE23744) : Colors.grey.shade300,
+            color: active ? AppTheme.secondary : Colors.grey.shade300,
             width: 1,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: active ? const Color(0xFFE23744) : Colors.grey.shade600,
+            color: active ? AppTheme.secondary : Colors.grey.shade600,
             fontSize: 11,
             fontWeight: FontWeight.w600,
           ),

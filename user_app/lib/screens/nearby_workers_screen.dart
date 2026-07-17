@@ -40,7 +40,7 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
   int? _bookingWorkerId; // tracks which worker is being booked
   String _sortBy = 'rating';
 
-  static const _red = Color(0xFFE23744);
+  static const _red = Color(0xFF4A5343);
 
   @override
   void initState() {
@@ -532,7 +532,7 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
   int _selectedSlotIndex = 0;
   final _notesCtrl = TextEditingController();
 
-  static const _red = Color(0xFFE23744);
+  static const _red = Color(0xFF4A5343);
 
   // Time slot configurations
   final List<String> _timeSlots = [

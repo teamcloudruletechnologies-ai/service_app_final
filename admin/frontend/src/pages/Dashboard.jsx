@@ -259,7 +259,7 @@ export default function Dashboard() {
         {/* Today's Overview */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 14 }}>
           <StatCard label="Today's Bookings"    value={todayStats.today_bookings ?? 0}                  note="Booked today"      up={null} loading={loading} bg="var(--accent-light)" fg="var(--accent-color)" />
-          <StatCard label="Today's Revenue"     value={todayStats.today_revenue != null ? formatRevenue(todayStats.today_revenue) : '₹0'} note="Earned today"      up={null} loading={loading} bg="#FEF2F2" fg="#E23744" />
+          <StatCard label="Today's Revenue"     value={todayStats.today_revenue != null ? formatRevenue(todayStats.today_revenue) : '₹0'} note="Earned today"      up={null} loading={loading} bg="var(--accent-light)" fg="var(--accent-color)" />
           <StatCard label="Today Completed"     value={todayStats.today_completed ?? 0}                 note="Jobs finished"     up={null} loading={loading} bg="var(--status-green-bg)" fg="var(--status-green-fg)" />
           <StatCard label="Workers Online"      value={activeWorkers}                                   note="Active right now"  up={null} loading={loading} bg="#EFF6FF" fg="#2563EB" />
         </div>

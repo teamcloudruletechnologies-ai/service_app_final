@@ -266,7 +266,7 @@ class BookingCard extends StatelessWidget {
             return Expanded(
               child: Container(
                 height: 2,
-                color: filled ? const Color(0xFFE23744) : Colors.grey.shade300,
+                color: filled ? AppTheme.secondary : Colors.grey.shade300,
               ),
             );
           }
@@ -280,7 +280,7 @@ class BookingCard extends StatelessWidget {
                 height: 10,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: filled ? const Color(0xFFE23744) : Colors.grey.shade300,
+                  color: filled ? AppTheme.secondary : Colors.grey.shade300,
                 ),
               ),
               const SizedBox(height: 4),
@@ -378,7 +378,7 @@ class BookingCard extends StatelessWidget {
                     '₹${booking.amount.toStringAsFixed(0)}',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFE23744),
+                      color: AppTheme.primary,
                       fontSize: 16,
                     ),
                   ),
@@ -395,7 +395,7 @@ class BookingCard extends StatelessWidget {
                     if (booking.status == 'pending') ...[
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE23744),
+                          backgroundColor: AppTheme.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -430,11 +430,11 @@ class BookingCard extends StatelessWidget {
                         );
                       },
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFFE23744)),
+                        side: const BorderSide(color: AppTheme.primary),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       ),
-                      child: const Text('Invoice', style: TextStyle(color: Color(0xFFE23744), fontSize: 13)),
+                      child: const Text('Invoice', style: TextStyle(color: AppTheme.primary, fontSize: 13)),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton(

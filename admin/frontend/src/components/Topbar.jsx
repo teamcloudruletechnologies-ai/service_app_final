@@ -49,7 +49,7 @@ export default function Topbar({ activePage }) {
             display: 'flex', alignItems: 'center', gap: 8,
               background: '#FFFFFF', border: '1.5px solid #1C1917',
               borderRadius: 12, padding: '0 12px', height: 38, width: 240,
-              boxShadow: '0 0 0 3px rgba(226,55,68,0.08)',
+              boxShadow: '0 0 0 3px rgba(74, 83, 67, 0.08)',
             transition: 'all 0.2s',
           }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1C1917" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -81,7 +81,7 @@ export default function Topbar({ activePage }) {
               fontWeight: 500,
             }}
             onClick={() => setSearchOpen(true)}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#F87171'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(226,55,68,0.08)'; }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#8A9683'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(74, 83, 67, 0.08)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#F3F4F6'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(28,25,23,0.02)'; }}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#A8A29E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -90,8 +90,8 @@ export default function Topbar({ activePage }) {
             <span>Search...</span>
             <span style={{
               marginLeft: 'auto', fontSize: 10,
-              background: '#FEF2F2', borderRadius: 4,
-              padding: '2px 6px', color: '#E23744', fontWeight: 700,
+              background: '#F0F4EF', borderRadius: 4,
+              padding: '2px 6px', color: '#4A5343', fontWeight: 700,
             }}>
               ⌘ K
             </span>
@@ -111,7 +111,7 @@ export default function Topbar({ activePage }) {
             boxShadow: '0 2px 4px rgba(28,25,23,0.02)',
           }}
           title="Notifications"
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#F87171'; e.currentTarget.style.color = '#E23744'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#8A9683'; e.currentTarget.style.color = '#4A5343'; }}
           onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#F3F4F6'; e.currentTarget.style.color = '#78716C'; }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'inherit' }}>
@@ -119,7 +119,7 @@ export default function Topbar({ activePage }) {
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
           <span style={{
-            width: 8, height: 8, background: '#E23744',
+            width: 8, height: 8, background: '#4A5343',
             borderRadius: '50%', position: 'absolute', top: 8, right: 8,
             border: '1.5px solid #FFFFFF'
           }} />
@@ -129,7 +129,7 @@ export default function Topbar({ activePage }) {
         <div
           style={{
             width: 38, height: 38, borderRadius: '50%',
-            background: '#E23744', color: '#FFFFFF',
+            background: '#4A5343', color: '#FFFFFF',
             fontSize: 12, fontWeight: 800,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', border: '2px solid #FFFFFF',

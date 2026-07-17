@@ -40,7 +40,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   String? _error;
   final bool _booking = false;
 
-  static const _red = Color(0xFFE23744);
+  static const _red = Color(0xFF4A5343);
 
   @override
   void initState() {
@@ -355,10 +355,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE23744).withValues(alpha: 0.08),
+                    color: _red.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(item.$1, color: const Color(0xFFE23744), size: 20),
+                  child: Icon(item.$1, color: _red, size: 20),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -381,9 +381,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   Widget _placeholder() {
     return Container(
       height: 220,
-      color: const Color(0xFFE23744).withValues(alpha: 0.07),
+      color: _red.withValues(alpha: 0.07),
       child: const Center(
-        child: Icon(Icons.home_repair_service, size: 64, color: Color(0xFFE23744)),
+        child: Icon(Icons.home_repair_service, size: 64, color: _red),
       ),
     );
   }

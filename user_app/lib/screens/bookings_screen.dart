@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'profile_screen.dart';
 
@@ -190,10 +191,10 @@ class _FilterChip extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
-            color: selected ? const Color(0xFFE23744) : Colors.white,
+            color: selected ? AppTheme.secondary : Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: selected ? const Color(0xFFE23744) : Colors.grey.shade300,
+              color: selected ? AppTheme.secondary : Colors.grey.shade300,
             ),
           ),
           child: Text(

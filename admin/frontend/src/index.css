@@ -17,13 +17,13 @@
   /* ─── Sidebar ────────────────────────────────────────────────── */
   --bg-sidebar:        #1A1A1A;  /* Matte Black sidebar    */
   --bg-sidebar-hover:  #2A2A28;  /* Slightly lighter black */
-  --bg-sidebar-active: #E23744;  /* Zomato red active row  */
+  --bg-sidebar-active: #4A5343;  /* Muted Olive Green active row  */
 
-  /* ─── Accent (Zomato Red primary) ────────────────────────────── */
-  --accent-color:   #E23744;     /* Zomato Red             */
-  --accent-dark:    #C62833;     /* Darker red             */
-  --accent-light:   #FEF2F2;     /* Very light red tint    */
-  --accent-border:  #F87171;     /* Mid red border         */
+  /* ─── Accent (Muted Olive Green primary) ───────────────────────── */
+  --accent-color:   #4A5343;     /* Muted Olive Green      */
+  --accent-dark:    #373E32;     /* Darker olive           */
+  --accent-light:   #F0F4EF;     /* Very light olive tint  */
+  --accent-border:  #8A9683;     /* Mid olive border       */
 
   /* ─── Text ───────────────────────────────────────────────────── */
   --text-primary:   #1A1A1A;     /* Matte Black            */
