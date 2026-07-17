@@ -1,14 +1,19 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../config/api_config.dart';
 import '../models/models.dart';
+import '../providers/auth_provider.dart';
 import '../providers/catalog_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
-import 'payment_screen.dart';
-import 'service_detail_screen.dart';
 import 'location_picker_screen.dart';
+import 'nearby_workers_screen.dart';
+import 'main_shell.dart';
+
 class UserOnboardingScreen extends StatefulWidget {
   const UserOnboardingScreen({super.key});
 
@@ -21,12 +26,11 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
 
-  // Location picked from the confirm-location screen
-  String _currentAddress = 'Tap to set your location';
+  String _currentAddress = 'Detecting location...';
   double? _latitude;
   double? _longitude;
   bool _locationPicked = false;
-
+  bool _isLocating = false;
   String _searchQuery = '';
 
   static const _red = Color(0xFF4A5343);
@@ -38,6 +42,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
       final catalog = context.read<CatalogProvider>();
       catalog.loadCategories();
       catalog.loadServices();
+      _autoDetectLocation();
     });
   }
 
@@ -48,10 +53,84 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
     super.dispose();
   }
 
-  // Open the existing LocationPickerScreen to confirm location
+  Future<Position?> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return null;
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return null;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return null;
+    }
+
+    return await Geolocator.getCurrentPosition();
+  }
+
+  Future<void> _autoDetectLocation() async {
+    setState(() {
+      _isLocating = true;
+      _currentAddress = 'Detecting location...';
+    });
+
+    final position = await _determinePosition();
+    if (position != null) {
+      _latitude = position.latitude;
+      _longitude = position.longitude;
+      _locationPicked = true;
+
+      // Reverse geocode via OpenStreetMap Nominatim
+      try {
+        final url = Uri.parse(
+          'https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.latitude}&lon=${position.longitude}'
+        );
+        final response = await http.get(url, headers: {
+          'User-Agent': 'com.urban.service_app',
+        });
+        if (response.statusCode == 200 && mounted) {
+          final data = jsonDecode(response.body);
+          final displayName = data['display_name'] as String?;
+          if (displayName != null) {
+            setState(() {
+              _currentAddress = displayName;
+            });
+          }
+        }
+      } catch (e) {
+        debugPrint('Geocoding error: $e');
+        if (mounted) {
+          setState(() {
+            _currentAddress = 'Lat: ${position.latitude.toStringAsFixed(4)}, Lng: ${position.longitude.toStringAsFixed(4)}';
+          });
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _currentAddress = 'Location permission required. Tap to set.';
+          _locationPicked = false;
+        });
+      }
+    }
+
+    if (mounted) {
+      setState(() => _isLocating = false);
+    }
+  }
+
   Future<void> _openLocationPicker() async {
     final result = await Navigator.of(context).push<LocationPickerResult>(
-      MaterialPageRoute(builder: (_) => LocationPickerScreen()),
+      MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
     );
     if (result != null && mounted) {
       setState(() {
@@ -63,42 +142,75 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
     }
   }
 
-  void _navigateToService(ServiceItem service) {
-    // Validate name
+  Future<bool> _saveProfileData() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter your name first'),
+          content: Text('Please enter your name'),
           backgroundColor: Colors.redAccent,
         ),
       );
-      return;
+      return false;
     }
 
-    // Must have location
     if (!_locationPicked || _latitude == null || _longitude == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please set your location first (tap the location bar above)'),
+          content: Text('Please set your location first'),
           backgroundColor: Colors.orangeAccent,
         ),
       );
-      _openLocationPicker();
-      return;
+      await _openLocationPicker();
+      return false;
     }
 
-    // Navigate to ServiceDetailScreen — like tapping a restaurant in Zomato
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ServiceDetailScreen(
-          serviceId: service.id,
-          address: _currentAddress,
-          latitude: _latitude,
-          longitude: _longitude,
-          userName: _nameCtrl.text.trim(),
-        ),
-      ),
+    final auth = context.read<AuthProvider>();
+    final success = await auth.updateUserProfile(
+      name: _nameCtrl.text.trim(),
+      email: _emailCtrl.text.trim().isNotEmpty ? _emailCtrl.text.trim() : null,
+      address: _currentAddress,
     );
+
+    if (success) {
+      await auth.saveLocationCoordinates(_latitude!, _longitude!);
+      return true;
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(auth.error ?? 'Failed to save profile. Please try again.'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+      return false;
+    }
+  }
+
+  Future<void> _saveAndProceed() async {
+    final success = await _saveProfileData();
+    if (success && mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainShell()),
+      );
+    }
+  }
+
+  Future<void> _navigateToService(ServiceItem service) async {
+    final success = await _saveProfileData();
+    if (success && mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => NearbyWorkersScreen(
+            service: service,
+            address: _currentAddress,
+            latitude: _latitude!,
+            longitude: _longitude!,
+            userName: _nameCtrl.text.trim(),
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -145,21 +257,25 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                             ],
                           ),
                           const SizedBox(height: 2),
-                          Text(
-                            _currentAddress,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: _locationPicked
-                                  ? Colors.grey.shade700
-                                  : _red,
-                            ),
-                          ),
+                          _isLocating
+                              ? const SizedBox(
+                                  height: 12,
+                                  width: 12,
+                                  child: CircularProgressIndicator(strokeWidth: 1.5, color: _red),
+                                )
+                              : Text(
+                                  _currentAddress,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: _locationPicked ? Colors.grey.shade700 : _red,
+                                  ),
+                                ),
                         ],
                       ),
                     ),
-                    if (!_locationPicked)
+                    if (!_locationPicked && !_isLocating)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
@@ -176,7 +292,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
               ),
             ),
 
-            // ─── USER NAME + EMAIL (below location) ───
+            // ─── PROFILE FORM CARD ───
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
               child: Card(
@@ -191,17 +307,17 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                   child: Form(
                     key: _formKey,
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const Text(
-                          '👤 Complete your profile',
+                          '👤 Setup your Profile',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                             color: Color(0xFF111827),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _nameCtrl,
                           textInputAction: TextInputAction.next,
@@ -247,6 +363,17 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                               borderSide: const BorderSide(color: _red),
                             ),
                           ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: _saveAndProceed,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: _red,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Save & Get Started', style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -324,7 +451,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
-                            childAspectRatio: 0.82,
+                            childAspectRatio: 1.05, // Adjusted to fit nicely without a button row
                           ),
                           itemCount: services.length,
                           itemBuilder: (context, index) {
@@ -355,41 +482,15 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(10),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            service.name,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 13,
-                                              color: Color(0xFF111827),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 3),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            children: [
-                                              Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                                decoration: BoxDecoration(
-                                                  color: _red,
-                                                  borderRadius: BorderRadius.circular(8),
-                                                ),
-                                                child: const Text(
-                                                  'Book Now',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                      child: Text(
+                                        service.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: Color(0xFF111827),
+                                        ),
                                       ),
                                     ),
                                   ],
