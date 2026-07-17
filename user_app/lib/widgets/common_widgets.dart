@@ -68,6 +68,8 @@ class ServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = ApiConfig.resolveImageUrl(service.imageUrl);
+    final discountText = service.price > 500 ? '₹100 OFF' : '20% OFF';
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -76,8 +78,8 @@ class ServiceCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 12,
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
@@ -100,6 +102,54 @@ class ServiceCard extends StatelessWidget {
                             errorWidget: (_, __, ___) => _placeholder(),
                           )
                         : _placeholder(),
+                    // Top-Left Discount Badge
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary, // Matte Black
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          discountText,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 10,
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Bottom-Left Rating Badge (Zomato-style green)
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2E5226), // Zomato green
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              service.avgRating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            const Icon(Icons.star, color: Colors.white, size: 10),
+                          ],
+                        ),
+                      ),
+                    ),
                     // Price badge at bottom-right of image
                     Positioned(
                       bottom: 8,
@@ -108,7 +158,7 @@ class ServiceCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                           boxShadow: [
                             BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
                           ],
@@ -117,7 +167,7 @@ class ServiceCard extends StatelessWidget {
                           '₹${service.price.toStringAsFixed(0)}',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                            fontSize: 11,
                             color: Color(0xFF1A1A1A),
                           ),
                         ),
@@ -129,67 +179,54 @@ class ServiceCard extends StatelessWidget {
             ),
             // Info below image
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Category tag
-                  if (service.categoryName != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        service.categoryName!,
-                        style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  if (service.categoryName != null) const SizedBox(height: 4),
                   // Service name
                   Text(
                     service.name,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       fontSize: 14,
                       color: Color(0xFF1A1A1A),
+                      letterSpacing: -0.2,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  // Rating row
+                  const SizedBox(height: 6),
+                  // Category & Delivery Time Row
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Color(0xFFFFC107), size: 13),
-                      const SizedBox(width: 2),
-                      Text(
-                        service.avgRating.toStringAsFixed(1),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                      ),
-                      if (service.totalReviews > 0) ...[
-                        const SizedBox(width: 2),
+                      if (service.categoryName != null) ...[
                         Text(
-                          '(${service.totalReviews})',
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+                          service.categoryName!,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '•',
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  // Estimated time badge
-                  Row(
-                    children: [
-                      Icon(Icons.access_time, size: 12, color: Colors.grey.shade500),
+                      const Icon(Icons.flash_on, color: AppTheme.secondary, size: 12),
                       const SizedBox(width: 2),
                       Text(
-                        '⏱ ${service.estimatedTime} min',
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 11, fontWeight: FontWeight.w500),
+                        '${service.estimatedTime} mins',
+                        style: const TextStyle(
+                          color: AppTheme.secondary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),

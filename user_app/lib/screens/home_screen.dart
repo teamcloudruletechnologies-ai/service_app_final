@@ -24,6 +24,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _searchCtrl = TextEditingController();
   String _sortBy = 'all';
+  bool _expressMode = false;
 
   @override
   void initState() {
@@ -76,23 +77,178 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
       child: Hero(
-        tag: 'profile_avatar_hero',
+        tag: 'profile_avatar_hero_home',
         child: CircleAvatar(
-          radius: 22,
+          radius: 20,
           backgroundColor: const Color(0xFFE3D0BA),
           child: CircleAvatar(
-            radius: 20,
+            radius: 18,
             backgroundColor: const Color(0xFF1A1A1A),
             child: Text(
               initial,
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: 14,
               ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGoldFlashSaleBanner() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F0C08), Color(0xFF261C14), Color(0xFF0F0C08)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.6), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFD4AF37).withOpacity(0.15),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -10,
+            top: -10,
+            child: Opacity(
+              opacity: 0.15,
+              child: Icon(Icons.auto_awesome, color: const Color(0xFFD4AF37), size: 100),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.workspace_premium, color: const Color(0xFFD4AF37), size: 18),
+                  const SizedBox(width: 6),
+                  const Text(
+                    'GOLD',
+                    style: TextStyle(
+                      color: Color(0xFFD4AF37),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      letterSpacing: 2.0,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'FLASH SALE',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFFE3D0BA),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                '₹1 for 3 months',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE3D0BA),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Renew Gold now',
+                        style: TextStyle(
+                          color: Color(0xFF1A1A1A),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Icon(Icons.arrow_forward, color: Color(0xFF1A1A1A), size: 12),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExploreOffersCard() {
+    return Container(
+      width: 75,
+      height: 82,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFE23744), Color(0xFFC62833)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFE23744).withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: const Text(
+              'OFFERS',
+              style: TextStyle(
+                color: Color(0xFFE23744),
+                fontWeight: FontWeight.w900,
+                fontSize: 8,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Explore',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
+          ),
+          const Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 14),
+        ],
       ),
     );
   }
@@ -124,14 +280,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             Row(
                               children: [
                                 const Text(
-                                  'Current Location',
+                                  'Home',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                    fontSize: 16,
                                     color: Color(0xFF111827),
                                   ),
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: 2),
                                 Icon(Icons.arrow_drop_down, color: AppTheme.secondary, size: 20),
                               ],
                             ),
@@ -148,149 +304,239 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        icon: const Icon(Icons.notifications_outlined, size: 28, color: Color(0xFF1A1A1A)),
-                        onPressed: () {
+                      const SizedBox(width: 8),
+                      // Zomato style Gold Badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFF3E5AB), Color(0xFFE3D0BA)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFB8860B), width: 0.8),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.stars, color: Color(0xFFB8860B), size: 12),
+                            SizedBox(width: 2),
+                            Text(
+                              'GOLD',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 8,
+                                color: Color(0xFF5C4033),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Zomato style Wallet Icon
+                      GestureDetector(
+                        onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(builder: (_) => const NotificationScreen()),
                           );
                         },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade300, width: 0.8),
+                          ),
+                          child: Icon(Icons.account_balance_wallet_outlined, size: 16, color: AppTheme.primary),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       _buildProfileButton(context, auth.user),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Hello, ${auth.user?.name.split(' ').first ?? 'User'} 👋',
-                    style: const TextStyle(
-                      color: Color(0xFF1A1A1A),
-                      fontWeight: FontWeight.w800,
-                      fontSize: 24,
-                      letterSpacing: -1.0,
-                      height: 1.2,
+                ],
+              ),
+            ),
+          ),
+          // Zomato style search bar with Express toggle
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade300, width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _searchCtrl,
+                        cursorColor: const Color(0xFF1A1A1A),
+                        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                        decoration: InputDecoration(
+                          hintText: _expressMode ? 'Search "express cleaning"...' : 'Search "spicy biryani" or services...',
+                          hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+                          prefixIcon: const Icon(Icons.search, color: AppTheme.primary, size: 20),
+                          suffixIcon: const Icon(Icons.mic, color: AppTheme.primary, size: 20),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        ),
+                        onChanged: _search,
+                        onSubmitted: _search,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Find trusted professionals near you',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  const SizedBox(width: 12),
+                  // Mock toggle switch representing Zomato's mode toggle
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        height: 28,
+                        child: Transform.scale(
+                          scale: 0.8,
+                          child: Switch(
+                            value: _expressMode,
+                            activeColor: AppTheme.secondary,
+                            onChanged: (val) {
+                              setState(() {
+                                _expressMode = val;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _expressMode ? 'EXPRESS' : 'NORMAL',
+                        style: TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.bold,
+                          color: _expressMode ? AppTheme.secondary : Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
           ),
+          // ─── Gold Sale Banner ───
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-              child: Container(
-                height: 56,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _searchCtrl,
-                  cursorColor: const Color(0xFF1A1A1A),
-                  style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-                  decoration: InputDecoration(
-                    hintText: 'Search services...',
-                    hintStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-                    prefixIcon: const Icon(Icons.search, color: Color(0xFF4A5343)),
-                    suffixIcon: _searchCtrl.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, color: Colors.grey),
-                            onPressed: () {
-                              _searchCtrl.clear();
-                              _search('');
-                            },
-                          )
-                        : null,
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  ),
-                  onChanged: _search,
-                  onSubmitted: _search,
-                ),
-              ),
+              padding: const EdgeInsets.only(bottom: 20),
+              child: _buildGoldFlashSaleBanner(),
             ),
           ),
-          // ─── CATEGORY CHIPS (Zomato style) ───
+          // ─── CATEGORY CHIPS (Zomato circular style) ───
           SliverToBoxAdapter(
             child: SizedBox(
-              height: 44,
+              height: 90,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 children: [
-                  _CategoryChip(
+                  _buildExploreOffersCard(),
+                  CircularCategoryButton(
                     label: 'All',
+                    icon: Icons.grid_view,
                     selected: catalog.selectedCategoryId == null,
                     onTap: () {
                       catalog.loadServices(search: _searchCtrl.text);
                     },
                   ),
-                  ...catalog.categories.map(
-                    (cat) => _CategoryChip(
+                  ...catalog.categories.map((cat) {
+                    IconData iconData = Icons.home_repair_service;
+                    if (cat.name.toLowerCase().contains('clean')) {
+                      iconData = Icons.cleaning_services_outlined;
+                    } else if (cat.name.toLowerCase().contains('plumb')) {
+                      iconData = Icons.plumbing_outlined;
+                    } else if (cat.name.toLowerCase().contains('elect')) {
+                      iconData = Icons.electrical_services_outlined;
+                    } else if (cat.name.toLowerCase().contains('repair')) {
+                      iconData = Icons.build_outlined;
+                    } else if (cat.name.toLowerCase().contains('paint')) {
+                      iconData = Icons.format_paint_outlined;
+                    }
+                    return CircularCategoryButton(
                       label: cat.name,
+                      icon: iconData,
                       selected: catalog.selectedCategoryId == cat.id,
                       onTap: () {
                         catalog.loadServices(categoryId: cat.id, search: _searchCtrl.text);
                       },
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               ),
             ),
           ),
-          // FIX: was `const SizedBox(height: 4)` directly inside `slivers` —
-          // CustomScrollView only accepts RenderSliver children, not plain
-          // boxes. Wrapped in SliverToBoxAdapter so it's a valid sliver.
           const SliverToBoxAdapter(
-            child: SizedBox(height: 4),
+            child: SizedBox(height: 12),
           ),
+          // ─── FILTER / SORT ROW (Zomato-style filter chips) ───
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 24),
-              child: BannerCarousel(
-                banners: catalog.banners,
-                loading: catalog.loadingBanners,
-              ),
-            ),
-          ),
-          // ─── FILTER / SORT ROW ───
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
-                  const Text(
-                    'Services',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF1A1A1A)),
+                  ZomatoFilterChip(
+                    label: 'Filters',
+                    icon: const Icon(Icons.tune, size: 14, color: AppTheme.primary),
+                    active: _sortBy != 'all',
+                    onTap: () {},
                   ),
-                  const Spacer(),
-                  _SortButton(label: 'Top Rated', active: _sortBy == 'top_rated', onTap: () => setState(() => _sortBy = _sortBy == 'top_rated' ? 'all' : 'top_rated')),
-                  const SizedBox(width: 6),
-                  _SortButton(label: 'Most Booked', active: _sortBy == 'most_booked', onTap: () => setState(() => _sortBy = _sortBy == 'most_booked' ? 'all' : 'most_booked')),
-                  const SizedBox(width: 6),
-                  _SortButton(label: 'Price ↑', active: _sortBy == 'price_low', onTap: () => setState(() => _sortBy = _sortBy == 'price_low' ? 'all' : 'price_low')),
+                  const SizedBox(width: 8),
+                  ZomatoFilterChip(
+                    label: 'Near & Fast',
+                    icon: const Icon(Icons.flash_on, size: 14, color: Colors.green),
+                    active: _sortBy == 'most_booked',
+                    onTap: () {
+                      setState(() {
+                        _sortBy = _sortBy == 'most_booked' ? 'all' : 'most_booked';
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  ZomatoFilterChip(
+                    label: 'Top Rated',
+                    active: _sortBy == 'top_rated',
+                    onTap: () {
+                      setState(() {
+                        _sortBy = _sortBy == 'top_rated' ? 'all' : 'top_rated';
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  ZomatoFilterChip(
+                    label: 'Price ↑',
+                    active: _sortBy == 'price_low',
+                    onTap: () {
+                      setState(() {
+                        _sortBy = _sortBy == 'price_low' ? 'all' : 'price_low';
+                      });
+                    },
+                  ),
                 ],
               ),
             ),
+          ),
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 8),
           ),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -546,72 +792,113 @@ class _BannerCarouselState extends State<BannerCarousel> {
   }
 }
 
-class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({required this.label, required this.selected, required this.onTap});
-
+class CircularCategoryButton extends StatelessWidget {
   final String label;
+  final IconData icon;
   final bool selected;
   final VoidCallback onTap;
+
+  const CircularCategoryButton({
+    super.key,
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: selected ? AppTheme.secondary : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: selected ? AppTheme.secondary : Colors.grey.shade300,
-            width: 1,
-          ),
-          boxShadow: selected
-              ? [BoxShadow(color: AppTheme.secondary.withOpacity(0.2), blurRadius: 6)]
-              : null,
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: selected ? Colors.white : const Color(0xFF1A1A1A),
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-          ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: selected ? AppTheme.secondary : Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: selected ? AppTheme.secondary : const Color(0xFFE3D0BA),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                icon,
+                color: selected ? Colors.white : AppTheme.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.bold : FontWeight.w600,
+                color: selected ? AppTheme.secondary : AppTheme.primary,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _SortButton extends StatelessWidget {
-  const _SortButton({required this.label, required this.active, required this.onTap});
-
+class ZomatoFilterChip extends StatelessWidget {
   final String label;
+  final Widget? icon;
   final bool active;
   final VoidCallback onTap;
+
+  const ZomatoFilterChip({
+    super.key,
+    required this.label,
+    this.icon,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? AppTheme.secondary.withOpacity(0.1) : Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          color: active ? AppTheme.secondary.withOpacity(0.08) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: active ? AppTheme.secondary : Colors.grey.shade300,
             width: 1,
           ),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: active ? AppTheme.secondary : Colors.grey.shade600,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              icon!,
+              const SizedBox(width: 4),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                color: active ? AppTheme.secondary : AppTheme.primary,
+                fontWeight: active ? FontWeight.bold : FontWeight.w600,
+                fontSize: 11,
+              ),
+            ),
+          ],
         ),
       ),
     );
