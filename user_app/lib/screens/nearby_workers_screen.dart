@@ -1,72 +1,165 @@
 import 'package:flutter/material.dart';
-import 'booking_form_screen.dart';
-import '../models/models.dart';
-import '../theme/app_theme.dart';
+import 'package:provider/provider.dart';
 
-class NearbyWorkersScreen extends StatelessWidget {
+import '../models/models.dart';
+import '../providers/auth_provider.dart';
+import '../providers/booking_provider.dart';
+import '../services/api_service.dart';
+import 'payment_screen.dart';
+
+/// Zomato-like "Select a Worker" screen.
+/// Fetches nearby workers using [latitude]/[longitude] (already known from onboarding).
+/// Book button → PaymentScreen directly.
+class NearbyWorkersScreen extends StatefulWidget {
   const NearbyWorkersScreen({
     super.key,
     required this.service,
     required this.address,
-    required this.workers,
+    required this.latitude,
+    required this.longitude,
+    this.workers, // Optional pre-fetched list; if null, fetches on init
+    this.userName,
   });
 
   final ServiceItem service;
   final String address;
-  final List<NearbyWorker> workers;
+  final double latitude;
+  final double longitude;
+  final List<NearbyWorker>? workers;
+  final String? userName;
 
-  IconData _getServiceIcon(String? serviceType) {
-    if (serviceType == null) return Icons.person;
-    switch (serviceType.toLowerCase()) {
-      case 'plumbing':
-        return Icons.plumbing;
-      case 'cleaning':
-        return Icons.cleaning_services;
-      case 'electrical':
-        return Icons.electrical_services;
-      case 'ac service':
-        return Icons.ac_unit;
-      case 'others':
-      default:
-        return Icons.construction;
+  @override
+  State<NearbyWorkersScreen> createState() => _NearbyWorkersScreenState();
+}
+
+class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
+  List<NearbyWorker> _workers = [];
+  bool _loading = true;
+  String? _bookingError;
+  int? _bookingWorkerId; // tracks which worker is being booked
+
+  static const _red = Color(0xFFE23744);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.workers != null) {
+      _workers = widget.workers!;
+      _loading = false;
+    } else {
+      _fetchWorkers();
+    }
+  }
+
+  Future<void> _fetchWorkers() async {
+    try {
+      final api = context.read<ApiService>();
+      final result = await api.fetchNearbyWorkers(
+        widget.latitude,
+        widget.longitude,
+        radius: 10.0,
+        serviceType: widget.service.categoryName,
+      );
+      if (mounted) setState(() { _workers = result; _loading = false; });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _book(NearbyWorker? worker) async {
+    if (_bookingWorkerId != null) return; // already booking
+    setState(() {
+      _bookingWorkerId = worker?.id ?? -1;
+      _bookingError = null;
+    });
+
+    try {
+      final auth = context.read<AuthProvider>();
+
+      // Save user name if provided from onboarding
+      if (widget.userName != null && widget.userName!.isNotEmpty) {
+        await auth.updateUserProfile(name: widget.userName!);
+      }
+
+      if (!mounted) return;
+
+      // Create booking
+      final booking = await context.read<BookingProvider>().createBooking(
+            serviceId: widget.service.id,
+            address: widget.address,
+            workerId: worker?.id,
+          );
+
+      if (!mounted) return;
+
+      if (booking != null) {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => PaymentScreen(booking: booking)),
+        );
+      } else {
+        setState(() {
+          _bookingError = 'Failed to create booking. Please try again.';
+          _bookingWorkerId = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _bookingError = e.toString();
+          _bookingWorkerId = null;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F3), // Crisp Milk White
+      backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: const Text('Select a Worker', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          widget.service.name,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+        ),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        foregroundColor: Colors.black87,
         elevation: 0,
+        surfaceTintColor: Colors.white,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Address details card
+          // ─── CONFIRMED LOCATION BAR (Zomato style) ───
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                const Icon(Icons.location_on, color: Colors.red, size: 24),
+                const Icon(Icons.location_on, color: _red, size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Service Location',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+                        'SERVICE LOCATION',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                          letterSpacing: 1.0,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        address,
-                        maxLines: 1,
+                        widget.address,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF111827),
+                        ),
                       ),
                     ],
                   ),
@@ -74,163 +167,249 @@ class NearbyWorkersScreen extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
 
-          // Title
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'Available ${service.categoryName ?? service.name}s Nearby',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          // ─── SERVICE SUMMARY ───
+          Container(
+            color: const Color(0xFFFEF2F2),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              children: [
+                const Icon(Icons.home_repair_service, color: _red, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    widget.service.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // Worker list
-          Expanded(
-            child: workers.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.people_outline, size: 64, color: Colors.grey.shade400),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'No nearby workers found for this service.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'You can still book, and we will assign the next available worker.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 13, color: Colors.grey),
-                          ),
-                        ],
+          const SizedBox(height: 8),
+
+          // Error banner
+          if (_bookingError != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Text(_bookingError!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+              ),
+            ),
+
+          // ─── WORKERS SECTION HEADER ───
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Row(
+              children: [
+                Text(
+                  'AVAILABLE EXPERTS NEAR YOU',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade500,
+                    letterSpacing: 1.1,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if (!_loading)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${_workers.length} found',
+                      style: TextStyle(
+                        color: Colors.green.shade700,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
                       ),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: workers.length,
-                    itemBuilder: (context, index) {
-                      final w = workers[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              // Photo Avatar
-                              CircleAvatar(
-                                radius: 30,
-                                backgroundColor: AppTheme.primary.withOpacity(0.1),
-                                backgroundImage: (w.photoUrl != null && w.photoUrl!.isNotEmpty)
-                                    ? NetworkImage(w.photoUrl!)
-                                    : null,
-                                child: (w.photoUrl == null || w.photoUrl!.isEmpty)
-                                    ? Icon(_getServiceIcon(w.serviceType), color: AppTheme.primary, size: 28)
-                                    : null,
-                              ),
-                              const SizedBox(width: 16),
-
-                              // Info Details
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      w.name,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '${w.experienceYears} Years Experience',
-                                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.star, color: Colors.amber, size: 16),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          w.rating.toStringAsFixed(1),
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Icon(Icons.location_on, color: Colors.grey.shade400, size: 14),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          '${w.distance?.toStringAsFixed(1) ?? "0.0"} km away',
-                                          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-
-                              // Book button
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => BookingFormScreen(
-                                        service: service,
-                                        initialAddress: address,
-                                        selectedWorker: w,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: const Text('Book', style: TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
                   ),
+              ],
+            ),
+          ),
+
+          // ─── WORKER LIST ───
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: _red))
+                : _workers.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        itemCount: _workers.length,
+                        itemBuilder: (context, index) => _buildWorkerCard(_workers[index]),
+                      ),
           ),
         ],
       ),
+      // ─── BOTTOM: BOOK ANY WORKER CTA ───
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              side: const BorderSide(color: AppTheme.primary, width: 1.5),
+              minimumSize: const Size.fromHeight(50),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              side: const BorderSide(color: _red, width: 1.5),
             ),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => BookingFormScreen(
-                    service: service,
-                    initialAddress: address,
-                    selectedWorker: null,
+            onPressed: _bookingWorkerId != null ? null : () => _book(null),
+            child: _bookingWorkerId == -1
+                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: _red, strokeWidth: 2.5))
+                : const Text(
+                    'Book Any Available Expert',
+                    style: TextStyle(color: _red, fontWeight: FontWeight.bold, fontSize: 15),
                   ),
-                ),
-              );
-            },
-            child: const Text(
-              'Book Any Available Worker',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary),
-            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWorkerCard(NearbyWorker w) {
+    final isBookingThis = _bookingWorkerId == w.id;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 3)),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Row(
+          children: [
+            // Avatar
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: _red.withValues(alpha: 0.08),
+              backgroundImage: (w.photoUrl != null && w.photoUrl!.isNotEmpty)
+                  ? NetworkImage(w.photoUrl!)
+                  : null,
+              child: (w.photoUrl == null || w.photoUrl!.isEmpty)
+                  ? const Icon(Icons.person, color: _red, size: 26)
+                  : null,
+            ),
+            const SizedBox(width: 14),
+
+            // Info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    w.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF111827)),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const SizedBox(width: 3),
+                      Text(
+                        w.rating.toStringAsFixed(1),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                      const SizedBox(width: 10),
+                      Icon(Icons.work_outline, color: Colors.grey.shade400, size: 13),
+                      const SizedBox(width: 3),
+                      Text(
+                        '${w.experienceYears} yrs',
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                      ),
+                      if (w.distance != null) ...[
+                        const SizedBox(width: 10),
+                        Icon(Icons.location_on, color: Colors.grey.shade400, size: 13),
+                        const SizedBox(width: 2),
+                        Text(
+                          '${w.distance!.toStringAsFixed(1)} km',
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                        ),
+                      ],
+                    ],
+                  ),
+                  if (w.serviceType != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        w.serviceType!,
+                        style: TextStyle(color: _red, fontSize: 11, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+
+            // Book button
+            SizedBox(
+              width: 68,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _red,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
+                ),
+                onPressed: (_bookingWorkerId != null) ? null : () => _book(w),
+                child: isBookingThis
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text('Book', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.people_outline, size: 68, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            const Text(
+              'No experts nearby',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No workers found within 10km of your location.\nYou can still book — we\'ll assign the nearest available expert.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 13, height: 1.5),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: _bookingWorkerId != null ? null : () => _book(null),
+              child: _bookingWorkerId != null
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Text('Confirm Booking', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            ),
+          ],
         ),
       ),
     );

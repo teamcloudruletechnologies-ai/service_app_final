@@ -1,23 +1,23 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 class ApiConfig {
-  static String get baseUrl {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:5000/api';
+  // Safe default local IP. Can be overridden at compile-time with:
+  // flutter run --dart-define=API_HOST=your_ip
+  static const String _defaultIp = '192.168.1.10';
+
+  static String get host {
+    if (kIsWeb) {
+      return 'localhost';
     }
-    return 'http://localhost:5000/api';
+    return const String.fromEnvironment('API_HOST', defaultValue: _defaultIp);
   }
 
-  static String get uploadsBaseUrl {
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:5000';
-    }
-    return 'http://localhost:5000';
-  }
+  static String get baseUrl => 'http://$host:5000/api';
+  static String get uploadsBaseUrl => 'http://$host:5000';
 
   static String resolveImageUrl(String? path) {
     if (path == null || path.isEmpty) return '';
-    if (path.startsWith('http')) return path;
+    if (path.startsWith('http') || path.startsWith('data:')) return path;
     return '$uploadsBaseUrl$path';
   }
 }

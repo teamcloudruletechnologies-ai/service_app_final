@@ -413,7 +413,12 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () {
-                        Navigator.of(context).pop(LocationPickerResult(address: _addressCtrl.text, workers: _workers));
+                        Navigator.of(context).pop(LocationPickerResult(
+                          address: _addressCtrl.text,
+                          workers: _workers,
+                          latitude: _selectedLocation?.latitude,
+                          longitude: _selectedLocation?.longitude,
+                        ));
                       },
                       child: const Text('Confirm Location', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
