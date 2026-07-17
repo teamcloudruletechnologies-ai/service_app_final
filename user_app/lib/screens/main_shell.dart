@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/auth_provider.dart';
 import 'bookings_screen.dart';
 import 'home_screen.dart';
+import 'login_screen.dart';
 import 'menu_screen.dart';
 
 class MainShell extends StatefulWidget {
@@ -13,6 +16,32 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _index = 0;
+  AuthProvider? _authProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _authProvider = context.read<AuthProvider>();
+      _authProvider?.addListener(_onAuthChange);
+    });
+  }
+
+  void _onAuthChange() {
+    if (!mounted) return;
+    if (_authProvider != null && !_authProvider!.isLoggedIn) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (_) => false,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _authProvider?.removeListener(_onAuthChange);
+    super.dispose();
+  }
 
   static const List<Widget> _pages = [
     HomeScreen(),
