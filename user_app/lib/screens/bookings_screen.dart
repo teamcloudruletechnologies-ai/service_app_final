@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'profile_screen.dart';
 
@@ -86,7 +87,14 @@ class _BookingsScreenState extends State<BookingsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('My Bookings'),
+        title: const Text(
+          'My Bookings',
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF1A1A1A)),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0,
+        surfaceTintColor: Colors.white,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -137,6 +145,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
               ],
             ),
           ),
+          const Divider(height: 1),
           Expanded(
             child: booking.loading
                 ? const LoadingView(message: 'Loading bookings...')
@@ -149,7 +158,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                             child: ListView.separated(
                               padding: const EdgeInsets.all(16),
                               itemCount: booking.bookings.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 12),
+                              separatorBuilder: (_, __) => const SizedBox(height: 0),
                               itemBuilder: (context, index) {
                                 final item = booking.bookings[index];
                                 return BookingCard(
@@ -177,7 +186,27 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(label: Text(label), selected: selected, onSelected: (_) => onSelected()),
+      child: GestureDetector(
+        onTap: onSelected,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected ? AppTheme.secondary : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: selected ? AppTheme.secondary : Colors.grey.shade300,
+            ),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? Colors.white : const Color(0xFF1A1A1A),
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

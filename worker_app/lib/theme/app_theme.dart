@@ -4,8 +4,9 @@ class AppTheme {
   // ─── Brand Palette ─────────────────────────────────────────────
   static const primary   = Color(0xFF1A1A1A); // Pure Matte Black
   static const sandal    = Color(0xFFE3D0BA); // Warm Sandal
-  static const olive     = Color(0xFF4A5343); // Muted Olive Green
+  static const olive     = Color(0xFF4A5343); // Muted Olive Green (accent/online)
   static const milkWhite = Color(0xFFF5F5F3); // Crisp Milk White
+  static const zomatoRed = Color(0xFFE23744); // Zomato Red (pending/new)
 
   // Aliases for legacy usage
   static const primaryDark = Color(0xFF1A1A1A);
@@ -52,7 +53,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
-        indicatorColor: sandal,
+        indicatorColor: olive,
         iconTheme: WidgetStatePropertyAll(
           IconThemeData(color: primary),
         ),
@@ -64,10 +65,10 @@ class AppTheme {
       // ─── Card ─────────────────────────────────────────────────
       cardTheme: CardThemeData(
         color: card,
-        elevation: 0,
+        elevation: 1,
+        shadowColor: Colors.black.withValues(alpha: 0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: sandal, width: 1.0),
         ),
       ),
 

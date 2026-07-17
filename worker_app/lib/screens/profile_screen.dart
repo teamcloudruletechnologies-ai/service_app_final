@@ -59,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() { _editMode = false; _saving = false; });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated!'), backgroundColor: Colors.green),
+          const SnackBar(content: Text('Profile updated!'), backgroundColor: AppTheme.olive),
         );
       }
     } catch (e) {
@@ -75,14 +75,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
+    final kycStatus = user?.kycStatus ?? 'not_submitted';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: const Text('Profile'),
+        automaticallyImplyLeading: false,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF111827),
         actions: [
           if (!_editMode)
             TextButton.icon(
@@ -102,34 +102,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Profile Avatar Header
+            // Avatar Header
             Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppTheme.primary, AppTheme.primary.withValues(alpha: 0.7)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
               padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppTheme.primary,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(color: AppTheme.primary.withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6)),
+                ],
+              ),
               child: Column(
                 children: [
                   Stack(
                     children: [
                       Container(
-                        width: 84,
-                        height: 84,
+                        width: 80,
+                        height: 80,
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.25),
+                          color: Colors.white.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.white, width: 3),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 3),
                         ),
                         child: Center(
                           child: Text(
                             (user?.name.isNotEmpty == true ? user!.name[0] : 'W').toUpperCase(),
                             style: const TextStyle(
-                              fontSize: 36,
+                              fontSize: 34,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -140,13 +139,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         bottom: 0,
                         right: 0,
                         child: Container(
-                          width: 26,
-                          height: 26,
-                          decoration: const BoxDecoration(
-                            color: Colors.green,
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: user?.status == 'active' ? AppTheme.olive : Colors.grey,
                             shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
                           ),
-                          child: const Icon(Icons.check, color: Colors.white, size: 16),
+                          child: Icon(
+                            user?.status == 'active' ? Icons.check : Icons.close,
+                            color: Colors.white,
+                            size: 14,
+                          ),
                         ),
                       ),
                     ],
@@ -160,22 +164,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
+                  // Stats Row
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
+                      color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.circle, size: 8, color: Colors.greenAccent),
+                        if (user?.experienceYears != null) ...[
+                          Text(
+                            '${user!.experienceYears} yrs exp',
+                            style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                          Container(
+                            width: 1,
+                            height: 12,
+                            color: Colors.white.withValues(alpha: 0.3),
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                        ],
+                        if (user?.serviceType != null)
+                          Text(
+                            user!.serviceType!,
+                            style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Status Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: user?.status == 'active'
+                          ? AppTheme.olive.withValues(alpha: 0.2)
+                          : Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.circle,
+                          size: 8,
+                          color: user?.status == 'active' ? AppTheme.olive : Colors.grey,
+                        ),
                         const SizedBox(width: 6),
                         Text(
-                          user?.status.toUpperCase() ?? 'ACTIVE',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          user?.status.toUpperCase() ?? 'INACTIVE',
+                          style: TextStyle(
+                            color: user?.status == 'active' ? AppTheme.olive : Colors.white70,
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.8,
@@ -190,12 +232,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 20),
 
-            // Profile Details Card
+            // Personal Info Card
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+                ],
               ),
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -204,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     const Text(
                       'Personal Information',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primary),
                     ),
                     const SizedBox(height: 16),
                     _ProfileField(
@@ -256,7 +300,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2))],
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+                ],
               ),
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -264,13 +310,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF0FDF4),
+                    color: kycStatus == 'approved'
+                        ? AppTheme.olive.withValues(alpha: 0.1)
+                        : kycStatus == 'pending'
+                            ? AppTheme.sandal.withValues(alpha: 0.3)
+                            : AppTheme.zomatoRed.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.verified_user_outlined, color: Colors.green, size: 22),
+                  child: Icon(
+                    Icons.verified_user_outlined,
+                    color: kycStatus == 'approved'
+                        ? AppTheme.olive
+                        : kycStatus == 'pending'
+                            ? AppTheme.sandal
+                            : AppTheme.zomatoRed,
+                    size: 22,
+                  ),
                 ),
-                title: const Text('KYC Verification', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                subtitle: const Text('Manage identity verification docs', style: TextStyle(fontSize: 12)),
+                title: Text(
+                  'KYC Verification',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                subtitle: Text(
+                  kycStatus == 'approved'
+                      ? 'Verified'
+                      : kycStatus == 'pending'
+                          ? 'Under review'
+                          : kycStatus == 'rejected'
+                              ? 'Rejected - re-upload'
+                              : 'Not submitted',
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                ),
                 trailing: const Icon(Icons.chevron_right, color: Color(0xFF6B7280)),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const WorkerKycScreen()),
@@ -278,16 +348,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
             // Logout Button
             OutlinedButton.icon(
               onPressed: () => _logout(context),
-              icon: const Icon(Icons.logout, color: Colors.red),
-              label: const Text('Sign Out', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              icon: const Icon(Icons.logout, color: AppTheme.zomatoRed),
+              label: const Text('Sign Out', style: TextStyle(color: AppTheme.zomatoRed, fontWeight: FontWeight.bold)),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(50),
-                side: const BorderSide(color: Colors.red),
+                side: const BorderSide(color: AppTheme.zomatoRed),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
@@ -322,7 +392,7 @@ class _ProfileField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF6B7280), letterSpacing: 0.5),
+          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade500, letterSpacing: 0.5),
         ),
         const SizedBox(height: 6),
         if (editable)
@@ -332,15 +402,15 @@ class _ProfileField extends StatelessWidget {
             decoration: InputDecoration(
               prefixIcon: Icon(icon, size: 20, color: AppTheme.primary),
               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD1D5DB))),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFD1D5DB))),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: AppTheme.primary, width: 1.5)),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade300)),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.grey.shade300)),
+              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppTheme.primary, width: 1.5)),
             ),
           )
         else
           Row(
             children: [
-              Icon(icon, size: 18, color: AppTheme.primary.withValues(alpha: 0.8)),
+              Icon(icon, size: 18, color: AppTheme.primary.withValues(alpha: 0.7)),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -348,7 +418,7 @@ class _ProfileField extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: controller.text.isNotEmpty ? const Color(0xFF111827) : Colors.grey,
+                    color: controller.text.isNotEmpty ? AppTheme.primary : Colors.grey,
                   ),
                 ),
               ),

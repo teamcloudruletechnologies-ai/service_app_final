@@ -17,13 +17,13 @@
   /* ─── Sidebar ────────────────────────────────────────────────── */
   --bg-sidebar:        #1A1A1A;  /* Matte Black sidebar    */
   --bg-sidebar-hover:  #2A2A28;  /* Slightly lighter black */
-  --bg-sidebar-active: #4A5343;  /* Olive green active row */
+  --bg-sidebar-active: #4A5343;  /* Muted Olive Green active row  */
 
-  /* ─── Accent (Olive Green primary) ───────────────────────────── */
+  /* ─── Accent (Muted Olive Green primary) ───────────────────────── */
   --accent-color:   #4A5343;     /* Muted Olive Green      */
-  --accent-dark:    #353C30;     /* Darker olive           */
-  --accent-light:   #EDF0EB;     /* Very light olive tint  */
-  --accent-border:  #8E9E84;     /* Mid olive border       */
+  --accent-dark:    #373E32;     /* Darker olive           */
+  --accent-light:   #F0F4EF;     /* Very light olive tint  */
+  --accent-border:  #8A9683;     /* Mid olive border       */
 
   /* ─── Text ───────────────────────────────────────────────────── */
   --text-primary:   #1A1A1A;     /* Matte Black            */
