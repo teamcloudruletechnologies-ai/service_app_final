@@ -22,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _searchCtrl = TextEditingController();
+  String _sortBy = 'all';
 
   @override
   void initState() {
@@ -29,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final catalog = context.read<CatalogProvider>();
       catalog.loadBanners();
+      catalog.loadCategories();
       catalog.loadServices();
     });
   }
@@ -44,6 +46,24 @@ class _HomeScreenState extends State<HomeScreen> {
           categoryId: context.read<CatalogProvider>().selectedCategoryId,
           search: query,
         );
+  }
+
+  List<ServiceItem> _getSortedServices(List<ServiceItem> services) {
+    final sorted = List<ServiceItem>.from(services);
+    switch (_sortBy) {
+      case 'top_rated':
+        sorted.sort((a, b) => b.avgRating.compareTo(a.avgRating));
+        break;
+      case 'most_booked':
+        sorted.sort((a, b) => b.totalBookings.compareTo(a.totalBookings));
+        break;
+      case 'price_low':
+        sorted.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      default:
+        break;
+    }
+    return sorted;
   }
 
   Widget _buildProfileButton(BuildContext context, UserAccount? user) {
@@ -202,11 +222,41 @@ class _HomeScreenState extends State<HomeScreen> {
                     focusedBorder: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   ),
+                  onChanged: _search,
                   onSubmitted: _search,
                 ),
               ),
             ),
           ),
+          // ─── CATEGORY CHIPS (Zomato style) ───
+          SliverToBoxAdapter(
+            child: SizedBox(
+              height: 44,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _CategoryChip(
+                    label: 'All',
+                    selected: catalog.selectedCategoryId == null,
+                    onTap: () {
+                      catalog.loadServices(search: _searchCtrl.text);
+                    },
+                  ),
+                  ...catalog.categories.map(
+                    (cat) => _CategoryChip(
+                      label: cat.name,
+                      selected: catalog.selectedCategoryId == cat.id,
+                      onTap: () {
+                        catalog.loadServices(categoryId: cat.id, search: _searchCtrl.text);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 24),
@@ -216,8 +266,28 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
+          // ─── FILTER / SORT ROW ───
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(
+                children: [
+                  const Text(
+                    'Services',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF1A1A1A)),
+                  ),
+                  const Spacer(),
+                  _SortButton(label: 'Top Rated', active: _sortBy == 'top_rated', onTap: () => setState(() => _sortBy = _sortBy == 'top_rated' ? 'all' : 'top_rated')),
+                  const SizedBox(width: 6),
+                  _SortButton(label: 'Most Booked', active: _sortBy == 'most_booked', onTap: () => setState(() => _sortBy = _sortBy == 'most_booked' ? 'all' : 'most_booked')),
+                  const SizedBox(width: 6),
+                  _SortButton(label: 'Price ↑', active: _sortBy == 'price_low', onTap: () => setState(() => _sortBy = _sortBy == 'price_low' ? 'all' : 'price_low')),
+                ],
+              ),
+            ),
+          ),
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             sliver: catalog.loadingServices
                 ? const SliverFillRemaining(child: LoadingView(message: 'Loading services...'))
                 : catalog.error != null
@@ -237,13 +307,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         : SliverGrid(
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
-                              childAspectRatio: 0.8,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
+                              childAspectRatio: 0.68,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
                             ),
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {
-                                final service = catalog.services[index];
+                                final sorted = _getSortedServices(catalog.services);
+                                final service = sorted[index];
                                 return ServiceCard(
                                   service: service,
                                   onTap: () => Navigator.of(context).push(
@@ -253,7 +324,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 );
                               },
-                              childCount: catalog.services.length,
+                              childCount: _getSortedServices(catalog.services).length,
                             ),
                           ),
           ),
@@ -465,6 +536,78 @@ class _BannerCarouselState extends State<BannerCarousel> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({required this.label, required this.selected, required this.onTap});
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? const Color(0xFFE23744) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? const Color(0xFFE23744) : Colors.grey.shade300,
+            width: 1,
+          ),
+          boxShadow: selected
+              ? [BoxShadow(color: const Color(0xFFE23744).withOpacity(0.2), blurRadius: 6)]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: selected ? Colors.white : const Color(0xFF1A1A1A),
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SortButton extends StatelessWidget {
+  const _SortButton({required this.label, required this.active, required this.onTap});
+
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? const Color(0xFFE23744).withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: active ? const Color(0xFFE23744) : Colors.grey.shade300,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active ? const Color(0xFFE23744) : Colors.grey.shade600,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -59,11 +59,11 @@ const NAV = [
 export default function Sidebar({ activeKey, onNav, onLogout }) {
   const [hovered, setHovered] = useState(null);
 
-  // Dark brown & black mix for the sidebar
+  // Dark black with red accent
   const bgMain = '#181512';
   const borderCol = '#2D2721';
-  const hoverBg = '#25201C';
-  const activeBg = '#B59A57'; // Gold for active
+  const hoverBg = '#2A1A1C';
+  const activeBg = '#E23744'; // Zomato red for active
   const textActive = '#FAF7F0';
   const textInactive = '#A89E91';
 
@@ -91,10 +91,10 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
       }}>
         <div style={{
           width: 32, height: 32, borderRadius: 10,
-          background: 'linear-gradient(135deg, #B59A57, #9A7E3F)',
+          background: 'linear-gradient(135deg, #E23744, #C62833)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
-          boxShadow: '0 2px 8px rgba(181, 154, 87, 0.25)',
+          boxShadow: '0 2px 8px rgba(226, 55, 68, 0.25)',
         }}>
           <svg width="18" height="18" viewBox="0 0 32 32" fill="none">
             <path d="M16 7L24 13.5V23.5H8V13.5L16 7Z" fill="#FAF7F0" fillOpacity="0.3" />
@@ -104,7 +104,7 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
         </div>
         <div>
           <div style={{ fontSize: 15, fontWeight: 800, color: '#FAF7F0', letterSpacing: '-0.02em', lineHeight: 1 }}>UrbanServe</div>
-          <div style={{ fontSize: 10, color: '#B59A57', fontWeight: 600, marginTop: 3, letterSpacing: '0.05em' }}>ADMIN PANEL</div>
+          <div style={{ fontSize: 10, color: '#E23744', fontWeight: 600, marginTop: 3, letterSpacing: '0.05em' }}>ADMIN PANEL</div>
         </div>
       </div>
 
@@ -159,8 +159,8 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
                   {item.badge && (
                     <span style={{
                       marginLeft: 'auto',
-                      background: active ? '#181512' : '#B59A57',
-                      color: active ? '#B59A57' : '#181512',
+                      background: active ? '#181512' : '#E23744',
+                      color: active ? '#E23744' : '#181512',
                       fontSize: 10,
                       borderRadius: 10,
                       padding: '2px 8px',
@@ -188,12 +188,12 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
       }}>
         <div style={{
           width: 36, height: 36, borderRadius: '50%',
-          background: '#25201C',
-          color: '#B59A57',
+          background: '#2A1A1C',
+          color: '#E23744',
           fontSize: 12, fontWeight: 800,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
-          border: '1.5px solid #3A3229',
+          border: '1.5px solid #3A2529',
         }}>PA</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: '#FAF7F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Prakash A.</div>
@@ -209,7 +209,7 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
             justifyContent: 'center', transition: 'all 0.15s ease',
             flexShrink: 0,
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = '#EF4444'; e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#E23744'; e.currentTarget.style.backgroundColor = 'rgba(226, 55, 68, 0.1)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.color = '#736555'; e.currentTarget.style.backgroundColor = 'transparent'; }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

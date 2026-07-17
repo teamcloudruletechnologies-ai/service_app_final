@@ -94,7 +94,7 @@ function StatCard({ label, value, trend, note, up, bg, fg, loading }) {
       transition: 'all 0.2s ease',
       cursor: 'pointer'
     }}
-    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#D1C4A5'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(181,154,87,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#F87171'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(226,55,68,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
     onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(28,25,23,0.03)'; e.currentTarget.style.transform = 'none'; }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -227,6 +227,9 @@ export default function Dashboard() {
   const recentBookings = data?.recentBookings || [];
   const revenueChart   = data?.revenueChart   || [];
   const activity       = data?.activity       || [];
+  const todayStats     = data?.todayStats     || {};
+  const activeWorkers  = data?.activeWorkers  || 0;
+  const topServices    = data?.topServices    || [];
 
   const totalBookings   = bookings.reduce((s, b) => s + Number(b.total), 0);
   const completedCount  = getBookingCount(bookings, 'completed');
@@ -252,6 +255,14 @@ export default function Dashboard() {
             ⚠️ API Error: {error} — showing cached data
           </div>
         )}
+
+        {/* Today's Overview */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 14 }}>
+          <StatCard label="Today's Bookings"    value={todayStats.today_bookings ?? 0}                  note="Booked today"      up={null} loading={loading} bg="var(--accent-light)" fg="var(--accent-color)" />
+          <StatCard label="Today's Revenue"     value={todayStats.today_revenue != null ? formatRevenue(todayStats.today_revenue) : '₹0'} note="Earned today"      up={null} loading={loading} bg="#FEF2F2" fg="#E23744" />
+          <StatCard label="Today Completed"     value={todayStats.today_completed ?? 0}                 note="Jobs finished"     up={null} loading={loading} bg="var(--status-green-bg)" fg="var(--status-green-fg)" />
+          <StatCard label="Workers Online"      value={activeWorkers}                                   note="Active right now"  up={null} loading={loading} bg="#EFF6FF" fg="#2563EB" />
+        </div>
 
         {/* Primary stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 14 }}>
@@ -297,6 +308,32 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Top Services */}
+        {topServices.length > 0 && (
+          <div style={{ ...card, marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>Top Services</span>
+              <span style={{ fontSize: 12, color: 'var(--accent-color)', cursor: 'pointer' }}>View all →</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
+              {topServices.slice(0, 6).map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'var(--bg-muted)', transition: 'all 0.15s', cursor: 'pointer' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent-light)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--bg-muted)'; }}
+                >
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--accent-light)', color: 'var(--accent-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, flexShrink: 0 }}>
+                    #{i + 1}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.bookings} bookings · {formatRevenue(s.revenue)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Bookings + KYC/Activity */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

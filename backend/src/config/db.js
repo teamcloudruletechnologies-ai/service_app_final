@@ -234,6 +234,8 @@ async function initDb() {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(100);
 
+    ALTER TABLE services ADD COLUMN IF NOT EXISTS estimated_time INTEGER DEFAULT 60;
+
     -- Seed realistic prices for services that still have price = 0
     UPDATE services SET price = CASE
       WHEN name ILIKE '%plumb%' THEN 499

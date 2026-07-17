@@ -38,6 +38,7 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
   bool _loading = true;
   String? _bookingError;
   int? _bookingWorkerId; // tracks which worker is being booked
+  String _sortBy = 'rating';
 
   static const _red = Color(0xFFE23744);
 
@@ -70,6 +71,22 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
     } catch (_) {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  List<NearbyWorker> _getSortedWorkers() {
+    final sorted = List<NearbyWorker>.from(_workers);
+    switch (_sortBy) {
+      case 'rating':
+        sorted.sort((a, b) => b.rating.compareTo(a.rating));
+        break;
+      case 'distance':
+        sorted.sort((a, b) => (a.distance ?? 999).compareTo(b.distance ?? 999));
+        break;
+      case 'experience':
+        sorted.sort((a, b) => b.experienceYears.compareTo(a.experienceYears));
+        break;
+    }
+    return sorted;
   }
 
   Future<void> _showScheduleAndBook(NearbyWorker? worker) async {
@@ -213,6 +230,38 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
 
           const SizedBox(height: 8),
 
+          // ─── SORT/FILTER BAR ───
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Text(
+                  'Sort by:',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade500),
+                ),
+                const SizedBox(width: 8),
+                _SortFilterChip(
+                  label: '⭐ Rating',
+                  active: _sortBy == 'rating',
+                  onTap: () => setState(() => _sortBy = 'rating'),
+                ),
+                const SizedBox(width: 6),
+                _SortFilterChip(
+                  label: '📍 Distance',
+                  active: _sortBy == 'distance',
+                  onTap: () => setState(() => _sortBy = 'distance'),
+                ),
+                const SizedBox(width: 6),
+                _SortFilterChip(
+                  label: '💼 Experience',
+                  active: _sortBy == 'experience',
+                  onTap: () => setState(() => _sortBy = 'experience'),
+                ),
+              ],
+            ),
+          ),
+
           // Error banner
           if (_bookingError != null)
             Padding(
@@ -267,13 +316,13 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator(color: _red))
-                : _workers.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        itemCount: _workers.length,
-                        itemBuilder: (context, index) => _buildWorkerCard(_workers[index]),
-                      ),
+                    : _workers.isEmpty
+                        ? _buildEmptyState()
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            itemCount: _getSortedWorkers().length,
+                            itemBuilder: (context, index) => _buildWorkerCard(_getSortedWorkers()[index]),
+                          ),
           ),
         ],
       ),
@@ -308,16 +357,15 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 3)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 12, offset: const Offset(0, 4)),
         ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            // Avatar
+            // Avatar with initials
             CircleAvatar(
               radius: 28,
               backgroundColor: _red.withValues(alpha: 0.08),
@@ -325,7 +373,10 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
                   ? NetworkImage(w.photoUrl!)
                   : null,
               child: (w.photoUrl == null || w.photoUrl!.isEmpty)
-                  ? const Icon(Icons.person, color: _red, size: 26)
+                  ? Text(
+                      (w.name.isNotEmpty ? w.name[0] : 'W').toUpperCase(),
+                      style: const TextStyle(color: _red, fontWeight: FontWeight.bold, fontSize: 20),
+                    )
                   : null,
             ),
             const SizedBox(width: 14),
@@ -335,11 +386,29 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    w.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF111827)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          w.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF111827)),
+                        ),
+                      ),
+                      // Available badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          'Available',
+                          style: TextStyle(color: Colors.green.shade700, fontSize: 9, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       const Icon(Icons.star, color: Colors.amber, size: 14),
@@ -366,14 +435,20 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
                       ],
                     ],
                   ),
-                  if (w.serviceType != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
+                  if (w.serviceType != null) ...[
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: _red.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
                       child: Text(
                         w.serviceType!,
-                        style: TextStyle(color: _red, fontSize: 11, fontWeight: FontWeight.w600),
+                        style: TextStyle(color: _red, fontSize: 10, fontWeight: FontWeight.w600),
                       ),
                     ),
+                  ],
                 ],
               ),
             ),
@@ -666,6 +741,40 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SortFilterChip extends StatelessWidget {
+  const _SortFilterChip({required this.label, required this.active, required this.onTap});
+
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: active ? const Color(0xFFE23744) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: active ? const Color(0xFFE23744) : Colors.grey.shade300,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active ? Colors.white : const Color(0xFF1A1A1A),
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

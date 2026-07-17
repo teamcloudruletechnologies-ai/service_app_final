@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const primary = Color(0xFF1A1A1A); // Pure Matte Black
-  static const primaryDark = Color(0xFF1A1A1A);
-  static const accent = Color(0xFFE3D0BA); // Warm Sandal
+  static const primary = Color(0xFFE23744); // Zomato Red
+  static const primaryDark = Color(0xFFC12030);
+  static const accent = Color(0xFFE23744); // Zomato Red
   static const secondary = Color(0xFF4A5343); // Muted Olive Green
-  static const surface = Color(0xFFF5F5F3); // Crisp Milk White
+  static const surface = Color(0xFFF8F8F8); // Light gray background
   static const card = Colors.white;
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF6B7280);
 
   static ThemeData light() {
     final base = ThemeData(
@@ -25,16 +27,16 @@ class AppTheme {
       scaffoldBackgroundColor: surface,
       fontFamily: 'sans-serif',
       navigationBarTheme: const NavigationBarThemeData(
-        backgroundColor: surface,
+        backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
-        indicatorColor: accent,
+        indicatorColor: primary,
         iconTheme: WidgetStatePropertyAll(
-          IconThemeData(color: primary),
+          IconThemeData(color: textSecondary),
         ),
         labelTextStyle: WidgetStatePropertyAll(
-          TextStyle(color: primary, fontWeight: FontWeight.bold, fontSize: 12),
+          TextStyle(color: textPrimary, fontWeight: FontWeight.bold, fontSize: 12),
         ),
       ),
       appBarTheme: const AppBarTheme(
@@ -47,10 +49,11 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: card,
-        elevation: 0,
+        elevation: 1,
+        shadowColor: Colors.black.withOpacity(0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFE3D0BA), width: 1.0),
+          side: BorderSide(color: Colors.grey.shade200, width: 1.0),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -58,11 +61,11 @@ class AppTheme {
         fillColor: Colors.white,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFE3D0BA), width: 1.0),
+          borderSide: const BorderSide(color: Color(0xFFE3E8EF), width: 1.0),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFE3D0BA), width: 1.0),
+          borderSide: const BorderSide(color: Color(0xFFE3E8EF), width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),

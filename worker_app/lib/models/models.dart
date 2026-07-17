@@ -91,6 +91,10 @@ class ServiceItem {
   final String? categoryName;
   final double price;
   final String status;
+  final double avgRating;
+  final int totalReviews;
+  final int totalBookings;
+  final int estimatedTime;
 
   const ServiceItem({
     required this.id,
@@ -101,6 +105,10 @@ class ServiceItem {
     this.categoryName,
     required this.price,
     required this.status,
+    this.avgRating = 4.5,
+    this.totalReviews = 0,
+    this.totalBookings = 0,
+    this.estimatedTime = 60,
   });
 
   factory ServiceItem.fromJson(Map<String, dynamic> json) {
@@ -113,6 +121,10 @@ class ServiceItem {
       categoryName: json['category_name'] as String?,
       price: (json['price'] as num?)?.toDouble() ?? 0,
       status: json['status'] as String? ?? 'active',
+      avgRating: (json['avg_rating'] as num?)?.toDouble() ?? 4.5,
+      totalReviews: json['total_reviews'] as int? ?? 0,
+      totalBookings: json['total_bookings'] as int? ?? 0,
+      estimatedTime: json['estimated_time'] as int? ?? 60,
     );
   }
 }

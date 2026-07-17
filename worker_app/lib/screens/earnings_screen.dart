@@ -49,10 +49,33 @@ class _EarningsScreenState extends State<EarningsScreen> {
     final currencyFmt = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
     final dateFmt = DateFormat('dd MMM yyyy, hh:mm a');
 
+    // Filter today's earnings
+    final today = DateTime.now();
+    final todayHistory = _history.where((item) {
+      final paidAtStr = item['paid_at'] as String?;
+      if (paidAtStr == null) return false;
+      final paidAt = DateTime.tryParse(paidAtStr);
+      return paidAt != null &&
+          paidAt.year == today.year &&
+          paidAt.month == today.month &&
+          paidAt.day == today.day;
+    }).toList();
+
+    final otherHistory = _history.where((item) {
+      final paidAtStr = item['paid_at'] as String?;
+      if (paidAtStr == null) return true;
+      final paidAt = DateTime.tryParse(paidAtStr);
+      return paidAt == null ||
+          !(paidAt.year == today.year &&
+              paidAt.month == today.month &&
+              paidAt.day == today.day);
+    }).toList();
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('My Earnings'),
+        title: const Text('Earnings'),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -69,7 +92,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const Icon(Icons.error_outline, size: 48, color: AppTheme.zomatoRed),
                         const SizedBox(height: 12),
                         Text(_error!, textAlign: TextAlign.center),
                         const SizedBox(height: 16),
@@ -78,150 +101,251 @@ class _EarningsScreenState extends State<EarningsScreen> {
                     ),
                   ),
                 )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Total Earnings summary card
-                      Card(
-                        color: AppTheme.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        child: Padding(
+              : RefreshIndicator(
+                  onRefresh: _loadData,
+                  color: AppTheme.olive,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Total Earnings Card
+                        Container(
                           padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(color: AppTheme.primary.withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6)),
+                            ],
+                          ),
                           child: Column(
                             children: [
                               const Text(
-                                'TOTAL EARNINGS (MY SHARE)',
-                                style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                                'TOTAL EARNINGS',
+                                style: TextStyle(color: Colors.white60, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 currencyFmt.format(_stats['total_earnings'] ?? 0.0),
-                                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                                style: const TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Paid and Pending rows
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Card(
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(color: Colors.grey.shade200),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  children: [
-                                    const Text('Received Payouts', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      currencyFmt.format(_stats['paid_earnings'] ?? 0.0),
-                                      style: const TextStyle(color: Colors.green, fontSize: 16, fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Card(
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(color: Colors.grey.shade200),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  children: [
-                                    const Text('Pending Payouts', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      currencyFmt.format(_stats['pending_earnings'] ?? 0.0),
-                                      style: const TextStyle(color: Colors.orange, fontSize: 16, fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Payout History',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1A1A1A)),
-                      ),
-                      const SizedBox(height: 12),
-                      _history.isEmpty
-                          ? Card(
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(color: Colors.grey.shade200),
-                              ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(32),
-                                child: Center(child: Text('No payout transactions recorded yet.')),
-                              ),
-                            )
-                          : ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: _history.length,
-                              separatorBuilder: (_, __) => const SizedBox(height: 8),
-                              itemBuilder: (context, index) {
-                                final item = _history[index] as Map<String, dynamic>;
-                                final paidAtStr = item['paid_at'] as String?;
-                                final paidAt = paidAtStr != null ? DateTime.tryParse(paidAtStr) : null;
-                                final status = item['status'] as String? ?? 'pending';
+                        const SizedBox(height: 16),
 
-                                return Card(
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    side: BorderSide(color: Colors.grey.shade200),
-                                  ),
-                                  child: ListTile(
-                                    title: Text(item['service_name'] ?? 'Home Service', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                    subtitle: Text(
-                                      paidAt != null ? dateFmt.format(paidAt) : 'Processing...',
-                                      style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                                    ),
-                                    trailing: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          currencyFmt.format(item['worker_payout'] ?? 0.0),
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          status.toUpperCase(),
-                                          style: TextStyle(
-                                            color: status == 'paid' ? Colors.green : Colors.orange,
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 9,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
+                        // Paid and Pending Stats
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _StatCard(
+                                label: 'Received',
+                                amount: currencyFmt.format(_stats['paid_earnings'] ?? 0.0),
+                                color: AppTheme.olive,
+                                icon: Icons.check_circle_outline,
+                              ),
                             ),
-                    ],
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _StatCard(
+                                label: 'Pending',
+                                amount: currencyFmt.format(_stats['pending_earnings'] ?? 0.0),
+                                color: AppTheme.zomatoRed,
+                                icon: Icons.schedule_outlined,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Today Section
+                        if (todayHistory.isNotEmpty) ...[
+                          Row(
+                            children: [
+                              Container(
+                                width: 4,
+                                height: 18,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.olive,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                'Today',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          ...todayHistory.map((item) => _buildHistoryItem(item, currencyFmt, dateFmt)),
+                          const SizedBox(height: 20),
+                        ],
+
+                        // Payout History
+                        Row(
+                          children: [
+                            Container(
+                              width: 4,
+                              height: 18,
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'Payout History',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        otherHistory.isEmpty && todayHistory.isEmpty
+                            ? Container(
+                                padding: const EdgeInsets.all(32),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF9FAFB),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Center(
+                                  child: Column(
+                                    children: [
+                                      Icon(Icons.receipt_long_outlined, size: 40, color: Colors.grey.shade300),
+                                      const SizedBox(height: 8),
+                                      Text('No payout transactions yet', style: TextStyle(color: Colors.grey.shade500)),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : otherHistory.isEmpty
+                                ? const SizedBox.shrink()
+                                : ListView.separated(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    itemCount: otherHistory.length,
+                                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                    itemBuilder: (context, index) {
+                                      final item = otherHistory[index] as Map<String, dynamic>;
+                                      return _buildHistoryItem(item, currencyFmt, dateFmt);
+                                    },
+                                  ),
+                      ],
+                    ),
                   ),
                 ),
+    );
+  }
+
+  Widget _buildHistoryItem(Map<String, dynamic> item, NumberFormat currencyFmt, DateFormat dateFmt) {
+    final paidAtStr = item['paid_at'] as String?;
+    final paidAt = paidAtStr != null ? DateTime.tryParse(paidAtStr) : null;
+    final status = item['status'] as String? ?? 'pending';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: (status == 'paid' ? AppTheme.olive : AppTheme.zomatoRed).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              status == 'paid' ? Icons.check_circle_outline : Icons.schedule_outlined,
+              color: status == 'paid' ? AppTheme.olive : AppTheme.zomatoRed,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['service_name'] ?? 'Home Service',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.primary),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  paidAt != null ? dateFmt.format(paidAt) : 'Processing...',
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                currencyFmt.format(item['worker_payout'] ?? 0.0),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.primary),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                status.toUpperCase(),
+                style: TextStyle(
+                  color: status == 'paid' ? AppTheme.olive : AppTheme.zomatoRed,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({
+    required this.label,
+    required this.amount,
+    required this.color,
+    required this.icon,
+  });
+
+  final String label;
+  final String amount;
+  final Color color;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(height: 8),
+          Text(label, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+          const SizedBox(height: 4),
+          Text(
+            amount,
+            style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 }

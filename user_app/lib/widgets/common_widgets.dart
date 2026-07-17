@@ -68,41 +68,132 @@ class ServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = ApiConfig.resolveImageUrl(service.imageUrl);
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFE3D0BA), width: 1.0),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: imageUrl.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(color: Colors.grey.shade200),
-                      errorWidget: (_, __, ___) => _placeholder(),
-                    )
-                  : _placeholder(),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-              child: Text(
-                service.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Color(0xFF1A1A1A),
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                  letterSpacing: -0.3,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image at top
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => Container(color: Colors.grey.shade200),
+                            errorWidget: (_, __, ___) => _placeholder(),
+                          )
+                        : _placeholder(),
+                    // Price badge at bottom-right of image
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                          ],
+                        ),
+                        child: Text(
+                          '₹${service.price.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            // Info below image
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Category tag
+                  if (service.categoryName != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        service.categoryName!,
+                        style: const TextStyle(
+                          color: AppTheme.primary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  if (service.categoryName != null) const SizedBox(height: 4),
+                  // Service name
+                  Text(
+                    service.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  // Rating row
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Color(0xFFFFC107), size: 13),
+                      const SizedBox(width: 2),
+                      Text(
+                        service.avgRating.toStringAsFixed(1),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                      ),
+                      if (service.totalReviews > 0) ...[
+                        const SizedBox(width: 2),
+                        Text(
+                          '(${service.totalReviews})',
+                          style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  // Estimated time badge
+                  Row(
+                    children: [
+                      Icon(Icons.access_time, size: 12, color: Colors.grey.shade500),
+                      const SizedBox(width: 2),
+                      Text(
+                        '⏱ ${service.estimatedTime} min',
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 11, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -113,9 +204,9 @@ class ServiceCard extends StatelessWidget {
 
   Widget _placeholder() {
     return Container(
-      color: AppTheme.primary.withValues(alpha: 0.1),
+      color: AppTheme.primary.withValues(alpha: 0.08),
       child: const Center(
-        child: Icon(Icons.home_repair_service, size: 40, color: AppTheme.primary),
+        child: Icon(Icons.home_repair_service, size: 36, color: AppTheme.primary),
       ),
     );
   }
@@ -135,21 +226,97 @@ class BookingCard extends StatelessWidget {
       case 'cancelled':
         return Colors.red;
       case 'in_progress':
-        return Colors.blue;
+        return Colors.purple;
       case 'confirmed':
-        return AppTheme.primary;
+        return Colors.blue;
       default:
         return Colors.orange;
     }
   }
 
+  int _statusStep(String status) {
+    switch (status) {
+      case 'pending':
+        return 0;
+      case 'confirmed':
+        return 1;
+      case 'in_progress':
+        return 2;
+      case 'completed':
+        return 3;
+      case 'cancelled':
+        return -1;
+      default:
+        return 0;
+    }
+  }
+
+  Widget _buildTimeline() {
+    final currentStep = _statusStep(booking.status);
+    final steps = ['Booked', 'Confirmed', 'In Progress', 'Completed'];
+    final isCancelled = booking.status == 'cancelled';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Row(
+        children: List.generate(steps.length * 2 - 1, (index) {
+          if (index.isOdd) {
+            final stepBefore = (index - 1) ~/ 2;
+            final filled = !isCancelled && stepBefore < currentStep;
+            return Expanded(
+              child: Container(
+                height: 2,
+                color: filled ? const Color(0xFFE23744) : Colors.grey.shade300,
+              ),
+            );
+          }
+          final step = index ~/ 2;
+          final filled = !isCancelled && step <= currentStep;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: filled ? const Color(0xFFE23744) : Colors.grey.shade300,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                steps[step],
+                style: TextStyle(
+                  fontSize: 8,
+                  fontWeight: filled ? FontWeight.bold : FontWeight.w500,
+                  color: filled ? const Color(0xFF1A1A1A) : Colors.grey.shade400,
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final dateFmt = DateFormat('dd MMM yyyy, hh:mm a');
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -180,44 +347,55 @@ class BookingCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              if (booking.address != null)
+              if (booking.workerName != null) ...[
+                const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(Icons.location_on_outlined, size: 16, color: Colors.grey.shade600),
+                    Icon(Icons.person_outline, size: 14, color: Colors.grey.shade500),
                     const SizedBox(width: 4),
-                    Expanded(child: Text(booking.address!, style: TextStyle(color: Colors.grey.shade700))),
+                    Text(
+                      booking.workerName!,
+                      style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                    ),
                   ],
                 ),
+              ],
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    dateFmt.format(booking.scheduledAt ?? booking.createdAt),
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey.shade500),
+                      const SizedBox(width: 4),
+                      Text(
+                        dateFmt.format(booking.scheduledAt ?? booking.createdAt),
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                      ),
+                    ],
                   ),
                   Text(
                     '₹${booking.amount.toStringAsFixed(0)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primary),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFE23744),
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
-              if (booking.status == 'pending' || (booking.canCancel && onCancel != null) || booking.status == 'completed') ...[
-                const SizedBox(height: 12),
+              // Progress timeline
+              _buildTimeline(),
+              // Action buttons
+              if (booking.canCancel && onCancel != null) ...[
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (booking.canCancel && onCancel != null)
-                      TextButton(
-                        onPressed: onCancel,
-                        child: const Text('Cancel Booking', style: TextStyle(color: Colors.red)),
-                      ),
                     if (booking.status == 'pending') ...[
-                      const SizedBox(width: 8),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primary,
+                          backgroundColor: const Color(0xFFE23744),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -230,37 +408,50 @@ class BookingCard extends StatelessWidget {
                         },
                         child: const Text('Pay Now', style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                    ],
-                    if (booking.status == 'completed') ...[
-                      OutlinedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => InvoiceScreen(booking: booking)),
-                          );
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppTheme.primary),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        child: const Text('View Invoice', style: TextStyle(color: AppTheme.primary)),
-                      ),
                       const SizedBox(width: 8),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amber.shade700,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => RatingScreen(booking: booking)),
-                          );
-                        },
-                        child: const Text('Rate Provider', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                    TextButton(
+                      onPressed: onCancel,
+                      child: const Text('Cancel', style: TextStyle(color: Colors.red, fontSize: 13)),
+                    ),
+                  ],
+                ),
+              ],
+              if (booking.status == 'completed') ...[
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => InvoiceScreen(booking: booking)),
+                        );
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFFE23744)),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       ),
-                    ]
+                      child: const Text('Invoice', style: TextStyle(color: Color(0xFFE23744), fontSize: 13)),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.amber.shade700,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => RatingScreen(booking: booking)),
+                        );
+                      },
+                      child: const Text('Rate', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    ),
                   ],
                 ),
               ],

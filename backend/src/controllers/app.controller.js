@@ -230,6 +230,27 @@ async function getWorkerEarnings(req, res, next) {
       [workerId]
     );
 
+    const todayStatsResult = await db.query(
+      `SELECT
+        COUNT(*)::int AS today_jobs,
+        COALESCE(SUM(amount) FILTER (WHERE status = 'completed'), 0)::float AS today_earnings,
+        COUNT(*) FILTER (WHERE status = 'completed')::int AS today_completed,
+        COUNT(*) FILTER (WHERE status = 'in_progress')::int AS today_in_progress
+       FROM bookings
+       WHERE worker_id = $1 AND DATE(created_at) = CURRENT_DATE`,
+      [workerId]
+    );
+
+    const totalJobsResult = await db.query(
+      `SELECT
+        COUNT(*)::int AS total_jobs,
+        COUNT(*) FILTER (WHERE status = 'completed')::int AS completed_jobs,
+        COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled_jobs
+       FROM bookings
+       WHERE worker_id = $1`,
+      [workerId]
+    );
+
     const historyResult = await db.query(
       `SELECT
         i.id,
@@ -250,6 +271,8 @@ async function getWorkerEarnings(req, res, next) {
 
     return success(res, "Worker earnings fetched successfully", {
       stats: statsResult.rows[0],
+      todayStats: todayStatsResult.rows[0],
+      totalJobs: totalJobsResult.rows[0],
       history: historyResult.rows,
     });
   } catch (err) {
