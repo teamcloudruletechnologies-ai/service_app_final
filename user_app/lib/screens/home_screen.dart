@@ -256,7 +256,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 4),
+          // FIX: was `const SizedBox(height: 4)` directly inside `slivers` —
+          // CustomScrollView only accepts RenderSliver children, not plain
+          // boxes. Wrapped in SliverToBoxAdapter so it's a valid sliver.
+          const SliverToBoxAdapter(
+            child: SizedBox(height: 4),
+          ),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 24),
