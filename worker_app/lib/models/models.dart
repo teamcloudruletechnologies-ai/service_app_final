@@ -119,9 +119,9 @@ class ServiceItem {
       description: json['description'] as String?,
       imageUrl: json['image_url'] as String?,
       categoryName: json['category_name'] as String?,
-      price: (json['price'] as num?)?.toDouble() ?? 0,
+      price: _toDouble(json['price']),
       status: json['status'] as String? ?? 'active',
-      avgRating: (json['avg_rating'] as num?)?.toDouble() ?? 4.5,
+      avgRating: _toDouble(json['avg_rating'], 4.5),
       totalReviews: json['total_reviews'] as int? ?? 0,
       totalBookings: json['total_bookings'] as int? ?? 0,
       estimatedTime: json['estimated_time'] as int? ?? 60,
@@ -176,7 +176,7 @@ class BookingItem {
       userName: json['user_name'] as String?,
       userPhone: json['user_phone'] as String?,
       status: json['status'] as String? ?? 'pending',
-      amount: (json['amount'] as num?)?.toDouble() ?? 0,
+      amount: _toDouble(json['amount']),
       address: json['address'] as String?,
       notes: json['notes'] as String?,
       scheduledAt: json['scheduled_at'] != null
@@ -237,4 +237,11 @@ class ReviewItem {
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
     );
   }
+}
+
+double _toDouble(dynamic val, [double defaultValue = 0.0]) {
+  if (val == null) return defaultValue;
+  if (val is num) return val.toDouble();
+  if (val is String) return double.tryParse(val) ?? defaultValue;
+  return defaultValue;
 }
