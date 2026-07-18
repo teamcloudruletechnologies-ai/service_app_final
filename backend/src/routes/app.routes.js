@@ -10,6 +10,8 @@ const upload = require("../middlewares/upload.middleware");
 const router = express.Router();
 
 router.get("/services/categories", controller.listCategories);
+// GET sub-categories of a specific parent category
+router.get("/services/categories/:id/subcategories", [param("id").isInt()], validate, controller.listSubCategories);
 router.get("/banners", controller.listActiveBanners);
 
 router.get(

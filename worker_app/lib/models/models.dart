@@ -13,6 +13,7 @@ class UserAccount {
   final String? pincode;
   final String? state;
   final String? address;
+  final double? rating;
 
   // True if this account was just auto-created or is missing operational details
   bool get needsOnboarding =>
@@ -35,6 +36,7 @@ class UserAccount {
     this.pincode,
     this.state,
     this.address,
+    this.rating,
   });
 
   factory UserAccount.fromJson(Map<String, dynamic> json) {
@@ -52,6 +54,7 @@ class UserAccount {
       pincode: json['pincode'] as String?,
       state: json['state'] as String?,
       address: json['address'] as String?,
+      rating: _toDouble(json['rating'], 4.5),
     );
   }
 }
@@ -145,6 +148,9 @@ class BookingItem {
   final String? notes;
   final DateTime? scheduledAt;
   final DateTime createdAt;
+  final String? otp;
+  final double? workerLat;
+  final double? workerLng;
 
   const BookingItem({
     required this.id,
@@ -162,6 +168,9 @@ class BookingItem {
     this.notes,
     this.scheduledAt,
     required this.createdAt,
+    this.otp,
+    this.workerLat,
+    this.workerLng,
   });
 
   factory BookingItem.fromJson(Map<String, dynamic> json) {
@@ -184,6 +193,9 @@ class BookingItem {
           : null,
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
           DateTime.now(),
+      otp: json['otp'] as String? ?? (json['otp'] != null ? json['otp'].toString() : null),
+      workerLat: _toDouble(json['worker_lat']),
+      workerLng: _toDouble(json['worker_lng']),
     );
   }
 

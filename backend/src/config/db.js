@@ -233,6 +233,8 @@ async function initDb() {
     -- Add address fields to users if missing
     ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(100);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 0;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS otp VARCHAR(10);
 
     ALTER TABLE services ADD COLUMN IF NOT EXISTS estimated_time INTEGER DEFAULT 60;
 

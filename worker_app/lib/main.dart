@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/booking_provider.dart';
@@ -8,29 +10,87 @@ import 'screens/splash_screen.dart';
 import 'services/api_service.dart';
 import 'theme/app_theme.dart';
 
-void main() {
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  debugPrint("Handling a background message: ${message.messageId}");
+}
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  try {
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    
+    final messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    final token = await messaging.getToken();
+    debugPrint("=================================================");
+    debugPrint("FCM WORKER TOKEN: $token");
+    debugPrint("=================================================");
+  } catch (e) {
+    debugPrint("Firebase init failed: $e");
+  }
+
   final apiService = ApiService();
   runApp(UrbanServiceApp(apiService: apiService));
 }
 
-class UrbanServiceApp extends StatelessWidget {
+class UrbanServiceApp extends StatefulWidget {
   const UrbanServiceApp({super.key, required this.apiService});
 
   final ApiService apiService;
 
   @override
+  State<UrbanServiceApp> createState() => _UrbanServiceAppState();
+}
+
+class _UrbanServiceAppState extends State<UrbanServiceApp> {
+  final GlobalKey<ScaffoldMessengerState> _messengerKey = GlobalKey<ScaffoldMessengerState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _setupFCM();
+  }
+
+  void _setupFCM() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      final notification = message.notification;
+      if (notification != null) {
+        _messengerKey.currentState?.showSnackBar(
+          SnackBar(
+            content: Text(
+              '🔔 ${notification.title}: ${notification.body}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: AppTheme.olive,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider<ApiService>.value(value: apiService),
-        ChangeNotifierProvider(create: (_) => AuthProvider(apiService)),
-        ChangeNotifierProvider(create: (_) => CatalogProvider(apiService)),
-        ChangeNotifierProvider(create: (_) => BookingProvider(apiService)),
+        Provider<ApiService>.value(value: widget.apiService),
+        ChangeNotifierProvider(create: (_) => AuthProvider(widget.apiService)),
+        ChangeNotifierProvider(create: (_) => CatalogProvider(widget.apiService)),
+        ChangeNotifierProvider(create: (_) => BookingProvider(widget.apiService)),
       ],
       child: MaterialApp(
         title: 'Urban Service',
         debugShowCheckedModeBanner: false,
+        scaffoldMessengerKey: _messengerKey,
         theme: AppTheme.light(),
         home: const SplashScreen(),
       ),

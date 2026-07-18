@@ -224,6 +224,32 @@ class ProfileScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ),
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.amber.shade200, width: 1.5),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.stars_rounded, color: Colors.amber, size: 20),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${user?.credits ?? 0} Credits',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.amber.shade900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SizedBox(height: 24),
           _InfoTile(icon: Icons.email_outlined, label: 'Email', value: user?.email ?? 'Not set'),
           _InfoTile(icon: Icons.phone_outlined, label: 'Phone', value: user?.phone ?? 'Not set'),

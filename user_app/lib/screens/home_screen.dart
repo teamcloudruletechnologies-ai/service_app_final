@@ -8,6 +8,7 @@ import '../config/api_config.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/catalog_provider.dart';
+import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'location_picker_screen.dart';
@@ -46,10 +47,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _search(String query) {
-    context.read<CatalogProvider>().loadServices(
-          categoryId: context.read<CatalogProvider>().selectedCategoryId,
-          search: query,
-        );
+    final catalog = context.read<CatalogProvider>();
+    catalog.loadServices(
+      categoryId: catalog.selectedSubCategoryId ?? catalog.selectedCategoryId,
+      search: query,
+    );
   }
 
   List<ServiceItem> _getSortedServices(List<ServiceItem> services) {
@@ -193,10 +195,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 6),
-              const Text(
-                'FLASH SALE',
+              Text(
+                context.translate('gold_flash_sale'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Color(0xFFE3D0BA),
                   fontWeight: FontWeight.bold,
                   fontSize: 22,
@@ -204,10 +206,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                '₹1 for 3 months',
+              Text(
+                context.translate('gold_price_sub'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                   fontSize: 14,
@@ -221,19 +223,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: const Color(0xFFE3D0BA),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Renew Gold now',
-                        style: TextStyle(
+                        context.translate('renew_gold'),
+                        style: const TextStyle(
                           color: Color(0xFF1A1A1A),
                           fontWeight: FontWeight.w800,
                           fontSize: 12,
                         ),
                       ),
-                      SizedBox(width: 4),
-                      Icon(Icons.arrow_forward, color: Color(0xFF1A1A1A), size: 12),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_forward, color: Color(0xFF1A1A1A), size: 12),
                     ],
                   ),
                 ),
@@ -274,9 +276,9 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(4),
             ),
-            child: const Text(
-              'OFFERS',
-              style: TextStyle(
+            child: Text(
+              context.translate('offers'),
+              style: const TextStyle(
                 color: Color(0xFFE23744),
                 fontWeight: FontWeight.w900,
                 fontSize: 8,
@@ -284,9 +286,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Explore',
-            style: TextStyle(
+          Text(
+            context.translate('explore'),
+            style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 11,
@@ -321,9 +323,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Urban Serve',
-                              style: TextStyle(
+                            Text(
+                              context.translate('app_name'),
+                              style: const TextStyle(
                                 fontWeight: FontWeight.w900,
                                 fontSize: 26,
                                 color: AppTheme.primary,
@@ -333,8 +335,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 2),
                             Text(
                               auth.user?.name != null && auth.user!.name.isNotEmpty
-                                  ? 'Hey, ${auth.user!.name}'
-                                  : 'Welcome Guest',
+                                  ? '${context.translate('hey')}${auth.user!.name}'
+                                  : context.translate('welcome_guest'),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
@@ -359,7 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   const SizedBox(width: 4),
                                   Flexible(
                                     child: Text(
-                                      auth.user?.address ?? 'Detecting location...',
+                                      auth.user?.address ?? context.translate('detecting_location'),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -377,6 +379,38 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
+                      if (auth.user != null) ...[
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.amber.shade200),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.stars_rounded, color: Colors.amber, size: 14),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '${auth.user!.credits ?? 0}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                    color: Colors.amber.shade900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       _buildProfileButton(context, auth.user),
                     ],
                   ),
@@ -400,14 +434,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: _searchCtrl,
                       cursorColor: const Color(0xFF1A1A1A),
                       style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
-                      decoration: const InputDecoration(
-                        hintText: 'Search services, plumbing, cleaning...',
-                        hintStyle: TextStyle(color: Colors.grey, fontSize: 13),
-                        prefixIcon: Icon(Icons.search, color: AppTheme.primary, size: 20),
+                      decoration: InputDecoration(
+                        hintText: context.translate('search_hint'),
+                        hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+                        prefixIcon: const Icon(Icons.search, color: AppTheme.primary, size: 20),
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
                       onChanged: _search,
                       onSubmitted: _search,
@@ -438,6 +472,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: Icons.grid_view,
                     selected: catalog.selectedCategoryId == null,
                     onTap: () {
+                      catalog.clearFilters();
                       catalog.loadServices(search: _searchCtrl.text);
                     },
                   ),
@@ -453,13 +488,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       iconData = Icons.build_outlined;
                     } else if (cat.name.toLowerCase().contains('paint')) {
                       iconData = Icons.format_paint_outlined;
+                    } else if (cat.name.toLowerCase().contains('ac')) {
+                      iconData = Icons.ac_unit_outlined;
+                    } else if (cat.name.toLowerCase().contains('carp')) {
+                      iconData = Icons.handyman_outlined;
+                    } else if (cat.name.toLowerCase().contains('pest')) {
+                      iconData = Icons.bug_report_outlined;
                     }
                     return CircularCategoryButton(
                       label: cat.name,
                       icon: iconData,
                       selected: catalog.selectedCategoryId == cat.id,
                       onTap: () {
-                        catalog.loadServices(categoryId: cat.id, search: _searchCtrl.text);
+                        catalog.selectCategory(cat.id, search: _searchCtrl.text);
                       },
                     );
                   }),
@@ -467,10 +508,53 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 12),
-          ),
-          // ─── FILTER / SORT ROW (Zomato-style filter chips) ───
+
+          // ─── SUB-CATEGORY CHIPS (animated slide-in when category selected) ───
+          if (catalog.selectedCategoryId != null)
+            SliverToBoxAdapter(
+              child: AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: catalog.loadingSubCategories
+                    ? const SizedBox(
+                        height: 44,
+                        child: Center(
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.secondary),
+                          ),
+                        ),
+                      )
+                    : catalog.subCategories.isEmpty
+                        ? const SizedBox.shrink()
+                        : SizedBox(
+                            height: 44,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              children: [
+                                // "All" sub-category chip
+                                _SubCategoryChip(
+                                  label: 'All',
+                                  selected: catalog.selectedSubCategoryId == null,
+                                  onTap: () => catalog.selectSubCategory(null, search: _searchCtrl.text),
+                                ),
+                                const SizedBox(width: 8),
+                                ...catalog.subCategories.map((sub) => Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: _SubCategoryChip(
+                                    label: sub.name,
+                                    selected: catalog.selectedSubCategoryId == sub.id,
+                                    onTap: () => catalog.selectSubCategory(sub.id, search: _searchCtrl.text),
+                                  ),
+                                )),
+                              ],
+                            ),
+                          ),
+              ),
+            ),
+
           SliverToBoxAdapter(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -478,14 +562,14 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 children: [
                   ZomatoFilterChip(
-                    label: 'Filters',
+                    label: context.translate('filters'),
                     icon: const Icon(Icons.tune, size: 14, color: AppTheme.primary),
                     active: _sortBy != 'all',
                     onTap: () {},
                   ),
                   const SizedBox(width: 8),
                   ZomatoFilterChip(
-                    label: 'Near & Fast',
+                    label: context.translate('near_fast'),
                     icon: const Icon(Icons.flash_on, size: 14, color: Colors.green),
                     active: _sortBy == 'most_booked',
                     onTap: () {
@@ -496,7 +580,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(width: 8),
                   ZomatoFilterChip(
-                    label: 'Top Rated',
+                    label: context.translate('top_rated'),
                     active: _sortBy == 'top_rated',
                     onTap: () {
                       setState(() {
@@ -506,7 +590,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(width: 8),
                   ZomatoFilterChip(
-                    label: 'Price ↑',
+                    label: context.translate('price_low'),
                     active: _sortBy == 'price_low',
                     onTap: () {
                       setState(() {
@@ -878,6 +962,54 @@ class ZomatoFilterChip extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SubCategoryChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _SubCategoryChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppTheme.primary : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? AppTheme.primary : Colors.grey.shade300,
+          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: AppTheme.primary.withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  )
+                ]
+              : null,
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? Colors.white : AppTheme.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+          ),
         ),
       ),
     );

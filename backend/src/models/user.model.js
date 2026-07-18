@@ -1,12 +1,12 @@
 const db = require("../config/db");
 const { paged } = require("../utils/pagination");
 
-const publicFields = "id, name, email, phone, state, address, status, created_at, updated_at";
+const publicFields = "id, name, email, phone, state, address, status, credits, created_at, updated_at";
 
 async function create(user) {
   const result = await db.query(
-    `INSERT INTO users (name, email, phone, password_hash, state, address, status)
-     VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, 'active'))
+    `INSERT INTO users (name, email, phone, password_hash, state, address, status, credits)
+     VALUES ($1, $2, $3, $4, $5, $6, COALESCE($7, 'active'), 0)
      RETURNING ${publicFields}`,
     [user.name || '', user.email || null, user.phone || null, user.passwordHash || null, user.state || null, user.address || null, user.status]
   );
@@ -20,7 +20,7 @@ async function findByEmailOrPhone(login) {
 
 async function findById(id) {
   const result = await db.query(
-    `SELECT u.id, u.name, u.email, u.phone, u.status, u.created_at, u.updated_at,
+    `SELECT u.id, u.name, u.email, u.phone, u.status, u.credits, u.created_at, u.updated_at,
             COUNT(b.id)::int as total_bookings,
             COALESCE(SUM(b.amount), 0)::float as total_spent
      FROM users u
@@ -133,4 +133,12 @@ async function getActivityLogs(userId, { limit = 100, offset = 0 } = {}) {
   return result.rows;
 }
 
-module.exports = { create, findByEmailOrPhone, findById, list, update, remove, getBookings, logActivity, getActivityLogs };
+async function awardCredits(userId, amount) {
+  const result = await db.query(
+    "UPDATE users SET credits = COALESCE(credits, 0) + $1 WHERE id = $2 RETURNING credits",
+    [amount, userId]
+  );
+  return result.rows[0]?.credits || 0;
+}
+
+module.exports = { create, findByEmailOrPhone, findById, list, update, remove, getBookings, logActivity, getActivityLogs, awardCredits };

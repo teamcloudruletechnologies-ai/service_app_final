@@ -374,11 +374,14 @@ class ApiService {
     return account;
   }
 
-  Future<BookingItem> updateBookingStatus(int bookingId, String status) async {
+  Future<BookingItem> updateBookingStatus(int bookingId, String status, {String? otp}) async {
     final response = await http.patch(
       Uri.parse('${ApiConfig.baseUrl}/app/bookings/$bookingId/status'),
       headers: _headers(auth: true),
-      body: jsonEncode({'status': status}),
+      body: jsonEncode({
+        'status': status,
+        if (otp != null) 'otp': otp,
+      }),
     );
     final data = _decode(response) as Map<String, dynamic>;
     return BookingItem.fromJson(data['data'] as Map<String, dynamic>);

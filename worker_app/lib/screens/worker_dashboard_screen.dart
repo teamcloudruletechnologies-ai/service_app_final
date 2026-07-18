@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 
@@ -22,9 +23,11 @@ class WorkerDashboardScreen extends StatefulWidget {
 }
 
 class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
+  final ApiService _api = ApiService();
   bool _isOnline = false;
   String _activeTab = 'active';
   Timer? _locationTimer;
+  Timer? _refreshTimer;
   double _mockLat = 13.0827;
   double _mockLng = 80.2707;
 
@@ -40,18 +43,67 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
       if (_isOnline) {
         _startLocationSharing();
       }
+
+      // Auto refresh dashboard every 10 seconds
+      _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+        if (mounted) {
+          _loadData();
+        }
+      });
     });
   }
 
   @override
   void dispose() {
     _locationTimer?.cancel();
+    _refreshTimer?.cancel();
     super.dispose();
+  }
+
+  final List<int> _notifiedPendingIds = [];
+
+  void _checkNewPendingOrders() {
+    if (!mounted) return;
+    final bookings = context.read<BookingProvider>().bookings;
+    final pending = bookings.where((b) => b.status == 'pending').toList();
+    if (pending.isNotEmpty) {
+      bool hasNew = false;
+      for (final b in pending) {
+        if (!_notifiedPendingIds.contains(b.id)) {
+          _notifiedPendingIds.add(b.id);
+          hasNew = true;
+        }
+      }
+      if (hasNew) {
+        HapticFeedback.vibrate();
+        SystemSound.play(SystemSoundType.click);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.notification_important_rounded, color: Colors.white),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '🔔 NEW JOB REQUEST RECEIVED! CHECK ORDERS.',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppTheme.zomatoRed,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 
   void _loadData() {
     context.read<AuthProvider>().reloadProfile();
-    context.read<BookingProvider>().loadBookings();
+    context.read<BookingProvider>().loadBookings().then((_) {
+      _checkNewPendingOrders();
+    });
   }
 
   void _startLocationSharing() {
@@ -266,8 +318,8 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
               _buildOnlineCard(kyc == 'approved', todayBookings.length, todayEarnings),
               const SizedBox(height: 16),
 
-              // KYC Banner
-              _buildKycBanner(kyc),
+              // KYC Stepper Wizard
+              _buildKycWizard(kyc),
               const SizedBox(height: 24),
 
               // Active Orders Header
@@ -474,113 +526,154 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     );
   }
 
-  Widget _buildKycBanner(String kycStatus) {
-    if (kycStatus == 'approved') {
-      return Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF0FDF4),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.olive.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          children: const [
-            Icon(Icons.verified_user_rounded, color: AppTheme.olive, size: 20),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Verified Service Partner',
-                style: TextStyle(color: AppTheme.olive, fontWeight: FontWeight.bold, fontSize: 13),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+  Widget _buildKycWizard(String status) {
+    final steps = ['Registered', 'Uploaded', 'Under Review', 'Active'];
+    int currentStep = 0;
+    bool isRejected = status == 'rejected';
 
-    if (kycStatus == 'pending') {
-      return Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFFBEB),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.sandal),
-        ),
-        child: Row(
-          children: [
-            const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.olive),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Identity Verification Pending',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 13),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Admin is reviewing your KYC documents.',
-                    style: TextStyle(color: Colors.grey, fontSize: 11),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
+    if (status == 'pending') {
+      currentStep = 2; // Under review
+    } else if (status == 'approved') {
+      currentStep = 3; // Active
+    } else if (isRejected) {
+      currentStep = 2; // Under review failed
+    } else {
+      currentStep = 1; // Not submitted yet
     }
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.zomatoRed.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100, width: 1.5),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 3)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const Text(
+            'KYC ACTIVATION STATUS',
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.1),
+          ),
+          const SizedBox(height: 16),
+          // Stepper Row
           Row(
-            children: [
-              const Icon(Icons.info_outline_rounded, color: AppTheme.zomatoRed, size: 22),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(steps.length, (index) {
+              final stepActive = index <= currentStep;
+              final isLast = index == steps.length - 1;
+              final stepColor = isRejected && index == 2
+                  ? AppTheme.zomatoRed
+                  : stepActive
+                      ? AppTheme.olive
+                      : Colors.grey.shade200;
+
+              return Expanded(
+                flex: isLast ? 0 : 1,
+                child: Row(
                   children: [
-                    const Text(
-                      'Verification Required',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: stepActive ? stepColor.withOpacity(0.12) : Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: stepActive ? stepColor : Colors.grey.shade300,
+                              width: 2,
+                            ),
+                          ),
+                          child: Center(
+                            child: isRejected && index == 2
+                                ? const Icon(Icons.close_rounded, size: 14, color: AppTheme.zomatoRed)
+                                : stepActive && index < currentStep
+                                    ? Icon(Icons.check_rounded, size: 14, color: stepColor)
+                                    : Text(
+                                        '${index + 1}',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: stepActive ? stepColor : Colors.grey.shade400,
+                                        ),
+                                      ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          steps[index],
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: stepActive ? FontWeight.bold : FontWeight.w500,
+                            color: stepActive ? Colors.black87 : Colors.grey.shade400,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      kycStatus == 'rejected'
-                          ? 'Your documents were rejected. Please re-upload.'
-                          : 'Upload your ID and bank details to start earning.',
-                      style: const TextStyle(color: Colors.grey, fontSize: 11),
-                    ),
+                    if (!isLast)
+                      Expanded(
+                        child: Container(
+                          height: 2,
+                          margin: const EdgeInsets.only(bottom: 14, left: 4, right: 4),
+                          color: index < currentStep ? AppTheme.olive : Colors.grey.shade200,
+                        ),
+                      ),
                   ],
+                ),
+              );
+            }),
+          ),
+          if (status != 'approved') ...[
+            const SizedBox(height: 16),
+            const Divider(height: 1, color: Color(0xFFF3F4F6)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  isRejected ? Icons.error_outline_rounded : Icons.info_outline_rounded,
+                  size: 16,
+                  color: isRejected ? AppTheme.zomatoRed : AppTheme.olive,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    isRejected
+                        ? 'Verification failed. Click below to re-submit your documents.'
+                        : status == 'pending'
+                            ? 'Admin is actively reviewing your KYC documents.'
+                            : 'Submit Aadhaar Card and Bank Details to unlock your profile.',
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                  ),
+                ),
+              ],
+            ),
+            if (status == 'not_submitted' || isRejected) ...[
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const WorkerKycScreen(),
+                    ),
+                  ).then((_) => _loadData());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  minimumSize: const Size.fromHeight(40),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text(
+                  'Upload KYC Documents',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const WorkerKycScreen()),
-              ).then((_) => _loadData());
-            },
-            child: const Text('Start Verification Onboarding'),
-          ),
+          ],
         ],
       ),
     );

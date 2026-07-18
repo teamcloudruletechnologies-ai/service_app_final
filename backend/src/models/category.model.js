@@ -1,12 +1,12 @@
 const db = require("../config/db");
 const { paged } = require("../utils/pagination");
 
-async function create({ name, description, icon_url, status }) {
+async function create({ name, description, icon_url, status, parent_id }) {
   const result = await db.query(
-    `INSERT INTO service_categories (name, description, icon_url, status)
-     VALUES ($1, $2, $3, COALESCE($4, 'active'))
+    `INSERT INTO service_categories (name, description, icon_url, status, parent_id)
+     VALUES ($1, $2, $3, COALESCE($4, 'active'), $5)
      RETURNING *`,
-    [name, description, icon_url || null, status]
+    [name, description, icon_url || null, status, parent_id || null]
   );
   return result.rows[0];
 }
@@ -21,7 +21,7 @@ async function findByName(name) {
   return result.rows[0];
 }
 
-async function list({ page, limit, offset, search, status }) {
+async function list({ page, limit, offset, search, status, parent_id, include_root = true }) {
   const params = [];
   const where = [];
 
@@ -33,6 +33,17 @@ async function list({ page, limit, offset, search, status }) {
   if (status) {
     params.push(status);
     where.push(`status = $${params.length}`);
+  }
+
+  if (parent_id !== undefined) {
+    if (parent_id === null) {
+      where.push(`parent_id IS NULL`);
+    } else {
+      params.push(parent_id);
+      where.push(`parent_id = $${params.length}`);
+    }
+  } else if (!include_root) {
+    where.push(`parent_id IS NOT NULL`);
   }
 
   const clause = where.length ? `WHERE ${where.join(" AND ")}` : "";
@@ -47,8 +58,12 @@ async function list({ page, limit, offset, search, status }) {
   return paged(result.rows, count.rows[0].count, page, limit);
 }
 
+async function listSubCategories(parent_id, options = {}) {
+  return list({ ...options, parent_id });
+}
+
 async function update(id, values) {
-  const allowed = ["name", "description", "icon_url", "status"];
+  const allowed = ["name", "description", "icon_url", "status", "parent_id"];
   const sets = [];
   const params = [];
 
@@ -74,4 +89,4 @@ async function remove(id) {
   return result.rows[0];
 }
 
-module.exports = { create, findById, findByName, list, update, remove };
+module.exports = { create, findById, findByName, list, listSubCategories, update, remove };
