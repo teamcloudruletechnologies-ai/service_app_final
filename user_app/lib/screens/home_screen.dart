@@ -10,6 +10,8 @@ import '../providers/auth_provider.dart';
 import '../providers/catalog_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
+import 'location_picker_screen.dart';
+import 'nearby_workers_screen.dart';
 import 'profile_screen.dart';
 import 'service_detail_screen.dart';
 import 'notification_screen.dart';
@@ -66,6 +68,49 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
     }
     return sorted;
+  }
+
+  Future<void> _navigateToService(BuildContext context, AuthProvider auth, ServiceItem service) async {
+    if (auth.latitude != null && auth.longitude != null) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => NearbyWorkersScreen(
+            service: service,
+            address: auth.user?.address ?? 'Current Location',
+            latitude: auth.latitude!,
+            longitude: auth.longitude!,
+            userName: auth.user?.name,
+          ),
+        ),
+      );
+      return;
+    }
+
+    final result = await Navigator.of(context).push<LocationPickerResult>(
+      MaterialPageRoute(
+        builder: (_) => LocationPickerScreen(serviceType: service.categoryName),
+      ),
+    );
+    if (result != null && mounted) {
+      await auth.saveLocationCoordinates(result.latitude ?? 0, result.longitude ?? 0);
+      if (auth.user?.address == null || auth.user!.address!.isEmpty) {
+        await auth.updateUserProfile(address: result.address);
+      }
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => NearbyWorkersScreen(
+              service: service,
+              address: result.address,
+              latitude: result.latitude ?? 0,
+              longitude: result.longitude ?? 0,
+              workers: result.workers,
+              userName: auth.user?.name,
+            ),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildProfileButton(BuildContext context, UserAccount? user) {
@@ -268,167 +313,105 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Zomato style location + actions bar
+                  // App Name, User Name, Location & Profile button
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.location_on, color: AppTheme.secondary, size: 28),
-                      const SizedBox(width: 8),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                const Text(
-                                  'Home',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Color(0xFF111827),
-                                  ),
-                                ),
-                                const SizedBox(width: 2),
-                                Icon(Icons.arrow_drop_down, color: AppTheme.secondary, size: 20),
-                              ],
+                            const Text(
+                              'Urban Serve',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 26,
+                                color: AppTheme.primary,
+                                letterSpacing: -0.5,
+                              ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              auth.user?.address ?? 'Detecting location...',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade600,
+                              auth.user?.name != null && auth.user!.name.isNotEmpty
+                                  ? 'Hey, ${auth.user!.name}'
+                                  : 'Welcome Guest',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            GestureDetector(
+                              onTap: () async {
+                                final result = await Navigator.of(context).push<LocationPickerResult>(
+                                  MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+                                );
+                                if (result != null && mounted) {
+                                  await auth.saveLocationCoordinates(result.latitude ?? 0, result.longitude ?? 0);
+                                  await auth.updateUserProfile(address: result.address);
+                                }
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.location_on, color: AppTheme.secondary, size: 14),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      auth.user?.address ?? 'Detecting location...',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey.shade600,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                  const Icon(Icons.arrow_drop_down, color: AppTheme.secondary, size: 16),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      // Zomato style Gold Badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFF3E5AB), Color(0xFFE3D0BA)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFFB8860B), width: 0.8),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.stars, color: Color(0xFFB8860B), size: 12),
-                            SizedBox(width: 2),
-                            Text(
-                              'GOLD',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 8,
-                                color: Color(0xFF5C4033),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      // Zomato style Wallet Icon
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const NotificationScreen()),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.grey.shade300, width: 0.8),
-                          ),
-                          child: Icon(Icons.account_balance_wallet_outlined, size: 16, color: AppTheme.primary),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       _buildProfileButton(context, auth.user),
                     ],
                   ),
-                ],
-              ),
-            ),
-          ),
-          // Zomato style search bar with Express toggle
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade300, width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TextField(
-                        controller: _searchCtrl,
-                        cursorColor: const Color(0xFF1A1A1A),
-                        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
-                        decoration: InputDecoration(
-                          hintText: _expressMode ? 'Search "express cleaning"...' : 'Search "spicy biryani" or services...',
-                          hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
-                          prefixIcon: const Icon(Icons.search, color: AppTheme.primary, size: 20),
-                          suffixIcon: const Icon(Icons.mic, color: AppTheme.primary, size: 20),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  const SizedBox(height: 16),
+                  // Search bar below
+                  Container(
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade200, width: 1.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
                         ),
-                        onChanged: _search,
-                        onSubmitted: _search,
-                      ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Mock toggle switch representing Zomato's mode toggle
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 28,
-                        child: Transform.scale(
-                          scale: 0.8,
-                          child: Switch(
-                            value: _expressMode,
-                            activeColor: AppTheme.secondary,
-                            onChanged: (val) {
-                              setState(() {
-                                _expressMode = val;
-                              });
-                            },
-                          ),
-                        ),
+                    child: TextField(
+                      controller: _searchCtrl,
+                      cursorColor: const Color(0xFF1A1A1A),
+                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                      decoration: const InputDecoration(
+                        hintText: 'Search services, plumbing, cleaning...',
+                        hintStyle: TextStyle(color: Colors.grey, fontSize: 13),
+                        prefixIcon: Icon(Icons.search, color: AppTheme.primary, size: 20),
+                        border: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _expressMode ? 'EXPRESS' : 'NORMAL',
-                        style: TextStyle(
-                          fontSize: 8,
-                          fontWeight: FontWeight.bold,
-                          color: _expressMode ? AppTheme.secondary : Colors.grey,
-                        ),
-                      ),
-                    ],
+                      onChanged: _search,
+                      onSubmitted: _search,
+                    ),
                   ),
                 ],
               ),
@@ -569,11 +552,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 final service = sorted[index];
                                 return ServiceCard(
                                   service: service,
-                                  onTap: () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => ServiceDetailScreen(serviceId: service.id),
-                                    ),
-                                  ),
+                                  onTap: () => _navigateToService(context, auth, service),
                                 );
                               },
                               childCount: _getSortedServices(catalog.services).length,
