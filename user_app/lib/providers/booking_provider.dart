@@ -21,8 +21,8 @@ class BookingProvider extends ChangeNotifier {
     try {
       final result = await _api.fetchBookings(status: status);
       bookings = result.items;
-    } on ApiException catch (e) {
-      error = e.message;
+    } catch (e) {
+      error = e.toString();
     } finally {
       loading = false;
       notifyListeners();

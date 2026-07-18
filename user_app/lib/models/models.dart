@@ -190,7 +190,7 @@ class BookingItem {
           : null,
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
           DateTime.now(),
-      otp: json['otp'] as String? ?? (json['otp'] != null ? json['otp'].toString() : null),
+      otp: json['otp']?.toString(),
       workerLat: _toDouble(json['worker_lat']),
       workerLng: _toDouble(json['worker_lng']),
     );
