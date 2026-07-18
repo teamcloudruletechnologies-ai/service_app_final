@@ -47,12 +47,10 @@ class BookingProvider extends ChangeNotifier {
         scheduledAt: scheduledAt,
         workerId: workerId,
       );
-      bookings = [booking, ...bookings];
-      loading = false;
-      notifyListeners();
+      await loadBookings();
       return booking;
-    } on ApiException catch (e) {
-      error = e.message;
+    } catch (e) {
+      error = e.toString();
       loading = false;
       notifyListeners();
       return null;

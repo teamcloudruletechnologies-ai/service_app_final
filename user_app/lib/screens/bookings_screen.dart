@@ -93,6 +93,14 @@ class _BookingsScreenState extends State<BookingsScreen> {
     final auth = context.watch<AuthProvider>();
     final booking = context.watch<BookingProvider>();
 
+    if (auth.isLoggedIn && booking.bookings.isEmpty && !booking.loading && booking.error == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !booking.loading) {
+          _load();
+        }
+      });
+    }
+
     if (!auth.isLoggedIn) {
       return Scaffold(
         backgroundColor: Colors.white,
