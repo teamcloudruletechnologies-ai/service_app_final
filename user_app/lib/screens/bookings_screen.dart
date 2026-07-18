@@ -93,14 +93,6 @@ class _BookingsScreenState extends State<BookingsScreen> {
     final auth = context.watch<AuthProvider>();
     final booking = context.watch<BookingProvider>();
 
-    if (auth.isLoggedIn && booking.bookings.isEmpty && !booking.loading && booking.error == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && !booking.loading) {
-          _load();
-        }
-      });
-    }
-
     if (!auth.isLoggedIn) {
       return Scaffold(
         backgroundColor: Colors.white,
@@ -232,7 +224,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
             child: booking.loading
                 ? const LoadingView(message: 'Loading bookings...')
                 : booking.error != null
-                    ? ErrorView(message: booking.error!, onRetry: _load)
+                    ? ErrorView(message: booking.error ?? 'Unknown error', onRetry: _load)
                     : booking.bookings.isEmpty
                         ? RefreshIndicator(
                             onRefresh: () async => _load(),

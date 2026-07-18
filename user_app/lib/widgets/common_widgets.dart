@@ -394,7 +394,7 @@ class BookingCard extends StatelessWidget {
                     Icon(Icons.person_outline, size: 14, color: Colors.grey.shade500),
                     const SizedBox(width: 4),
                     Text(
-                      booking.workerName!,
+                      booking.workerName ?? '',
                       style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                     ),
                   ],
@@ -485,7 +485,7 @@ class BookingCard extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          booking.otp!,
+                          booking.otp ?? '',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w900,

@@ -21,8 +21,10 @@ class BookingProvider extends ChangeNotifier {
     try {
       final result = await _api.fetchBookings(status: status);
       bookings = result.items;
+otp      debugPrint("BOOKING PROVIDER LOADED ITEMS COUNT: ${bookings.length}");
     } catch (e) {
       error = e.toString();
+      debugPrint("BOOKING PROVIDER LOAD ERROR: $e");
     } finally {
       loading = false;
       notifyListeners();

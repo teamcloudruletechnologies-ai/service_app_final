@@ -301,7 +301,13 @@ class ApiService {
     if (status != null) params['status'] = status;
 
     final uri = Uri.parse('${ApiConfig.baseUrl}/app/bookings').replace(queryParameters: params);
+    debugPrint("--------------------------------------------------");
+    debugPrint("FETCH BOOKINGS URI: $uri");
+    debugPrint("FETCH BOOKINGS TOKEN: $_token");
     final response = await http.get(uri, headers: _headers(auth: true));
+    debugPrint("FETCH BOOKINGS STATUS CODE: ${response.statusCode}");
+    debugPrint("FETCH BOOKINGS BODY: ${response.body}");
+    debugPrint("--------------------------------------------------");
     final data = _decode(response) as Map<String, dynamic>;
     return _parsePaged(data['data'] as Map<String, dynamic>, BookingItem.fromJson);
   }
