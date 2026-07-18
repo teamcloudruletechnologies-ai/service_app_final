@@ -280,27 +280,43 @@ class _BookingsScreenState extends State<BookingsScreen> {
                               itemCount: booking.bookings.length,
                               separatorBuilder: (_, __) => const SizedBox(height: 0),
                               itemBuilder: (context, index) {
-                                final item = booking.bookings[index];
-                                return BookingCard(
-                                  booking: item,
-                                  onCancel: item.canCancel ? () => _cancelBooking(item.id) : null,
-                                  onRebook: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => BookingFormScreen(
-                                          service: ServiceItem(
-                                            id: item.serviceId ?? 0,
-                                            name: item.serviceName ?? context.translate('service'),
-                                            price: item.amount,
-                                            status: 'active',
+                                try {
+                                  final item = booking.bookings[index];
+                                  return BookingCard(
+                                    booking: item,
+                                    onCancel: item.canCancel ? () => _cancelBooking(item.id) : null,
+                                    onRebook: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => BookingFormScreen(
+                                            service: ServiceItem(
+                                              id: item.serviceId ?? 0,
+                                              name: item.serviceName ?? context.translate('service'),
+                                              price: item.amount,
+                                              status: 'active',
+                                            ),
+                                            initialAddress: item.address,
+                                            initialNotes: item.notes,
                                           ),
-                                          initialAddress: item.address,
-                                          initialNotes: item.notes,
                                         ),
-                                      ),
-                                    );
-                                  },
-                                );
+                                      );
+                                    },
+                                  );
+                                } catch (e, stack) {
+                                  debugPrint("--------------------------------------------------");
+                                  debugPrint("ERROR RENDERING BOOKING ITEM AT INDEX $index: $e\n$stack");
+                                  debugPrint("--------------------------------------------------");
+                                  return Container(
+                                    padding: const EdgeInsets.all(16),
+                                    margin: const EdgeInsets.only(bottom: 12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.shade50,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: Colors.red.shade200),
+                                    ),
+                                    child: Text("Error rendering booking #${booking.bookings[index].id}: $e"),
+                                  );
+                                }
                               },
                             ),
                           ),
