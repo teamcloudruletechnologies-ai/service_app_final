@@ -26,22 +26,24 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // FIX: Previously this whole block (Firebase.initializeApp +
+  // messaging.requestPermission + messaging.getToken) was awaited
+  // BEFORE runApp() was called. requestPermission() shows a native
+  // Android "Allow notifications?" system dialog, which blocks the
+  // main isolate until the user responds. Since runApp() hadn't run
+  // yet, there was nothing on screen to even show — the app appeared
+  // completely frozen/black, and if the user didn't respond fast
+  // enough Android would treat it as an ANR (the "Davey! duration=
+  // 4681ms" / "Wrote stack traces to tombstoned" you saw in logcat).
+  //
+  // Fix: initialize Firebase core synchronously (cheap, no dialogs),
+  // call runApp() immediately so the UI (splash screen) shows right
+  // away, and do the permission request + token fetch afterwards in
+  // the background without blocking startup.
   try {
     await Firebase.initializeApp();
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    
-    final messaging = FirebaseMessaging.instance;
-    await messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-
-    final token = await messaging.getToken();
-    debugPrint("=================================================");
-    debugPrint("FCM USER TOKEN: $token");
-    debugPrint("=================================================");
   } catch (e) {
     debugPrint("Firebase init failed: $e");
   }
@@ -54,8 +56,31 @@ void main() async {
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
+
   final apiService = ApiService();
   runApp(UrbanServiceApp(apiService: apiService));
+
+  // Do the notification-permission dialog + token fetch AFTER the UI
+  // is already up and running, so it no longer blocks first frame.
+  _setupFcmPermissionsAndToken();
+}
+
+Future<void> _setupFcmPermissionsAndToken() async {
+  try {
+    final messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    final token = await messaging.getToken();
+    debugPrint("=================================================");
+    debugPrint("FCM USER TOKEN: $token");
+    debugPrint("=================================================");
+  } catch (e) {
+    debugPrint("FCM permission/token setup failed: $e");
+  }
 }
 
 class UrbanServiceApp extends StatefulWidget {

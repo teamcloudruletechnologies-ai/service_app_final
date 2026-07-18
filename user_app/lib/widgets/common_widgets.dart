@@ -52,7 +52,11 @@ class ErrorView extends StatelessWidget {
             Text(message, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(minimumSize: Size.zero),
+                onPressed: onRetry,
+                child: const Text('Retry'),
+              ),
             ],
           ],
         ),
@@ -527,6 +531,7 @@ class BookingCard extends StatelessWidget {
                     if (booking.status == 'pending') ...[
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
+                          minimumSize: Size.zero,
                           backgroundColor: AppTheme.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -556,6 +561,7 @@ class BookingCard extends StatelessWidget {
                   children: [
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
+                        minimumSize: Size.zero,
                         backgroundColor: AppTheme.secondary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -583,6 +589,7 @@ class BookingCard extends StatelessWidget {
                     if (onRebook != null) ...[
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
+                          minimumSize: Size.zero,
                           backgroundColor: AppTheme.secondary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -601,6 +608,7 @@ class BookingCard extends StatelessWidget {
                         );
                       },
                       style: OutlinedButton.styleFrom(
+                        minimumSize: Size.zero,
                         side: const BorderSide(color: AppTheme.primary),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -610,6 +618,7 @@ class BookingCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
+                        minimumSize: Size.zero,
                         backgroundColor: Colors.amber.shade700,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

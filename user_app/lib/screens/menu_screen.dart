@@ -112,7 +112,7 @@ class MenuScreen extends StatelessWidget {
         );
       },
       child: Hero(
-        tag: 'profile_avatar_hero',
+        tag: 'profile_avatar_hero_menu', // was 'profile_avatar_hero' — clashed with bookings_screen.dart
         child: CircleAvatar(
           radius: 20,
           backgroundColor: const Color(0xFFE3D0BA),

@@ -262,6 +262,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                                       icon: const Icon(Icons.refresh, size: 18),
                                       label: const Text('Refresh Bookings'),
                                       style: ElevatedButton.styleFrom(
+                                        minimumSize: Size.zero,
                                         backgroundColor: AppTheme.primary,
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
