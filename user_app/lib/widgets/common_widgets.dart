@@ -298,43 +298,46 @@ class BookingCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(top: 12),
-      child: Row(
-        children: List.generate(steps.length * 2 - 1, (index) {
-          if (index.isOdd) {
-            final stepBefore = (index - 1) ~/ 2;
-            final filled = !isCancelled && stepBefore < currentStep;
-            return Expanded(
-              child: Container(
-                height: 2,
-                color: filled ? AppTheme.secondary : Colors.grey.shade300,
-              ),
-            );
-          }
-          final step = index ~/ 2;
-          final filled = !isCancelled && step <= currentStep;
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+co      child: SizedBox(
+        width: double.infinity,
+        child: Row(
+          children: List.generate(steps.length * 2 - 1, (index) {
+            if (index.isOdd) {
+              final stepBefore = (index - 1) ~/ 2;
+              final filled = !isCancelled && stepBefore < currentStep;
+              return Expanded(
+                child: Container(
+                  height: 2,
                   color: filled ? AppTheme.secondary : Colors.grey.shade300,
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                steps[step],
-                style: TextStyle(
-                  fontSize: 8,
-                  fontWeight: filled ? FontWeight.bold : FontWeight.w500,
-                  color: filled ? const Color(0xFF1A1A1A) : Colors.grey.shade400,
+              );
+            }
+            final step = index ~/ 2;
+            final filled = !isCancelled && step <= currentStep;
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: filled ? AppTheme.secondary : Colors.grey.shade300,
+                  ),
                 ),
-              ),
-            ],
-          );
-        }),
+                const SizedBox(height: 4),
+                Text(
+                  steps[step],
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: filled ? FontWeight.bold : FontWeight.w500,
+                    color: filled ? const Color(0xFF1A1A1A) : Colors.grey.shade400,
+                  ),
+                ),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }
