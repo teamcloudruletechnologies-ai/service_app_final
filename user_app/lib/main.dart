@@ -16,7 +16,7 @@ const _splashBlack = Color(0xFF050505);
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-us  try {
+  try {
     await Firebase.initializeApp();
     debugPrint("Handling a background message: ${message.messageId}");
   } catch (e) {
