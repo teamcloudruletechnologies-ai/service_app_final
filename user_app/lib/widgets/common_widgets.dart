@@ -424,36 +424,74 @@ class BookingCard extends StatelessWidget {
                   ),
                 ],
               ),
-              // OTP Start/Completion Verification Card
-              if ((booking.status == 'confirmed' || booking.status == 'in_progress') && booking.otp != null) ...[
+              // OTP Start/Completion Verification Card (Rapido/Uber style)
+              if ((booking.status == 'pending' || booking.status == 'confirmed' || booking.status == 'in_progress') && booking.otp != null) ...[
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: AppTheme.secondary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.secondary.withOpacity(0.2)),
+                    color: booking.status == 'in_progress'
+                        ? Colors.purple.shade50
+                        : AppTheme.secondary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: booking.status == 'in_progress'
+                          ? Colors.purple.shade200
+                          : AppTheme.secondary.withOpacity(0.3),
+                      width: 1.2,
+                    ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.vpn_key_outlined, size: 16, color: AppTheme.secondary),
-                          const SizedBox(width: 6),
-                          Text(
-                            booking.status == 'confirmed' ? 'Job Start OTP' : 'Job Completion OTP',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primary),
-                          ),
-                        ],
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: booking.status == 'in_progress' ? Colors.purple : AppTheme.secondary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.key, size: 16, color: Colors.white),
                       ),
-                      Text(
-                        booking.otp!,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.secondary,
-                          letterSpacing: 2,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              booking.status == 'in_progress' ? 'JOB COMPLETION OTP' : 'JOB START OTP',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 11,
+                                letterSpacing: 0.5,
+                                color: booking.status == 'in_progress' ? Colors.purple.shade900 : AppTheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              booking.status == 'in_progress'
+                                  ? 'Share with worker when work finishes'
+                                  : 'Share with worker when they arrive',
+                              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: booking.status == 'in_progress' ? Colors.purple : AppTheme.secondary,
+                          ),
+                        ),
+                        child: Text(
+                          booking.otp!,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: booking.status == 'in_progress' ? Colors.purple.shade900 : AppTheme.primary,
+                            letterSpacing: 3,
+                          ),
                         ),
                       ),
                     ],
