@@ -164,6 +164,9 @@ class _LoginScreenState extends State<LoginScreen> {
       final isNew = res['is_new'] as bool? ?? false;
       final account = UserAccount.fromJson(res['account'] as Map<String, dynamic>);
 
+      // Sync fresh bookings for the logged in user
+      context.read<BookingProvider>().loadBookings();
+
       if (isNew || account.needsOnboarding) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const UserOnboardingScreen()),
