@@ -84,4 +84,15 @@ class BookingProvider extends ChangeNotifier {
       return false;
     }
   }
+
+  Future<BookingItem?> loadBookingDetail(int id) async {
+    try {
+      final updated = await _api.fetchBooking(id);
+      bookings = bookings.map((b) => b.id == id ? updated : b).toList();
+      notifyListeners();
+      return updated;
+    } catch (e) {
+      return null;
+    }
+  }
 }

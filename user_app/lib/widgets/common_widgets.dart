@@ -8,6 +8,8 @@ import '../theme/app_theme.dart';
 import '../screens/payment_screen.dart';
 import '../screens/rating_screen.dart';
 import '../screens/invoice_screen.dart';
+import '../screens/worker_tracking_map_screen.dart';
+import '../providers/language_provider.dart';
 
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key, this.message});
@@ -250,11 +252,12 @@ class ServiceCard extends StatelessWidget {
 }
 
 class BookingCard extends StatelessWidget {
-  const BookingCard({super.key, required this.booking, this.onTap, this.onCancel});
+  const BookingCard({super.key, required this.booking, this.onTap, this.onCancel, this.onRebook});
 
   final BookingItem booking;
   final VoidCallback? onTap;
   final VoidCallback? onCancel;
+  final VoidCallback? onRebook;
 
   Color _statusColor(String status) {
     switch (status) {
@@ -421,6 +424,42 @@ class BookingCard extends StatelessWidget {
                   ),
                 ],
               ),
+              // OTP Start/Completion Verification Card
+              if ((booking.status == 'confirmed' || booking.status == 'in_progress') && booking.otp != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.secondary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppTheme.secondary.withOpacity(0.2)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.vpn_key_outlined, size: 16, color: AppTheme.secondary),
+                          const SizedBox(width: 6),
+                          Text(
+                            booking.status == 'confirmed' ? 'Job Start OTP' : 'Job Completion OTP',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primary),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        booking.otp!,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.secondary,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               // Progress timeline
               _buildTimeline(),
               // Action buttons
@@ -454,11 +493,50 @@ class BookingCard extends StatelessWidget {
                   ],
                 ),
               ],
+              if (booking.status == 'confirmed' || booking.status == 'in_progress') ...[
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.secondary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => WorkerTrackingMapScreen(bookingId: booking.id),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.map_outlined, size: 14),
+                      label: const Text('Track Partner', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
+                  ],
+                ),
+              ],
               if (booking.status == 'completed') ...[
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    if (onRebook != null) ...[
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.secondary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        ),
+                        onPressed: onRebook,
+                        child: Text(context.translate('rebook'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     OutlinedButton(
                       onPressed: () {
                         Navigator.push(

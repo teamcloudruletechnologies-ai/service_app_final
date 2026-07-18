@@ -231,6 +231,20 @@ class ApiService {
     return _parsePaged(data['data'] as Map<String, dynamic>, ServiceCategory.fromJson);
   }
 
+  Future<List<ServiceCategory>> fetchSubCategories(int categoryId) async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/services/categories/$categoryId/subcategories'),
+      headers: _headers(),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    // Response is paged, extract rows
+    final payload = data['data'] as Map<String, dynamic>;
+    final rows = (payload['rows'] as List? ?? [])
+        .map((e) => ServiceCategory.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return rows;
+  }
+
   Future<PagedResult<BannerItem>> fetchBanners() async {
     final response = await http.get(
       Uri.parse('${ApiConfig.baseUrl}/app/banners?limit=10'),

@@ -54,6 +54,7 @@ class AppTheme {
         shadowColor: Colors.transparent,
         elevation: 0,
         indicatorColor: olive,
+        overlayColor: WidgetStatePropertyAll(Colors.transparent),
         iconTheme: WidgetStatePropertyAll(
           IconThemeData(color: primary),
         ),

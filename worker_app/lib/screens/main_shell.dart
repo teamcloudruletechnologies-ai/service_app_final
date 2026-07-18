@@ -5,7 +5,7 @@ import '../providers/auth_provider.dart';
 import 'profile_screen.dart';
 import 'worker_dashboard_screen.dart';
 import 'earnings_screen.dart';
-import 'reviews_screen.dart';
+import 'work_history_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -21,21 +21,18 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
-    final workerId = user?.id ?? 0;
 
     final pages = <Widget>[
       const WorkerDashboardScreen(),
       const EarningsScreen(),
-      workerId > 0
-          ? ReviewsScreen(workerId: workerId)
-          : const _ReviewsPlaceholder(),
+      const WorkHistoryScreen(),
       const ProfileScreen(),
     ];
 
     final destinations = const [
       NavigationDestination(icon: Icon(Icons.receipt_long_outlined), selectedIcon: Icon(Icons.receipt_long), label: 'Orders'),
       NavigationDestination(icon: Icon(Icons.account_balance_wallet_outlined), selectedIcon: Icon(Icons.account_balance_wallet), label: 'Earnings'),
-      NavigationDestination(icon: Icon(Icons.star_outline), selectedIcon: Icon(Icons.star), label: 'Activity'),
+      NavigationDestination(icon: Icon(Icons.assignment_turned_in_outlined), selectedIcon: Icon(Icons.assignment_turned_in), label: 'History'),
       NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profile'),
     ];
 

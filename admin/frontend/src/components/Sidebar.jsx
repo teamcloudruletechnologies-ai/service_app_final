@@ -49,7 +49,6 @@ const NAV = [
     label: 'Config',
     items: [
       { label: 'Notifications', key: 'notifications', icon: Icons.Notifications },
-      { label: 'Locations', key: 'locations', icon: Icons.Locations },
       { label: 'Roles & Perms', key: 'roles', icon: Icons.Roles },
       { label: 'Settings', key: 'settings', icon: Icons.Settings },
     ],

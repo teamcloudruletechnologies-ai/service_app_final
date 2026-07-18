@@ -3,10 +3,12 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
+import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'profile_screen.dart';
 import 'login_screen.dart';
+import 'booking_form_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -36,11 +38,11 @@ class _BookingsScreenState extends State<BookingsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel Booking'),
-        content: const Text('Are you sure you want to cancel this booking?'),
+        title: Text(context.translate('cancel_booking_title')),
+        content: Text(context.translate('cancel_booking_confirm')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('No')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Yes, Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(context.translate('no'))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(context.translate('yes_cancel'))),
         ],
       ),
     );
@@ -49,7 +51,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
     final ok = await context.read<BookingProvider>().cancelBooking(id);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? 'Booking cancelled' : 'Failed to cancel booking')),
+      SnackBar(content: Text(ok ? context.translate('booking_cancelled') : context.translate('failed_to_cancel'))),
     );
   }
 
@@ -94,9 +96,9 @@ class _BookingsScreenState extends State<BookingsScreen> {
       return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          title: const Text(
-            'My Bookings',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF1A1A1A)),
+          title: Text(
+            context.translate('my_bookings'),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF1A1A1A)),
           ),
           backgroundColor: Colors.white,
           foregroundColor: Colors.black87,
@@ -118,13 +120,13 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   child: const Icon(Icons.calendar_month_outlined, size: 64, color: AppTheme.secondary),
                 ),
                 const SizedBox(height: 24),
-                const Text(
-                  'Guest Mode Active',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                Text(
+                  context.translate('guest_mode'),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.primary),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Log in to view your booked appointments and track service history.',
+                  context.translate('login_prompt'),
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                 ),
@@ -143,9 +145,9 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Log In / Register',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+                  child: Text(
+                    context.translate('login_register'),
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                 ),
               ],
@@ -158,9 +160,9 @@ class _BookingsScreenState extends State<BookingsScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
-          'My Bookings',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF1A1A1A)),
+        title: Text(
+          context.translate('my_bookings'),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF1A1A1A)),
         ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
@@ -182,7 +184,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               children: [
                 _FilterChip(
-                  label: 'All',
+                  label: context.translate('cat_all'),
                   selected: _statusFilter == null,
                   onSelected: () {
                     setState(() => _statusFilter = null);
@@ -190,7 +192,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   },
                 ),
                 _FilterChip(
-                  label: 'Pending',
+                  label: context.translate('status_pending'),
                   selected: _statusFilter == 'pending',
                   onSelected: () {
                     setState(() => _statusFilter = 'pending');
@@ -198,7 +200,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   },
                 ),
                 _FilterChip(
-                  label: 'Confirmed',
+                  label: context.translate('status_confirmed'),
                   selected: _statusFilter == 'confirmed',
                   onSelected: () {
                     setState(() => _statusFilter = 'confirmed');
@@ -206,7 +208,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   },
                 ),
                 _FilterChip(
-                  label: 'Completed',
+                  label: context.translate('status_completed'),
                   selected: _statusFilter == 'completed',
                   onSelected: () {
                     setState(() => _statusFilter = 'completed');
@@ -235,6 +237,22 @@ class _BookingsScreenState extends State<BookingsScreen> {
                                 return BookingCard(
                                   booking: item,
                                   onCancel: item.canCancel ? () => _cancelBooking(item.id) : null,
+                                  onRebook: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => BookingFormScreen(
+                                          service: ServiceItem(
+                                            id: item.serviceId ?? 0,
+                                            name: item.serviceName ?? context.translate('service'),
+                                            price: item.amount,
+                                            status: 'active',
+                                          ),
+                                          initialAddress: item.address,
+                                          initialNotes: item.notes,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             ),

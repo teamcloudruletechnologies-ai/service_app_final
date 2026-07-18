@@ -10,6 +10,8 @@ const listFields = `
   w.name AS worker_name,
   w.phone AS worker_phone,
   w.service_type,
+  w.current_lat::float AS worker_lat,
+  w.current_lng::float AS worker_lng,
   b.service_id,
   s.name AS service_name,
   s.image_url AS service_image,
@@ -18,6 +20,7 @@ const listFields = `
   b.scheduled_at,
   b.status,
   b.amount::float AS amount,
+  b.otp,
   b.created_at,
   b.updated_at
 `;
@@ -74,22 +77,32 @@ async function findById(id) {
 }
 
 async function create({ userId, serviceId, workerId, amount, address, notes, scheduledAt }) {
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
   const result = await db.query(
-    `INSERT INTO bookings (user_id, service_id, worker_id, amount, address, notes, scheduled_at, status)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending')
+    `INSERT INTO bookings (user_id, service_id, worker_id, amount, address, notes, scheduled_at, status, otp)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8)
      RETURNING id`,
-    [userId, serviceId, workerId || null, amount, address || null, notes || null, scheduledAt || null]
+    [userId, serviceId, workerId || null, amount, address || null, notes || null, scheduledAt || null, otp]
   );
   return findById(result.rows[0].id);
 }
 
 async function updateStatus(id, status) {
+  let otpQuery = "";
+  let params = [status, id];
+  
+  if (status === 'in_progress') {
+    const nextOtp = Math.floor(1000 + Math.random() * 9000).toString();
+    otpQuery = ", otp = $3";
+    params.push(nextOtp);
+  }
+
   const result = await db.query(
     `UPDATE bookings
-     SET status = $1, updated_at = NOW()
+     SET status = $1, updated_at = NOW()${otpQuery}
      WHERE id = $2
      RETURNING id`,
-    [status, id]
+    params
   );
 
   if (!result.rows[0]) return null;

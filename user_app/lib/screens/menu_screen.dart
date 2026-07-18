@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'profile_screen.dart';
+import 'help_centre_screen.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
@@ -13,16 +15,16 @@ class MenuScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(context.translate('logout'), style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(context.translate('logout_confirm')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(context.translate('cancel')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Logout', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: Text(context.translate('logout'), style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -35,6 +37,39 @@ class MenuScreen extends StatelessWidget {
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (_) => false,
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final lang = Provider.of<LanguageProvider>(context, listen: false);
+        return AlertDialog(
+          title: Text(context.translate('select_language'), style: const TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('English'),
+                trailing: !lang.isTamil ? const Icon(Icons.check, color: AppTheme.secondary) : null,
+                onTap: () {
+                  lang.setLanguage('en');
+                  Navigator.pop(ctx);
+                },
+              ),
+              ListTile(
+                title: const Text('தமிழ்'),
+                trailing: lang.isTamil ? const Icon(Icons.check, color: AppTheme.secondary) : null,
+                onTap: () {
+                  lang.setLanguage('ta');
+                  Navigator.pop(ctx);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -102,11 +137,12 @@ class MenuScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
+    final lang = context.watch<LanguageProvider>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F3),
       appBar: AppBar(
-        title: const Text('Menu'),
+        title: Text(context.translate('menu')),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -151,7 +187,7 @@ class MenuScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user?.name ?? 'Guest User',
+                        user?.name ?? context.translate('guest_user'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -160,7 +196,7 @@ class MenuScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        user?.email ?? 'Sign in to access options',
+                        user?.email ?? context.translate('sign_in_access'),
                         style: TextStyle(
                           color: Colors.grey.shade400,
                           fontSize: 13,
@@ -176,12 +212,12 @@ class MenuScreen extends StatelessWidget {
 
           // Menu Options
           _buildMenuSection(
-            title: 'Account Settings',
+            title: context.translate('account_settings'),
             children: [
               _buildMenuTile(
                 icon: Icons.person_outline,
-                title: 'Edit Profile',
-                subtitle: 'Manage your personal details',
+                title: context.translate('edit_profile'),
+                subtitle: context.translate('manage_details'),
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const ProfileScreen()),
@@ -193,21 +229,34 @@ class MenuScreen extends StatelessWidget {
           const SizedBox(height: 16),
 
           _buildMenuSection(
-            title: 'General',
+            title: context.translate('language'),
+            children: [
+              _buildMenuTile(
+                icon: Icons.language_outlined,
+                title: context.translate('select_language'),
+                subtitle: lang.isTamil ? 'தமிழ்' : 'English',
+                onTap: () => _showLanguageDialog(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          _buildMenuSection(
+            title: context.translate('general'),
             children: [
               _buildMenuTile(
                 icon: Icons.info_outline,
-                title: 'About App',
-                subtitle: 'Version info and details',
+                title: context.translate('about_app'),
+                subtitle: context.translate('version_info'),
                 onTap: () => _showAboutDialog(context),
               ),
               _buildMenuTile(
                 icon: Icons.help_outline,
-                title: 'Help & Support',
-                subtitle: 'Contact us for help',
+                title: context.translate('help_support'),
+                subtitle: context.translate('contact_us'),
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Support details will be available soon.')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const HelpCentreScreen()),
                   );
                 },
               ),
@@ -220,7 +269,7 @@ class MenuScreen extends StatelessWidget {
               ? OutlinedButton.icon(
                   onPressed: () => _logout(context),
                   icon: const Icon(Icons.logout, color: Colors.red),
-                  label: const Text('Logout', style: TextStyle(color: Colors.red)),
+                  label: Text(context.translate('logout'), style: const TextStyle(color: Colors.red)),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size.fromHeight(52),
                     side: const BorderSide(color: Colors.red, width: 1.5),
@@ -237,7 +286,7 @@ class MenuScreen extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.login, color: Colors.white),
-                  label: const Text('Log In / Register', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  label: Text(context.translate('login_register'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primary,
                     minimumSize: const Size.fromHeight(52),

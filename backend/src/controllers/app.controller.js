@@ -10,12 +10,28 @@ const { success, error } = require("../utils/response");
 async function listCategories(req, res, next) {
   try {
     const paging = getPagination(req.query);
+    // If parent_id provided → return sub-categories of that parent
+    // If no parent_id → return only root (top-level) categories
+    const parentId = req.query.parent_id !== undefined
+      ? (req.query.parent_id === '' ? null : parseInt(req.query.parent_id))
+      : null;
     const data = await Category.list({
       ...paging,
       search: req.query.search,
       status: "active",
+      parent_id: parentId,
     });
     return success(res, "Categories fetched", data);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function listSubCategories(req, res, next) {
+  try {
+    const parentId = parseInt(req.params.id);
+    const rows = await Category.listSubCategories(parentId, { page: 1, limit: 50, offset: 0 });
+    return success(res, "Sub-categories fetched", rows);
   } catch (err) {
     return next(err);
   }
@@ -68,7 +84,9 @@ async function createBooking(req, res, next) {
       scheduledAt: scheduled_at,
     });
 
-    await User.logActivity(userId, "booking_created", `Booked service: ${service.name}`);
+    // Award 5 credits for booking
+    await User.awardCredits(userId, 5);
+    await User.logActivity(userId, "booking_created", `Booked service: ${service.name} (Earned 5 credits)`);
 
     return success(res, "Booking created successfully", booking, 201);
   } catch (err) {
@@ -147,7 +165,7 @@ async function updateMyBookingStatus(req, res, next) {
     const booking = await Booking.findById(req.params.id);
     if (!booking) return error(res, "Booking not found", 404);
 
-    const { status } = req.body;
+    const { status, otp } = req.body;
 
     if (req.auth.role === "worker") {
       if (booking.worker_id !== req.auth.id) {
@@ -163,6 +181,18 @@ async function updateMyBookingStatus(req, res, next) {
       };
       if (!valid[booking.status].includes(status)) {
         return error(res, `Cannot change booking status from ${booking.status} to ${status}`, 400);
+      }
+
+      if (status === "in_progress") {
+        if (!otp || String(booking.otp) !== String(otp)) {
+          return error(res, "Invalid Start OTP code. Please ask the customer for the correct code.", 400);
+        }
+      }
+
+      if (status === "completed") {
+        if (!otp || String(booking.otp) !== String(otp)) {
+          return error(res, "Invalid Completion OTP code. Please ask the customer for the correct code.", 400);
+        }
       }
     } else if (req.auth.role === "user") {
       if (booking.user_id !== req.auth.id) {
@@ -293,4 +323,5 @@ module.exports = {
   updateUserProfile,
   listActiveBanners,
   getWorkerEarnings,
+  listSubCategories,
 };

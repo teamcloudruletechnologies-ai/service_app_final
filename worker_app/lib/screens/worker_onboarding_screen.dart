@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
@@ -29,12 +32,102 @@ class _WorkerOnboardingScreenState extends State<WorkerOnboardingScreen> {
     'Pest Control'
   ];
 
+  // Location variables
+  String _currentAddress = 'Detecting location...';
+  double? _latitude;
+  double? _longitude;
+  String? _city;
+  String? _state;
+  String? _pincode;
+  bool _isLocating = false;
+  bool _locationFetched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _autoDetectLocation();
+    });
+  }
+
   @override
   void dispose() {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _experienceCtrl.dispose();
     super.dispose();
+  }
+
+  Future<Position?> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return null;
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return null;
+    }
+
+    if (permission == LocationPermission.deniedForever) return null;
+
+    return await Geolocator.getCurrentPosition();
+  }
+
+  Future<void> _autoDetectLocation() async {
+    setState(() {
+      _isLocating = true;
+      _currentAddress = 'Detecting location...';
+    });
+
+    try {
+      final position = await _determinePosition();
+      if (position != null) {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+        _locationFetched = true;
+
+        // Reverse geocode via OpenStreetMap Nominatim
+        final url = Uri.parse(
+          'https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.latitude}&lon=${position.longitude}'
+        );
+        final response = await http.get(url, headers: {
+          'User-Agent': 'com.urban.worker_app',
+        });
+        if (response.statusCode == 200 && mounted) {
+          final data = jsonDecode(response.body);
+          final addressData = data['address'] as Map<String, dynamic>?;
+          if (addressData != null) {
+            _city = addressData['city'] ?? addressData['town'] ?? addressData['village'] ?? addressData['suburb'] ?? addressData['county'];
+            _state = addressData['state'];
+            _pincode = addressData['postcode'];
+          }
+          setState(() {
+            _currentAddress = data['display_name'] ?? 'Coordinates: ${position.latitude}, ${position.longitude}';
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _currentAddress = 'Location permissions required. Tap to retry.';
+            _locationFetched = false;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Geocoding error: $e');
+      if (mounted && _latitude != null && _longitude != null) {
+        setState(() {
+          _currentAddress = 'Lat: ${_latitude!.toStringAsFixed(4)}, Lng: ${_longitude!.toStringAsFixed(4)}';
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLocating = false);
+      }
+    }
   }
 
   Future<void> _submit() async {
@@ -52,20 +145,36 @@ class _WorkerOnboardingScreenState extends State<WorkerOnboardingScreen> {
       return;
     }
 
+    if (!_locationFetched || _latitude == null || _longitude == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Location is required. Please enable GPS and try again.')),
+      );
+      _autoDetectLocation();
+      return;
+    }
+
     final auth = context.read<AuthProvider>();
     final ok = await auth.updateWorkerProfile(
       name: name,
       email: email.isEmpty ? null : email,
       serviceType: serviceType,
       experienceYears: exp,
+      city: _city,
+      state: _state,
+      address: _currentAddress,
+      pincode: _pincode,
     );
 
-    if (!mounted) return;
     if (ok) {
+      // Save geocoordinates to database
+      await auth.updateWorkerLocation(_latitude!, _longitude!, pincode: _pincode);
+
+      if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const MainShell()),
       );
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.error ?? 'Onboarding profile update failed')),
       );
@@ -106,7 +215,60 @@ class _WorkerOnboardingScreenState extends State<WorkerOnboardingScreen> {
                   'Please fill in your basic details to start getting orders near your area.',
                   style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+
+                // ─── LOCATION FETCH INDICATOR ───
+                GestureDetector(
+                  onTap: _autoDetectLocation,
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.location_on, color: Color(0xFF4A5343), size: 24),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Service Area Location',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: Color(0xFF111827),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              _isLocating
+                                  ? const SizedBox(
+                                      height: 12,
+                                      width: 12,
+                                      child: CircularProgressIndicator(strokeWidth: 1.5, color: Color(0xFF4A5343)),
+                                    )
+                                  : Text(
+                                      _currentAddress,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: _locationFetched ? Colors.grey.shade700 : Colors.red,
+                                      ),
+                                    ),
+                            ],
+                          ),
+                        ),
+                        if (!_locationFetched && !_isLocating)
+                          const Icon(Icons.refresh, color: Color(0xFF4A5343), size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
 
                 // Name
                 TextFormField(
@@ -144,7 +306,7 @@ class _WorkerOnboardingScreenState extends State<WorkerOnboardingScreen> {
                     return null;
                   },
                 ),
-
+                const SizedBox(height: 16),
 
                 // Service Type
                 DropdownButtonFormField<String>(
