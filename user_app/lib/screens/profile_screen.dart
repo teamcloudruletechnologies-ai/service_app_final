@@ -209,7 +209,7 @@ class ProfileScreen extends StatelessWidget {
               tag: 'profile_avatar_hero',
               child: CircleAvatar(
                 radius: 48,
-                backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
+                backgroundColor: AppTheme.primary.withOpacity(0.15),
                 child: Text(
                   (user?.name.isNotEmpty == true ? user!.name[0] : 'U').toUpperCase(),
                   style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: AppTheme.primary),

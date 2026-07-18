@@ -279,7 +279,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: _red.withValues(alpha: 0.1),
+                          color: _red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
