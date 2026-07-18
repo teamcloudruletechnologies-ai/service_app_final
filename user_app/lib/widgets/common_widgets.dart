@@ -298,7 +298,7 @@ class BookingCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(top: 12),
-co      child: SizedBox(
+      child: SizedBox(
         width: double.infinity,
         child: Row(
           children: List.generate(steps.length * 2 - 1, (index) {
