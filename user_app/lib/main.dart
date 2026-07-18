@@ -16,8 +16,12 @@ const _splashBlack = Color(0xFF050505);
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  debugPrint("Handling a background message: ${message.messageId}");
+us  try {
+    await Firebase.initializeApp();
+    debugPrint("Handling a background message: ${message.messageId}");
+  } catch (e) {
+    debugPrint("Background FCM error: $e");
+  }
 }
 
 void main() async {
@@ -73,21 +77,25 @@ class _UrbanServiceAppState extends State<UrbanServiceApp> {
   }
 
   void _setupFCM() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      final notification = message.notification;
-      if (notification != null) {
-        _messengerKey.currentState?.showSnackBar(
-          SnackBar(
-            content: Text(
-              '🔔 ${notification.title}: ${notification.body}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+    try {
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        final notification = message.notification;
+        if (notification != null) {
+          _messengerKey.currentState?.showSnackBar(
+            SnackBar(
+              content: Text(
+                '🔔 ${notification.title}: ${notification.body}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: AppTheme.secondary,
+              duration: const Duration(seconds: 5),
             ),
-            backgroundColor: AppTheme.secondary,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
-    });
+          );
+        }
+      });
+    } catch (e) {
+      debugPrint("FCM setup listener error: $e");
+    }
   }
 
   @override
