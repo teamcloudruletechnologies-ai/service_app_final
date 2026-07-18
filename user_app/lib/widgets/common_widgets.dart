@@ -415,16 +415,23 @@ class BookingCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey.shade500),
-                      const SizedBox(width: 4),
-                      Text(
-                        dateFmt.format(booking.scheduledAt ?? booking.createdAt),
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                      ),
-                    ],
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey.shade500),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            dateFmt.format(booking.scheduledAt ?? booking.createdAt),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     '₹${booking.amount.toStringAsFixed(0)}',
                     style: const TextStyle(
