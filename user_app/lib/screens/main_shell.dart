@@ -57,7 +57,12 @@ class _MainShellState extends State<MainShell> {
     final inactiveColor = Colors.grey.shade500;
 
     return GestureDetector(
-      onTap: () => setState(() => _index = index),
+      onTap: () {
+        setState(() => _index = index);
+        if (index == 1) {
+          context.read<BookingProvider>().loadBookings();
+        }
+      },
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
         width: 70,

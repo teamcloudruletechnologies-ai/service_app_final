@@ -226,7 +226,53 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 : booking.error != null
                     ? ErrorView(message: booking.error!, onRetry: _load)
                     : booking.bookings.isEmpty
-                        ? const Center(child: Text('No bookings yet'))
+                        ? RefreshIndicator(
+                            onRefresh: () async => _load(),
+                            child: SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: Container(
+                                height: MediaQuery.of(context).size.height * 0.55,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(28),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(20),
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.secondary.withOpacity(0.08),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.receipt_long_outlined, size: 56, color: AppTheme.secondary),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    const Text(
+                                      'No Bookings Found',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'You have no active or previous service bookings under this filter.',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    ElevatedButton.icon(
+                                      onPressed: _load,
+                                      icon: const Icon(Icons.refresh, size: 18),
+                                      label: const Text('Refresh Bookings'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppTheme.primary,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
                         : RefreshIndicator(
                             onRefresh: () async => _load(),
                             child: ListView.separated(
