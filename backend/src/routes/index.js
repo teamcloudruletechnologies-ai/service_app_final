@@ -20,6 +20,8 @@ const auth = require("../middlewares/auth.middleware");
 
 const router = express.Router();
 
+const userAddressRoutes = require("./user-address.routes");
+
 router.get("/health", (req, res) => {
   res.json({ success: true, message: "Backend is running" });
 });
@@ -35,6 +37,8 @@ router.use("/admin/invoices", checkPermission("invoices"), invoiceRoutes);
 router.use("/admin/complaints", checkPermission("complaints"), complaintRoutes);
 router.use("/admin/locations", checkPermission("locations"), locationRoutes);
 router.use("/app/locations", userLocationRoutes);
+router.use("/user-addresses", userAddressRoutes);
+router.use("/app/addresses", userAddressRoutes);
 router.use("/app", appRoutes);
 router.use("/admin/sub-admins", subAdminRoutes);
 router.use("/admin/notifications", checkPermission("notifications"), notificationRoutes);
