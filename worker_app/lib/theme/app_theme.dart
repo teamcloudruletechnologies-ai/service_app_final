@@ -49,19 +49,25 @@ class AppTheme {
       ),
 
       // ─── Bottom Nav ───────────────────────────────────────────
-      navigationBarTheme: const NavigationBarThemeData(
+      navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
-        indicatorColor: olive,
-        overlayColor: WidgetStatePropertyAll(Colors.transparent),
-        iconTheme: WidgetStatePropertyAll(
-          IconThemeData(color: primary),
-        ),
-        labelTextStyle: WidgetStatePropertyAll(
-          TextStyle(color: primary, fontWeight: FontWeight.bold, fontSize: 12),
-        ),
+        indicatorColor: Colors.white,
+        overlayColor: WidgetStatePropertyAll(Colors.white.withValues(alpha: 0.2)),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: primary, size: 24);
+          }
+          return IconThemeData(color: Colors.grey.shade600, size: 24);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(color: primary, fontWeight: FontWeight.bold, fontSize: 12);
+          }
+          return TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.normal, fontSize: 12);
+        }),
       ),
 
       // ─── Card ─────────────────────────────────────────────────

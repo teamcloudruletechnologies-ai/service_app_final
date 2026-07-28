@@ -311,38 +311,63 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: _isOnline ? Colors.green : Colors.grey,
+                          InkWell(
+                            onTap: () => _toggleOnlineStatus(!_isOnline),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: _isOnline ? Colors.green : Colors.grey,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                _isOnline ? 'Active Online' : 'Offline',
-                                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                              ),
-                            ],
+                                const SizedBox(width: 4),
+                                Text(
+                                  _isOnline ? 'Active Online' : 'Offline',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: _isOnline ? Colors.green.shade700 : Colors.grey.shade600,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.white,
-                    child: IconButton(
-                      icon: const Icon(Icons.notifications_none_rounded, color: AppTheme.matteBlack, size: 20),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const NotificationScreen()),
-                        );
-                      },
-                    ),
+                  Row(
+                    children: [
+                      // Online / Offline Switch Toggle
+                      Transform.scale(
+                        scale: 0.8,
+                        child: Switch(
+                          value: _isOnline,
+                          onChanged: (val) => _toggleOnlineStatus(val),
+                          activeThumbColor: Colors.white,
+                          activeTrackColor: AppTheme.primary,
+                          inactiveThumbColor: Colors.grey.shade400,
+                          inactiveTrackColor: Colors.grey.shade200,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.white,
+                        child: IconButton(
+                          icon: const Icon(Icons.notifications_none_rounded, color: AppTheme.matteBlack, size: 20),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
