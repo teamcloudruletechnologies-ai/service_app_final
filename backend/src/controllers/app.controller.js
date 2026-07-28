@@ -310,6 +310,68 @@ async function getWorkerEarnings(req, res, next) {
   }
 }
 
+async function startJobPhoto(req, res, next) {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return error(res, "Booking not found", 404);
+
+    if (req.auth.role === "worker" && booking.worker_id && booking.worker_id !== req.auth.id) {
+      return error(res, "You do not have permission to start this booking", 403);
+    }
+
+    const { otp, notes } = req.body;
+    if (booking.otp && String(booking.otp) !== String(otp)) {
+      return error(res, "Invalid Start OTP code. Please ask customer for correct code.", 400);
+    }
+
+    let photoUrl = null;
+    if (req.file) {
+      const { saveUpload } = require("../utils/fileUpload");
+      photoUrl = await saveUpload(req.file, "job_photos");
+    }
+
+    const updated = await Booking.startJobWithPhoto(req.params.id, req.auth.id, {
+      photoUrl,
+      notes: notes || req.body.start_notes,
+    });
+
+    return success(res, "Job started successfully with photo verification", updated);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function completeJobPhoto(req, res, next) {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return error(res, "Booking not found", 404);
+
+    if (req.auth.role === "worker" && booking.worker_id && booking.worker_id !== req.auth.id) {
+      return error(res, "You do not have permission to complete this booking", 403);
+    }
+
+    const { otp, notes } = req.body;
+    if (booking.otp && String(booking.otp) !== String(otp)) {
+      return error(res, "Invalid Completion OTP code. Please ask customer for correct code.", 400);
+    }
+
+    let photoUrl = null;
+    if (req.file) {
+      const { saveUpload } = require("../utils/fileUpload");
+      photoUrl = await saveUpload(req.file, "job_photos");
+    }
+
+    const updated = await Booking.completeJobWithPhoto(req.params.id, req.auth.id, {
+      photoUrl,
+      notes: notes || req.body.completion_notes,
+    });
+
+    return success(res, "Job completed successfully with photo verification", updated);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   listCategories,
   listServices,
@@ -324,4 +386,6 @@ module.exports = {
   listActiveBanners,
   getWorkerEarnings,
   listSubCategories,
+  startJobPhoto,
+  completeJobPhoto,
 };

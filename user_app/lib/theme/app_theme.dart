@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const primary = Color(0xFF1A1A1A); // Pure Matte Black
-  static const primaryDark = Color(0xFF1A1A1A);
-  static const accent = Color(0xFFE3D0BA); // Warm Sandal
+  static const primary = Color(0xFF006837); // Rich Emerald Green
+  static const primaryDark = Color(0xFF004D28);
   static const secondary = Color(0xFF4A5343); // Muted Olive Green
+  static const accent = Color(0xFFE3D0BA); // Warm Sandal
   static const surface = Color(0xFFF5F5F3); // Crisp Milk White
   static const card = Colors.white;
-  static const textPrimary = Color(0xFF1A1A1A);
+  static const textPrimary = Color(0xFF1A1A1A); // Pure Matte Black
   static const textSecondary = Color(0xFF6B7280);
 
   static ThemeData light() {
@@ -19,7 +19,7 @@ class AppTheme {
         secondary: secondary,
         tertiary: accent,
         surface: surface,
-        onSurface: primary,
+        onSurface: textPrimary,
         surfaceContainer: Colors.white,
         surfaceContainerHigh: Colors.white,
         surfaceContainerHighest: Colors.white,

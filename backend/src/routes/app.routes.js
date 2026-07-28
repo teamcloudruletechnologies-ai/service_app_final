@@ -134,6 +134,24 @@ router.patch(
   controller.updateMyBookingStatus
 );
 
+router.post(
+  "/bookings/:id/start-job",
+  allowRoles(roles.WORKER, roles.ADMIN),
+  upload.single("photo"),
+  [param("id").isInt()],
+  validate,
+  controller.startJobPhoto
+);
+
+router.post(
+  "/bookings/:id/complete-job",
+  allowRoles(roles.WORKER, roles.ADMIN),
+  upload.single("photo"),
+  [param("id").isInt()],
+  validate,
+  controller.completeJobPhoto
+);
+
 const paymentController = require("../controllers/payment.controller");
 const reviewController = require("../controllers/review.controller");
 

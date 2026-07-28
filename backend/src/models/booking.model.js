@@ -21,6 +21,12 @@ const listFields = `
   b.status,
   b.amount::float AS amount,
   b.otp,
+  b.start_photo_url,
+  b.completion_photo_url,
+  b.start_notes,
+  b.completion_notes,
+  b.job_started_at,
+  b.job_completed_at,
   b.created_at,
   b.updated_at
 `;
@@ -109,6 +115,40 @@ async function updateStatus(id, status) {
   return findById(result.rows[0].id);
 }
 
+async function startJobWithPhoto(id, workerId, { photoUrl, notes }) {
+  const nextOtp = Math.floor(1000 + Math.random() * 9000).toString();
+  const result = await db.query(
+    `UPDATE bookings
+     SET status = 'in_progress',
+         start_photo_url = COALESCE($1, start_photo_url),
+         start_notes = COALESCE($2, start_notes),
+         job_started_at = NOW(),
+         otp = $3,
+         updated_at = NOW()
+     WHERE id = $4 AND (worker_id = $5 OR worker_id IS NULL)
+     RETURNING id`,
+    [photoUrl || null, notes || null, nextOtp, id, workerId]
+  );
+  if (!result.rows[0]) return null;
+  return findById(result.rows[0].id);
+}
+
+async function completeJobWithPhoto(id, workerId, { photoUrl, notes }) {
+  const result = await db.query(
+    `UPDATE bookings
+     SET status = 'completed',
+         completion_photo_url = COALESCE($1, completion_photo_url),
+         completion_notes = COALESCE($2, completion_notes),
+         job_completed_at = NOW(),
+         updated_at = NOW()
+     WHERE id = $3 AND (worker_id = $4 OR worker_id IS NULL)
+     RETURNING id`,
+    [photoUrl || null, notes || null, id, workerId]
+  );
+  if (!result.rows[0]) return null;
+  return findById(result.rows[0].id);
+}
+
 async function analytics() {
   const [summary, byStatus, revenueByStatus, recent] = await Promise.all([
     db.query(
@@ -146,4 +186,4 @@ async function analytics() {
   };
 }
 
-module.exports = { list, findById, create, updateStatus, analytics };
+module.exports = { list, findById, create, updateStatus, startJobWithPhoto, completeJobWithPhoto, analytics };

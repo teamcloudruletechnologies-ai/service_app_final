@@ -6,7 +6,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
 class ReviewsScreen extends StatefulWidget {
-  const ReviewsScreen({super.key, required this.workerId});
+  const ReviewsScreen({super.key, this.workerId = 0});
 
   final int workerId;
 
