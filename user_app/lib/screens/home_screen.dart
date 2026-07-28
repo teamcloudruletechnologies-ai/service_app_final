@@ -2,6 +2,7 @@ import 'dart:async' as async_timer;
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import '../config/api_config.dart';
