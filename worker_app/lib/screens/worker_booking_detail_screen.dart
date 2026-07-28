@@ -52,9 +52,9 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
     }
   }
 
-  Future<void> _updateStatus(String status) async {
-    String? otpInput;
-    if (status == 'in_progress' || status == 'completed') {
+  Future<void> _updateStatus(String status, {String? otp}) async {
+    String? otpInput = otp;
+    if (otpInput == null && (status == 'in_progress' || status == 'completed')) {
       final isStart = status == 'in_progress';
       otpInput = await showDialog<String>(
         context: context,

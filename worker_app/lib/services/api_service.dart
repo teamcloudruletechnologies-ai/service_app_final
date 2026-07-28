@@ -86,6 +86,15 @@ class ApiService {
     throw ApiException(message, statusCode: response.statusCode);
   }
 
+  Future<dynamic> postRaw(String endpoint, Map<String, dynamic> body) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}$endpoint'),
+      headers: _headers(auth: true),
+      body: jsonEncode(body),
+    );
+    return _decode(response);
+  }
+
   PagedResult<T> _parsePaged<T>(Map<String, dynamic> payload, T Function(Map<String, dynamic>) fromJson) {
     final rows = (payload['rows'] as List? ?? [])
         .map((e) => fromJson(e as Map<String, dynamic>))
