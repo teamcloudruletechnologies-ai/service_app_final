@@ -8,6 +8,8 @@ import '../theme/app_theme.dart';
 import '../screens/payment_screen.dart';
 import '../screens/rating_screen.dart';
 import '../screens/invoice_screen.dart';
+import '../screens/worker_tracking_map_screen.dart';
+import '../providers/language_provider.dart';
 
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key, this.message});
@@ -50,7 +52,11 @@ class ErrorView extends StatelessWidget {
             Text(message, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(minimumSize: Size.zero),
+                onPressed: onRetry,
+                child: const Text('Retry'),
+              ),
             ],
           ],
         ),
@@ -68,6 +74,8 @@ class ServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = ApiConfig.resolveImageUrl(service.imageUrl);
+    final discountText = service.price > 500 ? '₹100 OFF' : '20% OFF';
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -76,8 +84,8 @@ class ServiceCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 12,
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
@@ -100,6 +108,54 @@ class ServiceCard extends StatelessWidget {
                             errorWidget: (_, __, ___) => _placeholder(),
                           )
                         : _placeholder(),
+                    // Top-Left Discount Badge
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary, // Matte Black
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          discountText,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 10,
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Bottom-Left Rating Badge (Zomato-style green)
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2E5226), // Zomato green
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              service.avgRating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 10,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            const Icon(Icons.star, color: Colors.white, size: 10),
+                          ],
+                        ),
+                      ),
+                    ),
                     // Price badge at bottom-right of image
                     Positioned(
                       bottom: 8,
@@ -108,7 +164,7 @@ class ServiceCard extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(6),
                           boxShadow: [
                             BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
                           ],
@@ -117,7 +173,7 @@ class ServiceCard extends StatelessWidget {
                           '₹${service.price.toStringAsFixed(0)}',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                            fontSize: 11,
                             color: Color(0xFF1A1A1A),
                           ),
                         ),
@@ -129,67 +185,54 @@ class ServiceCard extends StatelessWidget {
             ),
             // Info below image
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Category tag
-                  if (service.categoryName != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        service.categoryName!,
-                        style: const TextStyle(
-                          color: AppTheme.primary,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  if (service.categoryName != null) const SizedBox(height: 4),
                   // Service name
                   Text(
                     service.name,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       fontSize: 14,
                       color: Color(0xFF1A1A1A),
+                      letterSpacing: -0.2,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  // Rating row
+                  const SizedBox(height: 6),
+                  // Category & Delivery Time Row
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Color(0xFFFFC107), size: 13),
-                      const SizedBox(width: 2),
-                      Text(
-                        service.avgRating.toStringAsFixed(1),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                      ),
-                      if (service.totalReviews > 0) ...[
-                        const SizedBox(width: 2),
+                      if (service.categoryName != null) ...[
                         Text(
-                          '(${service.totalReviews})',
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+                          service.categoryName!,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '•',
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
                       ],
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  // Estimated time badge
-                  Row(
-                    children: [
-                      Icon(Icons.access_time, size: 12, color: Colors.grey.shade500),
+                      const Icon(Icons.flash_on, color: AppTheme.secondary, size: 12),
                       const SizedBox(width: 2),
                       Text(
-                        '⏱ ${service.estimatedTime} min',
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 11, fontWeight: FontWeight.w500),
+                        '${service.estimatedTime} mins',
+                        style: const TextStyle(
+                          color: AppTheme.secondary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 11,
+                        ),
                       ),
                     ],
                   ),
@@ -204,7 +247,7 @@ class ServiceCard extends StatelessWidget {
 
   Widget _placeholder() {
     return Container(
-      color: AppTheme.primary.withValues(alpha: 0.08),
+      color: AppTheme.primary.withOpacity(0.08),
       child: const Center(
         child: Icon(Icons.home_repair_service, size: 36, color: AppTheme.primary),
       ),
@@ -213,11 +256,12 @@ class ServiceCard extends StatelessWidget {
 }
 
 class BookingCard extends StatelessWidget {
-  const BookingCard({super.key, required this.booking, this.onTap, this.onCancel});
+  const BookingCard({super.key, required this.booking, this.onTap, this.onCancel, this.onRebook});
 
   final BookingItem booking;
   final VoidCallback? onTap;
   final VoidCallback? onCancel;
+  final VoidCallback? onRebook;
 
   Color _statusColor(String status) {
     switch (status) {
@@ -256,23 +300,24 @@ class BookingCard extends StatelessWidget {
     final steps = ['Booked', 'Confirmed', 'In Progress', 'Completed'];
     final isCancelled = booking.status == 'cancelled';
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Row(
-        children: List.generate(steps.length * 2 - 1, (index) {
-          if (index.isOdd) {
-            final stepBefore = (index - 1) ~/ 2;
-            final filled = !isCancelled && stepBefore < currentStep;
-            return Expanded(
-              child: Container(
-                height: 2,
-                color: filled ? AppTheme.secondary : Colors.grey.shade300,
-              ),
-            );
-          }
-          final step = index ~/ 2;
-          final filled = !isCancelled && step <= currentStep;
-          return Column(
+    final timelineChildren = <Widget>[];
+    for (int i = 0; i < steps.length * 2 - 1; i++) {
+      if (i.isOdd) {
+        final stepBefore = (i - 1) ~/ 2;
+        final filled = !isCancelled && stepBefore < currentStep;
+        timelineChildren.add(
+          Expanded(
+            child: Container(
+              height: 2,
+              color: filled ? AppTheme.secondary : Colors.grey.shade300,
+            ),
+          ),
+        );
+      } else {
+        final step = i ~/ 2;
+        final filled = !isCancelled && step <= currentStep;
+        timelineChildren.add(
+          Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
@@ -293,8 +338,18 @@ class BookingCard extends StatelessWidget {
                 ),
               ),
             ],
-          );
-        }),
+          ),
+        );
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: SizedBox(
+        width: double.infinity,
+        child: Row(
+          children: timelineChildren,
+        ),
       ),
     );
   }
@@ -333,7 +388,7 @@ class BookingCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _statusColor(booking.status).withValues(alpha: 0.12),
+                      color: _statusColor(booking.status).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -354,7 +409,7 @@ class BookingCard extends StatelessWidget {
                     Icon(Icons.person_outline, size: 14, color: Colors.grey.shade500),
                     const SizedBox(width: 4),
                     Text(
-                      booking.workerName!,
+                      booking.workerName ?? '',
                       style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
                     ),
                   ],
@@ -364,16 +419,23 @@ class BookingCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey.shade500),
-                      const SizedBox(width: 4),
-                      Text(
-                        dateFmt.format(booking.scheduledAt ?? booking.createdAt),
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
-                      ),
-                    ],
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey.shade500),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            dateFmt.format(booking.scheduledAt ?? booking.createdAt),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   Text(
                     '₹${booking.amount.toStringAsFixed(0)}',
                     style: const TextStyle(
@@ -384,6 +446,80 @@ class BookingCard extends StatelessWidget {
                   ),
                 ],
               ),
+              // OTP Start/Completion Verification Card (Rapido/Uber style)
+              if ((booking.status == 'pending' || booking.status == 'confirmed' || booking.status == 'in_progress') && booking.otp != null) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: booking.status == 'in_progress'
+                        ? Colors.purple.shade50
+                        : AppTheme.secondary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: booking.status == 'in_progress'
+                          ? Colors.purple.shade200
+                          : AppTheme.secondary.withOpacity(0.3),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: booking.status == 'in_progress' ? Colors.purple : AppTheme.secondary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.key, size: 16, color: Colors.white),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              booking.status == 'in_progress' ? 'JOB COMPLETION OTP' : 'JOB START OTP',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 11,
+                                letterSpacing: 0.5,
+                                color: booking.status == 'in_progress' ? Colors.purple.shade900 : AppTheme.primary,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              booking.status == 'in_progress'
+                                  ? 'Share with worker when work finishes'
+                                  : 'Share with worker when they arrive',
+                              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: booking.status == 'in_progress' ? Colors.purple : AppTheme.secondary,
+                          ),
+                        ),
+                        child: Text(
+                          booking.otp ?? '',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            color: booking.status == 'in_progress' ? Colors.purple.shade900 : AppTheme.primary,
+                            letterSpacing: 3,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               // Progress timeline
               _buildTimeline(),
               // Action buttons
@@ -395,6 +531,7 @@ class BookingCard extends StatelessWidget {
                     if (booking.status == 'pending') ...[
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
+                          minimumSize: Size.zero,
                           backgroundColor: AppTheme.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -417,11 +554,52 @@ class BookingCard extends StatelessWidget {
                   ],
                 ),
               ],
+              if (booking.status == 'confirmed' || booking.status == 'in_progress') ...[
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: Size.zero,
+                        backgroundColor: AppTheme.secondary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => WorkerTrackingMapScreen(bookingId: booking.id),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.map_outlined, size: 14),
+                      label: const Text('Track Partner', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ),
+                  ],
+                ),
+              ],
               if (booking.status == 'completed') ...[
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    if (onRebook != null) ...[
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size.zero,
+                          backgroundColor: AppTheme.secondary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        ),
+                        onPressed: onRebook,
+                        child: Text(context.translate('rebook'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     OutlinedButton(
                       onPressed: () {
                         Navigator.push(
@@ -430,6 +608,7 @@ class BookingCard extends StatelessWidget {
                         );
                       },
                       style: OutlinedButton.styleFrom(
+                        minimumSize: Size.zero,
                         side: const BorderSide(color: AppTheme.primary),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -439,6 +618,7 @@ class BookingCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
+                        minimumSize: Size.zero,
                         backgroundColor: Colors.amber.shade700,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

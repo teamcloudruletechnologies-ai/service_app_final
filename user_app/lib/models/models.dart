@@ -14,6 +14,7 @@ class UserAccount {
 
   final String? state;
   final String? address;
+  final int? credits;
 
   // True if this account was just auto-created (name is empty)
   bool get needsOnboarding => name.trim().isEmpty;
@@ -32,6 +33,7 @@ class UserAccount {
     this.pincode,
     this.state,
     this.address,
+    this.credits,
   });
 
   factory UserAccount.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,7 @@ class UserAccount {
       pincode: json['pincode'] as String?,
       state: json['state'] as String?,
       address: json['address'] as String?,
+      credits: json['credits'] as int? ?? 0,
     );
   }
 }
@@ -116,9 +119,9 @@ class ServiceItem {
       description: json['description'] as String?,
       imageUrl: json['image_url'] as String?,
       categoryName: json['category_name'] as String?,
-      price: (json['price'] as num?)?.toDouble() ?? 0,
+      price: _toDouble(json['price']),
       status: json['status'] as String? ?? 'active',
-      avgRating: (json['avg_rating'] as num?)?.toDouble() ?? 4.5,
+      avgRating: _toDouble(json['avg_rating'], 4.5),
       totalReviews: json['total_reviews'] as int? ?? 0,
       totalBookings: json['total_bookings'] as int? ?? 0,
       estimatedTime: json['estimated_time'] as int? ?? 60,
@@ -142,6 +145,9 @@ class BookingItem {
   final String? notes;
   final DateTime? scheduledAt;
   final DateTime createdAt;
+  final String? otp;
+  final double? workerLat;
+  final double? workerLng;
 
   const BookingItem({
     required this.id,
@@ -159,6 +165,9 @@ class BookingItem {
     this.notes,
     this.scheduledAt,
     required this.createdAt,
+    this.otp,
+    this.workerLat,
+    this.workerLng,
   });
 
   factory BookingItem.fromJson(Map<String, dynamic> json) {
@@ -173,7 +182,7 @@ class BookingItem {
       userName: json['user_name'] as String?,
       userPhone: json['user_phone'] as String?,
       status: json['status'] as String? ?? 'pending',
-      amount: (json['amount'] as num?)?.toDouble() ?? 0,
+      amount: _toDouble(json['amount']),
       address: json['address'] as String?,
       notes: json['notes'] as String?,
       scheduledAt: json['scheduled_at'] != null
@@ -181,6 +190,9 @@ class BookingItem {
           : null,
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
           DateTime.now(),
+      otp: json['otp']?.toString(),
+      workerLat: _toDouble(json['worker_lat']),
+      workerLng: _toDouble(json['worker_lng']),
     );
   }
 
@@ -259,11 +271,11 @@ class NearbyWorker {
       serviceType: json['service_type'] as String?,
       experienceYears: json['experience_years'] as int? ?? 0,
       phone: json['phone'] as String?,
-      latitude: (json['current_lat'] as num?)?.toDouble(),
-      longitude: (json['current_lng'] as num?)?.toDouble(),
-      distance: (json['distance'] as num?)?.toDouble(),
+      latitude: _toNullableDouble(json['current_lat']),
+      longitude: _toNullableDouble(json['current_lng']),
+      distance: _toNullableDouble(json['distance']),
       photoUrl: json['photo_url'] as String?,
-      rating: (json['rating'] as num?)?.toDouble() ?? 4.5,
+      rating: _toDouble(json['rating'], 4.5),
     );
   }
 }
@@ -315,4 +327,18 @@ class ReviewItem {
       createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
     );
   }
+}
+
+double _toDouble(dynamic val, [double defaultValue = 0.0]) {
+  if (val == null) return defaultValue;
+  if (val is num) return val.toDouble();
+  if (val is String) return double.tryParse(val) ?? defaultValue;
+  return defaultValue;
+}
+
+double? _toNullableDouble(dynamic val) {
+  if (val == null) return null;
+  if (val is num) return val.toDouble();
+  if (val is String) return double.tryParse(val);
+  return null;
 }

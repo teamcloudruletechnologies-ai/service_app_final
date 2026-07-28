@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 import '../models/models.dart';
 import '../providers/booking_provider.dart';
@@ -19,42 +20,59 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   final _apiService = ApiService();
   bool _loading = false;
-  String _paymentMethod = 'card'; // card, upi, netbanking
-  final _cardNumberCtrl = TextEditingController(text: '4321 8876 5432 1098');
-  final _expiryCtrl = TextEditingController(text: '12/29');
-  final _cvvCtrl = TextEditingController(text: '123');
-  final _upiCtrl = TextEditingController(text: 'customer@okaxis');
+  late Razorpay _razorpay;
 
   @override
   void initState() {
     super.initState();
     _apiService.init();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
   @override
   void dispose() {
-    _cardNumberCtrl.dispose();
-    _expiryCtrl.dispose();
-    _cvvCtrl.dispose();
-    _upiCtrl.dispose();
+    _razorpay.clear();
     super.dispose();
   }
 
-  Future<void> _processPayment() async {
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    _verifyPaymentOnBackend(
+      paymentId: response.paymentId!,
+      signature: response.signature!,
+      orderId: response.orderId!,
+    );
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    setState(() => _loading = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Payment Failed: [Code: ${response.code}] ${response.message}'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('External Wallet Selected: ${response.walletName}')),
+    );
+  }
+
+  Future<void> _verifyPaymentOnBackend({
+    required String paymentId,
+    required String signature,
+    required String orderId,
+  }) async {
     setState(() => _loading = true);
     try {
-      // 1. Create order on backend
-      final orderData = await _apiService.createPaymentOrder(widget.booking.id);
-      final orderId = orderData['orderId'] as String;
-
-      // Simulate payment network delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      // 2. Verify payment on backend with mock values
       await _apiService.verifyPayment(
         bookingId: widget.booking.id,
-        razorpayPaymentId: 'pay_${DateTime.now().millisecondsSinceEpoch}',
-        razorpaySignature: 'mock_signature',
+        razorpayPaymentId: paymentId,
+        razorpaySignature: signature,
         razorpayOrderId: orderId,
       );
 
@@ -64,7 +82,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         );
         // Refresh bookings list
         context.read<BookingProvider>().loadBookings();
-        
+
         // Show success dialog
         showDialog(
           context: context,
@@ -96,7 +114,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     } catch (err) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Payment Failed: $err')),
+          SnackBar(content: Text('Payment Verification Failed: $err'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -106,11 +124,48 @@ class _PaymentScreenState extends State<PaymentScreen> {
     }
   }
 
+  Future<void> _processPayment() async {
+    setState(() => _loading = true);
+    try {
+      // 1. Create order on backend
+      final orderData = await _apiService.createPaymentOrder(widget.booking.id);
+      final orderId = orderData['orderId'] as String;
+      final keyId = orderData['keyId'] as String;
+
+      var options = {
+        'key': keyId,
+        'amount': (widget.booking.amount * 100).toInt(), // amount in paise
+        'name': 'Urban Service',
+        'order_id': orderId,
+        'description': widget.booking.serviceName ?? 'Home Service Booking',
+        'timeout': 300, // in seconds
+        'prefill': {
+          'contact': _apiService.account?.phone ?? '9876543210',
+          'email': _apiService.account?.email ?? 'customer@urbanserve.com',
+        }
+      };
+
+      _razorpay.open(options);
+    } catch (err) {
+      if (mounted) {
+        setState(() => _loading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to initiate payment: $err'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(title: const Text('Checkout')),
+      appBar: AppBar(
+        title: const Text('Checkout'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0,
+      ),
       body: _loading
           ? Center(
               child: Column(
@@ -127,7 +182,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ],
               ),
             )
-          : SingleChildScrollView(
+          : Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -180,176 +235,72 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Select Payment Method',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1A1A1A)),
+                  // Security Info Card
+                  Card(
+                    color: Colors.green.shade50,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(color: Colors.green.shade100),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.shield_outlined, color: Colors.green.shade700, size: 28),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Secure Payments via Razorpay',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: Colors.green.shade900,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Supports Cards, UPI, Netbanking, and Wallets. Your credentials are never stored on our servers.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.green.shade700,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  // Payment options
-                  _buildPaymentOptionTile(
-                    id: 'card',
-                    title: 'Credit / Debit Card',
-                    icon: Icons.credit_card,
-                  ),
-                  _buildPaymentOptionTile(
-                    id: 'upi',
-                    title: 'UPI (GPay / PhonePe / BHIM)',
-                    icon: Icons.account_balance_wallet,
-                  ),
-                  _buildPaymentOptionTile(
-                    id: 'netbanking',
-                    title: 'Net Banking',
-                    icon: Icons.corporate_fare,
-                  ),
-                  const SizedBox(height: 24),
-                  // Method details
-                  if (_paymentMethod == 'card') _buildCardForm(),
-                  if (_paymentMethod == 'upi') _buildUpiForm(),
-                  if (_paymentMethod == 'netbanking') _buildNetbankingSelector(),
-                  const SizedBox(height: 36),
+                  const Spacer(),
                   ElevatedButton(
                     onPressed: _processPayment,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       backgroundColor: AppTheme.primary,
                     ),
-                    child: Text(
-                      'Pay Securely ₹${widget.booking.amount.toStringAsFixed(0)}',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.payment, color: Colors.white),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Proceed to Pay ₹${widget.booking.amount.toStringAsFixed(0)}',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-    );
-  }
-
-  Widget _buildPaymentOptionTile({required String id, required String title, required IconData icon}) {
-    final selected = _paymentMethod == id;
-    return GestureDetector(
-      onTap: () => setState(() => _paymentMethod = id),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected ? AppTheme.primary : Colors.grey.shade200,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: selected ? AppTheme.primary : Colors.grey.shade600),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                  color: selected ? Colors.black : Colors.grey.shade800,
-                ),
-              ),
-            ),
-            if (selected)
-              const Icon(Icons.check_circle, color: AppTheme.primary, size: 20)
-            else
-              Icon(Icons.radio_button_off, color: Colors.grey.shade400, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardForm() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _cardNumberCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Card Number',
-                prefixIcon: Icon(Icons.credit_card),
-                hintText: '4321 8876 5432 1098',
-              ),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _expiryCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Expiry Date',
-                      hintText: 'MM/YY',
-                    ),
-                    keyboardType: TextInputType.datetime,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _cvvCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'CVV',
-                      hintText: '123',
-                    ),
-                    obscureText: true,
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUpiForm() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: TextField(
-          controller: _upiCtrl,
-          decoration: const InputDecoration(
-            labelText: 'UPI ID',
-            prefixIcon: Icon(Icons.flash_on),
-            hintText: 'username@bank',
-          ),
-          keyboardType: TextInputType.emailAddress,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNetbankingSelector() {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: DropdownButtonFormField<String>(
-          value: 'sbi',
-          decoration: const InputDecoration(labelText: 'Select Bank'),
-          items: const [
-            DropdownMenuItem(value: 'sbi', child: Text('State Bank of India')),
-            DropdownMenuItem(value: 'hdfc', child: Text('HDFC Bank')),
-            DropdownMenuItem(value: 'icici', child: Text('ICICI Bank')),
-            DropdownMenuItem(value: 'axis', child: Text('Axis Bank')),
-          ],
-          onChanged: (val) {},
-        ),
-      ),
     );
   }
 }

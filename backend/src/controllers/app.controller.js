@@ -10,12 +10,28 @@ const { success, error } = require("../utils/response");
 async function listCategories(req, res, next) {
   try {
     const paging = getPagination(req.query);
+    // If parent_id provided → return sub-categories of that parent
+    // If no parent_id → return only root (top-level) categories
+    const parentId = req.query.parent_id !== undefined
+      ? (req.query.parent_id === '' ? null : parseInt(req.query.parent_id))
+      : null;
     const data = await Category.list({
       ...paging,
       search: req.query.search,
       status: "active",
+      parent_id: parentId,
     });
     return success(res, "Categories fetched", data);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function listSubCategories(req, res, next) {
+  try {
+    const parentId = parseInt(req.params.id);
+    const rows = await Category.listSubCategories(parentId, { page: 1, limit: 50, offset: 0 });
+    return success(res, "Sub-categories fetched", rows);
   } catch (err) {
     return next(err);
   }
@@ -68,7 +84,9 @@ async function createBooking(req, res, next) {
       scheduledAt: scheduled_at,
     });
 
-    await User.logActivity(userId, "booking_created", `Booked service: ${service.name}`);
+    // Award 5 credits for booking
+    await User.awardCredits(userId, 5);
+    await User.logActivity(userId, "booking_created", `Booked service: ${service.name} (Earned 5 credits)`);
 
     return success(res, "Booking created successfully", booking, 201);
   } catch (err) {
@@ -147,7 +165,7 @@ async function updateMyBookingStatus(req, res, next) {
     const booking = await Booking.findById(req.params.id);
     if (!booking) return error(res, "Booking not found", 404);
 
-    const { status } = req.body;
+    const { status, otp } = req.body;
 
     if (req.auth.role === "worker") {
       if (booking.worker_id !== req.auth.id) {
@@ -163,6 +181,18 @@ async function updateMyBookingStatus(req, res, next) {
       };
       if (!valid[booking.status].includes(status)) {
         return error(res, `Cannot change booking status from ${booking.status} to ${status}`, 400);
+      }
+
+      if (status === "in_progress") {
+        if (!otp || String(booking.otp) !== String(otp)) {
+          return error(res, "Invalid Start OTP code. Please ask the customer for the correct code.", 400);
+        }
+      }
+
+      if (status === "completed") {
+        if (!otp || String(booking.otp) !== String(otp)) {
+          return error(res, "Invalid Completion OTP code. Please ask the customer for the correct code.", 400);
+        }
       }
     } else if (req.auth.role === "user") {
       if (booking.user_id !== req.auth.id) {
@@ -280,6 +310,68 @@ async function getWorkerEarnings(req, res, next) {
   }
 }
 
+async function startJobPhoto(req, res, next) {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return error(res, "Booking not found", 404);
+
+    if (req.auth.role === "worker" && booking.worker_id && booking.worker_id !== req.auth.id) {
+      return error(res, "You do not have permission to start this booking", 403);
+    }
+
+    const { otp, notes } = req.body;
+    if (booking.otp && String(booking.otp) !== String(otp)) {
+      return error(res, "Invalid Start OTP code. Please ask customer for correct code.", 400);
+    }
+
+    let photoUrl = null;
+    if (req.file) {
+      const { saveUpload } = require("../utils/fileUpload");
+      photoUrl = await saveUpload(req.file, "job_photos");
+    }
+
+    const updated = await Booking.startJobWithPhoto(req.params.id, req.auth.id, {
+      photoUrl,
+      notes: notes || req.body.start_notes,
+    });
+
+    return success(res, "Job started successfully with photo verification", updated);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function completeJobPhoto(req, res, next) {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return error(res, "Booking not found", 404);
+
+    if (req.auth.role === "worker" && booking.worker_id && booking.worker_id !== req.auth.id) {
+      return error(res, "You do not have permission to complete this booking", 403);
+    }
+
+    const { otp, notes } = req.body;
+    if (booking.otp && String(booking.otp) !== String(otp)) {
+      return error(res, "Invalid Completion OTP code. Please ask customer for correct code.", 400);
+    }
+
+    let photoUrl = null;
+    if (req.file) {
+      const { saveUpload } = require("../utils/fileUpload");
+      photoUrl = await saveUpload(req.file, "job_photos");
+    }
+
+    const updated = await Booking.completeJobWithPhoto(req.params.id, req.auth.id, {
+      photoUrl,
+      notes: notes || req.body.completion_notes,
+    });
+
+    return success(res, "Job completed successfully with photo verification", updated);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   listCategories,
   listServices,
@@ -293,4 +385,7 @@ module.exports = {
   updateUserProfile,
   listActiveBanners,
   getWorkerEarnings,
+  listSubCategories,
+  startJobPhoto,
+  completeJobPhoto,
 };

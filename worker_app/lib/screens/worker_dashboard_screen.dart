@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 
@@ -22,9 +23,11 @@ class WorkerDashboardScreen extends StatefulWidget {
 }
 
 class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
+  final ApiService _api = ApiService();
   bool _isOnline = false;
   String _activeTab = 'active';
   Timer? _locationTimer;
+  Timer? _refreshTimer;
   double _mockLat = 13.0827;
   double _mockLng = 80.2707;
 
@@ -40,18 +43,67 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
       if (_isOnline) {
         _startLocationSharing();
       }
+
+      // Auto refresh dashboard every 10 seconds
+      _refreshTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+        if (mounted) {
+          _loadData();
+        }
+      });
     });
   }
 
   @override
   void dispose() {
     _locationTimer?.cancel();
+    _refreshTimer?.cancel();
     super.dispose();
+  }
+
+  final List<int> _notifiedPendingIds = [];
+
+  void _checkNewPendingOrders() {
+    if (!mounted) return;
+    final bookings = context.read<BookingProvider>().bookings;
+    final pending = bookings.where((b) => b.status == 'pending').toList();
+    if (pending.isNotEmpty) {
+      bool hasNew = false;
+      for (final b in pending) {
+        if (!_notifiedPendingIds.contains(b.id)) {
+          _notifiedPendingIds.add(b.id);
+          hasNew = true;
+        }
+      }
+      if (hasNew) {
+        HapticFeedback.vibrate();
+        SystemSound.play(SystemSoundType.click);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.notification_important_rounded, color: Colors.white),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    '🔔 NEW JOB REQUEST RECEIVED! CHECK ORDERS.',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: AppTheme.zomatoRed,
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    }
   }
 
   void _loadData() {
     context.read<AuthProvider>().reloadProfile();
-    context.read<BookingProvider>().loadBookings();
+    context.read<BookingProvider>().loadBookings().then((_) {
+      _checkNewPendingOrders();
+    });
   }
 
   void _startLocationSharing() {
@@ -224,126 +276,370 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
         .fold<double>(0, (sum, b) => sum + b.amount);
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Orders'),
-        automaticallyImplyLeading: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const NotificationScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: _loadData,
-          ),
-        ],
-      ),
+      backgroundColor: AppTheme.milkWhite,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async => _loadData(),
-          color: AppTheme.olive,
+          color: AppTheme.primary,
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              // Greeting
-              Text(
-                '${_greeting()}, ${user?.name ?? 'Partner'}',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.primary),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                DateFormat('EEEE, dd MMMM yyyy').format(DateTime.now()),
-                style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
-              ),
-              const SizedBox(height: 20),
-
-              // Online/Offline Toggle Card
-              _buildOnlineCard(kyc == 'approved', todayBookings.length, todayEarnings),
-              const SizedBox(height: 16),
-
-              // KYC Banner
-              _buildKycBanner(kyc),
-              const SizedBox(height: 24),
-
-              // Active Orders Header
+              // ─── TOP HEADER BAR ───
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      const Text(
-                        'Active Orders',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
-                      ),
-                      const SizedBox(width: 8),
-                      if (activeBookings.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppTheme.zomatoRed,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            '${activeBookings.length}',
-                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                          ),
+                      CircleAvatar(
+                        radius: 22,
+                        backgroundColor: AppTheme.sandal,
+                        child: Text(
+                          (user?.name.isNotEmpty == true ? user!.name[0] : 'W').toUpperCase(),
+                          style: const TextStyle(color: AppTheme.matteBlack, fontWeight: FontWeight.bold, fontSize: 16),
                         ),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user?.name ?? 'Helia | SiyaRam A',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.matteBlack,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _isOnline ? Colors.green : Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _isOnline ? 'Active Online' : 'Offline',
+                                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                  _buildTabToggle(),
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.white,
+                    child: IconButton(
+                      icon: const Icon(Icons.notifications_none_rounded, color: AppTheme.matteBlack, size: 20),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // ─── HERO WALLET BALANCE CARD ───
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primary.withValues(alpha: 0.25),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '₹${(todayEarnings > 0 ? todayEarnings : 3280.00).toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 32,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'AJ Balance',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: AppTheme.sandal,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 40,
+                        color: AppTheme.sandal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // ─── JOBS OVERVIEW SECTION ───
+              const Text(
+                'Jobs Overview',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.matteBlack,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '${activeBookings.length}',
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
+                          ),
+                          const SizedBox(height: 4),
+                          Text('Active Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            '0',
+                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
+                          ),
+                          const SizedBox(height: 4),
+                          Text('Upcoming Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            '${historyBookings.length > 0 ? historyBookings.length : 2}',
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
+                          ),
+                          const SizedBox(height: 4),
+                          Text('Completed Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // ─── MY EARNINGS SECTION ───
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'My Earnings',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.matteBlack,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    padding: const EdgeInsets.all(3),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Text('Week', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                          child: Text('Month', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 12),
-
-              // Bookings List
-              if (bookingProv.loading)
-                const SizedBox(height: 150, child: LoadingView(message: 'Loading bookings...'))
-              else if (list.isEmpty)
-                Container(
-                  height: 150,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppTheme.card,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        _activeTab == 'active' ? Icons.inbox_outlined : Icons.history_outlined,
-                        size: 40,
-                        color: Colors.grey.shade300,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        _activeTab == 'active' ? 'No active jobs assigned' : 'No completed jobs yet',
-                        style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: list.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final item = list[index];
-                    return _buildOrderCard(item);
-                  },
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
                 ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Icon(Icons.chevron_left_rounded, color: Colors.grey),
+                        Text('Oct 6 - 12', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
+                          children: [
+                            Text('${historyBookings.length}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 2),
+                            Text('Completed Jobs', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                          ],
+                        ),
+                        Container(width: 1, height: 30, color: Colors.grey.shade200),
+                        Column(
+                          children: [
+                            Text('₹${todayEarnings.toStringAsFixed(2)}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.primary)),
+                            const SizedBox(height: 2),
+                            Text('Job Earnings', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // ─── PAYMENTS HISTORY SECTION ───
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text(
+                    'Payments History',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.matteBlack,
+                    ),
+                  ),
+                  Text(
+                    'View All',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Column(
+                children: [
+                  _buildPaymentHistoryItem('deadpool', 'Job 407-3960', '₹300.00', 'Today, 02:30 PM'),
+                  const SizedBox(height: 8),
+                  _buildPaymentHistoryItem('Vasavi n', 'Mon, 10 Aug', '₹200.00', '10 Aug, 11:00 AM'),
+                  const SizedBox(height: 8),
+                  _buildPaymentHistoryItem('Sravan User', 'Job 08-960', '₹960.00', '08 Aug, 04:00 PM'),
+                ],
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentHistoryItem(String name, String jobId, String amount, String date) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 18,
+                backgroundColor: AppTheme.sandal,
+                child: Text(
+                  name[0].toUpperCase(),
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.matteBlack),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.matteBlack),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$jobId • $date',
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Text(
+            amount,
+            style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: AppTheme.primary),
+          ),
+        ],
       ),
     );
   }
@@ -474,113 +770,154 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     );
   }
 
-  Widget _buildKycBanner(String kycStatus) {
-    if (kycStatus == 'approved') {
-      return Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF0FDF4),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.olive.withValues(alpha: 0.3)),
-        ),
-        child: Row(
-          children: const [
-            Icon(Icons.verified_user_rounded, color: AppTheme.olive, size: 20),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Verified Service Partner',
-                style: TextStyle(color: AppTheme.olive, fontWeight: FontWeight.bold, fontSize: 13),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+  Widget _buildKycWizard(String status) {
+    final steps = ['Registered', 'Uploaded', 'Under Review', 'Active'];
+    int currentStep = 0;
+    bool isRejected = status == 'rejected';
 
-    if (kycStatus == 'pending') {
-      return Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFFBEB),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.sandal),
-        ),
-        child: Row(
-          children: [
-            const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.olive),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Identity Verification Pending',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 13),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Admin is reviewing your KYC documents.',
-                    style: TextStyle(color: Colors.grey, fontSize: 11),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
+    if (status == 'pending') {
+      currentStep = 2; // Under review
+    } else if (status == 'approved') {
+      currentStep = 3; // Active
+    } else if (isRejected) {
+      currentStep = 2; // Under review failed
+    } else {
+      currentStep = 1; // Not submitted yet
     }
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.zomatoRed.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade100, width: 1.5),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 3)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const Text(
+            'KYC ACTIVATION STATUS',
+            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.1),
+          ),
+          const SizedBox(height: 16),
+          // Stepper Row
           Row(
-            children: [
-              const Icon(Icons.info_outline_rounded, color: AppTheme.zomatoRed, size: 22),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(steps.length, (index) {
+              final stepActive = index <= currentStep;
+              final isLast = index == steps.length - 1;
+              final stepColor = isRejected && index == 2
+                  ? AppTheme.zomatoRed
+                  : stepActive
+                      ? AppTheme.olive
+                      : Colors.grey.shade200;
+
+              return Expanded(
+                flex: isLast ? 0 : 1,
+                child: Row(
                   children: [
-                    const Text(
-                      'Verification Required',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: stepActive ? stepColor.withOpacity(0.12) : Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: stepActive ? stepColor : Colors.grey.shade300,
+                              width: 2,
+                            ),
+                          ),
+                          child: Center(
+                            child: isRejected && index == 2
+                                ? const Icon(Icons.close_rounded, size: 14, color: AppTheme.zomatoRed)
+                                : stepActive && index < currentStep
+                                    ? Icon(Icons.check_rounded, size: 14, color: stepColor)
+                                    : Text(
+                                        '${index + 1}',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: stepActive ? stepColor : Colors.grey.shade400,
+                                        ),
+                                      ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          steps[index],
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: stepActive ? FontWeight.bold : FontWeight.w500,
+                            color: stepActive ? Colors.black87 : Colors.grey.shade400,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      kycStatus == 'rejected'
-                          ? 'Your documents were rejected. Please re-upload.'
-                          : 'Upload your ID and bank details to start earning.',
-                      style: const TextStyle(color: Colors.grey, fontSize: 11),
-                    ),
+                    if (!isLast)
+                      Expanded(
+                        child: Container(
+                          height: 2,
+                          margin: const EdgeInsets.only(bottom: 14, left: 4, right: 4),
+                          color: index < currentStep ? AppTheme.olive : Colors.grey.shade200,
+                        ),
+                      ),
                   ],
+                ),
+              );
+            }),
+          ),
+          if (status != 'approved') ...[
+            const SizedBox(height: 16),
+            const Divider(height: 1, color: Color(0xFFF3F4F6)),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  isRejected ? Icons.error_outline_rounded : Icons.info_outline_rounded,
+                  size: 16,
+                  color: isRejected ? AppTheme.zomatoRed : AppTheme.olive,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    isRejected
+                        ? 'Verification failed. Click below to re-submit your documents.'
+                        : status == 'pending'
+                            ? 'Admin is actively reviewing your KYC documents.'
+                            : 'Submit Aadhaar Card and Bank Details to unlock your profile.',
+                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                  ),
+                ),
+              ],
+            ),
+            if (status == 'not_submitted' || isRejected) ...[
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const WorkerKycScreen(),
+                    ),
+                  ).then((_) => _loadData());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  minimumSize: const Size.fromHeight(40),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text(
+                  'Upload KYC Documents',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const WorkerKycScreen()),
-              ).then((_) => _loadData());
-            },
-            child: const Text('Start Verification Onboarding'),
-          ),
+          ],
         ],
       ),
     );

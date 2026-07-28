@@ -12,9 +12,7 @@ const router = express.Router();
 // Used by user & worker apps to show available service areas
 router.get("/serviceable", controller.getServiceableLocations);
 
-// All routes below require authentication
-router.use(auth);
-
+// PUBLIC: Get nearby workers by coordinates (no auth needed)
 router.get(
   "/nearby",
   [
@@ -27,6 +25,7 @@ router.get(
   controller.findNearbyWorkers
 );
 
+// PUBLIC: Get workers by pincode (no auth needed)
 router.get(
   "/by-pincode",
   [
@@ -37,6 +36,9 @@ router.get(
   validate,
   controller.findWorkersByPincode
 );
+
+// All routes below require authentication
+router.use(auth);
 
 router.post(
   "/update-my-location",

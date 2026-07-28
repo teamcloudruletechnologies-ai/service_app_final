@@ -94,14 +94,28 @@ class _LoginScreenState extends State<LoginScreen> {
   void _onGetOtpPressed() {
     if (!_phoneFormKey.currentState!.validate()) return;
     
+    // Auto fill test OTP 123456 for smooth testing
+    final testOtp = '123456';
+    for (int i = 0; i < 6; i++) {
+      _otpControllers[i].text = testOtp[i];
+    }
+
     setState(() {
       _showOtpStep = true;
     });
     _startResendTimer();
     
-    // Auto focus first OTP field
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('🔑 Test OTP 123456 auto-filled! Tap Verify OTP to proceed.'),
+        duration: Duration(seconds: 4),
+        backgroundColor: Color(0xFF4A5343),
+      ),
+    );
+    
+    // Auto focus last OTP field
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _otpFocusNodes[0].requestFocus();
+      _otpFocusNodes[5].requestFocus();
     });
   }
 

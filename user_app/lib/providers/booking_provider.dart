@@ -21,8 +21,10 @@ class BookingProvider extends ChangeNotifier {
     try {
       final result = await _api.fetchBookings(status: status);
       bookings = result.items;
-    } on ApiException catch (e) {
-      error = e.message;
+      debugPrint("BOOKING PROVIDER LOADED ITEMS COUNT: ${bookings.length}");
+    } catch (e) {
+      error = e.toString();
+      debugPrint("BOOKING PROVIDER LOAD ERROR: $e");
     } finally {
       loading = false;
       notifyListeners();
@@ -47,12 +49,10 @@ class BookingProvider extends ChangeNotifier {
         scheduledAt: scheduledAt,
         workerId: workerId,
       );
-      bookings = [booking, ...bookings];
-      loading = false;
-      notifyListeners();
+      await loadBookings();
       return booking;
-    } on ApiException catch (e) {
-      error = e.message;
+    } catch (e) {
+      error = e.toString();
       loading = false;
       notifyListeners();
       return null;
@@ -82,6 +82,17 @@ class BookingProvider extends ChangeNotifier {
       error = e.message;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<BookingItem?> loadBookingDetail(int id) async {
+    try {
+      final updated = await _api.fetchBooking(id);
+      bookings = bookings.map((b) => b.id == id ? updated : b).toList();
+      notifyListeners();
+      return updated;
+    } catch (e) {
+      return null;
     }
   }
 }

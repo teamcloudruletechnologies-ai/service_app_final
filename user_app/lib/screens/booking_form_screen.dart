@@ -9,10 +9,11 @@ import '../theme/app_theme.dart';
 import 'payment_screen.dart';
 
 class BookingFormScreen extends StatefulWidget {
-  const BookingFormScreen({super.key, required this.service, this.initialAddress, this.selectedWorker});
+  const BookingFormScreen({super.key, required this.service, this.initialAddress, this.initialNotes, this.selectedWorker});
 
   final ServiceItem service;
   final String? initialAddress;
+  final String? initialNotes;
   final NearbyWorker? selectedWorker;
 
   @override
@@ -32,14 +33,6 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     if (widget.initialAddress != null) {
       _addressCtrl.text = widget.initialAddress!;
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = context.read<AuthProvider>().user;
-      if (user?.phone != null && _phoneCtrl.text.isEmpty) {
-        setState(() {
-          _phoneCtrl.text = user!.phone!;
-        });
-      }
-    });
   }
 
   @override

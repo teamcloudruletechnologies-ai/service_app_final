@@ -10,6 +10,8 @@ const upload = require("../middlewares/upload.middleware");
 const router = express.Router();
 
 router.get("/services/categories", controller.listCategories);
+// GET sub-categories of a specific parent category
+router.get("/services/categories/:id/subcategories", [param("id").isInt()], validate, controller.listSubCategories);
 router.get("/banners", controller.listActiveBanners);
 
 router.get(
@@ -130,6 +132,24 @@ router.patch(
   ],
   validate,
   controller.updateMyBookingStatus
+);
+
+router.post(
+  "/bookings/:id/start-job",
+  allowRoles(roles.WORKER, roles.ADMIN),
+  upload.single("photo"),
+  [param("id").isInt()],
+  validate,
+  controller.startJobPhoto
+);
+
+router.post(
+  "/bookings/:id/complete-job",
+  allowRoles(roles.WORKER, roles.ADMIN),
+  upload.single("photo"),
+  [param("id").isInt()],
+  validate,
+  controller.completeJobPhoto
 );
 
 const paymentController = require("../controllers/payment.controller");

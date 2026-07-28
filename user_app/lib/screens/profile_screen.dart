@@ -206,10 +206,20 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Center(
             child: Hero(
-              tag: 'profile_avatar_hero',
+              // FIX: was 'profile_avatar_hero' which collided with the same
+              // tag used in bookings_screen.dart. Because MainShell uses an
+              // IndexedStack, all tab screens (Home, Bookings, Profile, Menu)
+              // stay mounted simultaneously (just offstage), so two Hero
+              // widgets sharing one tag existed in the tree at the same time.
+              // That triggered "multiple heroes that share the same tag
+              // within a subtree", which cascaded into the layout crashes
+              // (infinite width / RenderBox not laid out / blank bookings
+              // list) seen in the logs. Giving each screen's Hero its own
+              // unique tag fixes it.
+              tag: 'profile_avatar_hero_profile',
               child: CircleAvatar(
                 radius: 48,
-                backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
+                backgroundColor: AppTheme.primary.withOpacity(0.15),
                 child: Text(
                   (user?.name.isNotEmpty == true ? user!.name[0] : 'U').toUpperCase(),
                   style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: AppTheme.primary),
@@ -222,6 +232,32 @@ class ProfileScreen extends StatelessWidget {
             child: Text(
               user?.name ?? 'User',
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.amber.shade200, width: 1.5),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.stars_rounded, color: Colors.amber, size: 20),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${user?.credits ?? 0} Credits',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.amber.shade900,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 24),

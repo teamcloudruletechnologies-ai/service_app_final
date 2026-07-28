@@ -161,6 +161,12 @@ class AuthProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
+  Future<void> updateWorkerLocation(double lat, double lng, {String? pincode}) async {
+    try {
+      await _api.updateWorkerLocation(lat, lng, pincode: pincode);
+    } catch (_) {}
+  }
+
   Future<void> logout() async {
     await _api.logout();
     notifyListeners();

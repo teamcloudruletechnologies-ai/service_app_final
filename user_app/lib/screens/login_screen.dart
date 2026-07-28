@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../providers/booking_provider.dart';
 import 'main_shell.dart';
 import 'user_onboarding_screen.dart';
 import '../models/models.dart';
@@ -92,14 +93,28 @@ class _LoginScreenState extends State<LoginScreen> {
   void _onGetOtpPressed() {
     if (!_phoneFormKey.currentState!.validate()) return;
     
+    // Auto fill test OTP 123456 for smooth testing
+    final testOtp = '123456';
+    for (int i = 0; i < 6; i++) {
+      _otpControllers[i].text = testOtp[i];
+    }
+
     setState(() {
       _showOtpStep = true;
     });
     _startResendTimer();
     
-    // Auto focus first OTP field
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('🔑 Test OTP 123456 auto-filled! Tap Verify OTP to proceed.'),
+        duration: Duration(seconds: 4),
+        backgroundColor: Color(0xFF4A5343),
+      ),
+    );
+    
+    // Auto focus last OTP field or verify button
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _otpFocusNodes[0].requestFocus();
+      _otpFocusNodes[5].requestFocus();
     });
   }
 
@@ -149,6 +164,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (res != null) {
       final isNew = res['is_new'] as bool? ?? false;
       final account = UserAccount.fromJson(res['account'] as Map<String, dynamic>);
+
+      // Sync fresh bookings for the logged in user
+      context.read<BookingProvider>().loadBookings();
 
       if (isNew || account.needsOnboarding) {
         Navigator.of(context).pushReplacement(
@@ -445,7 +463,39 @@ class _LoginScreenState extends State<LoginScreen> {
             letterSpacing: -0.2,
           ),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: 16),
+        // Demo OTP helper banner
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF4A5343).withOpacity(0.08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF4A5343).withOpacity(0.2)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.vpn_key_outlined, size: 18, color: Color(0xFF4A5343)),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Demo Mode: OTP is 123456',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  final testOtp = '123456';
+                  for (int i = 0; i < 6; i++) {
+                    _otpControllers[i].text = testOtp[i];
+                  }
+                  setState(() {});
+                },
+                child: const Text('Auto-fill', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF4A5343))),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 20),
 
         // 6-digit OTP input boxes
         Row(

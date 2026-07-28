@@ -230,9 +230,34 @@ async function initDb() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS user_addresses (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      title VARCHAR(60) NOT NULL DEFAULT 'Home',
+      address_line TEXT NOT NULL,
+      city VARCHAR(100),
+      state VARCHAR(100),
+      pincode VARCHAR(20),
+      landmark TEXT,
+      lat NUMERIC,
+      lng NUMERIC,
+      is_default BOOLEAN NOT NULL DEFAULT FALSE,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS start_photo_url TEXT;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS completion_photo_url TEXT;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS start_notes TEXT;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS completion_notes TEXT;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS job_started_at TIMESTAMPTZ;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS job_completed_at TIMESTAMPTZ;
+
     -- Add address fields to users if missing
     ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(100);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 0;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS otp VARCHAR(10);
 
     ALTER TABLE services ADD COLUMN IF NOT EXISTS estimated_time INTEGER DEFAULT 60;
 

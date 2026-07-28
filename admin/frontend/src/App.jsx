@@ -10,7 +10,6 @@ import Services from './pages/Services';
 import Kyc from './pages/Kyc';
 import Workers from './pages/Workers';
 import Support from './pages/Support';
-import Locations from './pages/Locations';
 import Notifications from './pages/Notifications';
 import Roles from './pages/Roles';
 import Banners from './pages/Banners';
@@ -211,8 +210,6 @@ export default function App() {
         return <Workers />;
       case 'support':
         return <Support />;
-      case 'locations':
-        return <Locations />;
       case 'notifications':
         return <Notifications />;
       case 'roles':

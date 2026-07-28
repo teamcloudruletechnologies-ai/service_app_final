@@ -52,12 +52,79 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
   }
 
   Future<void> _updateStatus(String status) async {
+    String? otpInput;
+    if (status == 'in_progress' || status == 'completed') {
+      final isStart = status == 'in_progress';
+      otpInput = await showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          final ctrl = TextEditingController();
+          final formKey = GlobalKey<FormState>();
+          return AlertDialog(
+            title: Text(isStart ? 'Enter Job Start OTP' : 'Enter Job Completion OTP', style: const TextStyle(fontWeight: FontWeight.bold)),
+            content: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    isStart
+                        ? 'Please ask the customer for the 4-digit code shown on their booking card to verify your arrival.'
+                        : 'Please ask the customer for the 4-digit code shown on their booking card to verify completion.',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: ctrl,
+                    keyboardType: TextInputType.number,
+                    maxLength: 4,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 8),
+                    decoration: InputDecoration(
+                      hintText: '0000',
+                      counterText: '',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    validator: (v) {
+                      if (v == null || v.trim().length != 4) {
+                        return 'Enter 4-digit code';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (formKey.currentState!.validate()) {
+                    Navigator.pop(ctx, ctrl.text.trim());
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
+                child: Text(isStart ? 'Verify & Start' : 'Verify & Complete', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          );
+        },
+      );
+      if (otpInput == null) return; // Cancelled
+    }
+
     setState(() {
       _updating = true;
     });
 
     final bookingProv = context.read<BookingProvider>();
-    final ok = await bookingProv.updateBookingStatus(widget.bookingId, status);
+    final ok = await bookingProv.updateBookingStatus(widget.bookingId, status, otp: otpInput);
 
     if (!mounted) return;
     setState(() {

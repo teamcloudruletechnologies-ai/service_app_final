@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/models.dart';
 import '../services/api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  AuthProvider(this._api);
+  AuthProvider(this._api) {
+    _api.onUnauthorized = () {
+      notifyListeners();
+    };
+  }
 
   final ApiService _api;
   bool loading = true;
   String? error;
+  double? latitude;
+  double? longitude;
 
   bool get isLoggedIn => _api.isLoggedIn;
   UserAccount? get user => _api.account;
@@ -17,6 +24,9 @@ class AuthProvider extends ChangeNotifier {
     loading = true;
     notifyListeners();
     await _api.init();
+    final prefs = await SharedPreferences.getInstance();
+    latitude = prefs.getDouble('user_lat');
+    longitude = prefs.getDouble('user_lng');
     if (_api.isLoggedIn) {
       try {
         await _api.fetchProfile();
@@ -25,6 +35,15 @@ class AuthProvider extends ChangeNotifier {
       }
     }
     loading = false;
+    notifyListeners();
+  }
+
+  Future<void> saveLocationCoordinates(double lat, double lng) async {
+    latitude = lat;
+    longitude = lng;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('user_lat', lat);
+    await prefs.setDouble('user_lng', lng);
     notifyListeners();
   }
 

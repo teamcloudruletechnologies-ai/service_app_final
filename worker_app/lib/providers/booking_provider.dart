@@ -70,9 +70,9 @@ class BookingProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateBookingStatus(int id, String status) async {
+  Future<bool> updateBookingStatus(int id, String status, {String? otp}) async {
     try {
-      final updated = await _api.updateBookingStatus(id, status);
+      final updated = await _api.updateBookingStatus(id, status, otp: otp);
       bookings = bookings.map((b) => b.id == id ? updated : b).toList();
       notifyListeners();
       return true;

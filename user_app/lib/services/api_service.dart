@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +23,7 @@ class ApiService {
 
   String? _token;
   UserAccount? _account;
+  void Function()? onUnauthorized;
 
   String? get token => _token;
   UserAccount? get account => _account;
@@ -81,6 +83,7 @@ class ApiService {
     }
     if (response.statusCode == 401) {
       logout();
+      onUnauthorized?.call();
     }
     final message = body is Map ? (body['message'] as String? ?? 'Request failed') : 'Request failed';
     throw ApiException(message, statusCode: response.statusCode);
@@ -229,6 +232,20 @@ class ApiService {
     return _parsePaged(data['data'] as Map<String, dynamic>, ServiceCategory.fromJson);
   }
 
+  Future<List<ServiceCategory>> fetchSubCategories(int categoryId) async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/services/categories/$categoryId/subcategories'),
+      headers: _headers(),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    // Response is paged, extract rows
+    final payload = data['data'] as Map<String, dynamic>;
+    final rows = (payload['rows'] as List? ?? [])
+        .map((e) => ServiceCategory.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return rows;
+  }
+
   Future<PagedResult<BannerItem>> fetchBanners() async {
     final response = await http.get(
       Uri.parse('${ApiConfig.baseUrl}/app/banners?limit=10'),
@@ -285,7 +302,13 @@ class ApiService {
     if (status != null) params['status'] = status;
 
     final uri = Uri.parse('${ApiConfig.baseUrl}/app/bookings').replace(queryParameters: params);
+    debugPrint("--------------------------------------------------");
+    debugPrint("FETCH BOOKINGS URI: $uri");
+    debugPrint("FETCH BOOKINGS TOKEN: $_token");
     final response = await http.get(uri, headers: _headers(auth: true));
+    debugPrint("FETCH BOOKINGS STATUS CODE: ${response.statusCode}");
+    debugPrint("FETCH BOOKINGS BODY: ${response.body}");
+    debugPrint("--------------------------------------------------");
     final data = _decode(response) as Map<String, dynamic>;
     return _parsePaged(data['data'] as Map<String, dynamic>, BookingItem.fromJson);
   }
