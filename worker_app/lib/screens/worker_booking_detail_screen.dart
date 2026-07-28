@@ -8,6 +8,7 @@ import '../providers/booking_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
+import 'worker_create_invoice_screen.dart';
 
 class WorkerBookingDetailScreen extends StatefulWidget {
   const WorkerBookingDetailScreen({super.key, required this.bookingId});
@@ -478,7 +479,8 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
 
   Widget? _buildActionButton() {
     if (_booking == null) return null;
-    final status = _booking!.status;
+    final b = _booking!;
+    final status = b.status;
 
     String label;
     Color color;
@@ -489,13 +491,26 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
       color = AppTheme.olive;
       onPressed = () => _updateStatus('confirmed');
     } else if (status == 'confirmed') {
-      label = 'Start Service';
+      label = 'Enter Customer OTP to Start';
       color = Colors.blue;
-      onPressed = () => _updateStatus('in_progress');
+      onPressed = () => _promptOtpAndStart();
     } else if (status == 'in_progress') {
-      label = 'Mark Complete';
-      color = AppTheme.olive;
-      onPressed = () => _updateStatus('completed');
+      label = 'Generate Custom Invoice & Finish';
+      color = AppTheme.primary;
+      onPressed = () async {
+        final res = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => WorkerCreateInvoiceScreen(
+              bookingId: b.id,
+              serviceName: b.serviceName ?? 'Service #${b.serviceId}',
+              customerName: b.userName ?? 'Customer',
+            ),
+          ),
+        );
+        if (res == true) {
+          _loadBooking();
+        }
+      };
     } else {
       return null;
     }
@@ -517,6 +532,46 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _promptOtpAndStart() async {
+    final ctrl = TextEditingController();
+    final otp = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Enter Customer Start OTP', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Ask the customer for the 4-digit OTP shown on their app to verify arrival.'),
+            const SizedBox(height: 14),
+            TextField(
+              controller: ctrl,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'e.g. 4829',
+                counterText: '',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
+            child: const Text('Verify & Start'),
+          ),
+        ],
+      ),
+    );
+
+    if (otp != null && otp.isNotEmpty) {
+      _updateStatus('in_progress', otp: otp);
+    }
   }
 }
 

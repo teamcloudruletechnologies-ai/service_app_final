@@ -33,11 +33,35 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = context.read<AuthProvider>();
       final catalog = context.read<CatalogProvider>();
       catalog.loadBanners();
       catalog.loadCategories();
       catalog.loadServices();
+
+      if (auth.latitude == null || auth.longitude == null) {
+        _autoFetchGpsLocation(auth);
+      }
     });
+  }
+
+  Future<void> _autoFetchGpsLocation(AuthProvider auth) async {
+    try {
+      LocationPermission perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.whileInUse || perm == LocationPermission.always) {
+        final pos = await Geolocator.getCurrentPosition(
+          timeLimit: const Duration(seconds: 6),
+        );
+        auth.setLocation(
+          address: 'Current Location (GPS)',
+          lat: pos.latitude,
+          lng: pos.longitude,
+        );
+      }
+    } catch (_) {}
   }
 
   @override

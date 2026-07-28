@@ -372,6 +372,49 @@ async function completeJobPhoto(req, res, next) {
   }
 }
 
+async function submitWorkerInvoice(req, res, next) {
+  try {
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) return error(res, "Booking not found", 404);
+
+    if (req.auth.role === "worker" && booking.worker_id && booking.worker_id !== req.auth.id) {
+      return error(res, "Forbidden", 403);
+    }
+
+    const { items, totalAmount } = req.body;
+    const itemsJson = typeof items === 'string' ? items : JSON.stringify(items || []);
+    const amountVal = parseFloat(totalAmount || 0);
+
+    const db = require("../config/db");
+    await db.query(
+      `UPDATE bookings
+       SET amount = $1,
+           completion_notes = $2,
+           status = 'completed',
+           job_completed_at = NOW(),
+           updated_at = NOW()
+       WHERE id = $3`,
+      [amountVal, itemsJson, req.params.id]
+    );
+
+    const invoiceNum = `INV-${Date.now()}-${req.params.id}`;
+    const platformFee = amountVal * 0.10;
+    const workerPayout = amountVal - platformFee;
+
+    await db.query(
+      `INSERT INTO invoices (booking_id, user_id, worker_id, invoice_number, status, amount, platform_fee, worker_payout, created_at)
+       VALUES ($1, $2, $3, $4, 'pending', $5, $6, $7, NOW())
+       ON CONFLICT DO NOTHING`,
+      [req.params.id, booking.user_id, booking.worker_id, invoiceNum, amountVal, platformFee, workerPayout]
+    );
+
+    const updated = await Booking.findById(req.params.id);
+    return success(res, "Invoice created and job completed successfully", updated);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   listCategories,
   listServices,
@@ -388,4 +431,5 @@ module.exports = {
   listSubCategories,
   startJobPhoto,
   completeJobPhoto,
+  submitWorkerInvoice,
 };
