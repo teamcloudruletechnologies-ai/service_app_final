@@ -152,14 +152,6 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.grey.shade200),
                         ),
-<<<<<<< HEAD
-                      );
-                    }
-                  },
-                  child: Text(_service!.price > 0
-                      ? 'Book Now — ₹${_service!.price.toStringAsFixed(0)}'
-                      : 'Book Now'),
-=======
                         child: Row(
                           children: [
                             const Icon(Icons.location_on, color: _red, size: 18),
@@ -210,14 +202,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                 height: 22,
                                 child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                               )
-                            : const Text(
-                                'Book Now',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            : Text(
+                                _service!.price > 0
+                                    ? 'Book Now — ₹${_service!.price.toStringAsFixed(0)}'
+                                    : 'Book Now',
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                       ),
                     ),
                   ],
->>>>>>> 14367102091450670cf4cc74007397d6827b5efa
                 ),
               ),
             ),
@@ -242,113 +235,87 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           else
             _placeholder(),
 
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Category chip
-                  if (service.categoryName != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: _red.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        service.categoryName!,
-                        style: const TextStyle(
-                          color: _red,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Category chip
+                if (service.categoryName != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _red.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      service.categoryName!,
+                      style: const TextStyle(
+                        color: _red,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
                       ),
                     ),
-                  const SizedBox(height: 10),
-
-                  // Name
-                  Text(
-                    service.name,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
                   ),
+                const SizedBox(height: 10),
 
-<<<<<<< HEAD
                 // Name
                 Text(
                   service.name,
-<<<<<<< HEAD
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                if (service.price > 0) ...[
-                  Text(
-                    '₹${service.price.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
-                const Text('About this service', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-=======
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
                 ),
-=======
-                  const SizedBox(height: 12),
->>>>>>> b3a5e4517e74f269132f8b5f42b2904eb136324f
 
-                  // Rating row + Estimated time
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Color(0xFFFFC107), size: 18),
+                const SizedBox(height: 12),
+
+                // Rating row + Estimated time
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: Color(0xFFFFC107), size: 18),
+                    const SizedBox(width: 4),
+                    Text(
+                      service.avgRating.toStringAsFixed(1),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                    if (service.totalReviews > 0) ...[
                       const SizedBox(width: 4),
                       Text(
-                        service.avgRating.toStringAsFixed(1),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                      ),
-                      if (service.totalReviews > 0) ...[
-                        const SizedBox(width: 4),
-                        Text(
-                          '(${service.totalReviews} reviews)',
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
-                        ),
-                      ],
-                      const SizedBox(width: 12),
-                      Container(width: 1, height: 16, color: Colors.grey.shade300),
-                      const SizedBox(width: 12),
-                      Icon(Icons.access_time, size: 16, color: Colors.grey.shade600),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${service.estimatedTime} min',
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500),
+                        '(${service.totalReviews} reviews)',
+                        style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
                       ),
                     ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Price
-                  Text(
-                    '₹${service.price.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF111827),
+                    const SizedBox(width: 12),
+                    Container(width: 1, height: 16, color: Colors.grey.shade300),
+                    const SizedBox(width: 12),
+                    Icon(Icons.access_time, size: 16, color: Colors.grey.shade600),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${service.estimatedTime} min',
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontWeight: FontWeight.w500),
                     ),
-                  ),
+                  ],
+                ),
 
-                  const SizedBox(height: 20),
-                  Divider(color: Colors.grey.shade100),
-                  const SizedBox(height: 16),
+                const SizedBox(height: 16),
+
+                // Price
+                Text(
+                  '₹${service.price.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF111827),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+                Divider(color: Colors.grey.shade100),
+                const SizedBox(height: 16),
 
                 // About section
                 const Text(
                   'About this service',
                   style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                 ),
->>>>>>> 14367102091450670cf4cc74007397d6827b5efa
                 const SizedBox(height: 8),
                 Text(
                   service.description ?? 'Professional service delivered at your doorstep by verified experts.',
