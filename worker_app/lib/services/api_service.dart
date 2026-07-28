@@ -99,6 +99,26 @@ class ApiService {
     );
   }
 
+  Future<String> uploadFile(String filePath) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/upload');
+    final request = http.MultipartRequest('POST', uri);
+    if (_token != null) {
+      request.headers['Authorization'] = 'Bearer $_token';
+    }
+    request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final json = jsonDecode(response.body);
+      if (json['success'] == true && json['data'] != null && json['data']['url'] != null) {
+        return json['data']['url'] as String;
+      }
+    }
+    throw ApiException('Failed to upload image', statusCode: response.statusCode);
+  }
+
   Future<Map<String, dynamic>> login(String login, String password, {String role = 'user'}) async {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/auth/login'),

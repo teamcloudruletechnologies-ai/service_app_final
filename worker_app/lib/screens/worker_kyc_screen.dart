@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
@@ -36,7 +37,17 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
     super.dispose();
   }
 
-  Future<void> _simulateUpload(String docType) async {
+  Future<void> _pickAndUpload(String docType) async {
+    final picker = ImagePicker();
+    // Allow user to choose Camera or Gallery for documents / selfie
+    final source = docType == 'selfie' ? ImageSource.camera : ImageSource.gallery;
+    final pickedFile = await picker.pickImage(
+      source: source,
+      imageQuality: 85,
+    );
+
+    if (pickedFile == null) return;
+
     setState(() {
       if (docType == 'aadhaar') _uploadingAadhaar = true;
       if (docType == 'pan') _uploadingPan = true;
@@ -44,34 +55,46 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
       if (docType == 'selfie') _uploadingSelfie = true;
     });
 
-    // Simulate upload delay
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final api = context.read<ApiService>();
+      final uploadedUrl = await api.uploadFile(pickedFile.path);
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    setState(() {
-      final mockUrl = '/uploads/kyc/mock_${docType}_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      if (docType == 'aadhaar') {
-        _uploadingAadhaar = false;
-        _aadhaarUrl = mockUrl;
-      }
-      if (docType == 'pan') {
-        _uploadingPan = false;
-        _panUrl = mockUrl;
-      }
-      if (docType == 'passbook') {
-        _uploadingPassbook = false;
-        _bankPassbookUrl = mockUrl;
-      }
-      if (docType == 'selfie') {
-        _uploadingSelfie = false;
-        _selfieUrl = mockUrl;
-      }
-    });
+      setState(() {
+        if (docType == 'aadhaar') {
+          _uploadingAadhaar = false;
+          _aadhaarUrl = uploadedUrl;
+        }
+        if (docType == 'pan') {
+          _uploadingPan = false;
+          _panUrl = uploadedUrl;
+        }
+        if (docType == 'passbook') {
+          _uploadingPassbook = false;
+          _bankPassbookUrl = uploadedUrl;
+        }
+        if (docType == 'selfie') {
+          _uploadingSelfie = false;
+          _selfieUrl = uploadedUrl;
+        }
+      });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${docType.toUpperCase()} document uploaded successfully (simulated)')),
-    );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${docType.toUpperCase()} image uploaded successfully!')),
+      );
+    } catch (err) {
+      if (!mounted) return;
+      setState(() {
+        if (docType == 'aadhaar') _uploadingAadhaar = false;
+        if (docType == 'pan') _uploadingPan = false;
+        if (docType == 'passbook') _uploadingPassbook = false;
+        if (docType == 'selfie') _uploadingSelfie = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Upload failed: ${err.toString()}')),
+      );
+    }
   }
 
   Future<void> _submit() async {
@@ -169,7 +192,7 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
                   label: 'Aadhaar Front & Back Photo',
                   hasFile: _aadhaarUrl != null,
                   loading: _uploadingAadhaar,
-                  onTap: () => _simulateUpload('aadhaar'),
+                  onTap: () => _pickAndUpload('aadhaar'),
                 ),
                 const SizedBox(height: 24),
 
@@ -197,7 +220,7 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
                   label: 'PAN Card Front Photo',
                   hasFile: _panUrl != null,
                   loading: _uploadingPan,
-                  onTap: () => _simulateUpload('pan'),
+                  onTap: () => _pickAndUpload('pan'),
                 ),
                 const SizedBox(height: 24),
 
@@ -223,7 +246,7 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
                   label: 'Bank Passbook / Cancelled Cheque Photo',
                   hasFile: _bankPassbookUrl != null,
                   loading: _uploadingPassbook,
-                  onTap: () => _simulateUpload('passbook'),
+                  onTap: () => _pickAndUpload('passbook'),
                 ),
                 const SizedBox(height: 24),
 
@@ -234,7 +257,7 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
                   label: 'Take Selfie Live Photo',
                   hasFile: _selfieUrl != null,
                   loading: _uploadingSelfie,
-                  onTap: () => _simulateUpload('selfie'),
+                  onTap: () => _pickAndUpload('selfie'),
                 ),
                 const SizedBox(height: 32),
 
