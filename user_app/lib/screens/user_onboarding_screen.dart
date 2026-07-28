@@ -125,17 +125,58 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                           height: 1.4,
                         ),
                       ),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 16),
+                      // Profile Setup Form Fields
+                      TextFormField(
+                        controller: _nameCtrl,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Enter your Full Name',
+                          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                          filled: true,
+                          fillColor: Colors.white.withValues(alpha: 0.15),
+                          prefixIcon: const Icon(Icons.person_outline, color: Colors.white),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _emailCtrl,
+                        keyboardType: TextInputType.emailAddress,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Enter your Email (Optional)',
+                          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                          filled: true,
+                          fillColor: Colors.white.withValues(alpha: 0.15),
+                          prefixIcon: const Icon(Icons.email_outlined, color: Colors.white),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                       // Bottom CTA Button Bar
                       GestureDetector(
                         onTap: () async {
                           final auth = context.read<AuthProvider>();
-                          if (_nameCtrl.text.trim().isNotEmpty) {
-                            await auth.updateUserProfile(
-                              name: _nameCtrl.text.trim(),
-                              email: _emailCtrl.text.trim(),
+                          final name = _nameCtrl.text.trim();
+                          if (name.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please enter your full name to set up profile')),
                             );
+                            return;
                           }
+                          await auth.updateUserProfile(
+                            name: name,
+                            email: _emailCtrl.text.trim(),
+                          );
                           if (mounted) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(builder: (_) => const MainShell()),
@@ -160,7 +201,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: const [
                               Text(
-                                'Get Started',
+                                'Save Profile & Get Started',
                                 style: TextStyle(
                                   color: AppTheme.primary,
                                   fontWeight: FontWeight.w900,

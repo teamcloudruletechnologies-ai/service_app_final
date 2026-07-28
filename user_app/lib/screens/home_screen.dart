@@ -47,21 +47,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _autoFetchGpsLocation(AuthProvider auth) async {
     try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
       LocationPermission perm = await Geolocator.checkPermission();
       if (perm == LocationPermission.denied) {
         perm = await Geolocator.requestPermission();
       }
       if (perm == LocationPermission.whileInUse || perm == LocationPermission.always) {
         final pos = await Geolocator.getCurrentPosition(
-          timeLimit: const Duration(seconds: 6),
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 10),
         );
-        auth.setLocation(
-          address: 'Current Location (GPS)',
-          lat: pos.latitude,
-          lng: pos.longitude,
-        );
+        await auth.saveLocationCoordinates(pos.latitude, pos.longitude);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint("Auto GPS Fetch error: $e");
+    }
   }
 
   @override

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../config/api_config.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'location_picker_screen.dart';
 import 'nearby_workers_screen.dart';
@@ -299,14 +300,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: AppTheme.sandal.withValues(alpha: 0.3),
+                      color: const Color(0xFFE3D0BA).withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
-                      children: const [
-                        Icon(Icons.info_outline_rounded, color: AppTheme.primary, size: 20),
-                        SizedBox(width: 10),
-                        Expanded(
+                      children: [
+                        const Icon(Icons.info_outline_rounded, color: AppTheme.primary, size: 20),
+                        const SizedBox(width: 10),
+                        const Expanded(
                           child: Text(
                             'Price set after work inspection & invoice by partner',
                             style: TextStyle(
