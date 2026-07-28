@@ -298,13 +298,28 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
                 const SizedBox(height: 16),
 
-                  // Price
-                  Text(
-                    '₹${service.price.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF111827),
+                  // Dynamic Inspection Price Note
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE3D0BA).withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline_rounded, color: AppTheme.primary, size: 20),
+                        const SizedBox(width: 10),
+                        const Expanded(
+                          child: Text(
+                            'Price set after work inspection & invoice by partner',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 

@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
 import '../theme/app_theme.dart';
+import 'main_shell.dart';
 import 'payment_screen.dart';
 
 class BookingFormScreen extends StatefulWidget {
@@ -82,14 +83,14 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     if (booking != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Booking placed! Proceeding to payment...'),
-          backgroundColor: Colors.green,
+          content: Text('🎉 Booking submitted successfully!'),
+          backgroundColor: AppTheme.primary,
         ),
       );
-      // Navigate to payment screen so user can pay immediately
+      // Navigate to Bookings Status Screen
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => PaymentScreen(booking: booking),
+          builder: (_) => const MainShell(initialTab: 1),
         ),
       );
     } else {
@@ -122,13 +123,11 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(widget.service.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                      if (widget.service.price > 0) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          '₹${widget.service.price.toStringAsFixed(0)}',
-                          style: const TextStyle(color: AppTheme.primary, fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                      ],
+                      const SizedBox(height: 8),
+                      Text(
+                        '₹${widget.service.price.toStringAsFixed(0)}',
+                        style: const TextStyle(color: AppTheme.primary, fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),

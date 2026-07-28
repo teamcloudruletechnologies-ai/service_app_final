@@ -168,15 +168,10 @@ class _LoginScreenState extends State<LoginScreen> {
       // Sync fresh bookings for the logged in user
       context.read<BookingProvider>().loadBookings();
 
-      if (isNew || account.needsOnboarding) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const UserOnboardingScreen()),
-        );
-      } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainShell()),
-        );
-      }
+      // Always navigate to Profile Setup screen after OTP verification
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const UserOnboardingScreen()),
+      );
     } else {
       final String? errorText = auth.error ?? localError;
       ScaffoldMessenger.of(context).showSnackBar(
