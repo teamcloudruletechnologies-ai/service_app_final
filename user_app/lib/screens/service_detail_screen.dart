@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../config/api_config.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'location_picker_screen.dart';
 import 'nearby_workers_screen.dart';
@@ -297,15 +298,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
                 const SizedBox(height: 16),
 
-                // Price
-                Text(
-                  '₹${service.price.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF111827),
+                  // Price
+                  Text(
+                    '₹${service.price.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF111827),
+                    ),
                   ),
-                ),
 
                 const SizedBox(height: 20),
                 Divider(color: Colors.grey.shade100),

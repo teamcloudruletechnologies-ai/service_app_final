@@ -152,6 +152,14 @@ router.post(
   controller.completeJobPhoto
 );
 
+router.post(
+  "/bookings/:id/submit-invoice",
+  allowRoles(roles.WORKER, roles.ADMIN),
+  [param("id").isInt(), body("totalAmount").isNumeric()],
+  validate,
+  controller.submitWorkerInvoice
+);
+
 const paymentController = require("../controllers/payment.controller");
 const reviewController = require("../controllers/review.controller");
 

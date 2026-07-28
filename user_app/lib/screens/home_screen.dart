@@ -33,11 +33,37 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = context.read<AuthProvider>();
       final catalog = context.read<CatalogProvider>();
       catalog.loadBanners();
       catalog.loadCategories();
       catalog.loadServices();
+
+      if (auth.latitude == null || auth.longitude == null) {
+        _autoFetchGpsLocation(auth);
+      }
     });
+  }
+
+  Future<void> _autoFetchGpsLocation(AuthProvider auth) async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      LocationPermission perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.whileInUse || perm == LocationPermission.always) {
+        final pos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 10),
+        );
+        await auth.saveLocationCoordinates(pos.latitude, pos.longitude);
+      }
+    } catch (e) {
+      debugPrint("Auto GPS Fetch error: $e");
+    }
   }
 
   @override
