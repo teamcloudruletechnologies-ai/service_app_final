@@ -212,24 +212,47 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Service Fee', style: TextStyle(color: Colors.grey.shade600)),
-                              Text('₹${widget.booking.amount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                          const Divider(height: 24),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Total Amount', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                              Text(
-                                '₹${widget.booking.amount.toStringAsFixed(2)}',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppTheme.primary),
+                          if (widget.booking.amount > 0) ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Service Fee', style: TextStyle(color: Colors.grey.shade600)),
+                                Text('₹${widget.booking.amount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w600)),
+                              ],
+                            ),
+                            const Divider(height: 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Total Amount', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                Text(
+                                  '₹${widget.booking.amount.toStringAsFixed(2)}',
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppTheme.primary),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            const Divider(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primary.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ],
-                          ),
+                              child: Row(
+                                children: const [
+                                  Icon(Icons.info_outline, color: AppTheme.primary, size: 20),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      'Final price will be provided by the service professional after inspection.',
+                                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -255,7 +278,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Secure Payments via Razorpay',
+                                  widget.booking.amount > 0 ? 'Secure Payments via Razorpay' : 'Verified Service Guarantee',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
@@ -264,7 +287,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Supports Cards, UPI, Netbanking, and Wallets. Your credentials are never stored on our servers.',
+                                  widget.booking.amount > 0
+                                      ? 'Supports Cards, UPI, Netbanking, and Wallets. Your credentials are never stored on our servers.'
+                                      : 'Service professional will inspect the site and submit a detailed bill before work starts.',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.green.shade700,
@@ -280,7 +305,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                   const Spacer(),
                   ElevatedButton(
-                    onPressed: _processPayment,
+                    onPressed: () {
+                      if (widget.booking.amount > 0) {
+                        _processPayment();
+                      } else {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const MainShell(initialTab: 1)),
+                          (_) => false,
+                        );
+                      }
+                    },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -289,10 +323,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.payment, color: Colors.white),
+                        Icon(widget.booking.amount > 0 ? Icons.payment : Icons.check_circle, color: Colors.white),
                         const SizedBox(width: 8),
                         Text(
-                          'Proceed to Pay ₹${widget.booking.amount.toStringAsFixed(0)}',
+                          widget.booking.amount > 0
+                              ? 'Proceed to Pay ₹${widget.booking.amount.toStringAsFixed(0)}'
+                              : 'Confirm Booking (Inspection Based)',
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ],

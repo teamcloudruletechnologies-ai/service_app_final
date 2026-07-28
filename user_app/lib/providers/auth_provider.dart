@@ -16,6 +16,14 @@ class AuthProvider extends ChangeNotifier {
   String? error;
   double? latitude;
   double? longitude;
+  String? house;
+  String? area;
+  String? city;
+  String? district;
+  String? state;
+  String? pincode;
+  String? gender;
+  String? fullAddress;
 
   bool get isLoggedIn => _api.isLoggedIn;
   UserAccount? get user => _api.account;
@@ -27,6 +35,14 @@ class AuthProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     latitude = prefs.getDouble('user_lat');
     longitude = prefs.getDouble('user_lng');
+    house = prefs.getString('user_house');
+    area = prefs.getString('user_area');
+    city = prefs.getString('user_city');
+    district = prefs.getString('user_district');
+    state = prefs.getString('user_state');
+    pincode = prefs.getString('user_pincode');
+    gender = prefs.getString('user_gender');
+    fullAddress = prefs.getString('user_full_address');
     if (_api.isLoggedIn) {
       try {
         await _api.fetchProfile();
@@ -44,6 +60,43 @@ class AuthProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('user_lat', lat);
     await prefs.setDouble('user_lng', lng);
+    notifyListeners();
+  }
+
+  Future<void> saveFullProfileLocation({
+    required double lat,
+    required double lng,
+    required String houseVal,
+    required String areaVal,
+    required String cityVal,
+    required String districtVal,
+    required String stateVal,
+    required String pincodeVal,
+    required String fullAddr,
+    String? genderVal,
+  }) async {
+    latitude = lat;
+    longitude = lng;
+    house = houseVal;
+    area = areaVal;
+    city = cityVal;
+    district = districtVal;
+    state = stateVal;
+    pincode = pincodeVal;
+    fullAddress = fullAddr;
+    gender = genderVal;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('user_lat', lat);
+    await prefs.setDouble('user_lng', lng);
+    await prefs.setString('user_house', houseVal);
+    await prefs.setString('user_area', areaVal);
+    await prefs.setString('user_city', cityVal);
+    await prefs.setString('user_district', districtVal);
+    await prefs.setString('user_state', stateVal);
+    await prefs.setString('user_pincode', pincodeVal);
+    await prefs.setString('user_full_address', fullAddr);
+    if (genderVal != null) await prefs.setString('user_gender', genderVal);
     notifyListeners();
   }
 

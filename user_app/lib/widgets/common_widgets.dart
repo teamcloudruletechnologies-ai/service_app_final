@@ -156,7 +156,7 @@ class ServiceCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Price badge at bottom-right of image
+                    // Verified badge at bottom-right of image
                     Positioned(
                       bottom: 8,
                       right: 8,
@@ -166,15 +166,15 @@ class ServiceCard extends StatelessWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(6),
                           boxShadow: [
-                            BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
+                            BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
                           ],
                         ),
-                        child: Text(
-                          '₹${service.price.toStringAsFixed(0)}',
-                          style: const TextStyle(
+                        child: const Text(
+                          'Inspection Based',
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                            color: Color(0xFF1A1A1A),
+                            fontSize: 10,
+                            color: AppTheme.primary,
                           ),
                         ),
                       ),
@@ -388,11 +388,11 @@ class BookingCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _statusColor(booking.status).withOpacity(0.12),
+                      color: _statusColor(booking.status).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      booking.status.replaceAll('_', ' ').toUpperCase(),
+                      _getFormattedStatus(booking.status),
                       style: TextStyle(
                         color: _statusColor(booking.status),
                         fontSize: 11,
@@ -437,11 +437,11 @@ class BookingCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '₹${booking.amount.toStringAsFixed(0)}',
+                    booking.amount > 0 ? '₹${booking.amount.toStringAsFixed(0)}' : 'Price after inspection',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       color: AppTheme.primary,
-                      fontSize: 16,
+                      fontSize: 13,
                     ),
                   ),
                 ],
@@ -640,5 +640,34 @@ class BookingCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+String _getFormattedStatus(String status) {
+  switch (status) {
+    case 'pending':
+      return 'SEARCHING FOR WORKER';
+    case 'assigned':
+      return 'WORKER ASSIGNED';
+    case 'confirmed':
+      return 'WORKER ACCEPTED';
+    case 'on_the_way':
+      return 'WORKER ON THE WAY';
+    case 'reached':
+      return 'WORKER REACHED';
+    case 'otp_pending':
+      return 'OTP VERIFICATION PENDING';
+    case 'in_progress':
+      return 'WORK STARTED';
+    case 'invoice_ready':
+      return 'INVOICE READY';
+    case 'payment_pending':
+      return 'PAYMENT PENDING';
+    case 'completed':
+      return 'BOOKING COMPLETED';
+    case 'cancelled':
+      return 'CANCELLED';
+    default:
+      return status.replaceAll('_', ' ').toUpperCase();
   }
 }
