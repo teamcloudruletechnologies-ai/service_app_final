@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // ─── Brand Palette ─────────────────────────────────────────────
-  static const primary   = Color(0xFF1A1A1A); // Pure Matte Black
+  static const primary   = Color(0xFF006837); // Rich Emerald Green
   static const sandal    = Color(0xFFE3D0BA); // Warm Sandal
-  static const olive     = Color(0xFF4A5343); // Muted Olive Green (accent/online)
+  static const olive     = Color(0xFF4A5343); // Muted Olive Green
   static const milkWhite = Color(0xFFF5F5F3); // Crisp Milk White
+  static const matteBlack = Color(0xFF1A1A1A); // Pure Matte Black
   static const zomatoRed = Color(0xFFE23744); // Zomato Red (pending/new)
 
   // Aliases for legacy usage
-  static const primaryDark = Color(0xFF1A1A1A);
+  static const primaryDark = Color(0xFF004D28);
   static const accent      = Color(0xFFE3D0BA); // Warm Sandal
   static const secondary   = Color(0xFF4A5343); // Olive
   static const surface     = Color(0xFFF5F5F3); // Milk White
