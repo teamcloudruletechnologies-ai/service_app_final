@@ -528,25 +528,6 @@ class BookingCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    if (booking.status == 'pending') ...[
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: Size.zero,
-                          backgroundColor: AppTheme.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => PaymentScreen(booking: booking)),
-                          );
-                        },
-                        child: const Text('Pay Now', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
                     TextButton(
                       onPressed: onCancel,
                       child: const Text('Cancel', style: TextStyle(color: Colors.red, fontSize: 13)),
@@ -586,6 +567,26 @@ class BookingCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    if (booking.amount > 0) ...[
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: Size.zero,
+                          backgroundColor: Colors.green.shade700,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => PaymentScreen(booking: booking)),
+                          );
+                        },
+                        icon: const Icon(Icons.payment, size: 14),
+                        label: Text('Pay Now (₹${booking.amount.toStringAsFixed(0)})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                     if (onRebook != null) ...[
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(

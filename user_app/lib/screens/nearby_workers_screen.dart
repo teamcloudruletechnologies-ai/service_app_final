@@ -6,11 +6,11 @@ import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
 import '../services/api_service.dart';
-import 'payment_screen.dart';
+import '../theme/app_theme.dart';
+import 'main_shell.dart';
 
 /// Zomato-like "Select a Worker" screen.
 /// Fetches nearby workers using [latitude]/[longitude] (already known from onboarding).
-/// Book button → PaymentScreen directly.
 class NearbyWorkersScreen extends StatefulWidget {
   const NearbyWorkersScreen({
     super.key,
@@ -135,8 +135,15 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
       if (!mounted) return;
 
       if (booking != null) {
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => PaymentScreen(booking: booking)),
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('🎉 Service Booked Successfully! Partner assigned for inspection.'),
+            backgroundColor: AppTheme.primary,
+          ),
+        );
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainShell(initialTab: 1)),
+          (_) => false,
         );
       } else {
         setState(() {

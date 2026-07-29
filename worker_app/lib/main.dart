@@ -38,12 +38,18 @@ void main() async {
     debugPrint("=================================================");
     debugPrint("FCM WORKER TOKEN: $token");
     debugPrint("=================================================");
+
+    final apiService = ApiService();
+    if (token != null && token.isNotEmpty) {
+      await apiService.init();
+      await apiService.updateFcmToken(token);
+    }
+    runApp(UrbanServiceApp(apiService: apiService));
   } catch (e) {
     debugPrint("Firebase init failed: $e");
+    final apiService = ApiService();
+    runApp(UrbanServiceApp(apiService: apiService));
   }
-
-  final apiService = ApiService();
-  runApp(UrbanServiceApp(apiService: apiService));
 }
 
 class UrbanServiceApp extends StatefulWidget {
