@@ -129,9 +129,24 @@ async function sendToWorker(workerId, { title, body, data = {} }) {
   }
 }
 
+/**
+ * Broadcast FCM Push Notification to All Active Workers
+ */
+async function sendToAllActiveWorkers({ title, body, data = {} }) {
+  try {
+    const res = await db.query("SELECT id FROM workers WHERE fcm_token IS NOT NULL");
+    for (const row of res.rows) {
+      await sendToWorker(row.id, { title, body, data });
+    }
+  } catch (err) {
+    logger.error(`Error broadcasting FCM to workers: ${err.message}`);
+  }
+}
+
 module.exports = {
   saveUserFcmToken,
   saveWorkerFcmToken,
   sendToUser,
   sendToWorker,
+  sendToAllActiveWorkers,
 };

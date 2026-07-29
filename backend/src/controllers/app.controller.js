@@ -89,11 +89,17 @@ async function createBooking(req, res, next) {
     await User.awardCredits(userId, 5);
     await User.logActivity(userId, "booking_created", `Booked service: ${service.name} (Earned 5 credits)`);
 
-    // Send FCM Notification to assigned worker
+    // Send FCM Notification to assigned worker or broadcast to active workers
     if (booking.worker_id) {
       fcmService.sendToWorker(booking.worker_id, {
         title: "🔔 New Job Assignment!",
         body: `New ${service.name} booking #${booking.id} assigned to you. Tap to view details.`,
+        data: { bookingId: booking.id, type: "new_job" }
+      });
+    } else {
+      fcmService.sendToAllActiveWorkers({
+        title: "🔔 New Job Request Available!",
+        body: `New ${service.name} booking #${booking.id} is available in your area. Open app to accept!`,
         data: { bookingId: booking.id, type: "new_job" }
       });
     }

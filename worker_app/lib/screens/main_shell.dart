@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'bookings_screen.dart';
 import 'profile_screen.dart';
 import 'worker_dashboard_screen.dart';
 import 'earnings_screen.dart';
@@ -21,8 +22,8 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     final pages = <Widget>[
       const WorkerDashboardScreen(),
+      const BookingsScreen(),
       const WorkHistoryScreen(),
-      const EarningsScreen(),
       const ReviewsScreen(),
       const ProfileScreen(),
     ];

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/booking_provider.dart';
 import '../widgets/common_widgets.dart';
+import 'worker_booking_detail_screen.dart';
 
 class BookingsScreen extends StatefulWidget {
   const BookingsScreen({super.key});
@@ -110,9 +111,18 @@ class _BookingsScreenState extends State<BookingsScreen> {
                               separatorBuilder: (_, __) => const SizedBox(height: 12),
                               itemBuilder: (context, index) {
                                 final item = booking.bookings[index];
-                                return BookingCard(
-                                  booking: item,
-                                  onCancel: item.canCancel ? () => _cancelBooking(item.id) : null,
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => WorkerBookingDetailScreen(bookingId: item.id),
+                                      ),
+                                    ).then((_) => _load());
+                                  },
+                                  child: BookingCard(
+                                    booking: item,
+                                    onCancel: item.canCancel ? () => _cancelBooking(item.id) : null,
+                                  ),
                                 );
                               },
                             ),
