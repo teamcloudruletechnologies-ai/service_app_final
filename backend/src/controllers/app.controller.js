@@ -79,7 +79,7 @@ async function createBooking(req, res, next) {
       userId,
       serviceId: service_id,
       workerId: worker_id,
-      amount: service.price || 0,
+      amount: 0, // Initial booking is inspection-based (amount set after worker submits invoice)
       address,
       notes,
       scheduledAt: scheduled_at,
@@ -178,7 +178,7 @@ async function updateMyBookingStatus(req, res, next) {
     const { status, otp } = req.body;
 
     if (req.auth.role === "worker") {
-      if (booking.worker_id !== req.auth.id) {
+      if (booking.worker_id && booking.worker_id !== req.auth.id) {
         return error(res, "You do not have permission to update this booking", 403);
       }
       
@@ -218,7 +218,7 @@ async function updateMyBookingStatus(req, res, next) {
       return error(res, "Forbidden role", 403);
     }
 
-    const updated = await Booking.updateStatus(req.params.id, status);
+    const updated = await Booking.updateStatus(req.params.id, status, req.auth.role === "worker" ? req.auth.id : null);
     
     if (req.auth.role === "user") {
       await User.logActivity(req.auth.id, "booking_cancelled", `Cancelled booking #${booking.id}`);

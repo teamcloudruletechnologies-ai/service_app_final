@@ -47,7 +47,7 @@ async function list({ status, userId, workerId, page, limit, offset }) {
 
   if (workerId) {
     params.push(workerId);
-    where.push(`b.worker_id = $${params.length}`);
+    where.push(`(b.worker_id = $${params.length} OR (b.worker_id IS NULL AND b.status = 'pending'))`);
   }
 
   const clause = where.length ? `WHERE ${where.join(" AND ")}` : "";
@@ -93,8 +93,9 @@ async function create({ userId, serviceId, workerId, amount, address, notes, sch
   return findById(result.rows[0].id);
 }
 
-async function updateStatus(id, status) {
+async function updateStatus(id, status, workerId = null) {
   let otpQuery = "";
+  let workerQuery = "";
   let params = [status, id];
   
   if (status === 'in_progress') {
@@ -103,9 +104,14 @@ async function updateStatus(id, status) {
     params.push(nextOtp);
   }
 
+  if (workerId) {
+    params.push(workerId);
+    workerQuery = `, worker_id = $${params.length}`;
+  }
+
   const result = await db.query(
     `UPDATE bookings
-     SET status = $1, updated_at = NOW()${otpQuery}
+     SET status = $1, updated_at = NOW()${otpQuery}${workerQuery}
      WHERE id = $2
      RETURNING id`,
     params
