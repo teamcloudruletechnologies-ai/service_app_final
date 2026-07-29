@@ -78,14 +78,14 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     if (booking != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Booking placed! Proceeding to payment...'),
-          backgroundColor: Colors.green,
+          content: Text('🎉 Booking submitted successfully!'),
+          backgroundColor: AppTheme.primary,
         ),
       );
-      // Navigate to payment screen so user can pay immediately
+      // Navigate to Bookings Status Screen
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => PaymentScreen(booking: booking),
+          builder: (_) => const MainShell(initialTab: 1),
         ),
       );
     } else {
@@ -119,9 +119,9 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                     children: [
                       Text(widget.service.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                       const SizedBox(height: 8),
-                      Text(
-                        '₹${widget.service.price.toStringAsFixed(0)}',
-                        style: const TextStyle(color: AppTheme.primary, fontSize: 22, fontWeight: FontWeight.bold),
+                      const Text(
+                        'Final price will be provided by the service professional after inspection.',
+                        style: TextStyle(color: AppTheme.primary, fontSize: 13, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),

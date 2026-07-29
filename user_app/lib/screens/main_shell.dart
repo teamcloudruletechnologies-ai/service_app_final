@@ -10,19 +10,22 @@ import 'menu_screen.dart';
 import 'profile_screen.dart';
 
 class MainShell extends StatefulWidget {
-  const MainShell({super.key});
+  const MainShell({super.key, this.initialTab = 0});
+
+  final int initialTab;
 
   @override
   State<MainShell> createState() => _MainShellState();
 }
 
 class _MainShellState extends State<MainShell> {
-  int _index = 0;
+  late int _index;
   AuthProvider? _authProvider;
 
   @override
   void initState() {
     super.initState();
+    _index = widget.initialTab;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _authProvider = context.read<AuthProvider>();
       _authProvider?.addListener(_onAuthChange);

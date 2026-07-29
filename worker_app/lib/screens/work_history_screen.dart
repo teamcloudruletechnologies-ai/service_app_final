@@ -176,14 +176,40 @@ class _WorkHistoryScreenState extends State<WorkHistoryScreen> {
                     if (completedBookings.isEmpty)
                       Center(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 48),
+                          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
                           child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.assignment_turned_in_outlined, size: 48, color: Colors.grey.shade300),
-                              const SizedBox(height: 12),
+                              Container(
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.olive.withValues(alpha: 0.08),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.engineering_outlined, size: 64, color: AppTheme.olive),
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                'No Completed Jobs Yet',
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                              ),
+                              const SizedBox(height: 8),
                               Text(
-                                'No completed jobs recorded yet.',
-                                style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+                                'Your completed service orders and payouts will appear here after job completion.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 13, height: 1.4),
+                              ),
+                              const SizedBox(height: 24),
+                              ElevatedButton.icon(
+                                onPressed: _loadData,
+                                icon: const Icon(Icons.refresh_rounded, size: 18),
+                                label: const Text('Refresh Orders'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primary,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                ),
                               ),
                             ],
                           ),

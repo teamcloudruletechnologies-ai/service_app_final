@@ -62,10 +62,10 @@ void main() async {
 
   // Do the notification-permission dialog + token fetch AFTER the UI
   // is already up and running, so it no longer blocks first frame.
-  _setupFcmPermissionsAndToken();
+  _setupFcmPermissionsAndToken(apiService);
 }
 
-Future<void> _setupFcmPermissionsAndToken() async {
+Future<void> _setupFcmPermissionsAndToken(ApiService apiService) async {
   try {
     final messaging = FirebaseMessaging.instance;
     await messaging.requestPermission(
@@ -78,6 +78,11 @@ Future<void> _setupFcmPermissionsAndToken() async {
     debugPrint("=================================================");
     debugPrint("FCM USER TOKEN: $token");
     debugPrint("=================================================");
+
+    if (token != null && token.isNotEmpty) {
+      await apiService.init();
+      await apiService.updateFcmToken(token);
+    }
   } catch (e) {
     debugPrint("FCM permission/token setup failed: $e");
   }

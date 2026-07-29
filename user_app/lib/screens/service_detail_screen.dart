@@ -296,20 +296,21 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
                   const SizedBox(height: 16),
 
-                  // Dynamic Inspection Price Note
+                  // Inspection Price Note
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE3D0BA).withValues(alpha: 0.3),
+                      color: AppTheme.primary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
                     ),
                     child: Row(
-                      children: [
-                        const Icon(Icons.info_outline_rounded, color: AppTheme.primary, size: 20),
-                        const SizedBox(width: 10),
-                        const Expanded(
+                      children: const [
+                        Icon(Icons.info_outline_rounded, color: AppTheme.primary, size: 20),
+                        SizedBox(width: 10),
+                        Expanded(
                           child: Text(
-                            'Price set after work inspection & invoice by partner',
+                            'Final price will be provided by the service professional after inspection.',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.bold,

@@ -253,10 +253,12 @@ async function initDb() {
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS job_started_at TIMESTAMPTZ;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS job_completed_at TIMESTAMPTZ;
 
-    -- Add address fields to users if missing
+    -- Add address fields and FCM tokens to users and workers if missing
     ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(100);
     ALTER TABLE users ADD COLUMN IF NOT EXISTS credits INTEGER DEFAULT 0;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS fcm_token TEXT;
+    ALTER TABLE workers ADD COLUMN IF NOT EXISTS fcm_token TEXT;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS otp VARCHAR(10);
 
     ALTER TABLE services ADD COLUMN IF NOT EXISTS estimated_time INTEGER DEFAULT 60;

@@ -116,6 +116,22 @@ async function verifyPayment(req, res, next) {
       message: "Payment successful. Booking confirmed.",
     });
 
+    // Send FCM Push Notifications
+    const fcmService = require("../utils/fcm.service");
+    if (updatedBooking.worker_id) {
+      fcmService.sendToWorker(updatedBooking.worker_id, {
+        title: "💰 Payment Received!",
+        body: `Customer paid ₹${updatedBooking.amount} for Booking #${bookingId}. Job completed!`,
+        data: { bookingId, amount: updatedBooking.amount, type: "payment_received" }
+      });
+    }
+
+    fcmService.sendToUser(updatedBooking.user_id, {
+      title: "🎉 Payment Successful!",
+      body: `Payment of ₹${updatedBooking.amount} confirmed for Booking #${bookingId}. Thank you!`,
+      data: { bookingId, amount: updatedBooking.amount, type: "payment_success" }
+    });
+
     return success(res, "Payment verified successfully", { booking: updatedBooking });
   } catch (err) {
     logger.error("Error verifying payment", err);

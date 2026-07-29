@@ -115,6 +115,17 @@ class ApiService {
     return payload;
   }
 
+  Future<void> updateFcmToken(String token) async {
+    if (_token == null) return;
+    try {
+      await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/user/fcm-token'),
+        headers: _headers(),
+        body: jsonEncode({'fcmToken': token}),
+      );
+    } catch (_) {}
+  }
+
   Future<Map<String, dynamic>> phoneLogin(String phone, {String role = 'user'}) async {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/auth/phone-login'),

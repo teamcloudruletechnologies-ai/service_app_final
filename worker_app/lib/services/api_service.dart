@@ -89,6 +89,17 @@ class ApiService {
 
 
 
+  Future<void> updateFcmToken(String token) async {
+    if (_token == null) return;
+    try {
+      await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/worker/fcm-token'),
+        headers: _headers(auth: true),
+        body: jsonEncode({'fcmToken': token}),
+      );
+    } catch (_) {}
+  }
+
   PagedResult<T> _parsePaged<T>(Map<String, dynamic> payload, T Function(Map<String, dynamic>) fromJson) {
     final rows = (payload['rows'] as List? ?? [])
         .map((e) => fromJson(e as Map<String, dynamic>))

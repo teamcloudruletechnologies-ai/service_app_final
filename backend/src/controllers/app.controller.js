@@ -6,6 +6,7 @@ const Worker = require("../models/worker.model");
 const Banner = require("../models/banner.model");
 const { getPagination } = require("../utils/pagination");
 const { success, error } = require("../utils/response");
+const fcmService = require("../utils/fcm.service");
 
 async function listCategories(req, res, next) {
   try {
@@ -78,7 +79,7 @@ async function createBooking(req, res, next) {
       userId,
       serviceId: service_id,
       workerId: worker_id,
-      amount: service.price || 0,
+      amount: 0, // Initial booking is inspection-based (amount set after worker submits invoice)
       address,
       notes,
       scheduledAt: scheduled_at,
@@ -87,6 +88,15 @@ async function createBooking(req, res, next) {
     // Award 5 credits for booking
     await User.awardCredits(userId, 5);
     await User.logActivity(userId, "booking_created", `Booked service: ${service.name} (Earned 5 credits)`);
+
+    // Send FCM Notification to assigned worker
+    if (booking.worker_id) {
+      fcmService.sendToWorker(booking.worker_id, {
+        title: "🔔 New Job Assignment!",
+        body: `New ${service.name} booking #${booking.id} assigned to you. Tap to view details.`,
+        data: { bookingId: booking.id, type: "new_job" }
+      });
+    }
 
     return success(res, "Booking created successfully", booking, 201);
   } catch (err) {
@@ -168,7 +178,7 @@ async function updateMyBookingStatus(req, res, next) {
     const { status, otp } = req.body;
 
     if (req.auth.role === "worker") {
-      if (booking.worker_id !== req.auth.id) {
+      if (booking.worker_id && booking.worker_id !== req.auth.id) {
         return error(res, "You do not have permission to update this booking", 403);
       }
       
@@ -208,10 +218,31 @@ async function updateMyBookingStatus(req, res, next) {
       return error(res, "Forbidden role", 403);
     }
 
-    const updated = await Booking.updateStatus(req.params.id, status);
+    const updated = await Booking.updateStatus(req.params.id, status, req.auth.role === "worker" ? req.auth.id : null);
     
     if (req.auth.role === "user") {
       await User.logActivity(req.auth.id, "booking_cancelled", `Cancelled booking #${booking.id}`);
+      if (booking.worker_id) {
+        fcmService.sendToWorker(booking.worker_id, {
+          title: "⚠️ Booking Cancelled",
+          body: `Customer cancelled Booking #${booking.id}.`,
+          data: { bookingId: booking.id, type: "booking_cancelled" }
+        });
+      }
+    } else if (req.auth.role === "worker") {
+      if (status === "confirmed") {
+        fcmService.sendToUser(booking.user_id, {
+          title: "✅ Worker Accepted!",
+          body: `Partner accepted your booking #${booking.id}. Check OTP on your booking card.`,
+          data: { bookingId: booking.id, status: "confirmed" }
+        });
+      } else if (status === "in_progress") {
+        fcmService.sendToUser(booking.user_id, {
+          title: "🛠️ Work Started!",
+          body: `Partner verified your OTP and started the service.`,
+          data: { bookingId: booking.id, status: "in_progress" }
+        });
+      }
     }
 
     return success(res, "Booking status updated successfully", updated);
@@ -409,7 +440,35 @@ async function submitWorkerInvoice(req, res, next) {
     );
 
     const updated = await Booking.findById(req.params.id);
+
+    // Send FCM Notification to User that invoice is ready to pay
+    fcmService.sendToUser(booking.user_id, {
+      title: "🧾 Custom Invoice Ready!",
+      body: `Worker submitted bill of ₹${amountVal}. Tap to view & Pay Now via Razorpay.`,
+      data: { bookingId: booking.id, amount: amountVal, type: "invoice_ready" }
+    });
+
     return success(res, "Invoice created and job completed successfully", updated);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function updateUserFcmToken(req, res, next) {
+  try {
+    const { fcmToken } = req.body;
+    await fcmService.saveUserFcmToken(req.auth.id, fcmToken);
+    return success(res, "User FCM Token updated successfully");
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function updateWorkerFcmToken(req, res, next) {
+  try {
+    const { fcmToken } = req.body;
+    await fcmService.saveWorkerFcmToken(req.auth.id, fcmToken);
+    return success(res, "Worker FCM Token updated successfully");
   } catch (err) {
     return next(err);
   }
@@ -432,4 +491,6 @@ module.exports = {
   startJobPhoto,
   completeJobPhoto,
   submitWorkerInvoice,
+  updateUserFcmToken,
+  updateWorkerFcmToken,
 };
