@@ -14,6 +14,9 @@ import '../widgets/common_widgets.dart';
 import 'worker_booking_detail_screen.dart';
 import 'worker_kyc_screen.dart';
 import 'notification_screen.dart';
+import 'profile_screen.dart';
+import 'work_history_screen.dart';
+import 'bookings_screen.dart';
 
 class WorkerDashboardScreen extends StatefulWidget {
   const WorkerDashboardScreen({super.key});
@@ -291,7 +294,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                   InkWell(
                     onTap: () {
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (_) => const WorkerProfileScreen()),
+                        MaterialPageRoute(builder: (_) => ProfileScreen()),
                       );
                     },
                     borderRadius: BorderRadius.circular(12),
@@ -347,9 +350,10 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      // Online / Offline Switch Toggle
+                ), // Close InkWell
+                Row(
+                  children: [
+                    // Online / Offline Switch Toggle
                       Transform.scale(
                         scale: 0.8,
                         child: Switch(
@@ -384,7 +388,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
               GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const WorkHistoryScreen()),
+                    MaterialPageRoute(builder: (_) => WorkHistoryScreen()),
                   );
                 },
                 child: Container(
@@ -459,7 +463,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const BookingsScreen()),
+                          MaterialPageRoute(builder: (_) => BookingsScreen()),
                         );
                       },
                       child: Container(
@@ -486,7 +490,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const BookingsScreen()),
+                          MaterialPageRoute(builder: (_) => BookingsScreen()),
                         );
                       },
                       child: Container(
@@ -513,7 +517,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                     child: GestureDetector(
                       onTap: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const WorkHistoryScreen()),
+                          MaterialPageRoute(builder: (_) => WorkHistoryScreen()),
                         );
                       },
                       child: Container(
