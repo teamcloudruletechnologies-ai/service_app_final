@@ -59,7 +59,6 @@ void main() async {
   }
 }
 
-}
 class UrbanServiceApp extends StatefulWidget {
   const UrbanServiceApp({super.key, required this.apiService});
 
@@ -84,7 +83,7 @@ class _UrbanServiceAppState extends State<UrbanServiceApp> {
     try {
       const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
       const initSettings = InitializationSettings(android: androidSettings);
-      await _localNotifications.initialize(initSettings);
+      await _localNotifications.initialize(settings: initSettings);
 
       const channel = AndroidNotificationChannel(
         'high_importance_channel',
@@ -104,10 +103,10 @@ class _UrbanServiceAppState extends State<UrbanServiceApp> {
   void _showHeadsUpBanner(String title, String body) {
     try {
       _localNotifications.show(
-        DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        title,
-        body,
-        const NotificationDetails(
+        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title: title,
+        body: body,
+        notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             'high_importance_channel',
             'High Importance Notifications',
