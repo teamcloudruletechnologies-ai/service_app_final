@@ -10,17 +10,19 @@ try {
   admin = require("firebase-admin");
   const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || path.join(__dirname, "../config/serviceAccountKey.json");
 
+  const getCert = (sa) => (admin.credential?.cert ? admin.credential.cert(sa) : admin.cert(sa));
+
   if (fs.existsSync(serviceAccountPath)) {
     const serviceAccount = require(serviceAccountPath);
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: getCert(serviceAccount),
     });
     isFcmInitialized = true;
     logger.info("Firebase Admin SDK initialized successfully with service account.");
   } else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: getCert(serviceAccount),
     });
     isFcmInitialized = true;
     logger.info("Firebase Admin SDK initialized successfully with environment JSON.");

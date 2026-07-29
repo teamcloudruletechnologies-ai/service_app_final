@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../config/api_config.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
 
@@ -137,7 +138,7 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: Image.network(
-                                  widget.banners[actualIdx].imageUrl!,
+                                  ApiConfig.resolveImageUrl(widget.banners[actualIdx].imageUrl!),
                                   fit: BoxFit.cover,
                                   width: double.infinity,
                                   errorBuilder: (_, __, ___) => _buildFallbackBannerContent(
