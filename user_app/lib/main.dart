@@ -14,6 +14,7 @@ import 'services/api_service.dart';
 import 'theme/app_theme.dart';
 
 const _splashBlack = Color(0xFF050505);
+final GlobalKey<ScaffoldMessengerState> _messengerKey = GlobalKey<ScaffoldMessengerState>();
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -104,6 +105,7 @@ class UrbanServiceApp extends StatefulWidget {
   State<UrbanServiceApp> createState() => _UrbanServiceAppState();
 }
 
+class _UrbanServiceAppState extends State<UrbanServiceApp> {
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   @override
@@ -117,7 +119,7 @@ class UrbanServiceApp extends StatefulWidget {
     try {
       const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
       const initSettings = InitializationSettings(android: androidSettings);
-      await _localNotifications.initialize(initSettings);
+      await _localNotifications.initialize(settings: initSettings);
 
       const channel = AndroidNotificationChannel(
         'high_importance_channel',
@@ -137,10 +139,10 @@ class UrbanServiceApp extends StatefulWidget {
   void _showHeadsUpBanner(String title, String body) {
     try {
       _localNotifications.show(
-        DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        title,
-        body,
-        const NotificationDetails(
+        id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title: title,
+        body: body,
+        notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             'high_importance_channel',
             'High Importance Notifications',
