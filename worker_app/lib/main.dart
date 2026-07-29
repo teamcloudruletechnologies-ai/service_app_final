@@ -34,6 +34,12 @@ void main() async {
       sound: true,
     );
 
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
     final token = await messaging.getToken();
     debugPrint("=================================================");
     debugPrint("FCM WORKER TOKEN: $token");

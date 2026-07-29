@@ -74,6 +74,12 @@ Future<void> _setupFcmPermissionsAndToken(ApiService apiService) async {
       sound: true,
     );
 
+    await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
     final token = await messaging.getToken();
     debugPrint("=================================================");
     debugPrint("FCM USER TOKEN: $token");

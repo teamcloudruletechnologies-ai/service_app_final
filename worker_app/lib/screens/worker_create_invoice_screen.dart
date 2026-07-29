@@ -90,13 +90,65 @@ class _WorkerCreateInvoiceScreenState extends State<WorkerCreateInvoiceScreen> {
       return;
     }
 
+    final otpCtrl = TextEditingController();
+    final otpInput = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Enter Customer Finish OTP', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Please ask the customer for the 4-digit Finish OTP code shown on their booking card to verify job completion.',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: otpCtrl,
+              keyboardType: TextInputType.number,
+              maxLength: 4,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 8),
+              decoration: InputDecoration(
+                hintText: '0000',
+                counterText: '',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (otpCtrl.text.trim().length == 4) {
+                Navigator.pop(ctx, otpCtrl.text.trim());
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
+            child: const Text('Verify & Submit', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (otpInput == null || otpInput.length != 4) return;
+
     setState(() => _submitting = true);
 
     try {
       final api = context.read<ApiService>();
-      await api.postRaw('/bookings/${widget.bookingId}/submit-invoice', {
+      await api.postRaw('/app/bookings/${widget.bookingId}/submit-invoice', {
         'items': items,
         'totalAmount': _totalAmount,
+        'otp': otpInput,
       });
 
       if (!mounted) return;

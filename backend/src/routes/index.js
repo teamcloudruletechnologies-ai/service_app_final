@@ -40,6 +40,7 @@ router.use("/app/locations", userLocationRoutes);
 router.use("/user-addresses", userAddressRoutes);
 router.use("/app/addresses", userAddressRoutes);
 router.use("/app", appRoutes);
+router.use("/bookings", appRoutes); // Alias route support for mobile app endpoints
 router.use("/admin/sub-admins", subAdminRoutes);
 router.use("/admin/notifications", checkPermission("notifications"), notificationRoutes);
 router.use("/admin/banners", checkPermission("banners"), bannerRoutes);
