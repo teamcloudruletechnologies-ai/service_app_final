@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -34,7 +35,10 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
   bool _loading = true;
   String? _error;
   double _distanceKm = 0.0;
+  int _durationMins = 0;
+  String _nextTurnInstruction = 'Follow indicated road path to destination';
   List<LatLng> _routePoints = [];
+  StreamSubscription<Position>? _positionSubscription;
 
   @override
   void initState() {
@@ -42,11 +46,17 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
     _initNavigation();
   }
 
+  @override
+  void dispose() {
+    _positionSubscription?.cancel();
+    super.dispose();
+  }
+
   Future<void> _initNavigation() async {
     setState(() => _loading = true);
 
     try {
-      // 1. Get worker position
+      // 1. Fetch current worker GPS location
       Position? position;
       try {
         final perm = await Geolocator.checkPermission();
@@ -59,7 +69,7 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
         _workerPos = LatLng(position.latitude, position.longitude);
       }
 
-      // 2. Geocode customer address
+      // 2. Geocode customer target address
       LatLng? custLatLng;
       if (widget.initialLat != null && widget.initialLng != null && widget.initialLat != 0) {
         custLatLng = LatLng(widget.initialLat!, widget.initialLng!);
@@ -68,26 +78,24 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
       }
 
       if (custLatLng == null) {
-        // Fallback offset slightly from worker position if geocoding yields no results
         custLatLng = LatLng(_workerPos.latitude + 0.015, _workerPos.longitude + 0.015);
       }
 
       _customerPos = custLatLng;
 
-      // 3. Calculate Distance
-      const distanceCalc = Distance();
-      _distanceKm = distanceCalc.as(LengthUnit.Kilometer, _workerPos, _customerPos!) ?? 0.0;
+      // 3. Fetch OSRM Road Driving Route
+      await _fetchRoadRoute(_workerPos, _customerPos!);
 
-      // 4. Create simple route polyline
-      _routePoints = [_workerPos, _customerPos!];
+      // 4. Start Live GPS Position Stream for continuous updates & auto-recalculation
+      _startLivePositionStream();
 
       setState(() => _loading = false);
 
-      // Center map bounds
+      // Fit map camera
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && _customerPos != null) {
           final bounds = LatLngBounds.fromPoints([_workerPos, _customerPos!]);
-          _mapController.fitCamera(CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(50)));
+          _mapController.fitCamera(CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(60)));
         }
       });
     } catch (e) {
@@ -98,6 +106,89 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
         });
       }
     }
+  }
+
+  Future<void> _fetchRoadRoute(LatLng origin, LatLng destination) async {
+    try {
+      final url = Uri.parse(
+        'https://router.project-osrm.org/route/v1/driving/'
+        '${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}'
+        '?overview=full&geometries=geojson&steps=true',
+      );
+
+      final res = await http.get(url);
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        final routes = data['routes'] as List?;
+        if (routes != null && routes.isNotEmpty) {
+          final route = routes[0];
+          final distanceMeters = (route['distance'] as num).toDouble();
+          final durationSecs = (route['duration'] as num).toDouble();
+
+          final geometry = route['geometry'];
+          final coords = geometry['coordinates'] as List;
+          final points = coords.map<LatLng>((c) => LatLng((c[1] as num).toDouble(), (c[0] as num).toDouble())).toList();
+
+          // Extract turn instruction step if available
+          String turnMsg = 'Follow road path to destination';
+          try {
+            final steps = route['legs'][0]['steps'] as List;
+            if (steps.length > 1) {
+              final step = steps[1];
+              final maneuver = step['maneuver'];
+              final type = maneuver['type'] ?? 'continue';
+              final modifier = maneuver['modifier'] ?? '';
+              final name = step['name'] ?? '';
+              turnMsg = '${type.toUpperCase()} $modifier ${name.isNotEmpty ? "onto $name" : ""}';
+            }
+          } catch (_) {}
+
+          setState(() {
+            _routePoints = points;
+            _distanceKm = distanceMeters / 1000;
+            _durationMins = (durationSecs / 60).round();
+            _nextTurnInstruction = turnMsg;
+          });
+          return;
+        }
+      }
+    } catch (_) {}
+
+    // Direct line fallback if OSRM is offline
+    const distanceCalc = Distance();
+    setState(() {
+      _routePoints = [origin, destination];
+      _distanceKm = distanceCalc.as(LengthUnit.Kilometer, origin, destination) ?? 0.0;
+      _durationMins = (_distanceKm * 3).round();
+    });
+  }
+
+  void _startLivePositionStream() {
+    _positionSubscription?.cancel();
+    _positionSubscription = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10, // update every 10 meters
+      ),
+    ).listen((pos) {
+      if (!mounted || _customerPos == null) return;
+      final newPos = LatLng(pos.latitude, pos.longitude);
+
+      const distanceCalc = Distance();
+      final movedMeters = distanceCalc.as(LengthUnit.Meter, _workerPos, newPos) ?? 0;
+
+      setState(() {
+        _workerPos = newPos;
+      });
+
+      // Move camera to center worker position
+      _mapController.move(newPos, _mapController.camera.zoom);
+
+      // Auto Recalculate route if worker moved > 30 meters
+      if (movedMeters > 30) {
+        _fetchRoadRoute(newPos, _customerPos!);
+      }
+    });
   }
 
   Future<LatLng?> _geocodeAddress(String address) async {
@@ -120,14 +211,14 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Navigate to Booking #${widget.bookingId}'),
+        title: Text('In-App Road Navigation #${widget.bookingId}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.my_location),
             onPressed: () {
               if (_customerPos != null) {
                 final bounds = LatLngBounds.fromPoints([_workerPos, _customerPos!]);
-                _mapController.fitCamera(CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(50)));
+                _mapController.fitCamera(CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(60)));
               }
             },
           ),
@@ -140,7 +231,7 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
             mapController: _mapController,
             options: MapOptions(
               initialCenter: _workerPos,
-              initialZoom: 13.0,
+              initialZoom: 14.5,
             ),
             children: [
               TileLayer(
@@ -152,8 +243,8 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
                   polylines: [
                     Polyline(
                       points: _routePoints,
-                      strokeWidth: 4.5,
-                      color: AppTheme.primary,
+                      strokeWidth: 5.5,
+                      color: const Color(0xFF1E88E5),
                     ),
                   ],
                 ),
@@ -162,16 +253,16 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
                   // Worker position pin
                   Marker(
                     point: _workerPos,
-                    width: 44,
-                    height: 44,
+                    width: 46,
+                    height: 46,
                     child: Container(
                       padding: const EdgeInsets.all(6),
                       decoration: const BoxDecoration(
                         color: Colors.blue,
                         shape: BoxShape.circle,
-                        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 6)],
+                        boxShadow: [BoxShadow(color: Colors.black38, blurRadius: 6)],
                       ),
-                      child: const Icon(Icons.handyman_rounded, color: Colors.white, size: 24),
+                      child: const Icon(Icons.navigation_rounded, color: Colors.white, size: 24),
                     ),
                   ),
                   // Customer destination pin
@@ -193,6 +284,41 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
                 ],
               ),
             ],
+          ),
+
+          // ─── TOP TURN-BY-TURN INSTRUCTION BANNER ───
+          Positioned(
+            top: 16,
+            left: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 8)],
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.turn_right_rounded, color: Colors.greenAccent, size: 28),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('NEXT STEP', style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
+                        Text(
+                          _nextTurnInstruction,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
 
           if (_loading)
@@ -247,7 +373,7 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          '${_distanceKm.toStringAsFixed(1)} KM away',
+                          '${_distanceKm.toStringAsFixed(1)} KM • ~$_durationMins mins',
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.matteBlack),
                         ),
                       ),

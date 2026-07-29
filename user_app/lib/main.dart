@@ -91,6 +91,11 @@ Future<void> _setupFcmPermissionsAndToken(ApiService apiService) async {
       await apiService.init();
       await apiService.updateFcmToken(token);
     }
+
+    messaging.onTokenRefresh.listen((newToken) async {
+      debugPrint("FCM TOKEN REFRESHED: $newToken");
+      await apiService.updateFcmToken(newToken);
+    });
   } catch (e) {
     debugPrint("FCM permission/token setup failed: $e");
   }

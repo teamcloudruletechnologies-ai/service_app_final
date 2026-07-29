@@ -126,6 +126,37 @@ class ApiService {
     } catch (_) {}
   }
 
+  Future<List<Map<String, dynamic>>> fetchAddresses() async {
+    if (_token == null) return [];
+    try {
+      final response = await http.get(
+        Uri.parse('${ApiConfig.baseUrl}/app/addresses'),
+        headers: _headers(),
+      );
+      final data = _decode(response);
+      if (data['success'] == true && data['data'] is List) {
+        return List<Map<String, dynamic>>.from(data['data']);
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  Future<Map<String, dynamic>?> createAddress(Map<String, dynamic> body) async {
+    if (_token == null) return null;
+    try {
+      final response = await http.post(
+        Uri.parse('${ApiConfig.baseUrl}/app/addresses'),
+        headers: _headers(),
+        body: jsonEncode(body),
+      );
+      final data = _decode(response);
+      if (data['success'] == true && data['data'] is Map) {
+        return Map<String, dynamic>.from(data['data']);
+      }
+    } catch (_) {}
+    return null;
+  }
+
   Future<Map<String, dynamic>> phoneLogin(String phone, {String role = 'user'}) async {
     final response = await http.post(
       Uri.parse('${ApiConfig.baseUrl}/auth/phone-login'),

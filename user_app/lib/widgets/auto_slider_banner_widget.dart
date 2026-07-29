@@ -43,40 +43,13 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
     super.dispose();
   }
 
-  List<Map<String, dynamic>> _getFallbackBanners() {
-    return [
-      {
-        'title': 'GOLD FLASH SALE',
-        'subtitle': '₹1 for 3 months premium care',
-        'action': 'Renew Gold now →',
-        'colors': [const Color(0xFF0F0C08), const Color(0xFF261C14), const Color(0xFF0F0C08)],
-        'accent': const Color(0xFFD4AF37),
-        'icon': Icons.workspace_premium,
-      },
-      {
-        'title': 'MONSOON CLEANING 30% OFF',
-        'subtitle': 'Deep Home & Sofa Cleaning Services',
-        'action': 'Book Service Now →',
-        'colors': [const Color(0xFF0B2B26), const Color(0xFF163E38), const Color(0xFF051C18)],
-        'accent': const Color(0xFF2EC4B6),
-        'icon': Icons.cleaning_services_outlined,
-      },
-      {
-        'title': 'EXPERT AC SERVICE & REPAIR',
-        'subtitle': 'Flat ₹200 OFF on Gas Charging & Inspection',
-        'action': 'Claim Discount →',
-        'colors': [const Color(0xFF1D2A44), const Color(0xFF2B3A5A), const Color(0xFF101B33)],
-        'accent': const Color(0xFF00B4D8),
-        'icon': Icons.ac_unit_outlined,
-      },
-    ];
-  }
-
   @override
   Widget build(BuildContext context) {
-    final hasApiBanners = widget.banners.isNotEmpty;
-    final fallbackBanners = _getFallbackBanners();
-    final itemCount = hasApiBanners ? widget.banners.length : fallbackBanners.length;
+    if (widget.banners.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final itemCount = widget.banners.length;
 
     return Column(
       children: [
@@ -91,6 +64,8 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
             },
             itemBuilder: (context, index) {
               final actualIdx = index % itemCount;
+              final banner = widget.banners[actualIdx];
+              final imgUrl = ApiConfig.resolveImageUrl(banner.imageUrl);
 
               return AnimatedBuilder(
                 animation: _pageController,
@@ -108,21 +83,12 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   child: Container(
-                    padding: const EdgeInsets.all(18),
+                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: hasApiBanners
-                            ? [const Color(0xFF1A1A1A), const Color(0xFF2C2C2C)]
-                            : fallbackBanners[actualIdx]['colors'] as List<Color>,
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: const Color(0xFF1A1A1A),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: (hasApiBanners
-                                ? Colors.white24
-                                : (fallbackBanners[actualIdx]['accent'] as Color))
-                            .withOpacity(0.5),
+                        color: Colors.white24,
                         width: 1.2,
                       ),
                       boxShadow: [
@@ -133,37 +99,30 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
                         ),
                       ],
                     ),
-                    child: hasApiBanners
-                        ? (widget.banners[actualIdx].imageUrl != null && widget.banners[actualIdx].imageUrl!.isNotEmpty
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  ApiConfig.resolveImageUrl(widget.banners[actualIdx].imageUrl!),
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  errorBuilder: (_, __, ___) => _buildFallbackBannerContent(
-                                    title: widget.banners[actualIdx].title ?? 'Special Offer',
-                                    sub: 'Tap to view details',
-                                    action: 'Explore Now →',
-                                    accent: AppTheme.primary,
-                                    icon: Icons.campaign,
-                                  ),
-                                ),
-                              )
-                            : _buildFallbackBannerContent(
-                                title: widget.banners[actualIdx].title ?? 'Special Offer',
-                                sub: 'Exclusive savings on home services',
-                                action: 'Book Now →',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: imgUrl.isNotEmpty
+                          ? Image.network(
+                              imgUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorBuilder: (_, __, ___) => _buildFallbackBannerContent(
+                                title: banner.title ?? 'Special Offer',
+                                sub: 'Tap to view details',
+                                action: 'Explore Now →',
                                 accent: AppTheme.primary,
-                                icon: Icons.local_offer_outlined,
-                              ))
-                        : _buildFallbackBannerContent(
-                            title: fallbackBanners[actualIdx]['title'] as String,
-                            sub: fallbackBanners[actualIdx]['subtitle'] as String,
-                            action: fallbackBanners[actualIdx]['action'] as String,
-                            accent: fallbackBanners[actualIdx]['accent'] as Color,
-                            icon: fallbackBanners[actualIdx]['icon'] as IconData,
-                          ),
+                                icon: Icons.campaign,
+                              ),
+                            )
+                          : _buildFallbackBannerContent(
+                              title: banner.title ?? 'Special Offer',
+                              sub: 'Exclusive savings on home services',
+                              action: 'Book Now →',
+                              accent: AppTheme.primary,
+                              icon: Icons.local_offer_outlined,
+                            ),
+                    ),
                   ),
                 ),
               );

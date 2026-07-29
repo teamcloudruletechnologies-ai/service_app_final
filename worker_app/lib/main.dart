@@ -51,6 +51,12 @@ void main() async {
       await apiService.init();
       await apiService.updateFcmToken(token);
     }
+
+    messaging.onTokenRefresh.listen((newToken) async {
+      debugPrint("FCM WORKER TOKEN REFRESHED: $newToken");
+      await apiService.updateFcmToken(newToken);
+    });
+
     runApp(UrbanServiceApp(apiService: apiService));
   } catch (e) {
     debugPrint("Firebase init failed: $e");

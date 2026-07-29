@@ -158,6 +158,61 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
     }
   }
 
+  Future<void> _promptAddNewAddress(BuildContext context) async {
+    final addrCtrl = TextEditingController();
+    final typeCtrl = TextEditingController(text: 'Home');
+
+    final newAddress = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Add New Booking Address', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter a new location address to save to your account.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            const SizedBox(height: 14),
+            TextField(
+              controller: addrCtrl,
+              maxLines: 2,
+              decoration: InputDecoration(
+                hintText: 'Flat/House No, Street, Area, City',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (addrCtrl.text.trim().isNotEmpty) {
+                Navigator.pop(ctx, addrCtrl.text.trim());
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
+            child: const Text('Save & Select', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (newAddress != null && newAddress.isNotEmpty && mounted) {
+      setState(() {
+        _addressCtrl.text = newAddress;
+      });
+      final api = context.read<ApiService>();
+      await api.createAddress({
+        'address': newAddress,
+        'title': typeCtrl.text,
+      });
+      _searchAddress(newAddress);
+    }
+  }
+
   Future<void> _searchAddress(String query) async {
     if (query.trim().isEmpty) return;
 
@@ -404,7 +459,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                                     },
                                   ),
                                 ),
-                              if (fullAddr != null && fullAddr.isNotEmpty && fullAddr != permAddr)
+                               if (fullAddr != null && fullAddr.isNotEmpty && fullAddr != permAddr)
                                 Padding(
                                   padding: const EdgeInsets.only(right: 8),
                                   child: ChoiceChip(
@@ -422,6 +477,13 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                                     },
                                   ),
                                 ),
+                              ActionChip(
+                                avatar: const Icon(Icons.add_location_alt_rounded, size: 16, color: AppTheme.primary),
+                                label: const Text('+ Add New Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppTheme.primary)),
+                                backgroundColor: Colors.white,
+                                side: const BorderSide(color: AppTheme.primary),
+                                onPressed: () => _promptAddNewAddress(context),
+                              ),
                             ],
                           ),
                         );
