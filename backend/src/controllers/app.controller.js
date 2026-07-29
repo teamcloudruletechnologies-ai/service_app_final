@@ -418,7 +418,11 @@ async function submitWorkerInvoice(req, res, next) {
       return error(res, "Forbidden", 403);
     }
 
-    const { items, totalAmount } = req.body;
+    const { items, totalAmount, otp } = req.body;
+    if (otp && String(booking.otp) !== String(otp)) {
+      return error(res, "Invalid Finish OTP code. Please ask the customer for the correct 4-digit code.", 400);
+    }
+
     const itemsJson = typeof items === 'string' ? items : JSON.stringify(items || []);
     const amountVal = parseFloat(totalAmount || 0);
 

@@ -11,6 +11,7 @@ import '../providers/auth_provider.dart';
 import '../providers/catalog_provider.dart';
 import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/auto_slider_banner_widget.dart';
 import '../widgets/common_widgets.dart';
 import 'location_picker_screen.dart';
 import 'nearby_workers_screen.dart';
@@ -406,38 +407,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      if (auth.user != null) ...[
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.amber.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.amber.shade200),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.stars_rounded, color: Colors.amber, size: 14),
-                                const SizedBox(width: 3),
-                                Text(
-                                  '${auth.user!.credits ?? 0}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 11,
-                                    color: Colors.amber.shade900,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
                       _buildProfileButton(context, auth.user),
                     ],
                   ),
@@ -478,11 +447,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // ─── Gold Sale Banner ───
+          // ─── Auto-sliding Banner Section ───
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.only(bottom: 20),
-              child: _buildGoldFlashSaleBanner(),
+              child: AutoSliderBannerWidget(banners: catalog.banners),
             ),
           ),
           // ─── CATEGORY CHIPS (Zomato circular style) ───
@@ -582,53 +551,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-          SliverToBoxAdapter(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  ZomatoFilterChip(
-                    label: context.translate('filters'),
-                    icon: const Icon(Icons.tune, size: 14, color: AppTheme.primary),
-                    active: _sortBy != 'all',
-                    onTap: () {},
-                  ),
-                  const SizedBox(width: 8),
-                  ZomatoFilterChip(
-                    label: context.translate('near_fast'),
-                    icon: const Icon(Icons.flash_on, size: 14, color: Colors.green),
-                    active: _sortBy == 'most_booked',
-                    onTap: () {
-                      setState(() {
-                        _sortBy = _sortBy == 'most_booked' ? 'all' : 'most_booked';
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  ZomatoFilterChip(
-                    label: context.translate('top_rated'),
-                    active: _sortBy == 'top_rated',
-                    onTap: () {
-                      setState(() {
-                        _sortBy = _sortBy == 'top_rated' ? 'all' : 'top_rated';
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  ZomatoFilterChip(
-                    label: context.translate('price_low'),
-                    active: _sortBy == 'price_low',
-                    onTap: () {
-                      setState(() {
-                        _sortBy = _sortBy == 'price_low' ? 'all' : 'price_low';
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
           const SliverToBoxAdapter(
             child: SizedBox(height: 8),
           ),
