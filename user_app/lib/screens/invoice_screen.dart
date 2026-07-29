@@ -201,13 +201,13 @@ class InvoiceScreen extends StatelessWidget {
           return pw.Padding(
             padding: const pw.EdgeInsets.all(24),
             child: pw.Column(
-              cross: pw.CrossAxisAlignment.start,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Row(
-                  main: pw.MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Column(
-                      cross: pw.CrossAxisAlignment.start,
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text('URBAN SERVICE', style: pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold)),
                         pw.Text('Official Service Receipt & Tax Invoice', style: const pw.TextStyle(fontSize: 10)),
@@ -219,7 +219,7 @@ class InvoiceScreen extends StatelessWidget {
                 pw.Divider(thickness: 1),
                 pw.SizedBox(height: 12),
                 pw.Row(
-                  main: pw.MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text('Invoice #: $invoiceNumber'),
                     pw.Text('Date: ${dateFmt.format(booking.createdAt)}'),
@@ -227,10 +227,10 @@ class InvoiceScreen extends StatelessWidget {
                 ),
                 pw.SizedBox(height: 16),
                 pw.Row(
-                  main: pw.MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Column(
-                      cross: pw.CrossAxisAlignment.start,
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text('Customer:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         pw.Text(booking.userName ?? 'Customer'),
@@ -238,7 +238,7 @@ class InvoiceScreen extends StatelessWidget {
                       ],
                     ),
                     pw.Column(
-                      cross: pw.CrossAxisAlignment.end,
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
                       children: [
                         pw.Text('Provider:', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                         pw.Text(booking.workerName ?? 'Partner Professional'),
@@ -253,7 +253,7 @@ class InvoiceScreen extends StatelessWidget {
                   child: pw.Column(
                     children: [
                       pw.Row(
-                        main: pw.MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Text(booking.serviceName ?? 'Service Item', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
                           pw.Text('₹${baseAmount.toStringAsFixed(2)}'),
@@ -261,7 +261,7 @@ class InvoiceScreen extends StatelessWidget {
                       ),
                       pw.SizedBox(height: 8),
                       pw.Row(
-                        main: pw.MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Text('Platform Fee (10%)'),
                           pw.Text('₹${platformFee.toStringAsFixed(2)}'),
@@ -269,7 +269,7 @@ class InvoiceScreen extends StatelessWidget {
                       ),
                       pw.Divider(),
                       pw.Row(
-                        main: pw.MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Text('Total Paid', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14)),
                           pw.Text('₹${booking.amount.toStringAsFixed(2)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14, color: PdfColors.green800)),
