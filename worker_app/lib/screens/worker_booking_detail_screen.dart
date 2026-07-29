@@ -9,6 +9,7 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'worker_create_invoice_screen.dart';
+import 'worker_in_app_navigation_screen.dart';
 
 class WorkerBookingDetailScreen extends StatefulWidget {
   const WorkerBookingDetailScreen({super.key, required this.bookingId});
@@ -298,20 +299,24 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
                 label: b.address ?? 'No address provided',
                 trailing: null,
               ),
-              if (b.address != null && b.address!.isNotEmpty) ...[
+              if (b.address != null && b.address!.isNotEmpty && (b.status == 'confirmed' || b.status == 'in_progress')) ...[
                 const SizedBox(height: 14),
                 ElevatedButton.icon(
                   onPressed: () {
-                    final query = Uri.encodeComponent(b.address!);
-                    launchUrl(
-                      Uri.parse('https://www.google.com/maps/search/?api=1&query=$query'),
-                      mode: LaunchMode.externalApplication,
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => WorkerInAppNavigationScreen(
+                          bookingId: b.id,
+                          customerName: b.userName ?? 'Customer',
+                          customerAddress: b.address!,
+                        ),
+                      ),
                     );
                   },
-                  icon: const Icon(Icons.navigation_rounded, color: Colors.white, size: 18),
-                  label: const Text('Navigate to Customer Address 📍', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                  icon: const Icon(Icons.map_rounded, color: Colors.white, size: 18),
+                  label: const Text('Start In-App Map Navigation 📍', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.olive,
+                    backgroundColor: AppTheme.primary,
                     minimumSize: const Size.fromHeight(44),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),

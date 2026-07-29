@@ -75,6 +75,17 @@ async function createBooking(req, res, next) {
       return error(res, "Service not found or unavailable", 404);
     }
 
+    if (worker_id) {
+      const db = require("../config/db");
+      const activeCheck = await db.query(
+        `SELECT id FROM bookings WHERE worker_id = $1 AND status IN ('confirmed', 'in_progress') LIMIT 1`,
+        [worker_id]
+      );
+      if (activeCheck.rows.length > 0) {
+        return error(res, "Worker is currently busy with an active job. Please select another worker or try again later.", 400);
+      }
+    }
+
     const booking = await Booking.create({
       userId,
       serviceId: service_id,
@@ -187,6 +198,17 @@ async function updateMyBookingStatus(req, res, next) {
       if (booking.worker_id && booking.worker_id !== req.auth.id) {
         return error(res, "You do not have permission to update this booking", 403);
       }
+
+      if (status === "confirmed") {
+        const db = require("../config/db");
+        const activeCheck = await db.query(
+          `SELECT id FROM bookings WHERE worker_id = $1 AND status IN ('confirmed', 'in_progress') AND id != $2 LIMIT 1`,
+          [req.auth.id, req.params.id]
+        );
+        if (activeCheck.rows.length > 0) {
+          return error(res, "Worker is busy. You already have an active job in progress. Complete it first before accepting another.", 400);
+        }
+      }
       
       const valid = {
         pending: ["confirmed", "in_progress", "cancelled"],
@@ -272,10 +294,24 @@ async function updateUserProfile(req, res, next) {
 async function listActiveBanners(req, res, next) {
   try {
     const paging = getPagination(req.query);
-    const data = await Banner.list({
+    let data = await Banner.list({
       ...paging,
       status: "active",
     });
+    if (!data.items || data.items.length === 0) {
+      data = {
+        items: [
+          {
+            id: 1,
+            title: "BOOK TRUSTED PROFESSIONALS",
+            image_url: "/uploads/banners/trusted_pros.png",
+            link_url: "",
+            status: "active"
+          }
+        ],
+        total: 1
+      };
+    }
     return success(res, "Active banners fetched successfully", data);
   } catch (err) {
     return next(err);
