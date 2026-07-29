@@ -437,10 +437,12 @@ class BookingCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    booking.amount > 0 ? '₹${booking.amount.toStringAsFixed(0)}' : 'Price after inspection',
-                    style: const TextStyle(
+                    (booking.status == 'completed' && booking.amount > 0)
+                        ? '₹${booking.amount.toStringAsFixed(0)}'
+                        : 'Price after inspection',
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primary,
+                      color: (booking.status == 'completed' && booking.amount > 0) ? AppTheme.primary : AppTheme.secondary,
                       fontSize: 13,
                     ),
                   ),
