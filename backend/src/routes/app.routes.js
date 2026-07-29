@@ -81,6 +81,21 @@ router.patch(
   ],
   validate,
   controller.updateUserProfile
+// FCM token update routes
+router.post(
+  "/user/fcm-token",
+  allowRoles(roles.USER),
+  [body("fcmToken").trim().notEmpty()],
+  validate,
+  controller.updateUserFcmToken
+);
+
+router.post(
+  "/worker/fcm-token",
+  allowRoles(roles.WORKER),
+  [body("fcmToken").trim().notEmpty()],
+  validate,
+  controller.updateWorkerFcmToken
 );
 
 // User-only routes
