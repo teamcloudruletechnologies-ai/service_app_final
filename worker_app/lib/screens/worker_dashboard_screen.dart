@@ -303,7 +303,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            user?.name ?? 'Helia | SiyaRam A',
+                            user?.name ?? 'Service Partner',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w900,
@@ -394,7 +394,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '₹${(todayEarnings > 0 ? todayEarnings : 3280.00).toStringAsFixed(2)}',
+                          '₹${todayEarnings.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.w900,
@@ -470,12 +470,12 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                       ),
                       child: Column(
                         children: [
-                          const Text(
-                            '0',
-                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
+                          Text(
+                            '${activeBookings.where((b) => b.status == 'pending').length}',
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
                           ),
                           const SizedBox(height: 4),
-                          Text('Upcoming Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                          Text('Pending Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
                         ],
                       ),
                     ),
@@ -491,7 +491,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                       child: Column(
                         children: [
                           Text(
-                            '${historyBookings.length > 0 ? historyBookings.length : 2}',
+                            '${historyBookings.length}',
                             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
                           ),
                           const SizedBox(height: 4),
@@ -552,10 +552,13 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Icon(Icons.chevron_left_rounded, color: Colors.grey),
-                        Text('Oct 6 - 12', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                        Icon(Icons.chevron_right_rounded, color: Colors.grey),
+                      children: [
+                        const Icon(Icons.chevron_left_rounded, color: Colors.grey),
+                        Text(
+                          '${DateFormat('MMM d').format(DateTime.now().subtract(const Duration(days: 7)))} - ${DateFormat('MMM d').format(DateTime.now())}',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        const Icon(Icons.chevron_right_rounded, color: Colors.grey),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -607,15 +610,36 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              Column(
-                children: [
-                  _buildPaymentHistoryItem('deadpool', 'Job 407-3960', '₹300.00', 'Today, 02:30 PM'),
-                  const SizedBox(height: 8),
-                  _buildPaymentHistoryItem('Vasavi n', 'Mon, 10 Aug', '₹200.00', '10 Aug, 11:00 AM'),
-                  const SizedBox(height: 8),
-                  _buildPaymentHistoryItem('Sravan User', 'Job 08-960', '₹960.00', '08 Aug, 04:00 PM'),
-                ],
-              ),
+              if (historyBookings.isEmpty)
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'No payment transactions recorded yet.',
+                      style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: historyBookings.map((b) {
+                    final dateStr = DateFormat('dd MMM, hh:mm a').format(b.scheduledAt ?? b.createdAt);
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildPaymentHistoryItem(
+                        b.userName ?? 'Customer',
+                        'Job #${b.id}',
+                        '₹${b.amount.toStringAsFixed(2)}',
+                        dateStr,
+                      ),
+                    );
+                  }).toList(),
+                ),
             ],
           ),
         ),

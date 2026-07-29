@@ -319,7 +319,11 @@ export default function Bookings() {
                         <td style={{ padding: '14px 16px' }}>{book.user_name || `Customer #${book.user_id}`}</td>
                         <td style={{ padding: '14px 16px' }}>{book.worker_name || 'Unassigned ⏳'}</td>
                         <td style={{ padding: '14px 16px', textTransform: 'capitalize' }}>{book.service_type || '—'}</td>
-                        <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 600 }}>{formatCurrency(book.amount)}</td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 600 }}>
+                          {(book.status === 'completed' && Number(book.amount) > 0)
+                            ? formatCurrency(book.amount)
+                            : <span style={{ color: 'var(--text-secondary)', fontSize: 11, fontStyle: 'italic' }}>Price after inspection</span>}
+                        </td>
                         <td style={{ padding: '14px 16px', textAlign: 'center' }}>
                           <span style={{
                             display: 'inline-flex',
@@ -541,7 +545,11 @@ export default function Bookings() {
                 <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>💰 Financial breakdown</h4>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--accent-light)', padding: '12px 16px', borderRadius: 8 }}>
                   <span style={{ fontSize: 13, color: 'var(--accent-dark)', fontWeight: 500 }}>Total Service Charge</span>
-                  <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--accent-dark)' }}>{formatCurrency(selectedBooking.amount)}</span>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent-dark)' }}>
+                    {(selectedBooking.status === 'completed' && Number(selectedBooking.amount) > 0)
+                      ? formatCurrency(selectedBooking.amount)
+                      : 'Price after inspection'}
+                  </span>
                 </div>
               </div>
 
