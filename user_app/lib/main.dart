@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/booking_provider.dart';
@@ -103,31 +104,76 @@ class UrbanServiceApp extends StatefulWidget {
   State<UrbanServiceApp> createState() => _UrbanServiceAppState();
 }
 
-class _UrbanServiceAppState extends State<UrbanServiceApp> {
-  final GlobalKey<ScaffoldMessengerState> _messengerKey = GlobalKey<ScaffoldMessengerState>();
+  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
     super.initState();
+    _initLocalNotifications();
     _setupFCM();
+  }
+
+  Future<void> _initLocalNotifications() async {
+    try {
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const initSettings = InitializationSettings(android: androidSettings);
+      await _localNotifications.initialize(initSettings);
+
+      const channel = AndroidNotificationChannel(
+        'high_importance_channel',
+        'High Importance Notifications',
+        description: 'This channel is used for important notifications.',
+        importance: Importance.max,
+      );
+
+      await _localNotifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          ?.createNotificationChannel(channel);
+    } catch (e) {
+      debugPrint("Local Notification init error: $e");
+    }
+  }
+
+  void _showHeadsUpBanner(String title, String body) {
+    try {
+      _localNotifications.show(
+        DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'high_importance_channel',
+            'High Importance Notifications',
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+          ),
+        ),
+      );
+    } catch (e) {
+      debugPrint("Show heads up banner error: $e");
+    }
   }
 
   void _setupFCM() {
     try {
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         final notification = message.notification;
-        if (notification != null) {
-          _messengerKey.currentState?.showSnackBar(
-            SnackBar(
-              content: Text(
-                '🔔 ${notification.title}: ${notification.body}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              backgroundColor: AppTheme.secondary,
-              duration: const Duration(seconds: 5),
+        final title = notification?.title ?? message.data['title'] ?? 'Notification';
+        final body = notification?.body ?? message.data['body'] ?? 'New update received';
+
+        _showHeadsUpBanner(title, body);
+
+        _messengerKey.currentState?.showSnackBar(
+          SnackBar(
+            content: Text(
+              '🔔 $title: $body',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-          );
-        }
+            backgroundColor: AppTheme.secondary,
+            duration: const Duration(seconds: 5),
+          ),
+        );
       });
     } catch (e) {
       debugPrint("FCM setup listener error: $e");
