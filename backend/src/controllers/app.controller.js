@@ -468,6 +468,7 @@ async function submitWorkerInvoice(req, res, next) {
        SET amount = $1,
            completion_notes = $2,
            status = 'completed',
+           payment_status = 'paid',
            job_completed_at = NOW(),
            updated_at = NOW()
        WHERE id = $3`,
