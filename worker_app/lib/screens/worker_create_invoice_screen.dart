@@ -94,7 +94,7 @@ class _WorkerCreateInvoiceScreenState extends State<WorkerCreateInvoiceScreen> {
 
     try {
       final api = context.read<ApiService>();
-      await api.postRaw('/bookings/${widget.bookingId}/submit-invoice', {
+      await api.postRaw('/app/bookings/${widget.bookingId}/submit-invoice', {
         'items': items,
         'totalAmount': _totalAmount,
       });
