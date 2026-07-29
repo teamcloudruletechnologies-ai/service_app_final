@@ -14,6 +14,9 @@ import '../widgets/common_widgets.dart';
 import 'worker_booking_detail_screen.dart';
 import 'worker_kyc_screen.dart';
 import 'notification_screen.dart';
+import 'profile_screen.dart';
+import 'work_history_screen.dart';
+import 'bookings_screen.dart';
 
 class WorkerDashboardScreen extends StatefulWidget {
   const WorkerDashboardScreen({super.key});
@@ -288,28 +291,35 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundColor: AppTheme.sandal,
-                        child: Text(
-                          (user?.name.isNotEmpty == true ? user!.name[0] : 'W').toUpperCase(),
-                          style: const TextStyle(color: AppTheme.matteBlack, fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            user?.name ?? 'Service Partner',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w900,
-                              color: AppTheme.matteBlack,
-                            ),
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => ProfileScreen()),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 22,
+                          backgroundColor: AppTheme.sandal,
+                          child: Text(
+                            (user?.name.isNotEmpty == true ? user!.name[0] : 'W').toUpperCase(),
+                            style: const TextStyle(color: AppTheme.matteBlack, fontWeight: FontWeight.bold, fontSize: 16),
                           ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user?.name ?? 'Service Partner',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                                color: AppTheme.matteBlack,
+                              ),
+                            ),
                           const SizedBox(height: 2),
                           InkWell(
                             onTap: () => _toggleOnlineStatus(!_isOnline),
@@ -340,9 +350,10 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      // Online / Offline Switch Toggle
+                ), // Close InkWell
+                Row(
+                  children: [
+                    // Online / Offline Switch Toggle
                       Transform.scale(
                         scale: 0.8,
                         child: Switch(
@@ -374,57 +385,64 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
               const SizedBox(height: 20),
 
               // ─── HERO WALLET BALANCE CARD ───
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.primary.withValues(alpha: 0.25),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '₹${todayEarnings.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'AJ Balance',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppTheme.sandal,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(16),
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => WorkHistoryScreen()),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primary.withValues(alpha: 0.25),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
                       ),
-                      child: const Icon(
-                        Icons.account_balance_wallet_rounded,
-                        size: 40,
-                        color: AppTheme.sandal,
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '₹${todayEarnings.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'AJ Balance (Tap for History) →',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppTheme.sandal,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.account_balance_wallet_rounded,
+                          size: 40,
+                          color: AppTheme.sandal,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -442,61 +460,82 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '${activeBookings.length}',
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
-                          ),
-                          const SizedBox(height: 4),
-                          Text('Active Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '${activeBookings.where((b) => b.status == 'pending').length}',
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
-                          ),
-                          const SizedBox(height: 4),
-                          Text('Pending Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-                        ],
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => BookingsScreen()),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              '${activeBookings.length}',
+                              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
+                            ),
+                            const SizedBox(height: 4),
+                            Text('Active Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => BookingsScreen()),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              '${activeBookings.where((b) => b.status == 'pending').length}',
+                              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
+                            ),
+                            const SizedBox(height: 4),
+                            Text('Pending Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                          ],
+                        ),
                       ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '${historyBookings.length}',
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
-                          ),
-                          const SizedBox(height: 4),
-                          Text('Completed Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
-                        ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => WorkHistoryScreen()),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              '${historyBookings.length}',
+                              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.matteBlack),
+                            ),
+                            const SizedBox(height: 4),
+                            Text('Completed Jobs', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                          ],
+                        ),
                       ),
                     ),
                   ),

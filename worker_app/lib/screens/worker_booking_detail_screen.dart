@@ -292,42 +292,31 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
                 label: b.userName ?? 'Guest Customer',
                 trailing: null,
               ),
-              const SizedBox(height: 12),
-              _CustomerRow(
-                icon: Icons.phone_outlined,
-                label: b.userPhone ?? 'No contact info',
-                trailing: b.userPhone != null
-                    ? GestureDetector(
-                        onTap: () => launchUrl(Uri.parse('tel:${b.userPhone}')),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppTheme.olive.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.call, color: AppTheme.olive, size: 18),
-                        ),
-                      )
-                    : null,
-              ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               _CustomerRow(
                 icon: Icons.location_on_outlined,
                 label: b.address ?? 'No address provided',
-                trailing: b.address != null
-                    ? GestureDetector(
-                        onTap: () => launchUrl(Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(b.address!)}')),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppTheme.olive.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.navigation_outlined, color: AppTheme.olive, size: 18),
-                        ),
-                      )
-                    : null,
+                trailing: null,
               ),
+              if (b.address != null && b.address!.isNotEmpty) ...[
+                const SizedBox(height: 14),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    final query = Uri.encodeComponent(b.address!);
+                    launchUrl(
+                      Uri.parse('https://www.google.com/maps/search/?api=1&query=$query'),
+                      mode: LaunchMode.externalApplication,
+                    );
+                  },
+                  icon: const Icon(Icons.navigation_rounded, color: Colors.white, size: 18),
+                  label: const Text('Navigate to Customer Address 📍', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.olive,
+                    minimumSize: const Size.fromHeight(44),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

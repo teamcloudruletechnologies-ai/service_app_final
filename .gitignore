@@ -1,0 +1,15 @@
+node_modules/
+.env
+*.env
+npm-debug.log*
+uploads/
+backend/src/config/serviceAccountKey.json
+serviceAccountKey.json
+google-services.json
+*.pem
+*.key
+.DS_Store
+build/
+.dart_tool/
+.pub-cache/
+.pub/

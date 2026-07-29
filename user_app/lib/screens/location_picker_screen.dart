@@ -373,6 +373,59 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 10),
+
+                    // Saved Addresses Quick Selection Chips
+                    Consumer<AuthProvider>(
+                      builder: (context, auth, _) {
+                        final permAddr = auth.user?.address;
+                        final fullAddr = auth.fullAddress;
+                        return SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              if (permAddr != null && permAddr.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: ChoiceChip(
+                                    avatar: const Icon(Icons.home, size: 16, color: Colors.white),
+                                    label: const Text('Permanent Address', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white)),
+                                    selected: _addressCtrl.text == permAddr,
+                                    selectedColor: AppTheme.primary,
+                                    backgroundColor: Colors.grey.shade800,
+                                    onSelected: (sel) {
+                                      if (sel) {
+                                        setState(() {
+                                          _addressCtrl.text = permAddr;
+                                        });
+                                        _searchAddress(permAddr);
+                                      }
+                                    },
+                                  ),
+                                ),
+                              if (fullAddr != null && fullAddr.isNotEmpty && fullAddr != permAddr)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: ChoiceChip(
+                                    avatar: const Icon(Icons.work, size: 16),
+                                    label: const Text('Work / Secondary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                    selected: _addressCtrl.text == fullAddr,
+                                    selectedColor: AppTheme.primary,
+                                    onSelected: (sel) {
+                                      if (sel) {
+                                        setState(() {
+                                          _addressCtrl.text = fullAddr;
+                                        });
+                                        _searchAddress(fullAddr);
+                                      }
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                     const SizedBox(height: 12),
 
                     // Address Textbox
