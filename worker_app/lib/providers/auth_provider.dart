@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import '../models/models.dart';
@@ -20,6 +21,12 @@ class AuthProvider extends ChangeNotifier {
     if (_api.isLoggedIn) {
       try {
         await _api.fetchProfile();
+        try {
+          final token = await FirebaseMessaging.instance.getToken();
+          if (token != null && token.isNotEmpty) {
+            await _api.updateFcmToken(token);
+          }
+        } catch (_) {}
       } catch (_) {
         await _api.logout();
       }
@@ -34,6 +41,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       await _api.login(login, password, role: role);
+      try {
+        final token = await FirebaseMessaging.instance.getToken();
+        if (token != null && token.isNotEmpty) {
+          await _api.updateFcmToken(token);
+        }
+      } catch (_) {}
       loading = false;
       notifyListeners();
       return true;

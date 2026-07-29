@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -106,6 +107,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       await _api.login(login, password, role: role);
+      try {
+        final token = await FirebaseMessaging.instance.getToken();
+        if (token != null && token.isNotEmpty) {
+          await _api.updateFcmToken(token);
+        }
+      } catch (_) {}
       loading = false;
       notifyListeners();
       return true;

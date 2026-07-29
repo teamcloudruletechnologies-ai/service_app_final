@@ -82,8 +82,11 @@ class ApiService {
       return body;
     }
     if (response.statusCode == 401) {
-      logout();
-      onUnauthorized?.call();
+      final reqPath = response.request?.url.path ?? '';
+      if (reqPath.contains('/auth/me') || reqPath.contains('/user/fcm-token') || reqPath.contains('/profile')) {
+        logout();
+        onUnauthorized?.call();
+      }
     }
     final message = body is Map ? (body['message'] as String? ?? 'Request failed') : 'Request failed';
     throw ApiException(message, statusCode: response.statusCode);

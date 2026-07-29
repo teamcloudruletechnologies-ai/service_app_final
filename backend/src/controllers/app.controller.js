@@ -424,8 +424,8 @@ async function completeJobPhoto(req, res, next) {
     }
 
     const { otp, notes } = req.body;
-    if (booking.otp && String(booking.otp) !== String(otp)) {
-      return error(res, "Invalid Completion OTP code. Please ask customer for correct code.", 400);
+    if (booking.otp && (!otp || String(booking.otp) !== String(otp))) {
+      return error(res, "Invalid Completion OTP code. Please ask customer for correct 4-digit code.", 400);
     }
 
     let photoUrl = null;
@@ -455,7 +455,7 @@ async function submitWorkerInvoice(req, res, next) {
     }
 
     const { items, totalAmount, otp } = req.body;
-    if (otp && String(booking.otp) !== String(otp)) {
+    if (booking.otp && (!otp || String(booking.otp) !== String(otp))) {
       return error(res, "Invalid Finish OTP code. Please ask the customer for the correct 4-digit code.", 400);
     }
 

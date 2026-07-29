@@ -37,6 +37,14 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant AutoSliderBannerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.banners.length != widget.banners.length) {
+      _startAutoSlide();
+    }
+  }
+
+  @override
   void dispose() {
     _timer?.cancel();
     _pageController.dispose();
