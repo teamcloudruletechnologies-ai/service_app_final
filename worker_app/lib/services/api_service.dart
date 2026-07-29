@@ -87,14 +87,7 @@ class ApiService {
     throw ApiException(message, statusCode: response.statusCode);
   }
 
-  Future<dynamic> postRaw(String endpoint, Map<String, dynamic> body) async {
-    final response = await http.post(
-      Uri.parse('${ApiConfig.baseUrl}$endpoint'),
-      headers: _headers(auth: true),
-      body: jsonEncode(body),
-    );
-    return _decode(response);
-  }
+
 
   Future<void> updateFcmToken(String token) async {
     if (_token == null) return;
