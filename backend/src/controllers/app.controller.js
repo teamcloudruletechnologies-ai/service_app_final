@@ -476,7 +476,20 @@ async function submitWorkerInvoice(req, res, next) {
     );
 
     const invoiceNum = `INV-${Date.now()}-${req.params.id}`;
-    const platformFee = amountVal * 0.10;
+    let platformFee = amountVal * 0.10;
+    try {
+      const CalculationClient = require("../utils/calculationClient");
+      const calcResult = await CalculationClient.calculateServiceCharge({
+        subtotal: amountVal,
+        service_charge_percent: 10.0,
+        fixed_booking_fee: 0.0
+      });
+      if (calcResult && typeof calcResult.total_service_charge === "number") {
+        platformFee = calcResult.total_service_charge;
+      }
+    } catch (calcErr) {
+      console.warn("[CalculationClient Warning] Using fallback platform fee calculation:", calcErr.message);
+    }
     const workerPayout = amountVal - platformFee;
 
     await db.query(
