@@ -131,7 +131,14 @@ function NewBookingToast({ bookings, onDismiss, onViewBookings }) {
 
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem('admin_token'));
-  const [activePage, setActivePage] = useState('dashboard');
+  const [activePage, setActivePageState] = useState(() => {
+    return localStorage.getItem('admin_active_page') || 'dashboard';
+  });
+
+  const setActivePage = (page) => {
+    localStorage.setItem('admin_active_page', page);
+    setActivePageState(page);
+  };
   const [newBookings, setNewBookings] = useState([]);
   const lastSeenIdRef = useRef(null);
   const pollingRef = useRef(null);
