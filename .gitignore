@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+venv/
+calculation_service/venv/
+env/
+.venv/
+
+# Environment variables
+.env
+*.env.local
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

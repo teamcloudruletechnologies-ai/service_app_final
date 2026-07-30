@@ -1,0 +1,206 @@
+================================================================================
+SERVICE APP - COMPLETE API ENDPOINTS & IMPLEMENTATION SUMMARY
+================================================================================
+
+--------------------------------------------------------------------------------
+1. AUTHENTICATION API ENDPOINTS (/api/auth)
+--------------------------------------------------------------------------------
+POST /api/auth/admin/register          - Register new admin account
+POST /api/auth/user/register           - Register new user account
+POST /api/auth/worker/register         - Register new worker account
+POST /api/auth/login                   - Unified login for admin, user, and worker
+POST /api/auth/phone-login             - Mobile phone login with OTP validation
+GET  /api/auth/me                      - Get current authenticated account info
+
+--------------------------------------------------------------------------------
+2. APP & CUSTOMER SERVICE ENDPOINTS (/api/app)
+--------------------------------------------------------------------------------
+GET   /api/app/services/categories              - List top-level service categories
+GET   /api/app/services/categories/:id/subcategories - List sub-categories of parent category
+GET   /api/app/banners                          - List active promotional banners
+GET   /api/app/services                         - List active services with filters
+GET   /api/app/services/:id                     - Get single service details
+POST  /api/app/upload                           - Generic upload endpoint for files/KYC
+PATCH /api/app/worker/profile                   - Worker profile & onboarding update
+GET   /api/app/worker/earnings                  - Worker earnings & job stats history
+PATCH /api/app/user/profile                     - User profile update
+POST  /api/app/user/fcm-token                   - Save/update User FCM Device Token [NEW]
+POST  /api/app/worker/fcm-token                 - Save/update Worker FCM Device Token [NEW]
+POST  /api/app/bookings                         - Create new service booking
+PATCH /api/app/bookings/:id/cancel              - Cancel pending/confirmed booking
+GET   /api/app/bookings                         - List my bookings (User / Worker)
+GET   /api/app/bookings/:id                     - Get booking details
+PATCH /api/app/bookings/:id/status              - Update booking status with OTP verification
+POST  /api/app/bookings/:id/start-job           - Start job with start photo verification
+POST  /api/app/bookings/:id/complete-job        - Complete job with photo verification
+POST  /api/app/bookings/:id/submit-invoice      - Worker custom invoice generation & job finish
+POST  /api/app/payments/order                   - Create Razorpay payment order
+POST  /api/app/payments/verify                  - Verify Razorpay payment signature & update status
+POST  /api/app/reviews                          - Submit service review & rating
+GET   /api/app/reviews                          - List service reviews
+
+--------------------------------------------------------------------------------
+3. USER ADDRESSES & LOCATION ENDPOINTS (/api/app/addresses, /api/user-addresses)
+--------------------------------------------------------------------------------
+GET    /api/app/addresses                       - Get user saved addresses
+POST   /api/app/addresses                       - Add new user address
+PUT    /api/app/addresses/:id                   - Update user address
+DELETE /api/app/addresses/:id                   - Delete user address
+PATCH  /api/app/addresses/:id/default           - Set default user address
+
+--------------------------------------------------------------------------------
+4. USER LOCATION & GEOCODING (/api/app/locations)
+--------------------------------------------------------------------------------
+POST /api/app/locations/reverse-geocode         - Reverse geocode lat/lng to address
+POST /api/app/locations/nearby-workers          - Find nearby active workers by lat/lng
+POST /api/app/locations/update-worker-location  - Update worker live lat/lng
+GET  /api/app/locations/worker-location/:id     - Get worker live location for tracking
+
+--------------------------------------------------------------------------------
+5. ADMIN USER MANAGEMENT (/api/admin/users)
+--------------------------------------------------------------------------------
+GET    /api/admin/users                         - List users with search, sort, pagination
+POST   /api/admin/users                         - Create user
+GET    /api/admin/users/:id                     - Get user details
+PATCH  /api/admin/users/:id                     - Update user details
+DELETE /api/admin/users/:id                     - Delete user account
+PATCH  /api/admin/users/:id/block               - Block user account
+PATCH  /api/admin/users/:id/unblock             - Unblock user account
+GET    /api/admin/users/:id/bookings           - View user booking history
+GET    /api/admin/users/:id/activity-logs       - View user activity logs
+GET    /api/admin/users/:id/activity-logs/download - Download activity logs CSV
+
+--------------------------------------------------------------------------------
+6. ADMIN WORKER MANAGEMENT (/api/workers)
+--------------------------------------------------------------------------------
+GET    /api/workers                             - List workers with status & service filter
+POST   /api/workers                             - Create worker account
+GET    /api/workers/:id                         - Get worker profile details
+PATCH  /api/workers/:id                         - Update worker details
+DELETE /api/workers/:id                         - Delete worker account
+PATCH  /api/workers/:id/status                  - Toggle worker status (active/inactive)
+
+--------------------------------------------------------------------------------
+7. WORKER KYC MANAGEMENT (/api/kyc)
+--------------------------------------------------------------------------------
+POST  /api/kyc                                  - Submit worker KYC documents
+GET   /api/kyc                                  - List KYC submissions for admin
+GET   /api/kyc/:id                              - Get single KYC submission details
+PATCH /api/kyc/:id/review                       - Admin review KYC (Approve / Reject)
+
+--------------------------------------------------------------------------------
+8. ADMIN SERVICES CATALOG (/api/admin/services)
+--------------------------------------------------------------------------------
+GET    /api/admin/services/categories           - List categories CRUD
+POST   /api/admin/services/categories           - Create category
+PUT    /api/admin/services/categories/:id       - Update category
+DELETE /api/admin/services/categories/:id       - Delete category
+GET    /api/admin/services                      - List services CRUD
+POST   /api/admin/services                      - Create service (with image upload)
+PUT    /api/admin/services/:id                  - Update service
+DELETE /api/admin/services/:id                  - Delete service
+PATCH  /api/admin/services/:id/status           - Toggle service availability status
+
+--------------------------------------------------------------------------------
+9. ADMIN BOOKINGS MANAGEMENT (/api/admin/bookings)
+--------------------------------------------------------------------------------
+GET   /api/admin/bookings                       - List all bookings with date & status filters
+GET   /api/admin/bookings/analytics             - Analytics dashboard metrics
+GET   /api/admin/bookings/:id                   - Get booking details
+PATCH /api/admin/bookings/:id                   - Admin update booking status / assign worker
+
+--------------------------------------------------------------------------------
+10. ADMIN INVOICES & PAYOUTS (/api/admin/invoices)
+--------------------------------------------------------------------------------
+GET /api/admin/invoices                         - List invoices
+GET /api/admin/invoices/payments                - List payment transactions
+GET /api/admin/invoices/reports                 - Invoice financial summary report
+GET /api/admin/invoices/payouts                 - Worker payouts summary
+GET /api/admin/invoices/:id                     - Get single invoice details
+
+--------------------------------------------------------------------------------
+11. ADMIN COMPLAINTS & HELP (/api/admin/complaints)
+--------------------------------------------------------------------------------
+GET   /api/admin/complaints                     - List complaints
+GET   /api/admin/complaints/:id                 - Get complaint details
+PATCH /api/admin/complaints/:id                 - Update complaint status / resolution
+POST  /api/admin/complaints                     - Raise new complaint
+
+--------------------------------------------------------------------------------
+12. ADMIN LOCATIONS & ZONES (/api/admin/locations)
+--------------------------------------------------------------------------------
+GET    /api/admin/locations/zones               - List service zones
+POST   /api/admin/locations/zones               - Create zone
+DELETE /api/admin/locations/zones/:id           - Delete zone
+GET    /api/admin/locations/pincodes            - List serviceable pincodes
+POST   /api/admin/locations/pincodes            - Create pincode mapping
+
+--------------------------------------------------------------------------------
+13. SUB-ADMIN MANAGEMENT (/api/admin/sub-admins)
+--------------------------------------------------------------------------------
+GET    /api/admin/sub-admins                    - List sub-admin accounts
+POST   /api/admin/sub-admins                    - Create sub-admin account
+GET    /api/admin/sub-admins/:id                - Get sub-admin details
+PATCH  /api/admin/sub-admins/:id                - Update sub-admin permissions
+DELETE /api/admin/sub-admins/:id                - Delete sub-admin account
+
+--------------------------------------------------------------------------------
+14. ADMIN NOTIFICATIONS & BANNERS (/api/admin/notifications, /api/admin/banners)
+--------------------------------------------------------------------------------
+GET    /api/admin/notifications                 - List notifications
+PATCH  /api/admin/notifications/:id/read        - Mark notification read
+PATCH  /api/admin/notifications/read-all        - Mark all notifications read
+DELETE /api/admin/notifications/:id             - Delete notification
+GET    /api/admin/banners                       - List banners
+POST   /api/admin/banners                       - Create banner
+PUT    /api/admin/banners/:id                   - Update banner
+DELETE /api/admin/banners/:id                   - Delete banner
+
+--------------------------------------------------------------------------------
+15. SYSTEM HEALTH & REVIEWS (/health, /api/admin/reviews)
+--------------------------------------------------------------------------------
+GET /health                                     - System health check
+GET /admin/reviews                              - List user reviews for admin
+
+================================================================================
+TOTAL API ENDPOINTS: 94 Endpoints
+================================================================================
+
+--------------------------------------------------------------------------------
+RECENT MAJOR IMPLEMENTATIONS & UPDATES SUMMARY
+--------------------------------------------------------------------------------
+
+1. FIX: Upfront Payment Prompt on Initial Booking
+   - Previously in user_app/nearby_workers_screen.dart, creating a booking was
+     immediately redirecting to PaymentScreen (forcing upfront payment before worker arrival).
+   - FIX: Removed immediate PaymentScreen redirect. Now navigates to My Bookings
+     screen with a toast "Service Booked Successfully! Partner assigned for inspection."
+   - Upfront "Pay Now" button removed from pending booking card.
+
+2. OTP Generation & Verification Flow
+   - 4-digit OTP is displayed on User App booking card.
+   - Worker App has an AlertDialog popup ("Enter Customer Start OTP").
+   - Backend PATCH /api/app/bookings/:id/status verifies OTP before updating
+     status to 'in_progress'.
+
+3. Worker Custom Invoice & Razorpay Payment Flow
+   - Worker App features WorkerCreateInvoiceScreen where worker enters line items
+     and total amount, posting to POST /api/app/bookings/:id/submit-invoice.
+   - Backend updates bookings.amount = totalAmount and creates invoice.
+   - User App BookingCard updates dynamically once invoice is submitted, displaying
+     a prominent "Pay Now (₹<amount>)" button leading to PaymentScreen with Razorpay integration.
+
+4. Firebase Cloud Messaging (FCM) Push Notifications Setup
+   - Installed `firebase-admin` package in backend.
+   - Updated Database Schema (db.js) to add `fcm_token` column to `users` and `workers` tables.
+   - Created FCM Service module (backend/src/utils/fcm.service.js) for handling push dispatches
+     and DB notification fallbacks.
+   - Added endpoints POST /api/app/user/fcm-token and POST /api/app/worker/fcm-token.
+   - Wired real-time push notification triggers across backend operations:
+     - New Booking -> Push to Worker ("🔔 New Job Assignment!")
+     - Worker Accepts -> Push to User ("✅ Worker Accepted! Check OTP")
+     - OTP Verified -> Push to User ("🛠️ Work Started!")
+     - Invoice Submitted -> Push to User ("🧾 Custom Invoice Ready! Pay ₹399 Now")
+     - Payment Verified -> Push to Worker ("💰 Payment Received!") & User ("🎉 Payment Successful!")
+   - Updated Flutter User App and Worker App (main.dart & ApiService) to auto-sync FCM token on startup.
+================================================================================

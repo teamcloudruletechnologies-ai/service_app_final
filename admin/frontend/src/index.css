@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import "tailwindcss";
+
+:root {
+  /* ─── Brand Palette ──────────────────────────────────────────── */
+  --black:   #1A1A1A;   /* Pure Matte Black  */
+  --white:   #F5F5F3;   /* Crisp Milk White  */
+  --sandal:  #E3D0BA;   /* Warm Sandal       */
+  --olive:   #4A5343;   /* Muted Olive Green */
+
+  /* ─── Background ─────────────────────────────────────────────── */
+  --bg-app:           #F5F5F3;   /* Milk White canvas      */
+  --bg-card:          #FFFFFF;   /* Pure white cards       */
+  --bg-muted:         #EDE8E0;   /* Slightly warm muted    */
+  --border-color:     #D9CFBF;   /* Sandal-tinted border   */
+
+  /* ─── Sidebar ────────────────────────────────────────────────── */
+  --bg-sidebar:        #1A1A1A;  /* Matte Black sidebar    */
+  --bg-sidebar-hover:  #2A2A28;  /* Slightly lighter black */
+  --bg-sidebar-active: #4A5343;  /* Muted Olive Green active row  */
+
+  /* ─── Accent (Muted Olive Green primary) ───────────────────────── */
+  --accent-color:   #4A5343;     /* Muted Olive Green      */
+  --accent-dark:    #373E32;     /* Darker olive           */
+  --accent-light:   #F0F4EF;     /* Very light olive tint  */
+  --accent-border:  #8A9683;     /* Mid olive border       */
+
+  /* ─── Text ───────────────────────────────────────────────────── */
+  --text-primary:   #1A1A1A;     /* Matte Black            */
+  --text-secondary: #5C5C5A;     /* Softer dark grey       */
+  --text-muted:     #9A978F;     /* Warm muted grey        */
+
+  /* ─── Sidebar Text ───────────────────────────────────────────── */
+  --sidebar-text-active:   #F5F5F3;  /* Milk White on active   */
+  --sidebar-text-inactive: #B8B4AC;  /* Muted sandal on idle   */
+
+  /* ─── Status badges ──────────────────────────────────────────── */
+  --status-green-bg:  #E6EDDF;
+  --status-green-fg:  #2E5226;
+  --status-red-bg:    #F5E0DC;
+  --status-red-fg:    #8B2218;
+  --status-amber-bg:  #F5EDD8;
+  --status-amber-fg:  #7A4F00;
+}
+
+
+* {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(28,25,23,0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(28,25,23,0.2);
+}
