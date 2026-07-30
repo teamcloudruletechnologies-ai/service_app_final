@@ -81,6 +81,8 @@ router.patch(
   ],
   validate,
   controller.updateUserProfile
+);
+
 // FCM token update routes
 router.post(
   "/user/fcm-token",
