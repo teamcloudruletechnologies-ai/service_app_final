@@ -204,8 +204,9 @@ export default function Dashboard() {
     dashboardAPI.getStats()
       .then(res => {
         if (!active) return;
-        // ✅ api interceptor already returns response.data — so res IS the data
-        setData(res);
+        // Unpack payload data correctly whether interceptor returns response or response.data
+        const payload = res?.data || res;
+        setData(payload);
         setLoading(false);
       })
       .catch(err => {
@@ -219,17 +220,18 @@ export default function Dashboard() {
   }, []); // ✅ empty deps — runs only once
 
   /* ─── Parse ─── */
-  const users          = data?.users;
-  const workers        = data?.workers;
-  const bookings       = data?.bookings       || [];
-  const kyc            = data?.kyc            || [];
-  const revenue        = data?.revenue        || 0;
-  const recentBookings = data?.recentBookings || [];
-  const revenueChart   = data?.revenueChart   || [];
-  const activity       = data?.activity       || [];
-  const todayStats     = data?.todayStats     || {};
-  const activeWorkers  = data?.activeWorkers  || 0;
-  const topServices    = data?.topServices    || [];
+  const payload        = data?.data || data;
+  const users          = payload?.users;
+  const workers        = payload?.workers;
+  const bookings       = payload?.bookings       || [];
+  const kyc            = payload?.kyc            || [];
+  const revenue        = payload?.revenue        || 0;
+  const recentBookings = payload?.recentBookings || [];
+  const revenueChart   = payload?.revenueChart   || [];
+  const activity       = payload?.activity       || [];
+  const todayStats     = payload?.todayStats     || {};
+  const activeWorkers  = payload?.activeWorkers  || 0;
+  const topServices    = payload?.topServices    || [];
 
   const totalBookings   = bookings.reduce((s, b) => s + Number(b.total), 0);
   const completedCount  = getBookingCount(bookings, 'completed');

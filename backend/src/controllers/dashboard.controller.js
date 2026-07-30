@@ -7,16 +7,22 @@ async function overview(req, res, next) {
       db.query("SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status = 'active' OR status IS NOT NULL) AS active FROM users"),
       db.query("SELECT COUNT(*) AS total, COUNT(*) FILTER (WHERE status = 'active' OR status IS NOT NULL) AS active FROM workers"),
       db.query("SELECT status, COUNT(*) AS total FROM worker_kyc GROUP BY status"),
-      db.query("SELECT status, COUNT(*) AS total FROM bookings GROUP BY status"),
+      db.query(`
+        SELECT status, COUNT(*)::int AS total FROM (
+          SELECT status FROM bookings
+          UNION ALL
+          SELECT status FROM invoices
+        ) combined GROUP BY status
+      `),
       db.query("SELECT COALESCE((SELECT SUM(amount) FROM invoices WHERE status != 'cancelled'), (SELECT SUM(amount) FROM bookings WHERE status != 'cancelled'), 0)::float AS total"),
       db.query(`
-        SELECT b.id, COALESCE(i.amount, b.amount)::float AS amount, b.status, b.created_at, 
+        SELECT COALESCE(i.id, b.id) AS id, COALESCE(i.amount, b.amount)::float AS amount, COALESCE(i.status, b.status) AS status, COALESCE(i.created_at, b.created_at) AS created_at, 
                u.name AS user_name, w.name AS worker_name, w.service_type
-        FROM bookings b
-        LEFT JOIN users u ON b.user_id = u.id
-        LEFT JOIN workers w ON b.worker_id = w.id
-        LEFT JOIN invoices i ON i.booking_id = b.id
-        ORDER BY b.created_at DESC
+        FROM invoices i
+        FULL OUTER JOIN bookings b ON b.id = i.booking_id
+        LEFT JOIN users u ON u.id = COALESCE(i.user_id, b.user_id)
+        LEFT JOIN workers w ON w.id = COALESCE(i.worker_id, b.worker_id)
+        ORDER BY created_at DESC
         LIMIT 5
       `),
       db.query(`
@@ -37,13 +43,11 @@ async function overview(req, res, next) {
       `),
       db.query(`
         SELECT
-          COUNT(*)::int AS today_bookings,
+          (SELECT COUNT(*)::int FROM invoices WHERE DATE(created_at) = CURRENT_DATE) AS today_bookings,
           COALESCE((SELECT SUM(amount) FROM invoices WHERE DATE(created_at) = CURRENT_DATE AND status != 'cancelled'), 0)::float AS today_revenue,
-          COUNT(*) FILTER (WHERE status = 'completed')::int AS today_completed,
-          COUNT(*) FILTER (WHERE status = 'pending')::int AS today_pending,
-          COUNT(*) FILTER (WHERE status = 'in_progress')::int AS today_in_progress
-        FROM bookings
-        WHERE DATE(created_at) = CURRENT_DATE
+          (SELECT COUNT(*)::int FROM invoices WHERE DATE(created_at) = CURRENT_DATE AND status IN ('completed', 'paid')) AS today_completed,
+          (SELECT COUNT(*)::int FROM invoices WHERE DATE(created_at) = CURRENT_DATE AND status = 'pending') AS today_pending,
+          (SELECT COUNT(*)::int FROM bookings WHERE DATE(created_at) = CURRENT_DATE AND status = 'in_progress') AS today_in_progress
       `),
       db.query("SELECT COUNT(*)::int AS count FROM workers WHERE status = 'active' OR status IS NOT NULL"),
       db.query(`
