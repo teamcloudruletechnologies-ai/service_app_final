@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { bookingsAPI } from '../api';
+import { toast } from 'react-toastify';
 
 const STATUS_BADGES = {
   pending: { bg: 'var(--accent-light)', fg: 'var(--accent-dark)', text: 'Pending' },
@@ -123,6 +124,7 @@ export default function Bookings() {
         if (res && res.success) {
           // Update local state in drawer
           setSelectedBooking(res.data);
+          toast.success(`Booking status updated to ${newStatus}`);
           // Refresh list and stats
           fetchBookingsList();
           fetchStats();
@@ -130,7 +132,7 @@ export default function Bookings() {
       })
       .catch(err => {
         console.error('Failed to update status:', err);
-        alert(err?.message || 'Failed to update booking status');
+        toast.error(err?.message || 'Failed to update booking status');
       })
       .finally(() => setUpdatingStatus(false));
   };

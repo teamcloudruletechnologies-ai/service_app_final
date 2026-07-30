@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { rolesAPI } from '../api';
+import { toast } from 'react-toastify';
+import ConfirmModal from '../components/ConfirmModal';
 
 function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
@@ -72,11 +74,19 @@ export default function Roles() {
   // Stats
   const [stats, setStats] = useState({ total: 0, active: 0, inactive: 0, suspended: 0 });
 
-  // Drawer
+  // Drawer State
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [editingAdmin, setEditingAdmin] = useState(null); // null = Create Mode
   const [drawerLoading, setDrawerLoading] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState(null); // null = Create, otherwise Admin object
   const [saving, setSaving] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirm',
+    variant: 'danger',
+    onConfirm: () => {},
+  });
 
   // Form states
   const [formName, setFormName] = useState('');
@@ -154,13 +164,13 @@ export default function Roles() {
           }
           setFormPermissions(perms);
         } else {
-          alert('Failed to load sub-admin details.');
+          toast.error('Failed to load sub-admin details.');
           setDrawerOpen(false);
         }
       })
       .catch(err => {
         console.error('Error fetching sub-admin details:', err);
-        alert(err?.message || 'Failed to load sub-admin details.');
+        toast.error(err?.message || 'Failed to load sub-admin details.');
         setDrawerOpen(false);
       })
       .finally(() => setDrawerLoading(false));
@@ -168,21 +178,29 @@ export default function Roles() {
 
   // Delete Sub-Admin
   const handleDelete = (adminId, name) => {
-    if (window.confirm(`Are you sure you want to delete sub-admin "${name}"? This action cannot be undone.`)) {
-      setLoading(true);
-      rolesAPI.delete(adminId)
-        .then(res => {
-          if (res && res.success) {
-            alert('✅ Sub-admin deleted successfully');
-            fetchSubAdmins();
-          }
-        })
-        .catch(err => {
-          console.error('Error deleting sub-admin:', err);
-          alert(err?.message || 'Failed to delete sub-admin');
-          setLoading(false);
-        });
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Delete Sub-Admin',
+      message: `Are you sure you want to delete sub-admin "${name}"? This action cannot be undone.`,
+      confirmText: 'Delete Sub-Admin',
+      variant: 'danger',
+      onConfirm: () => {
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        setLoading(true);
+        rolesAPI.delete(adminId)
+          .then(res => {
+            if (res && res.success) {
+              toast.success('Sub-admin deleted successfully!');
+              fetchSubAdmins();
+            }
+          })
+          .catch(err => {
+            console.error('Error deleting sub-admin:', err);
+            toast.error(err?.message || 'Failed to delete sub-admin');
+            setLoading(false);
+          });
+      }
+    });
   };
 
   // Toggle permission checkbox
@@ -207,7 +225,7 @@ export default function Roles() {
   const handleSave = (e) => {
     e.preventDefault();
     if (!formName.trim() || !formEmail.trim() || (!editingAdmin && !formPassword)) {
-      alert('Please fill out all required fields.');
+      toast.warning('Please fill out all required fields.');
       return;
     }
 
@@ -230,14 +248,14 @@ export default function Roles() {
     request
       .then(res => {
         if (res && res.success) {
-          alert(`✅ Sub-admin ${editingAdmin ? 'updated' : 'created'} successfully!`);
+          toast.success(`Sub-admin ${editingAdmin ? 'updated' : 'created'} successfully!`);
           setDrawerOpen(false);
           fetchSubAdmins();
         }
       })
       .catch(err => {
         console.error('Error saving sub-admin:', err);
-        alert(err?.message || 'Failed to save sub-admin.');
+        toast.error(err?.message || 'Failed to save sub-admin.');
       })
       .finally(() => setSaving(false));
   };
@@ -922,6 +940,17 @@ export default function Roles() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        variant={confirmConfig.variant}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

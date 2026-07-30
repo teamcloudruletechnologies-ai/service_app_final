@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { locationsAPI } from '../api';
+import { toast } from 'react-toastify';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function Locations() {
   const [activeTab, setActiveTab] = useState('zones'); // 'zones' or 'pincodes'
@@ -10,6 +12,14 @@ export default function Locations() {
   // Modals state
   const [isZoneModalOpen, setIsZoneModalOpen] = useState(false);
   const [isPincodeModalOpen, setIsPincodeModalOpen] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirm',
+    variant: 'danger',
+    onConfirm: () => {},
+  });
   
   // Form states
   const [zoneForm, setZoneForm] = useState({ name: '', city: '', radius_km: 10, center_lat: '', center_lng: '' });
@@ -45,9 +55,10 @@ export default function Locations() {
     try {
       const newStatus = zone.status === 'active' ? 'inactive' : 'active';
       await locationsAPI.updateZoneStatus(zone.id, newStatus);
+      toast.success(`Zone status updated to ${newStatus}`);
       fetchData();
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      toast.error(`Error: ${err.message}`);
     }
   };
 
@@ -55,11 +66,12 @@ export default function Locations() {
     e.preventDefault();
     try {
       await locationsAPI.createZone(zoneForm);
+      toast.success('Zone created successfully!');
       setIsZoneModalOpen(false);
       setZoneForm({ name: '', city: '', radius_km: 10, center_lat: '', center_lng: '' });
       fetchData();
     } catch (err) {
-      alert(`Error creating zone: ${err.message}`);
+      toast.error(`Error creating zone: ${err.message}`);
     }
   };
 
@@ -67,22 +79,33 @@ export default function Locations() {
     e.preventDefault();
     try {
       await locationsAPI.createPincode(pincodeForm);
+      toast.success('Pincode added successfully!');
       setIsPincodeModalOpen(false);
       setPincodeForm({ code: '', zone_id: '' });
       fetchData();
     } catch (err) {
-      alert(`Error creating pincode: ${err.message}`);
+      toast.error(`Error creating pincode: ${err.message}`);
     }
   };
 
-  const handleDeletePincode = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this pincode?')) return;
-    try {
-      await locationsAPI.deletePincode(id);
-      fetchData();
-    } catch (err) {
-      alert(`Error deleting pincode: ${err.message}`);
-    }
+  const handleDeletePincode = (id) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Delete Pincode',
+      message: 'Are you sure you want to delete this pincode?',
+      confirmText: 'Delete Pincode',
+      variant: 'danger',
+      onConfirm: async () => {
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        try {
+          await locationsAPI.deletePincode(id);
+          toast.success('Pincode deleted successfully!');
+          fetchData();
+        } catch (err) {
+          toast.error(`Error deleting pincode: ${err.message}`);
+        }
+      }
+    });
   };
 
   return (
@@ -296,6 +319,16 @@ export default function Locations() {
         </div>
       )}
 
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        variant={confirmConfig.variant}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

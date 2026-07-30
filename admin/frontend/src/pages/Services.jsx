@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { servicesAPI } from '../api';
+import { toast } from 'react-toastify';
+import ConfirmModal from '../components/ConfirmModal';
 
 function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
@@ -51,6 +53,14 @@ export default function Services() {
   // Form Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirm',
+    variant: 'danger',
+    onConfirm: () => {},
+  });
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
@@ -126,7 +136,7 @@ export default function Services() {
   // Submit Form (Create / Edit)
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name) return alert('Service Name is required.');
+    if (!formData.name) return toast.warning('Service Name is required.');
 
     setSubmitting(true);
     const payload = {
@@ -143,13 +153,14 @@ export default function Services() {
     savePromise
       .then(res => {
         if (res && res.success) {
+          toast.success(editingService ? 'Service updated successfully!' : 'Service created successfully!');
           setIsModalOpen(false);
           fetchServices();
         }
       })
       .catch(err => {
         console.error('Error saving service:', err);
-        alert(err?.message || 'Failed to save service category.');
+        toast.error(err?.message || 'Failed to save service category.');
       })
       .finally(() => setSubmitting(false));
   };
@@ -160,29 +171,39 @@ export default function Services() {
     servicesAPI.updateStatus(service.id, newStatus)
       .then(res => {
         if (res && res.success) {
+          toast.success(`Service status updated to ${newStatus}`);
           fetchServices();
         }
       })
       .catch(err => {
         console.error('Error toggling service status:', err);
-        alert(err?.message || 'Failed to update service availability status.');
+        toast.error(err?.message || 'Failed to update service availability status.');
       });
   };
 
   // Delete Service
   const handleDelete = (service) => {
-    if (window.confirm(`Are you sure you want to permanently delete the "${service.name}" service category?\nThis cannot be undone.`)) {
-      servicesAPI.delete(service.id)
-        .then(res => {
-          if (res && res.success) {
-            fetchServices();
-          }
-        })
-        .catch(err => {
-          console.error('Error deleting service:', err);
-          alert(err?.message || 'Failed to delete service category.');
-        });
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Delete Service Category',
+      message: `Are you sure you want to permanently delete the "${service.name}" service category?\nThis cannot be undone.`,
+      confirmText: 'Delete Category',
+      variant: 'danger',
+      onConfirm: () => {
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        servicesAPI.delete(service.id)
+          .then(res => {
+            if (res && res.success) {
+              toast.success('Service category deleted successfully!');
+              fetchServices();
+            }
+          })
+          .catch(err => {
+            console.error('Error deleting service:', err);
+            toast.error(err?.message || 'Failed to delete service category.');
+          });
+      }
+    });
   };
 
   // Stats
@@ -503,6 +524,17 @@ export default function Services() {
           </form>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        variant={confirmConfig.variant}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

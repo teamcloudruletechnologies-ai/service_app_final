@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { usersAPI } from '../api';
+import { toast } from 'react-toastify';
+import ConfirmModal from '../components/ConfirmModal';
 
 function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
@@ -62,6 +64,14 @@ export default function Users() {
   // Drawer status
   const [selectedUser, setSelectedUser] = useState(null);
   const [drawerLoading, setDrawerLoading] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirm',
+    variant: 'danger',
+    onConfirm: () => {},
+  });
 
   // Fetch Users List
   const fetchUsersList = () => {
@@ -128,7 +138,7 @@ export default function Users() {
       })
       .catch(err => {
         console.error('Error fetching user detail:', err);
-        alert('Failed to load customer profile details.');
+        toast.error('Failed to load customer profile details.');
         setSelectedUser(null);
       })
       .finally(() => setDrawerLoading(false));
@@ -139,42 +149,59 @@ export default function Users() {
     const isCurrentlySuspended = user.status === 'suspended';
     const action = isCurrentlySuspended ? 'unblock' : 'block';
     
-    if (window.confirm(`Are you sure you want to ${action} account for ${user.name}?`)) {
-      const apiCall = isCurrentlySuspended ? usersAPI.unblock : usersAPI.block;
-      apiCall(user.id)
-        .then(res => {
-          if (res && res.success) {
-            fetchUsersList();
-            // If details drawer is open for this user, reload drawer too
-            if (selectedUser && selectedUser.id === user.id) {
-              handleViewDetails(user.id);
+    setConfirmConfig({
+      isOpen: true,
+      title: `${action === 'block' ? 'Block' : 'Unblock'} Customer Account`,
+      message: `Are you sure you want to ${action} account for ${user.name}?`,
+      confirmText: action === 'block' ? 'Block User' : 'Unblock User',
+      variant: action === 'block' ? 'danger' : 'warning',
+      onConfirm: () => {
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        const apiCall = isCurrentlySuspended ? usersAPI.unblock : usersAPI.block;
+        apiCall(user.id)
+          .then(res => {
+            if (res && res.success) {
+              toast.success(`User ${user.name} ${action}ed successfully!`);
+              fetchUsersList();
+              if (selectedUser && selectedUser.id === user.id) {
+                handleViewDetails(user.id);
+              }
             }
-          }
-        })
-        .catch(err => {
-          console.error(`Failed to ${action} user:`, err);
-          alert(err?.message || `Failed to update status.`);
-        });
-    }
+          })
+          .catch(err => {
+            console.error(`Failed to ${action} user:`, err);
+            toast.error(err?.message || `Failed to update status.`);
+          });
+      }
+    });
   };
 
   // Delete User
   const handleDeleteUser = (user) => {
-    if (window.confirm(`WARNING: Are you sure you want to permanently delete ${user.name}?\nAll their booking records and activity logs will be cascade deleted. This cannot be undone.`)) {
-      usersAPI.delete(user.id)
-        .then(res => {
-          if (res && res.success) {
-            fetchUsersList();
-            if (selectedUser && selectedUser.id === user.id) {
-              setSelectedUser(null);
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Delete Customer Account',
+      message: `WARNING: Are you sure you want to permanently delete ${user.name}?\nAll their booking records and activity logs will be cascade deleted. This cannot be undone.`,
+      confirmText: 'Delete Account',
+      variant: 'danger',
+      onConfirm: () => {
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        usersAPI.delete(user.id)
+          .then(res => {
+            if (res && res.success) {
+              toast.success(`User ${user.name} deleted successfully!`);
+              fetchUsersList();
+              if (selectedUser && selectedUser.id === user.id) {
+                setSelectedUser(null);
+              }
             }
-          }
-        })
-        .catch(err => {
-          console.error('Failed to delete user:', err);
-          alert(err?.message || 'Failed to delete user account.');
-        });
-    }
+          })
+          .catch(err => {
+            console.error('Failed to delete user:', err);
+            toast.error(err?.message || 'Failed to delete user account.');
+          });
+      }
+    });
   };
 
   // Stats calculation relative to total data
@@ -631,6 +658,17 @@ export default function Users() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        variant={confirmConfig.variant}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

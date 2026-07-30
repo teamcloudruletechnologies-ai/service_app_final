@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const PAGE_META = {
   dashboard:     { title: 'Dashboard',       crumb: 'Admin Panel > Dashboard' },
@@ -21,7 +22,11 @@ const PAGE_META = {
 export default function Topbar({ activePage }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
-  const meta = PAGE_META[activePage] || PAGE_META.dashboard;
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const pageKey = activePage || (location.pathname === '/' ? 'dashboard' : location.pathname.substring(1));
+  const meta = PAGE_META[pageKey] || PAGE_META.dashboard;
 
   return (
     <header style={{
@@ -102,6 +107,7 @@ export default function Topbar({ activePage }) {
 
         {/* Notification bell */}
         <button
+          onClick={() => navigate('/notifications')}
           style={{
             width: 38, height: 38, borderRadius: 12,
             border: '1px solid #F3F4F6', background: '#FFFFFF',

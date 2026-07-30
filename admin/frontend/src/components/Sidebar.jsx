@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // SVG Icons for professional look
 const Icons = {
@@ -57,6 +58,11 @@ const NAV = [
 
 export default function Sidebar({ activeKey, onNav, onLogout }) {
   const [hovered, setHovered] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Determine current active page key from pathname
+  const currentKey = activeKey || (location.pathname === '/' ? 'dashboard' : location.pathname.substring(1));
 
   // Dark black with olive accent
   const bgMain = '#181512';
@@ -65,6 +71,12 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
   const activeBg = '#4A5343'; // Muted Olive Green for active
   const textActive = '#FAF7F0';
   const textInactive = '#A89E91';
+
+  const handleItemClick = (itemKey) => {
+    const path = itemKey === 'dashboard' ? '/' : `/${itemKey}`;
+    navigate(path);
+    if (onNav) onNav(itemKey);
+  };
 
   return (
     <aside style={{
@@ -121,7 +133,7 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
               </div>
             )}
             {section.items.map((item) => {
-              const active = (activeKey || 'dashboard') === item.key;
+              const active = currentKey === item.key;
               const isHovered = hovered === item.key;
               return (
                 <div
@@ -142,7 +154,7 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
                     userSelect: 'none',
                     letterSpacing: '-0.01em',
                   }}
-                  onClick={() => onNav?.(item.key)}
+                  onClick={() => handleItemClick(item.key)}
                   onMouseEnter={() => setHovered(item.key)}
                   onMouseLeave={() => setHovered(null)}
                 >

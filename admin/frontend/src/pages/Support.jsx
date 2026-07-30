@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { complaintsAPI } from '../api';
+import { toast } from 'react-toastify';
 
 export default function Support() {
   const [complaints, setComplaints] = useState([]);
@@ -44,8 +45,9 @@ export default function Support() {
       await complaintsAPI.updateStatus(selectedComplaint.id, newStatus);
       await fetchComplaints();
       setSelectedComplaint(prev => ({ ...prev, status: newStatus }));
+      toast.success(`Ticket status updated to ${newStatus}`);
     } catch (err) {
-      alert(`Error updating status: ${err.message}`);
+      toast.error(`Error updating status: ${err.message}`);
     }
   };
 
@@ -55,9 +57,9 @@ export default function Support() {
       await complaintsAPI.addNotes(selectedComplaint.id, notesInput);
       await fetchComplaints();
       setSelectedComplaint(prev => ({ ...prev, admin_notes: notesInput }));
-      alert('Notes updated successfully');
+      toast.success('Notes updated successfully');
     } catch (err) {
-      alert(`Error adding notes: ${err.message}`);
+      toast.error(`Error adding notes: ${err.message}`);
     }
   };
 

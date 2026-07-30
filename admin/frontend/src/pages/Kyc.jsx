@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { kycAPI } from '../api';
+import { toast } from 'react-toastify';
 
 function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
@@ -148,7 +149,7 @@ export default function Kyc() {
       })
       .catch(err => {
         console.error('Error loading KYC details:', err);
-        alert('Failed to load KYC document details.');
+        toast.error('Failed to load KYC document details.');
         setSelectedRecord(null);
       })
       .finally(() => setDrawerLoading(false));
@@ -163,7 +164,7 @@ export default function Kyc() {
       selfieState === 'rejected';
 
     if (isAnyRejected && !rejectionReason.trim()) {
-      alert('Please specify a rejection reason for the rejected document(s).');
+      toast.warning('Please specify a rejection reason for the rejected document(s).');
       return;
     }
 
@@ -181,7 +182,7 @@ export default function Kyc() {
       .then(res => {
         // backend: success(res, 'KYC reviewed', kyc) => { success: true, message, data }
         if (res && res.success) {
-          alert(`✅ KYC review submitted! Status updated to: ${res.data?.status || 'updated'}`);
+          toast.success(`KYC review submitted! Status updated to: ${res.data?.status || 'updated'}`);
           setSelectedRecord(null);
           fetchKycList();
           fetchStats();
@@ -189,7 +190,7 @@ export default function Kyc() {
       })
       .catch(err => {
         console.error('Error submitting review:', err);
-        alert(err?.message || 'Failed to submit KYC review.');
+        toast.error(err?.message || 'Failed to submit KYC review.');
       })
       .finally(() => setSubmittingReview(false));
   };

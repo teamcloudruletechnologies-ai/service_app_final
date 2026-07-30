@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { workersAPI } from '../api';
+import { toast } from 'react-toastify';
+import ConfirmModal from '../components/ConfirmModal';
 
 function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
@@ -59,6 +61,14 @@ export default function Workers() {
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [performance, setPerformance] = useState(null);
   const [actionLoading, setActionLoading] = useState('');
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirm',
+    variant: 'danger',
+    onConfirm: () => {},
+  });
 
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -114,30 +124,49 @@ export default function Workers() {
     setPerformance(null);
   };
 
-  const handleAction = async (action) => {
-    if (!selectedWorker) return;
+  const executeWorkerAction = async (action) => {
     setActionLoading(action);
     try {
       if (action === 'activate') await workersAPI.activate(selectedWorker.id);
       else if (action === 'suspend') await workersAPI.suspend(selectedWorker.id);
       else if (action === 'delete') {
-        if (!window.confirm(`Delete worker "${selectedWorker.name}"? This cannot be undone.`)) {
-          setActionLoading('');
-          return;
-        }
         await workersAPI.delete(selectedWorker.id);
         closeDrawer();
       }
       await fetchWorkers();
       if (action !== 'delete') {
         setSelectedWorker(prev => ({ ...prev, status: action === 'activate' ? 'active' : 'suspended' }));
+        toast.success(`Worker ${action}d successfully!`);
+      } else {
+        toast.success('Worker deleted successfully!');
       }
     } catch (err) {
-      alert(err?.message || `Failed to ${action} worker`);
+      toast.error(err?.message || `Failed to ${action} worker`);
     } finally {
       setActionLoading('');
     }
   };
+
+  const handleWorkerAction = (action) => {
+    if (!selectedWorker) return;
+    if (action === 'delete') {
+      setConfirmConfig({
+        isOpen: true,
+        title: 'Delete Service Provider Account',
+        message: `Delete worker "${selectedWorker.name}"? This cannot be undone.`,
+        confirmText: 'Delete Worker',
+        variant: 'danger',
+        onConfirm: () => {
+          setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+          executeWorkerAction(action);
+        }
+      });
+    } else {
+      executeWorkerAction(action);
+    }
+  };
+
+  const handleAction = handleWorkerAction;
 
   const filtered = workers.filter(w => {
     const s = search.toLowerCase().trim();
@@ -454,6 +483,17 @@ export default function Workers() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        variant={confirmConfig.variant}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

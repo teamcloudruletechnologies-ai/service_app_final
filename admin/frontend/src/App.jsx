@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
@@ -15,8 +16,11 @@ import Roles from './pages/Roles';
 import Banners from './pages/Banners';
 import Payments from './pages/Payments';
 import Reviews from './pages/Reviews';
+import Locations from './pages/Locations';
 import Settings from './pages/Settings';
 import { bookingsAPI } from './api';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 /* ── New Booking Toast Popup ── */
 function NewBookingToast({ bookings, onDismiss, onViewBookings }) {
@@ -131,10 +135,10 @@ function NewBookingToast({ bookings, onDismiss, onViewBookings }) {
 
 export default function App() {
   const [token, setToken] = useState(() => localStorage.getItem('admin_token'));
-  const [activePage, setActivePage] = useState('dashboard');
   const [newBookings, setNewBookings] = useState([]);
   const lastSeenIdRef = useRef(null);
   const pollingRef = useRef(null);
+  const navigate = useNavigate();
 
   // Poll for new bookings every 30 seconds
   useEffect(() => {
@@ -176,74 +180,57 @@ export default function App() {
     };
   }, [token]);
 
-  if (!token) {
-    return (
-      <Login
-        onLoginSuccess={(newToken) => {
-          localStorage.setItem('admin_token', newToken);
-          setToken(newToken);
-          if (window.location.pathname === '/login') {
-            window.history.pushState({}, '', '/');
-          }
-        }}
-      />
-    );
-  }
-
-  function renderPage() {
-    switch (activePage) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'invoices':
-        return <Invoices />;
-      case 'bookings':
-        return <Bookings />;
-      case 'users':
-        return <Users />;
-      case 'services':
-        return <Services />;
-      case 'banners':
-        return <Banners />;
-      case 'kyc':
-        return <Kyc />;
-      case 'workers':
-        return <Workers />;
-      case 'support':
-        return <Support />;
-      case 'notifications':
-        return <Notifications />;
-      case 'roles':
-        return <Roles />;
-      case 'payments':
-        return <Payments />;
-      case 'reviews':
-        return <Reviews />;
-      case 'settings':
-        return <Settings />;
-      default:
-        return (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, system-ui, sans-serif', color: 'var(--text-muted)', fontSize: 14 }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🚧</div>
-              <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>Page coming soon</div>
-              <div>"{activePage}" module not built yet</div>
-            </div>
-          </div>
-        );
-    }
-  }
-
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
     setToken(null);
+    navigate('/login');
   };
+
+  if (!token) {
+    return (
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            <Login
+              onLoginSuccess={(newToken) => {
+                localStorage.setItem('admin_token', newToken);
+                setToken(newToken);
+                navigate('/');
+              }}
+            />
+          }
+        />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-app)', color: 'var(--text-primary)' }}>
-      <Sidebar activeKey={activePage} onNav={setActivePage} onLogout={handleLogout} />
+      <Sidebar onLogout={handleLogout} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Topbar activePage={activePage} />
-        {renderPage()}
+        <Topbar />
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/workers" element={<Workers />} />
+          <Route path="/kyc" element={<Kyc />} />
+          <Route path="/bookings" element={<Bookings />} />
+          <Route path="/invoices" element={<Invoices />} />
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/reviews" element={<Reviews />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/banners" element={<Banners />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/roles" element={<Roles />} />
+          <Route path="/locations" element={<Locations />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </div>
 
       {/* New Booking Popup Toast */}
@@ -251,11 +238,25 @@ export default function App() {
         <NewBookingToast
           bookings={newBookings}
           onDismiss={() => setNewBookings([])}
-          onViewBookings={() => setActivePage('bookings')}
+          onViewBookings={() => navigate('/bookings')}
         />
       )}
+
+      {/* Global Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3500}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 }
 
-
+

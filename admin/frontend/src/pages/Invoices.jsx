@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { invoicesAPI } from '../api';
+import { toast } from 'react-toastify';
 
 const STATUS_BADGES = {
   paid: { bg: 'var(--status-green-bg)', fg: 'var(--status-green-fg)', text: 'Paid' },
@@ -141,7 +142,7 @@ export default function Invoices() {
       })
       .catch(err => {
         console.error('Error fetching invoice details:', err);
-        alert('Failed to load invoice details');
+        toast.error('Failed to load invoice details');
       })
       .finally(() => setDetailLoading(false));
   };

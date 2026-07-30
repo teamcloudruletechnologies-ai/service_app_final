@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { bannersAPI } from '../api';
+import { toast } from 'react-toastify';
+import ConfirmModal from '../components/ConfirmModal';
 
 const resolveImageUrl = (url) => {
   if (!url) return '';
@@ -58,6 +60,14 @@ export default function Banners() {
   const [submitting, setSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBanner, setEditingBanner] = useState(null); // null = Create, otherwise the Banner object
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirm',
+    variant: 'danger',
+    onConfirm: () => {},
+  });
 
   // Form states
   const [title, setTitle] = useState('');
@@ -118,7 +128,8 @@ export default function Banners() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!editingBanner && !selectedFile) {
-      return alert('Please select a banner image to upload.');
+      toast.warning('Please select a banner image to upload.');
+      return;
     }
 
     setSubmitting(true);
@@ -137,30 +148,40 @@ export default function Banners() {
     savePromise
       .then(res => {
         if (res && res.success) {
+          toast.success(editingBanner ? 'Banner updated successfully!' : 'Banner created successfully!');
           setIsModalOpen(false);
           fetchBanners();
         }
       })
       .catch(err => {
         console.error('Error saving banner:', err);
-        alert(err?.message || 'Failed to save banner.');
+        toast.error(err?.message || 'Failed to save banner.');
       })
       .finally(() => setSubmitting(false));
   };
 
   const handleDelete = (banner) => {
-    if (window.confirm('Are you sure you want to permanently delete this banner?')) {
-      bannersAPI.delete(banner.id)
-        .then(res => {
-          if (res && res.success) {
-            fetchBanners();
-          }
-        })
-        .catch(err => {
-          console.error('Error deleting banner:', err);
-          alert(err?.message || 'Failed to delete banner.');
-        });
-    }
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Delete Banner',
+      message: 'Are you sure you want to permanently delete this banner?',
+      confirmText: 'Delete Banner',
+      variant: 'danger',
+      onConfirm: () => {
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        bannersAPI.delete(banner.id)
+          .then(res => {
+            if (res && res.success) {
+              toast.success('Banner deleted successfully!');
+              fetchBanners();
+            }
+          })
+          .catch(err => {
+            console.error('Error deleting banner:', err);
+            toast.error(err?.message || 'Failed to delete banner.');
+          });
+      }
+    });
   };
 
   const handleToggleStatus = (banner) => {
@@ -171,12 +192,13 @@ export default function Banners() {
     bannersAPI.update(banner.id, formData)
       .then(res => {
         if (res && res.success) {
+          toast.success(`Banner status updated to ${newStatus}`);
           fetchBanners();
         }
       })
       .catch(err => {
         console.error('Error toggling banner status:', err);
-        alert(err?.message || 'Failed to update banner status.');
+        toast.error(err?.message || 'Failed to update banner status.');
       });
   };
 
@@ -494,6 +516,17 @@ export default function Banners() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        variant={confirmConfig.variant}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }

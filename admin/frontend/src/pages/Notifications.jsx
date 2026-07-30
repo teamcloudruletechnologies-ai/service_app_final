@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { notificationsAPI } from '../api';
+import { toast } from 'react-toastify';
+import ConfirmModal from '../components/ConfirmModal';
 
 /* ─── Reusable Skeleton loader (same as KYC) ─── */
 function Skeleton({ w = '100%', h = 16, radius = 6 }) {
@@ -89,6 +91,14 @@ export default function Notifications() {
   const [selectedNotif, setSelectedNotif] = useState(null);
   const [drawerLoading, setDrawerLoading] = useState(false);
   const [markingRead, setMarkingRead] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirm',
+    variant: 'danger',
+    onConfirm: () => {},
+  });
 
   /* ── Fetch list ── */
   const fetchList = () => {
@@ -144,16 +154,18 @@ export default function Notifications() {
     notificationsAPI.markRead(id)
       .then(res => {
         if (res && res.success) {
-          setNotifications(prev =>
-            prev.map(n => n.id === id ? { ...n, read: true } : n)
-          );
+          setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
           if (selectedNotif?.id === id) {
             setSelectedNotif(prev => ({ ...prev, read: true }));
           }
+          toast.success('Marked as read');
           fetchStats();
         }
       })
-      .catch(err => console.error('Mark read error:', err))
+      .catch(err => {
+        console.error('Mark read error:', err);
+        toast.error('Failed to mark notification as read');
+      })
       .finally(() => setMarkingRead(false));
   };
 
@@ -163,24 +175,41 @@ export default function Notifications() {
       .then(res => {
         if (res && res.success) {
           setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+          toast.success('All notifications marked as read!');
           fetchStats();
         }
       })
-      .catch(err => console.error('Mark all read error:', err));
+      .catch(err => {
+        console.error('Mark all read error:', err);
+        toast.error('Failed to mark all as read');
+      });
   };
 
   /* ── Delete ── */
   const handleDelete = (id) => {
-    if (!window.confirm('Delete this notification?')) return;
-    notificationsAPI.delete(id)
-      .then(res => {
-        if (res && res.success) {
-          setNotifications(prev => prev.filter(n => n.id !== id));
-          if (selectedNotif?.id === id) setSelectedNotif(null);
-          fetchStats();
-        }
-      })
-      .catch(err => console.error('Delete error:', err));
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Delete Notification',
+      message: 'Are you sure you want to delete this notification?',
+      confirmText: 'Delete Notification',
+      variant: 'danger',
+      onConfirm: () => {
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        notificationsAPI.delete(id)
+          .then(res => {
+            if (res && res.success) {
+              setNotifications(prev => prev.filter(n => n.id !== id));
+              if (selectedNotif?.id === id) setSelectedNotif(null);
+              toast.success('Notification deleted');
+              fetchStats();
+            }
+          })
+          .catch(err => {
+            console.error('Delete error:', err);
+            toast.error('Failed to delete notification');
+          });
+      }
+    });
   };
 
   const formatDate = (dateString) => {
@@ -652,6 +681,17 @@ export default function Notifications() {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        variant={confirmConfig.variant}
+        onConfirm={confirmConfig.onConfirm}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 }
