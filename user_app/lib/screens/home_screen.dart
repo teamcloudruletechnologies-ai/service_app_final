@@ -462,7 +462,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 children: [
-                  _buildExploreOffersCard(),
                   CircularCategoryButton(
                     label: 'All',
                     icon: Icons.grid_view,

@@ -203,6 +203,22 @@ class _WorkerInAppNavigationScreenState extends State<WorkerInAppNavigationScree
           return LatLng(lat, lon);
         }
       }
+
+      // Fallback: strip door numbers / leading digits before first comma
+      List<String> parts = address.split(',');
+      if (parts.length > 1) {
+        String fallbackAddr = parts.sublist(1).join(',').trim();
+        final fbUrl = Uri.parse('https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(fallbackAddr)}&format=json&limit=1');
+        final fbRes = await http.get(fbUrl, headers: {'User-Agent': 'UrbanWorkerApp/1.0'});
+        if (fbRes.statusCode == 200) {
+          final fbData = jsonDecode(fbRes.body) as List;
+          if (fbData.isNotEmpty) {
+            final lat = double.parse(fbData[0]['lat']);
+            final lon = double.parse(fbData[0]['lon']);
+            return LatLng(lat, lon);
+          }
+        }
+      }
     } catch (_) {}
     return null;
   }

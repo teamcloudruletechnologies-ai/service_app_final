@@ -131,7 +131,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
         final data = jsonDecode(resp.body) as Map<String, dynamic>;
         final addr = data['address'] as Map<String, dynamic>? ?? {};
 
-        final house = addr['building'] ?? addr['house_number'] ?? addr['road'] ?? '';
+        final house = (addr['building'] ?? addr['house_number'] ?? addr['road'] ?? addr['suburb'] ?? addr['neighbourhood'] ?? (data['display_name'] != null ? data['display_name'].toString().split(',').first : '')).toString();
         final area = addr['suburb'] ?? addr['neighbourhood'] ?? addr['village'] ?? addr['residential'] ?? '';
         final city = addr['city'] ?? addr['town'] ?? addr['municipality'] ?? addr['county'] ?? '';
         final district = addr['state_district'] ?? addr['county'] ?? city;

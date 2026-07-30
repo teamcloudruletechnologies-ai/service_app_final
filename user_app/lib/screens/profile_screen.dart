@@ -264,6 +264,13 @@ class ProfileScreen extends StatelessWidget {
           _InfoTile(icon: Icons.email_outlined, label: 'Email', value: user?.email ?? 'Not set'),
           _InfoTile(icon: Icons.phone_outlined, label: 'Phone', value: user?.phone ?? 'Not set'),
           _InfoTile(icon: Icons.verified_outlined, label: 'Status', value: user?.status ?? 'active'),
+          _InfoTile(
+            icon: Icons.location_on_outlined,
+            label: 'Primary Saved Address',
+            value: user?.address != null && user!.address.isNotEmpty
+                ? user.address
+                : 'No address set yet (GPS Auto-Detected)',
+          ),
           const SizedBox(height: 32),
           if (user != null) ...[
             ElevatedButton.icon(

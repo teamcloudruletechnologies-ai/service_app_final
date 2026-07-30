@@ -257,9 +257,44 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
             _workers = workers;
           });
         } else {
+          // Smart Fallback Search: Strip door numbers / leading digits before first comma
+          List<String> parts = query.split(',');
+          if (parts.length > 1) {
+            String fallbackQuery = parts.sublist(1).join(',').trim();
+            final fallbackUrl = Uri.parse(
+              'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(fallbackQuery)}&format=json&limit=1'
+            );
+            final fbResp = await http.get(fallbackUrl, headers: {'User-Agent': 'com.urban.service_app'});
+            if (fbResp.statusCode == 200) {
+              final List fbData = jsonDecode(fbResp.body);
+              if (fbData.isNotEmpty) {
+                final lat = double.parse(fbData[0]['lat'] as String);
+                final lon = double.parse(fbData[0]['lon'] as String);
+                final point = LatLng(lat, lon);
+
+                setState(() {
+                  _selectedLocation = point;
+                });
+                _mapController.move(point, 15.0);
+
+                final api = context.read<ApiService>();
+                final workers = await api.fetchNearbyWorkers(
+                  point.latitude,
+                  point.longitude,
+                  radius: 10.0,
+                  serviceType: widget.serviceType,
+                );
+                setState(() {
+                  _workers = workers;
+                });
+                return;
+              }
+            }
+          }
+
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Address not found. Please try a different search.')),
+              const SnackBar(content: Text('Could not pin exact door number, but location address saved.')),
             );
           }
         }

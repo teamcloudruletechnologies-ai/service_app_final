@@ -309,6 +309,8 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
                           bookingId: b.id,
                           customerName: b.userName ?? 'Customer',
                           customerAddress: b.address!,
+                          initialLat: b.latitude,
+                          initialLng: b.longitude,
                         ),
                       ),
                     );

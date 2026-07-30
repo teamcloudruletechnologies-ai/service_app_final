@@ -151,6 +151,8 @@ class BookingItem {
   final String? otp;
   final double? workerLat;
   final double? workerLng;
+  final double? latitude;
+  final double? longitude;
 
   const BookingItem({
     required this.id,
@@ -171,6 +173,8 @@ class BookingItem {
     this.otp,
     this.workerLat,
     this.workerLng,
+    this.latitude,
+    this.longitude,
   });
 
   factory BookingItem.fromJson(Map<String, dynamic> json) {
@@ -196,6 +200,8 @@ class BookingItem {
       otp: json['otp']?.toString(),
       workerLat: _toDouble(json['worker_lat']),
       workerLng: _toDouble(json['worker_lng']),
+      latitude: _toDouble(json['latitude']),
+      longitude: _toDouble(json['longitude']),
     );
   }
 
