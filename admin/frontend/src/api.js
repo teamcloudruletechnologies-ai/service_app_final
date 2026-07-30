@@ -7,13 +7,13 @@ const getBaseURL = () => {
     return "http://localhost:5000/api";
   } else if (urlParams.get("api") === "live") {
     localStorage.removeItem("use_local_api");
-    return "https://service-app-hsu6.onrender.com/api";
+    return "https://service-app-final.onrender.com/api";
   }
 
   if (localStorage.getItem("use_local_api") === "true") {
     return "http://localhost:5000/api";
   }
-  return "https://service-app-hsu6.onrender.com/api";
+  return "https://service-app-final.onrender.com/api";
 };
 
 const api = axios.create({

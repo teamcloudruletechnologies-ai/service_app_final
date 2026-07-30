@@ -76,9 +76,9 @@ async function reports() {
         COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_invoices,
         COUNT(*) FILTER (WHERE status = 'failed')::int AS failed_invoices,
         COALESCE(SUM(amount), 0)::float AS total_amount,
-        COALESCE(SUM(amount) FILTER (WHERE status = 'paid'), 0)::float AS paid_amount,
-        COALESCE(SUM(platform_fee) FILTER (WHERE status = 'paid'), 0)::float AS platform_fee,
-        COALESCE(SUM(worker_payout) FILTER (WHERE status = 'paid'), 0)::float AS worker_payout
+        COALESCE(SUM(amount) FILTER (WHERE status != 'cancelled'), 0)::float AS paid_amount,
+        COALESCE(SUM(platform_fee) FILTER (WHERE status != 'cancelled'), 0)::float AS platform_fee,
+        COALESCE(SUM(worker_payout) FILTER (WHERE status != 'cancelled'), 0)::float AS worker_payout
        FROM invoices`
     ),
     db.query("SELECT status, COUNT(*)::int AS total, COALESCE(SUM(amount), 0)::float AS amount FROM invoices GROUP BY status"),
@@ -110,7 +110,7 @@ async function payouts() {
       COALESCE(SUM(i.platform_fee), 0)::float AS platform_fee
      FROM invoices i
      LEFT JOIN workers w ON w.id = i.worker_id
-     WHERE i.status = 'paid'
+     WHERE i.status != 'cancelled'
      GROUP BY i.worker_id, w.name, w.phone
      ORDER BY payout_amount DESC`
   );
