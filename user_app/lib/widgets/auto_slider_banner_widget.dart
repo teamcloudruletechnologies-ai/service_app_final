@@ -111,6 +111,7 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
                       borderRadius: BorderRadius.circular(16),
                       child: imgUrl.isNotEmpty
                           ? Stack(
+                              fit: StackFit.expand,
                               children: [
                                 Image.network(
                                   imgUrl,
@@ -125,33 +126,26 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
                                     icon: Icons.campaign,
                                   ),
                                 ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.black.withValues(alpha: 0.75),
-                                        Colors.black.withValues(alpha: 0.1),
-                                      ],
-                                      begin: Alignment.bottomLeft,
-                                      end: Alignment.topRight,
-                                    ),
-                                  ),
-                                ),
-                                if (banner.title != null && banner.title!.isNotEmpty)
+                                if (banner.title != null && banner.title!.isNotEmpty && !banner.title!.toLowerCase().contains('offer'))
                                   Positioned(
-                                    left: 16,
-                                    bottom: 14,
-                                    right: 16,
-                                    child: Text(
-                                      banner.title!,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                        shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                                    left: 12,
+                                    bottom: 10,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withValues(alpha: 0.65),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
+                                      child: Text(
+                                        banner.title!,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
                                   ),
                               ],

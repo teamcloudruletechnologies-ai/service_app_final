@@ -1,6 +1,7 @@
 import 'dart:async' as async_timer;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../config/api_config.dart';
@@ -24,16 +25,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
 
-  // 8 Categories for the 4x2 Grid (Screen 5 & 6 Mockup)
-  final List<(String, IconData, Color)> _gridCategories = [
-    ('Plumbing', Icons.plumbing_rounded, const Color(0xFFEBF8FF)),
-    ('Electrical', Icons.electric_bolt_rounded, const Color(0xFFFEFCBF)),
-    ('Cleaning', Icons.cleaning_services_rounded, const Color(0xFFE6FFFA)),
-    ('Carpentry', Icons.carpenter_rounded, const Color(0xFFFEEBC8)),
-    ('Appliance', Icons.kitchen_rounded, const Color(0xFFE9D8FD)),
-    ('Painting', Icons.format_paint_rounded, const Color(0xFFFED7D7)),
-    ('Pest Control', Icons.bug_report_rounded, const Color(0xFFC6F6D5)),
-    ('More', Icons.grid_view_rounded, const Color(0xFFEDF2F7)),
+  // 8 Categories with real image thumbnails for the 4x2 Grid
+  final List<(String, String, IconData, Color)> _gridCategories = [
+    ('Plumbing', 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400', Icons.plumbing_rounded, const Color(0xFFEBF8FF)),
+    ('Electrical', 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400', Icons.electric_bolt_rounded, const Color(0xFFFEFCBF)),
+    ('Cleaning', 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400', Icons.cleaning_services_rounded, const Color(0xFFE6FFFA)),
+    ('Carpentry', 'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=400', Icons.carpenter_rounded, const Color(0xFFFEEBC8)),
+    ('Appliance', 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=400', Icons.kitchen_rounded, const Color(0xFFE9D8FD)),
+    ('Painting', 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400', Icons.format_paint_rounded, const Color(0xFFFED7D7)),
+    ('Pest Control', 'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400', Icons.bug_report_rounded, const Color(0xFFC6F6D5)),
+    ('More', '', Icons.grid_view_rounded, const Color(0xFFEDF2F7)),
   ];
 
   @override
@@ -60,14 +61,20 @@ class _HomeScreenState extends State<HomeScreen> {
         ? user.address!
         : 'Madurai, Tamil Nadu';
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFC),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            await catalog.loadCategories();
-            await catalog.loadServices();
-          },
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFAFAFC),
+        body: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              await catalog.loadCategories();
+              await catalog.loadServices();
+            },
           color: AppTheme.primary,
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -270,11 +277,20 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 56,
                               height: 56,
                               decoration: BoxDecoration(
-                                color: item.$3,
+                                color: item.$4,
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: item.$3.withValues(alpha: 0.8)),
+                                border: Border.all(color: item.$4.withValues(alpha: 0.8)),
                               ),
-                              child: Icon(item.$2, color: const Color(0xFF1A1A1A), size: 26),
+                              child: item.$2.isNotEmpty
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: CachedNetworkImage(
+                                        imageUrl: item.$2,
+                                        fit: BoxFit.cover,
+                                        errorWidget: (_, __, ___) => Icon(item.$3, color: const Color(0xFF1A1A1A), size: 26),
+                                      ),
+                                    )
+                                  : Icon(item.$3, color: const Color(0xFF1A1A1A), size: 26),
                             ),
                             const SizedBox(height: 6),
                             Text(
@@ -396,6 +412,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                 ),
               ],
+            ),
             ),
           ),
         ),
