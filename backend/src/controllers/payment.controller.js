@@ -114,8 +114,13 @@ async function verifyPayment(req, res, next) {
       status: "successful",
     });
 
-    // Update booking status to confirmed
-    const updatedBooking = await Booking.updateStatus(bookingId, "confirmed");
+    // Update booking status to completed and payment_status to paid
+    const db = require("../config/db");
+    await db.query(
+      `UPDATE bookings SET payment_status = 'paid', status = 'completed', updated_at = NOW() WHERE id = $1`,
+      [bookingId]
+    );
+    const updatedBooking = await Booking.findById(bookingId);
 
     // Generate Invoice
     await Invoice.create({

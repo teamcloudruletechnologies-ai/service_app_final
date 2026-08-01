@@ -166,10 +166,14 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
           (_) => false,
         );
       } else {
+        final errText = bookingProvider.error ?? 'Failed to create booking. Please try again.';
         setState(() {
-          _bookingError = bookingProvider.error ?? 'Failed to create booking. Please try again.';
+          _bookingError = errText;
           _bookingWorkerId = null;
         });
+        if (errText.toLowerCase().contains('busy') || errText.toLowerCase().contains('another worker')) {
+          _showWorkerBusyPopupDialog(worker?.name ?? 'Service Professional');
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -177,8 +181,77 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
           _bookingError = e.toString();
           _bookingWorkerId = null;
         });
+        if (e.toString().toLowerCase().contains('busy')) {
+          _showWorkerBusyPopupDialog(worker?.name ?? 'Service Professional');
+        }
       }
     }
+  }
+
+  void _showWorkerBusyPopupDialog(String workerName) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.engineering_rounded, color: Colors.amber, size: 48),
+              ),
+              const SizedBox(height: 18),
+              Text(
+                '$workerName is Currently Busy! 👷‍♂️',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                '$workerName is currently engaged on another active job. Tap below to book any available expert for instant assignment.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.4),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  _book(null);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text(
+                  'Book Any Available Expert',
+                  style: TextStyle(color: Color(0xFF1A1A1A), fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  side: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                child: const Text(
+                  'Select Another Worker',
+                  style: TextStyle(color: Color(0xFF475569), fontWeight: FontWeight.w600, fontSize: 14),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
