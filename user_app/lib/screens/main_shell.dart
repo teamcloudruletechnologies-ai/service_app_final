@@ -53,8 +53,6 @@ class _MainShellState extends State<MainShell> {
   static const List<Widget> _pages = [
     HomeScreen(),
     BookingsScreen(),
-    HelpCentreScreen(),
-    NotificationScreen(),
     ProfileScreen(),
   ];
 
@@ -72,14 +70,14 @@ class _MainShellState extends State<MainShell> {
       },
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 64,
+        width: 72,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               isSelected ? solidIcon : outlineIcon,
               color: isSelected ? activeColor : inactiveColor,
-              size: 24,
+              size: 25,
             ),
             const SizedBox(height: 3),
             Text(
@@ -122,9 +120,7 @@ class _MainShellState extends State<MainShell> {
           children: [
             _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, 'Home'),
             _buildNavItem(1, Icons.calendar_today_outlined, Icons.calendar_month_rounded, 'Bookings'),
-            _buildNavItem(2, Icons.local_offer_outlined, Icons.local_offer_rounded, 'Offers'),
-            _buildNavItem(3, Icons.mail_outline_rounded, Icons.mail_rounded, 'Inbox'),
-            _buildNavItem(4, Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+            _buildNavItem(2, Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
           ],
         ),
       ),

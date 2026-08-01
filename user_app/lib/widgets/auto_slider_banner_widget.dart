@@ -110,18 +110,51 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: imgUrl.isNotEmpty
-                          ? Image.network(
-                              imgUrl,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                              errorBuilder: (_, __, ___) => _buildFallbackBannerContent(
-                                title: banner.title ?? 'Special Offer',
-                                sub: 'Tap to view details',
-                                action: 'Explore Now →',
-                                accent: AppTheme.primary,
-                                icon: Icons.campaign,
-                              ),
+                          ? Stack(
+                              children: [
+                                Image.network(
+                                  imgUrl,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  errorBuilder: (_, __, ___) => _buildFallbackBannerContent(
+                                    title: banner.title ?? 'Special Offer',
+                                    sub: 'Tap to view details',
+                                    action: 'Explore Now →',
+                                    accent: AppTheme.primary,
+                                    icon: Icons.campaign,
+                                  ),
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.black.withValues(alpha: 0.75),
+                                        Colors.black.withValues(alpha: 0.1),
+                                      ],
+                                      begin: Alignment.bottomLeft,
+                                      end: Alignment.topRight,
+                                    ),
+                                  ),
+                                ),
+                                if (banner.title != null && banner.title!.isNotEmpty)
+                                  Positioned(
+                                    left: 16,
+                                    bottom: 14,
+                                    right: 16,
+                                    child: Text(
+                                      banner.title!,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                        shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                              ],
                             )
                           : _buildFallbackBannerContent(
                               title: banner.title ?? 'Special Offer',

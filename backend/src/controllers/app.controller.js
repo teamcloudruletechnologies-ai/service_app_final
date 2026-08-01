@@ -312,13 +312,27 @@ async function listActiveBanners(req, res, next) {
         items: [
           {
             id: 1,
-            title: "BOOK TRUSTED PROFESSIONALS",
-            image_url: "/uploads/banners/trusted_pros.png",
+            title: "Summer Offer - 20% OFF (Code: URBAN20)",
+            image_url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800",
+            link_url: "",
+            status: "active"
+          },
+          {
+            id: 2,
+            title: "30-Min Fast Doorstep Service Guarantee",
+            image_url: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800",
+            link_url: "",
+            status: "active"
+          },
+          {
+            id: 3,
+            title: "Deep Home Cleaning & Sanitization Special",
+            image_url: "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=800",
             link_url: "",
             status: "active"
           }
         ],
-        total: 1
+        total: 3
       };
     }
     return success(res, "Active banners fetched successfully", data);
