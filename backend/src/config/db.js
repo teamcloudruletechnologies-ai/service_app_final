@@ -252,6 +252,7 @@ async function initDb() {
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS completion_notes TEXT;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS job_started_at TIMESTAMPTZ;
     ALTER TABLE bookings ADD COLUMN IF NOT EXISTS job_completed_at TIMESTAMPTZ;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_status VARCHAR(30) DEFAULT 'unpaid';
 
     -- Add address fields and FCM tokens to users and workers if missing
     ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT;

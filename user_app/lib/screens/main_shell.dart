@@ -3,10 +3,12 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
+import '../theme/app_theme.dart';
 import 'bookings_screen.dart';
+import 'help_centre_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
-import 'menu_screen.dart';
+import 'notification_screen.dart';
 import 'profile_screen.dart';
 
 class MainShell extends StatefulWidget {
@@ -51,14 +53,15 @@ class _MainShellState extends State<MainShell> {
   static const List<Widget> _pages = [
     HomeScreen(),
     BookingsScreen(),
+    HelpCentreScreen(),
+    NotificationScreen(),
     ProfileScreen(),
-    MenuScreen(),
   ];
 
   Widget _buildNavItem(int index, IconData outlineIcon, IconData solidIcon, String label) {
     final isSelected = _index == index;
-    final activeColor = const Color(0xFFE23744); // Zomato Red
-    final inactiveColor = Colors.grey.shade500;
+    final activeColor = AppTheme.primary;
+    final inactiveColor = const Color(0xFF94A3B8);
 
     return GestureDetector(
       onTap: () {
@@ -69,7 +72,7 @@ class _MainShellState extends State<MainShell> {
       },
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 70,
+        width: 64,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -78,13 +81,13 @@ class _MainShellState extends State<MainShell> {
               color: isSelected ? activeColor : inactiveColor,
               size: 24,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Text(
               label,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 11,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? activeColor : inactiveColor,
+                color: isSelected ? const Color(0xFF1A1A1A) : inactiveColor,
               ),
             ),
           ],
@@ -96,31 +99,32 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F3),
+      backgroundColor: AppTheme.surface,
       body: IndexedStack(index: _index, children: _pages),
       bottomNavigationBar: Container(
-        height: 60 + MediaQuery.paddingOf(context).bottom,
+        height: 62 + MediaQuery.paddingOf(context).bottom,
         padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, -4),
             ),
           ],
-          border: Border(
-            top: BorderSide(color: Colors.grey.shade100, width: 1.2),
+          border: const Border(
+            top: BorderSide(color: Color(0xFFF1F5F9), width: 1.0),
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
-            _buildNavItem(1, Icons.calendar_today_outlined, Icons.calendar_today, 'Bookings'),
-            _buildNavItem(2, Icons.person_outline, Icons.person, 'Profile'),
-            _buildNavItem(3, Icons.menu_outlined, Icons.menu, 'Menu'),
+            _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, 'Home'),
+            _buildNavItem(1, Icons.calendar_today_outlined, Icons.calendar_month_rounded, 'Bookings'),
+            _buildNavItem(2, Icons.local_offer_outlined, Icons.local_offer_rounded, 'Offers'),
+            _buildNavItem(3, Icons.mail_outline_rounded, Icons.mail_rounded, 'Inbox'),
+            _buildNavItem(4, Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
           ],
         ),
       ),

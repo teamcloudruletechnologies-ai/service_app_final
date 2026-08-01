@@ -54,6 +54,10 @@ class CatalogProvider extends ChangeNotifier {
     await loadServices(categoryId: categoryId, search: search);
   }
 
+  Future<void> setSearchQuery(String query) async {
+    await loadServices(search: query.trim().isEmpty ? null : query.trim());
+  }
+
   Future<void> _loadSubCategories(int categoryId) async {
     loadingSubCategories = true;
     notifyListeners();

@@ -267,8 +267,8 @@ class ProfileScreen extends StatelessWidget {
           _InfoTile(
             icon: Icons.location_on_outlined,
             label: 'Primary Saved Address',
-            value: user?.address != null && user!.address.isNotEmpty
-                ? user.address
+            value: (user?.address != null && user!.address!.trim().isNotEmpty)
+                ? user.address!
                 : 'No address set yet (GPS Auto-Detected)',
           ),
           const SizedBox(height: 32),
@@ -280,8 +280,8 @@ class ProfileScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
                 backgroundColor: AppTheme.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                foregroundColor: const Color(0xFF1E293B),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
             ),
             const SizedBox(height: 12),

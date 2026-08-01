@@ -58,20 +58,105 @@ class _WorkerOnboardingScreenState extends State<WorkerOnboardingScreen> {
     super.dispose();
   }
 
+  void _showLocationDialog({
+    required String title,
+    required String message,
+    required String actionLabel,
+    required VoidCallback onAction,
+  }) {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        icon: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.amber.shade50,
+            shape: BoxShape.circle,
+          ),
+          child: const Icon(Icons.location_off_rounded, color: Colors.amber, size: 36),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          textAlign: TextAlign.center,
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: [
+          OutlinedButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              onAction();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(actionLabel),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<Position?> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) return null;
+    if (!serviceEnabled) {
+      if (mounted) {
+        _showLocationDialog(
+          title: 'GPS Location Disabled',
+          message: 'GPS location services are turned off on your device. Turn on GPS to auto-detect your location.',
+          actionLabel: 'Turn On GPS',
+          onAction: () => Geolocator.openLocationSettings(),
+        );
+      }
+      return null;
+    }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) return null;
+      if (permission == LocationPermission.denied) {
+        if (mounted) {
+          _showLocationDialog(
+            title: 'Location Permission Required',
+            message: 'Location permission is required to auto-detect your location.',
+            actionLabel: 'Open Settings',
+            onAction: () => Geolocator.openAppSettings(),
+          );
+        }
+        return null;
+      }
     }
 
-    if (permission == LocationPermission.deniedForever) return null;
+    if (permission == LocationPermission.deniedForever) {
+      if (mounted) {
+        _showLocationDialog(
+          title: 'Location Permission Denied',
+          message: 'Location permissions are permanently denied. Please enable them in app settings.',
+          actionLabel: 'Open Settings',
+          onAction: () => Geolocator.openAppSettings(),
+        );
+      }
+      return null;
+    }
 
     return await Geolocator.getCurrentPosition();
   }

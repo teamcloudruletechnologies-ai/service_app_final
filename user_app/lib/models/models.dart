@@ -96,6 +96,8 @@ class ServiceItem {
   final int totalBookings;
   final int estimatedTime;
 
+  double get basePrice => price;
+
   const ServiceItem({
     required this.id,
     this.categoryId,

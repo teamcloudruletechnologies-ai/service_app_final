@@ -75,21 +75,30 @@ async function createBooking(req, res, next) {
       return error(res, "Service not found or unavailable", 404);
     }
 
+    let validWorkerId = worker_id;
     if (worker_id) {
       const db = require("../config/db");
-      const activeCheck = await db.query(
-        `SELECT id FROM bookings WHERE worker_id = $1 AND status IN ('confirmed', 'in_progress') LIMIT 1`,
+      const workerCheck = await db.query(
+        `SELECT id FROM users WHERE id = $1 AND role = 'worker'`,
         [worker_id]
       );
-      if (activeCheck.rows.length > 0) {
-        return error(res, "Worker is currently busy with an active job. Please select another worker or try again later.", 400);
+      if (workerCheck.rows.length === 0) {
+        validWorkerId = null;
+      } else {
+        const activeCheck = await db.query(
+          `SELECT id FROM bookings WHERE worker_id = $1 AND status IN ('confirmed', 'in_progress') LIMIT 1`,
+          [worker_id]
+        );
+        if (activeCheck.rows.length > 0) {
+          return error(res, "Worker is currently busy with an active job. Please select another worker or try again later.", 400);
+        }
       }
     }
 
     const booking = await Booking.create({
       userId,
       serviceId: service_id,
-      workerId: worker_id,
+      workerId: validWorkerId,
       amount: 0, // Initial booking is inspection-based (amount set after worker submits invoice)
       address,
       notes,
@@ -463,12 +472,18 @@ async function submitWorkerInvoice(req, res, next) {
     const amountVal = parseFloat(totalAmount || 0);
 
     const db = require("../config/db");
+    try {
+      await db.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_status VARCHAR(30) DEFAULT 'unpaid'`);
+      await db.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS completion_notes TEXT`);
+      await db.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS job_completed_at TIMESTAMPTZ`);
+    } catch (_) {}
+
     await db.query(
       `UPDATE bookings
        SET amount = $1,
            completion_notes = $2,
            status = 'completed',
-           payment_status = 'paid',
+           payment_status = 'unpaid',
            job_completed_at = NOW(),
            updated_at = NOW()
        WHERE id = $3`,

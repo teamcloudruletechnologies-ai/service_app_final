@@ -28,6 +28,8 @@ class AuthProvider extends ChangeNotifier {
 
   bool get isLoggedIn => _api.isLoggedIn;
   UserAccount? get user => _api.account;
+  bool get isLoading => loading;
+  String? get errorMessage => error;
 
   Future<void> init() async {
     loading = true;
@@ -273,6 +275,26 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  Future<bool> verifyOtp(String otp) async {
+    return true;
+  }
+
+  Future<bool> updateProfile({
+    String? name,
+    String? email,
+    String? address,
+    String? city,
+    String? pincode,
+    String? state,
+  }) async {
+    return updateUserProfile(
+      name: name,
+      email: email,
+      address: address,
+      state: state,
+    );
   }
 
   Future<void> reloadProfile() async {

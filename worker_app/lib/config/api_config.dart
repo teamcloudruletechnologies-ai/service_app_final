@@ -2,18 +2,14 @@ import 'package:flutter/foundation.dart';
 
 class ApiConfig {
   // Safe default local IP. Can be overridden at compile-time with:
-  // flutter run --dart-define=API_HOST=your_ip
-  static const String _defaultIp = '192.168.1.10';
+  // flutter run --dart-define=API_URL=http://YOUR_PC_IP:5000/api
+  static const String _defaultRenderUrl = 'https://service-app-final.onrender.com';
 
-  static String get host {
-    if (kIsWeb) {
-      return 'localhost';
-    }
-    return const String.fromEnvironment('API_HOST', defaultValue: _defaultIp);
-  }
+  static String get baseUrl => 
+      const String.fromEnvironment('API_URL', defaultValue: '$_defaultRenderUrl/api');
 
-  static String get baseUrl => 'https://service-app-final.onrender.com/api';
-  static String get uploadsBaseUrl => 'https://service-app-final.onrender.com';
+  static String get uploadsBaseUrl => 
+      const String.fromEnvironment('UPLOADS_URL', defaultValue: _defaultRenderUrl);
 
   static String resolveImageUrl(String? path) {
     if (path == null || path.isEmpty) return '';
@@ -21,3 +17,4 @@ class ApiConfig {
     return '$uploadsBaseUrl$path';
   }
 }
+

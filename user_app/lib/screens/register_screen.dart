@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
-import 'main_shell.dart';
+import '../theme/app_theme.dart';
+import 'login_screen.dart';
+import 'user_onboarding_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key, this.initialPhone});
-
-  final String? initialPhone;
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -16,186 +17,156 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
-  final _passwordCtrl = TextEditingController();
-  
-  bool _obscure = true;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.initialPhone != null) {
-      _phoneCtrl.text = widget.initialPhone!;
-    }
-  }
+  bool _loading = false;
 
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _emailCtrl.dispose();
     _phoneCtrl.dispose();
-    _passwordCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _submit() async {
+  Future<void> _onRegisterPressed() async {
     if (!_formKey.currentState!.validate()) return;
-    
-    final name = _nameCtrl.text.trim();
-    final email = _emailCtrl.text.trim();
-    final phone = _phoneCtrl.text.trim();
-    final password = _passwordCtrl.text;
 
-    final auth = context.read<AuthProvider>();
-    bool ok = false;
+    setState(() => _loading = true);
+    try {
+      final auth = context.read<AuthProvider>();
+      final cleaned = _phoneCtrl.text.replaceAll(RegExp(r'\D'), '');
 
-    if (email.isEmpty && phone.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email or phone is required')),
-      );
-      return;
-    }
-    
-    if (widget.initialPhone != null) {
-      ok = await auth.registerWithoutPassword(
-        name: name,
-        email: email.isEmpty ? null : email,
-        phone: phone.isEmpty ? null : phone,
-      );
-    } else {
-      ok = await auth.register(
-        name: name,
-        email: email.isEmpty ? null : email,
-        phone: phone.isEmpty ? null : phone,
-        password: password,
-      );
-    }
-
-    if (!mounted) return;
-    if (ok) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const MainShell()),
-        (_) => false,
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(auth.error ?? 'Registration failed')),
-      );
+      final success = await auth.phoneLogin(cleaned);
+      if (mounted && success) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const UserOnboardingScreen()),
+        );
+      }
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final isNewFromPhoneLogin = widget.initialPhone != null;
-
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: Text(isNewFromPhoneLogin ? 'Complete Profile' : 'Create Account')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(
-                  Icons.person_add_alt_1,
-                  size: 64,
-                  color: Colors.black,
+                const Text(
+                  'Create Account',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1A1A1A),
+                    letterSpacing: -0.5,
+                  ),
                 ),
-                const SizedBox(height: 24),
-                
-                // Form Header
-                Text(
-                  isNewFromPhoneLogin ? 'Complete Profile' : 'Customer Signup',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
+                const SizedBox(height: 6),
+                const Text(
+                  'Register to get started',
+                  style: TextStyle(fontSize: 14, color: Color(0xFF718096)),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
 
+                // Full Name Input
                 TextFormField(
                   controller: _nameCtrl,
-                  cursorColor: Colors.black,
                   decoration: const InputDecoration(
                     labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.badge_outlined),
+                    hintText: 'Enter your name',
+                    prefixIcon: Icon(Icons.person_outline_rounded),
                   ),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
-                ),
-                const SizedBox(height: 16),
-                
-                TextFormField(
-                  controller: _phoneCtrl,
-                  keyboardType: TextInputType.phone,
-                  cursorColor: Colors.black,
-                  readOnly: isNewFromPhoneLogin,
-                  enabled: !isNewFromPhoneLogin,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone Number',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                  ),
+                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
                 ),
                 const SizedBox(height: 16),
 
-                TextFormField(
-                  controller: _emailCtrl,
-                  keyboardType: TextInputType.emailAddress,
-                  cursorColor: Colors.black,
-                  decoration: const InputDecoration(
-                    labelText: 'Email Address',
-                    prefixIcon: Icon(Icons.email_outlined),
-                  ),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return 'Required';
-                    }
-                    if (!v.contains('@')) {
-                      return 'Enter a valid email address';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                if (!isNewFromPhoneLogin) ...[
-                  TextFormField(
-                    controller: _passwordCtrl,
-                    obscureText: _obscure,
-                    cursorColor: Colors.black,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
-                        onPressed: () => setState(() => _obscure = !_obscure),
+                // Mobile Number Input Card
+                Row(
+                  children: [
+                    Container(
+                      height: 56,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: const Color(0xFFE2E8F0)),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: const [
+                          Text('+91', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          SizedBox(width: 4),
+                          Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: Color(0xFF718096)),
+                        ],
                       ),
                     ),
-                    validator: (v) => v == null || v.length < 6 ? 'Min 6 characters' : null,
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: auth.loading ? null : _submit,
-                  child: auth.loading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
-                      : const Text('Save Profile'),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _phoneCtrl,
+                        keyboardType: TextInputType.phone,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
+                        ],
+                        decoration: const InputDecoration(
+                          hintText: 'Enter mobile number',
+                        ),
+                        validator: (v) {
+                          if (v == null || v.trim().isEmpty) return 'Enter mobile number';
+                          if (v.replaceAll(RegExp(r'\D'), '').length < 10) return 'Valid 10-digit number required';
+                          return null;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                if (!isNewFromPhoneLogin) ...[
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Already have an account? Sign In'),
+                const SizedBox(height: 28),
+
+                // Golden Yellow Send OTP Button
+                ElevatedButton(
+                  onPressed: _loading ? null : _onRegisterPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primary,
+                    foregroundColor: const Color(0xFF1A1A1A),
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
-                ],
+                  child: _loading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1A1A1A)))
+                      : const Text('Send OTP', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A))),
+                ),
+                const SizedBox(height: 24),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Already have an account? ', style: TextStyle(color: Color(0xFF718096))),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        );
+                      },
+                      child: const Text(
+                        'Login',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

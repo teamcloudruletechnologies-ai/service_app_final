@@ -3,11 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/models.dart';
-import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
 import '../theme/app_theme.dart';
 import 'main_shell.dart';
-import 'payment_screen.dart';
 
 class BookingFormScreen extends StatefulWidget {
   const BookingFormScreen({super.key, required this.service, this.initialAddress, this.initialNotes, this.selectedWorker});
@@ -229,7 +227,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                     ? const SizedBox(
                         height: 20,
                         width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1E293B)),
                       )
                     : const Text('Confirm Booking'),
               ),
