@@ -42,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final catalog = context.read<CatalogProvider>();
+      catalog.loadBanners();
       catalog.loadCategories();
       catalog.loadServices();
     });
@@ -72,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
+              await catalog.loadBanners();
               await catalog.loadCategories();
               await catalog.loadServices();
             },
