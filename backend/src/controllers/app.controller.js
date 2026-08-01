@@ -303,38 +303,10 @@ async function updateUserProfile(req, res, next) {
 async function listActiveBanners(req, res, next) {
   try {
     const paging = getPagination(req.query);
-    let data = await Banner.list({
+    const data = await Banner.list({
       ...paging,
       status: "active",
     });
-    if (!data.items || data.items.length === 0) {
-      data = {
-        items: [
-          {
-            id: 1,
-            title: "Summer Offer - 20% OFF (Code: URBAN20)",
-            image_url: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=800",
-            link_url: "",
-            status: "active"
-          },
-          {
-            id: 2,
-            title: "30-Min Fast Doorstep Service Guarantee",
-            image_url: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=800",
-            link_url: "",
-            status: "active"
-          },
-          {
-            id: 3,
-            title: "Deep Home Cleaning & Sanitization Special",
-            image_url: "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=800",
-            link_url: "",
-            status: "active"
-          }
-        ],
-        total: 3
-      };
-    }
     return success(res, "Active banners fetched successfully", data);
   } catch (err) {
     return next(err);

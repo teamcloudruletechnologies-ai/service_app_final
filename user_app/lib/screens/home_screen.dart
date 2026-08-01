@@ -205,17 +205,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // DYNAMIC AUTO-SLIDING PROMO BANNER WIDGET
+                // DYNAMIC AUTO-SLIDING PROMO BANNER WIDGET (Renders exclusively Admin Panel uploaded banners)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: AutoSliderBannerWidget(
-                    banners: catalog.banners.isNotEmpty
-                        ? catalog.banners
-                        : const [
-                            BannerItem(id: 1, title: 'Summer Offer - 20% OFF (Code: URBAN20)', imageUrl: '', status: 'active'),
-                            BannerItem(id: 2, title: '30-Min Doorstep Service', imageUrl: '', status: 'active'),
-                            BannerItem(id: 3, title: 'Deep Cleaning Special 30% OFF', imageUrl: '', status: 'active'),
-                          ],
+                    banners: catalog.banners,
                   ),
                 ),
                 const SizedBox(height: 24),
