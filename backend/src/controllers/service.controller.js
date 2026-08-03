@@ -126,14 +126,15 @@ async function createService(req, res, next) {
     const existing = await Service.findByName(req.body.name);
     if (existing) return error(res, "Service with this name already exists", 409);
 
-    // Save image file if uploaded
-    let image_url = req.body.image || null;
+    // Save image file if uploaded or format Google Drive URL
+    let image_url = req.body.image ? formatGoogleDriveUrl(req.body.image) : null;
     if (req.file) {
       image_url = await saveUpload(req.file, "services");
     }
 
     const service = await Service.create({
       name: req.body.name,
+      category_id: req.body.category_id ? parseInt(req.body.category_id) : null,
       description: req.body.description || null,
       image_url,
       status: req.body.status,
@@ -160,9 +161,10 @@ async function updateService(req, res, next) {
     // Build update data
     const updateData = {};
     if (req.body.name !== undefined) updateData.name = req.body.name;
+    if (req.body.category_id !== undefined) updateData.category_id = req.body.category_id ? parseInt(req.body.category_id) : null;
     if (req.body.description !== undefined) updateData.description = req.body.description;
     if (req.body.status !== undefined) updateData.status = req.body.status;
-    if (req.body.image !== undefined) updateData.image_url = req.body.image;
+    if (req.body.image !== undefined) updateData.image_url = formatGoogleDriveUrl(req.body.image);
     if (req.file) {
       updateData.image_url = await saveUpload(req.file, "services");
     }

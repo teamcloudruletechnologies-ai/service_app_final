@@ -54,6 +54,7 @@ export default function Services() {
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
+    category_id: '',
     description: '',
     image: '',
     status: 'active'
@@ -63,10 +64,10 @@ export default function Services() {
   const fetchCategories = () => {
     servicesAPI.getCategories()
       .then(res => {
-        if (res && res.success) {
+        if (res && (res.success || res.data)) {
           const catList = Array.isArray(res.data) 
             ? res.data 
-            : (res.data?.rows || []);
+            : (res.data?.rows || res.rows || []);
           setCategories(catList);
         }
       })
@@ -97,6 +98,7 @@ export default function Services() {
 
   useEffect(() => {
     fetchServices();
+    fetchCategories();
   }, []);
 
   // Handle open modal for create
@@ -104,6 +106,7 @@ export default function Services() {
     setEditingService(null);
     setFormData({
       name: '',
+      category_id: '',
       description: '',
       image: '',
       status: 'active'
@@ -116,6 +119,7 @@ export default function Services() {
     setEditingService(service);
     setFormData({
       name: service.name,
+      category_id: service.category_id || '',
       description: service.description || '',
       image: service.image_url || '',
       status: service.status || 'active'
@@ -131,6 +135,7 @@ export default function Services() {
     setSubmitting(true);
     const payload = {
       name: formData.name,
+      category_id: formData.category_id ? parseInt(formData.category_id) : null,
       description: formData.description || null,
       image: formData.image || '',
       status: formData.status
@@ -424,6 +429,21 @@ export default function Services() {
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none' }}
                 />
+              </div>
+
+              {/* Category Dropdown */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Service Category</label>
+                <select
+                  value={formData.category_id}
+                  onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
+                  style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none', cursor: 'pointer', background: 'var(--bg-card)' }}
+                >
+                  <option value="">Select Category (Optional)</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
               </div>
 
               {/* Description */}
