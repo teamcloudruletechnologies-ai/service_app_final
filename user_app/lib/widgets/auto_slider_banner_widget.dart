@@ -21,7 +21,7 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.9, initialPage: 1000);
+    _pageController = PageController(viewportFraction: 0.92, initialPage: 1000);
     _startAutoSlide();
   }
 
@@ -62,7 +62,7 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
     return Column(
       children: [
         SizedBox(
-          height: 140,
+          height: 155,
           child: PageView.builder(
             controller: _pageController,
             onPageChanged: (index) {
@@ -81,7 +81,7 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
                   double value = 1.0;
                   if (_pageController.position.haveDimensions) {
                     value = (_pageController.page! - index);
-                    value = (1 - (value.abs() * 0.15)).clamp(0.85, 1.0);
+                    value = (1 - (value.abs() * 0.06)).clamp(0.94, 1.0);
                   }
                   return Transform.scale(
                     scale: value,
@@ -89,19 +89,14 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
                   );
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Container(
-                    padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1A1A1A),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white24,
-                        width: 1.2,
-                      ),
+                      borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.12),
+                          color: Colors.black.withValues(alpha: 0.08),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -110,45 +105,18 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: imgUrl.isNotEmpty
-                          ? Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Image.network(
-                                  imgUrl,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                  errorBuilder: (_, __, ___) => _buildFallbackBannerContent(
-                                    title: banner.title ?? 'Special Offer',
-                                    sub: 'Tap to view details',
-                                    action: 'Explore Now →',
-                                    accent: AppTheme.primary,
-                                    icon: Icons.campaign,
-                                  ),
-                                ),
-                                if (banner.title != null && banner.title!.isNotEmpty && !banner.title!.toLowerCase().contains('offer'))
-                                  Positioned(
-                                    left: 12,
-                                    bottom: 10,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black.withValues(alpha: 0.65),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text(
-                                        banner.title!,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                          ? Image.network(
+                              imgUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              errorBuilder: (context, error, stackTrace) => _buildFallbackBannerContent(
+                                title: banner.title ?? 'Special Offer',
+                                sub: 'Tap to view details',
+                                action: 'Explore Now →',
+                                accent: AppTheme.primary,
+                                icon: Icons.campaign,
+                              ),
                             )
                           : _buildFallbackBannerContent(
                               title: banner.title ?? 'Special Offer',
@@ -164,7 +132,7 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
             },
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 14),
 
         // ─── ANIMATED DOT INDICATORS ───
         Row(
@@ -175,7 +143,7 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
               duration: const Duration(milliseconds: 300),
               margin: const EdgeInsets.symmetric(horizontal: 4),
               height: 6,
-              width: isSelected ? 20 : 6,
+              width: isSelected ? 24 : 6,
               decoration: BoxDecoration(
                 color: isSelected ? AppTheme.primary : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(10),
@@ -194,69 +162,73 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
     required Color accent,
     required IconData icon,
   }) {
-    return Stack(
-      children: [
-        Positioned(
-          right: -10,
-          top: -10,
-          child: Opacity(
-            opacity: 0.15,
-            child: Icon(icon, color: accent, size: 90),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      color: const Color(0xFF1E293B),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -10,
+            top: -10,
+            child: Opacity(
+              opacity: 0.15,
+              child: Icon(icon, color: accent, size: 100),
+            ),
           ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: accent, size: 16),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: accent,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 14,
-                      letterSpacing: 1.2,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, color: accent, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: accent,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                        letterSpacing: 0.8,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              sub,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
+                ],
               ),
-            ),
-            const SizedBox(height: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
-              decoration: BoxDecoration(
-                color: accent,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Text(
-                action,
+              const SizedBox(height: 6),
+              Text(
+                sub,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 11,
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+                decoration: BoxDecoration(
+                  color: accent,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  action,
+                  style: const TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

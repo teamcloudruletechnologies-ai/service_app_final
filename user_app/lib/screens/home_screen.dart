@@ -84,89 +84,88 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // TOP HEADER: Pale Background Container (App Name + User Name + Location + Notification Bell)
+                // TOP HEADER: Clean Unboxed Header (Greeting + Location + Notification Bell)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFEF9C3).withValues(alpha: 0.45),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFFEF08A)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.02),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Urban Service',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w900,
-                                    color: Color(0xFF1A1A1A),
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Hello, ${user?.name.isNotEmpty == true ? user!.name : "User"} 👋',
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF475569),
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              'Hello, ${user?.name.isNotEmpty == true ? user!.name : "User"} 👋',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF1E293B),
+                                letterSpacing: -0.4,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            IconButton(
-                              onPressed: () {
+                            const SizedBox(height: 4),
+                            InkWell(
+                              onTap: () {
                                 Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                                  MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
                                 );
                               },
-                              icon: const Icon(Icons.notifications_none_rounded, color: Color(0xFF1A1A1A), size: 26),
+                              borderRadius: BorderRadius.circular(8),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.location_on_rounded, color: AppTheme.primaryDark, size: 16),
+                                  const SizedBox(width: 4),
+                                  Flexible(
+                                    child: Text(
+                                      selectedLoc,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF64748B),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 2),
+                                  const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: Color(0xFF64748B)),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 10),
-                        InkWell(
-                          onTap: () {
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: IconButton(
+                          onPressed: () {
                             Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+                              MaterialPageRoute(builder: (_) => const NotificationScreen()),
                             );
                           },
-                          borderRadius: BorderRadius.circular(12),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.location_on_rounded, color: AppTheme.primaryDark, size: 20),
-                              const SizedBox(width: 6),
-                              Text(
-                                selectedLoc.length > 28 ? '${selectedLoc.substring(0, 28)}...' : selectedLoc,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1A1A1A),
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              const Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: Color(0xFF1A1A1A)),
-                            ],
-                          ),
+                          icon: const Icon(Icons.notifications_none_rounded, color: Color(0xFF1E293B), size: 22),
+                          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                          padding: EdgeInsets.zero,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -174,32 +173,86 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Container(
+                    height: 52,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      borderRadius: BorderRadius.circular(26),
+                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 10,
+                          color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+                          blurRadius: 16,
+                          spreadRadius: 0,
                           offset: const Offset(0, 4),
+                        ),
+                        BoxShadow(
+                          color: const Color(0xFF0F172A).withValues(alpha: 0.02),
+                          blurRadius: 4,
+                          spreadRadius: 0,
+                          offset: const Offset(0, 1),
                         ),
                       ],
                     ),
-                    child: TextField(
-                      controller: _searchCtrl,
-                      onChanged: (val) {
-                        catalog.setSearchQuery(val);
-                      },
-                      decoration: const InputDecoration(
-                        hintText: 'Search for services...',
-                        hintStyle: TextStyle(color: Color(0xFFA0AEC0), fontSize: 14),
-                        prefixIcon: Icon(Icons.search_rounded, color: Color(0xFF718096)),
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 14),
-                      ),
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 16),
+                        const Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 22),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: TextField(
+                            controller: _searchCtrl,
+                            textAlignVertical: TextAlignVertical.center,
+                            onChanged: (val) {
+                              catalog.setSearchQuery(val);
+                              setState(() {});
+                            },
+                            style: const TextStyle(
+                              color: Color(0xFF1E293B),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Search for services...',
+                              hintStyle: TextStyle(
+                                color: Color(0xFF94A3B8),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: -0.2,
+                              ),
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ),
+                        if (_searchCtrl.text.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              _searchCtrl.clear();
+                              catalog.setSearchQuery('');
+                              setState(() {});
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: Icon(Icons.cancel_rounded, color: Color(0xFF94A3B8), size: 18),
+                            ),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Container(
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: const Color(0xFFF1F5F9)),
+                              ),
+                              child: const Icon(Icons.tune_rounded, color: Color(0xFF475569), size: 16),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),
@@ -207,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 // DYNAMIC AUTO-SLIDING PROMO BANNER WIDGET (Renders exclusively Admin Panel uploaded banners)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  padding: EdgeInsets.zero,
                   child: AutoSliderBannerWidget(
                     banners: catalog.banners,
                   ),
