@@ -148,17 +148,17 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
   Color _statusColor(String status) {
     switch (status) {
       case 'pending':
-        return AppTheme.zomatoRed;
+        return AppTheme.primary;
       case 'confirmed':
-        return Colors.blue;
+        return AppTheme.primaryDark;
       case 'in_progress':
-        return AppTheme.olive;
+        return const Color(0xFFCA8A04);
       case 'completed':
-        return Colors.green;
+        return AppTheme.primary;
       case 'cancelled':
-        return Colors.grey;
+        return const Color(0xFFD97706);
       default:
-        return Colors.grey;
+        return const Color(0xFFEAB308);
     }
   }
 

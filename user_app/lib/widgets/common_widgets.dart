@@ -266,15 +266,15 @@ class BookingCard extends StatelessWidget {
   Color _statusColor(String status) {
     switch (status) {
       case 'completed':
-        return Colors.green;
+        return AppTheme.primary;
       case 'cancelled':
-        return Colors.red;
+        return const Color(0xFFD97706);
       case 'in_progress':
-        return Colors.purple;
+        return const Color(0xFFCA8A04);
       case 'confirmed':
-        return Colors.blue;
+        return AppTheme.primaryDark;
       default:
-        return Colors.orange;
+        return const Color(0xFFEAB308);
     }
   }
 
