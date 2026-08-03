@@ -67,7 +67,7 @@ export default function Services() {
       ...prev,
       sub_services: [
         ...prev.sub_services,
-        { id: Date.now(), name: '', price: '', estimated_time: '45' }
+        { id: Date.now(), name: '', estimated_time: '45' }
       ]
     }));
   };
@@ -539,29 +539,21 @@ export default function Services() {
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
                     {formData.sub_services.map((sub, idx) => (
-                      <div key={sub.id || idx} style={{ display: 'flex', gap: 6, alignItems: 'center', backgroundColor: '#FFF', padding: 8, borderRadius: 8, border: '1px solid #E5E7EB' }}>
+                      <div key={sub.id || idx} style={{ display: 'flex', gap: 8, alignItems: 'center', backgroundColor: '#FFF', padding: 8, borderRadius: 8, border: '1px solid #E5E7EB' }}>
                         <input
                           type="text"
                           required
                           placeholder="Sub-Service Name (e.g. Filter Wash)"
                           value={sub.name}
                           onChange={(e) => handleSubServiceChange(sub.id, 'name', e.target.value)}
-                          style={{ flex: 2, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
-                        />
-                        <input
-                          type="number"
-                          required
-                          placeholder="Price (₹)"
-                          value={sub.price}
-                          onChange={(e) => handleSubServiceChange(sub.id, 'price', e.target.value)}
-                          style={{ width: 90, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                          style={{ flex: 1, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
                         />
                         <input
                           type="number"
                           placeholder="Time (mins)"
                           value={sub.estimated_time}
                           onChange={(e) => handleSubServiceChange(sub.id, 'estimated_time', e.target.value)}
-                          style={{ width: 85, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                          style={{ width: 95, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
                         />
                         <button
                           type="button"
