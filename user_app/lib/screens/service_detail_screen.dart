@@ -351,7 +351,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                             ? ServiceItem(
                                 id: widget.service.id,
                                 categoryId: widget.service.categoryId,
-                                name: '${widget.service.name} (${_selectedSubService!.name})',
+                                name: _selectedSubService!.name,
                                 description: widget.service.description,
                                 imageUrl: widget.service.imageUrl,
                                 categoryName: widget.service.categoryName,
