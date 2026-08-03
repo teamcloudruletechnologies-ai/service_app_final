@@ -267,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // 4x2 CATEGORIES GRID (Screen 5 & 6 Mockup)
+                // DYNAMIC CATEGORIES GRID (Loaded from Backend / Admin Panel)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
@@ -277,16 +277,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         'Categories',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          catalog.clearFilters();
-                          catalog.loadServices();
-                        },
-                        child: const Text(
-                          'See All',
-                          style: TextStyle(color: AppTheme.primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
+                      if (catalog.selectedCategoryId != null)
+                        TextButton(
+                          onPressed: () {
+                            catalog.selectCategory(null);
+                          },
+                          child: const Text(
+                            'Show All',
+                            style: TextStyle(color: AppTheme.primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -294,66 +294,132 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _gridCategories.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.85,
-                    ),
-                    itemBuilder: (context, index) {
-                      final item = _gridCategories[index];
-                      return InkWell(
-                        onTap: () {
-                          if (index == 7) {
-                            catalog.clearFilters();
-                            catalog.loadServices();
-                          } else {
-                            final matchedCat = catalog.categories.firstWhere(
-                              (c) => c.name.toLowerCase().contains(item.$1.toLowerCase().substring(0, 3)),
-                              orElse: () => catalog.categories.isNotEmpty ? catalog.categories[0] : ServiceCategory(id: 1, name: item.$1, status: 'active'),
-                            );
-                            catalog.selectCategory(matchedCat.id);
-                          }
-                        },
-                        borderRadius: BorderRadius.circular(16),
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                color: item.$4,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: item.$4.withValues(alpha: 0.8)),
+                  child: catalog.loadingCategories
+                      ? const Center(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: CircularProgressIndicator(color: AppTheme.primary, strokeWidth: 2),
+                        )
+                      : (catalog.categories.isEmpty
+                          ? GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: _gridCategories.length,
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                mainAxisSpacing: 16,
+                                crossAxisSpacing: 16,
+                                childAspectRatio: 0.85,
                               ),
-                              child: item.$2.isNotEmpty
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(16),
-                                      child: CachedNetworkImage(
-                                        imageUrl: item.$2,
-                                        fit: BoxFit.cover,
-                                        errorWidget: (_, __, ___) => Icon(item.$3, color: const Color(0xFF1A1A1A), size: 26),
+                              itemBuilder: (context, index) {
+                                final item = _gridCategories[index];
+                                return InkWell(
+                                  onTap: () {
+                                    final matchedCat = catalog.categories.firstWhere(
+                                      (c) => c.name.toLowerCase().contains(item.$1.toLowerCase().substring(0, 3)),
+                                      orElse: () => catalog.categories.isNotEmpty ? catalog.categories[0] : ServiceCategory(id: 1, name: item.$1, status: 'active'),
+                                    );
+                                    catalog.selectCategory(matchedCat.id);
+                                  },
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 56,
+                                        height: 56,
+                                        decoration: BoxDecoration(
+                                          color: item.$4,
+                                          borderRadius: BorderRadius.circular(16),
+                                          border: Border.all(color: item.$4.withValues(alpha: 0.8)),
+                                        ),
+                                        child: item.$2.isNotEmpty
+                                            ? ClipRRect(
+                                                borderRadius: BorderRadius.circular(16),
+                                                child: CachedNetworkImage(
+                                                  imageUrl: item.$2,
+                                                  fit: BoxFit.cover,
+                                                  errorWidget: (_, __, ___) => Icon(item.$3, color: const Color(0xFF1A1A1A), size: 26),
+                                                ),
+                                              )
+                                            : Icon(item.$3, color: const Color(0xFF1A1A1A), size: 26),
                                       ),
-                                    )
-                                  : Icon(item.$3, color: const Color(0xFF1A1A1A), size: 26),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              item.$1,
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A)),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        item.$1,
+                                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A)),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            )
+                          : GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: catalog.categories.length,
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                mainAxisSpacing: 16,
+                                crossAxisSpacing: 16,
+                                childAspectRatio: 0.85,
+                              ),
+                              itemBuilder: (context, index) {
+                                final cat = catalog.categories[index];
+                                final isSelected = catalog.selectedCategoryId == cat.id;
+                                final imgUrl = ApiConfig.resolveImageUrl(cat.iconUrl);
+
+                                return InkWell(
+                                  onTap: () {
+                                    if (isSelected) {
+                                      catalog.selectCategory(null);
+                                    } else {
+                                      catalog.selectCategory(cat.id);
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        width: 56,
+                                        height: 56,
+                                        decoration: BoxDecoration(
+                                          color: isSelected ? AppTheme.primary.withValues(alpha: 0.15) : const Color(0xFFF1F5F9),
+                                          borderRadius: BorderRadius.circular(16),
+                                          border: Border.all(
+                                            color: isSelected ? AppTheme.primary : const Color(0xFFE2E8F0),
+                                            width: isSelected ? 2 : 1,
+                                          ),
+                                        ),
+                                        child: imgUrl.isNotEmpty
+                                            ? ClipRRect(
+                                                borderRadius: BorderRadius.circular(15),
+                                                child: CachedNetworkImage(
+                                                  imageUrl: imgUrl,
+                                                  fit: BoxFit.cover,
+                                                  errorWidget: (_, __, ___) => const Icon(Icons.category_rounded, color: Color(0xFF1E293B), size: 24),
+                                                ),
+                                              )
+                                            : const Icon(Icons.category_rounded, color: Color(0xFF1E293B), size: 24),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        cat.name,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                          color: isSelected ? AppTheme.primaryDark : const Color(0xFF1A1A1A),
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            )),
                 ),
                 const SizedBox(height: 28),
 
