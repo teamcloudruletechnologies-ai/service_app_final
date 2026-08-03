@@ -422,7 +422,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: catalog.services.isEmpty
+                  child: catalog.loadingServices
                       ? Container(
                           height: 120,
                           decoration: BoxDecoration(
@@ -430,9 +430,50 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: const Color(0xFFE2E8F0)),
                           ),
-                          child: const Center(child: CircularProgressIndicator(color: AppTheme.primary)),
+                          child: const Center(child: CircularProgressIndicator(color: AppTheme.primary, strokeWidth: 2)),
                         )
-                      : GridView.builder(
+                      : (catalog.services.isEmpty
+                          ? Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: const Color(0xFFE2E8F0)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primary.withValues(alpha: 0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.handyman_rounded, color: AppTheme.primary, size: 28),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    'Services Coming Soon 🛠️',
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF1E293B)),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Services configured in Admin Panel will appear here.',
+                                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            )
+                          : GridView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: catalog.services.length,
