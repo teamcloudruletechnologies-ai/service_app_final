@@ -62,10 +62,10 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
     return Column(
       children: [
         SizedBox(
-          height: 160,
+          height: 175,
           child: PageView.builder(
             controller: _pageController,
-            scrollDirection: Axis.vertical,
+            scrollDirection: Axis.horizontal,
             onPageChanged: (index) {
               setState(() {
                 _currentIndex = index % itemCount;
@@ -79,47 +79,36 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
               return AnimatedBuilder(
                 animation: _pageController,
                 builder: (context, child) {
-                  double pageOffset = 0.0;
+                  double value = 1.0;
                   if (_pageController.position.haveDimensions) {
-                    pageOffset = (_pageController.page! - index);
+                    value = (_pageController.page! - index);
+                    value = (1 - (value.abs() * 0.05)).clamp(0.95, 1.0);
                   }
-
-                  // 3D vertical slide-up & backside stack effect
-                  final double scale = (1 - (pageOffset.abs() * 0.08)).clamp(0.88, 1.0);
-                  final double opacity = (1 - (pageOffset.abs() * 0.4)).clamp(0.2, 1.0);
-                  final double translateY = pageOffset * -15;
-
-                  return Transform.translate(
-                    offset: Offset(0, translateY),
-                    child: Transform.scale(
-                      scale: scale,
-                      child: Opacity(
-                        opacity: opacity,
-                        child: child,
-                      ),
-                    ),
+                  return Transform.scale(
+                    scale: value,
+                    child: child,
                   );
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFF1A1A1A),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.12),
-                          blurRadius: 14,
-                          offset: const Offset(0, 6),
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(16),
                       child: imgUrl.isNotEmpty
                           ? Image.network(
                               imgUrl,
-                              fit: BoxFit.cover,
+                              fit: BoxFit.fill,
                               width: double.infinity,
                               height: double.infinity,
                               errorBuilder: (context, error, stackTrace) => _buildFallbackBannerContent(
@@ -144,20 +133,21 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
             },
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
 
-        // ─── ANIMATED VERTICAL / HORIZONTAL INDICATOR DOTS ───
+        // ─── ANIMATED HORIZONTAL PILL INDICATOR DOTS ───
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(itemCount, (idx) {
             final isSelected = idx == _currentIndex;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
               margin: const EdgeInsets.symmetric(horizontal: 3),
-              height: isSelected ? 16 : 6,
-              width: 6,
+              height: 6,
+              width: isSelected ? 22 : 6,
               decoration: BoxDecoration(
-                color: isSelected ? AppTheme.primary : Colors.grey.shade300,
+                color: isSelected ? AppTheme.primary : const Color(0xFFCBD5E1),
                 borderRadius: BorderRadius.circular(10),
               ),
             );
