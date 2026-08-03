@@ -264,7 +264,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                   controller: _nameCtrl,
                   decoration: const InputDecoration(
                     labelText: 'Full Name *',
-                    hintText: 'e.g. Praveen Kumar',
+                    hintText: 'Full Name',
                     prefixIcon: Icon(Icons.person_outline_rounded),
                   ),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Full Name is required' : null,
@@ -277,7 +277,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                   keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     labelText: 'Email Address (Optional)',
-                    hintText: 'e.g. praveen@gmail.com',
+                    hintText: 'Email Address',
                     prefixIcon: Icon(Icons.email_outlined),
                   ),
                 ),

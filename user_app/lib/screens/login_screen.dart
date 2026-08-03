@@ -31,6 +31,19 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _phoneCtrl.addListener(_validatePhone);
+    for (int i = 0; i < 6; i++) {
+      final index = i;
+      _otpFocusNodes[index].onKeyEvent = (FocusNode node, KeyEvent event) {
+        if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.backspace) {
+          if (_otpControllers[index].text.isEmpty && index > 0) {
+            _otpControllers[index - 1].clear();
+            _otpFocusNodes[index - 1].requestFocus();
+            return KeyEventResult.handled;
+          }
+        }
+        return KeyEventResult.ignored;
+      };
+    }
   }
 
   void _validatePhone() {
@@ -143,6 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -151,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
               AnimatedCrossFade(
                 duration: const Duration(milliseconds: 200),
                 crossFadeState: _showOtpStep ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                firstChild: const SizedBox(height: 24),
+                firstChild: const SizedBox(height: 60),
                 secondChild: Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
@@ -215,12 +229,12 @@ class _LoginScreenState extends State<LoginScreen> {
             'Welcome Back! 👋',
             style: TextStyle(
               fontSize: 28,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.bold,
               color: Color(0xFF1A1A1A),
               letterSpacing: -0.5,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           const Text(
             'Login to your account',
             style: TextStyle(
@@ -229,20 +243,23 @@ class _LoginScreenState extends State<LoginScreen> {
               letterSpacing: -0.2,
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
-          // Side-by-Side Country Code + Phone Input Card Container (Mockup Screen 2)
+          // Side-by-Side Country Code + Phone Input Row
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                height: 56,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
+                height: 54,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   border: Border.all(color: const Color(0xFFE2E8F0)),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: const [
                     Text(
                       '+91',
@@ -262,6 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextFormField(
                   controller: _phoneCtrl,
                   keyboardType: TextInputType.phone,
+                  textAlignVertical: TextAlignVertical.center,
                   inputFormatters: [
                     FilteringTextInputFormatter.digitsOnly,
                     LengthLimitingTextInputFormatter(10),
@@ -273,6 +291,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     letterSpacing: 0.5,
                   ),
                   decoration: InputDecoration(
+                    isDense: true,
+                    filled: true,
+                    fillColor: Colors.white,
                     hintText: 'Enter mobile number',
                     hintStyle: const TextStyle(
                       color: Color(0xFFA0AEC0),
@@ -280,6 +301,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       fontSize: 15,
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
+                    focusedErrorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                    ),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return 'Please enter mobile number';
@@ -291,17 +332,18 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
 
-          // Primary Yellow Send OTP Button (Mockup 2)
+          // Primary Send OTP Button
           ElevatedButton(
             onPressed: (isLoading || !_isPhoneValid) ? null : _onGetOtpPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: _isPhoneValid ? AppTheme.primary : AppTheme.primary.withValues(alpha: 0.5),
               foregroundColor: const Color(0xFF1A1A1A),
-              minimumSize: const Size.fromHeight(52),
+              minimumSize: const Size.fromHeight(54),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               elevation: 0,
+              alignment: Alignment.center,
             ),
             child: isLoading
                 ? const SizedBox(
@@ -319,7 +361,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
           ),
-          const SizedBox(height: 36),
+          const SizedBox(height: 20),
 
           // Terms & Privacy Policy Footer
           Center(
@@ -364,12 +406,12 @@ class _LoginScreenState extends State<LoginScreen> {
           'Verify OTP',
           style: TextStyle(
             fontSize: 28,
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.bold,
             color: Color(0xFF1A1A1A),
             letterSpacing: -0.5,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         Text(
           'We sent a 6-digit verification code to +91 ${_phoneCtrl.text}',
           style: const TextStyle(
@@ -378,7 +420,7 @@ class _LoginScreenState extends State<LoginScreen> {
             letterSpacing: -0.2,
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
 
         // Demo Mode Helper Banner (Screen 3 Mockup)
         Container(
@@ -389,6 +431,7 @@ class _LoginScreenState extends State<LoginScreen> {
             border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Icon(Icons.vpn_key_rounded, size: 20, color: Color(0xFF1A1A1A)),
               const SizedBox(width: 10),
@@ -428,15 +471,15 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: List.generate(6, (index) {
             return SizedBox(
-              width: 46,
-              height: 56,
+              width: 48,
+              height: 58,
               child: TextField(
                 controller: _otpControllers[index],
                 focusNode: _otpFocusNodes[index],
                 keyboardType: TextInputType.number,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(1),
+                  LengthLimitingTextInputFormatter(6),
                 ],
                 textAlign: TextAlign.center,
                 maxLength: 1,
@@ -465,16 +508,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 onChanged: (v) {
-                  if (v.isNotEmpty) {
+                  if (v.length > 1) {
+                    final digits = v.replaceAll(RegExp(r'\D'), '');
+                    for (int i = 0; i < 6; i++) {
+                      if (i < digits.length) {
+                        _otpControllers[i].text = digits[i];
+                      }
+                    }
+                    if (digits.length >= 6) {
+                      _otpFocusNodes[5].unfocus();
+                      _verifyAndProceed();
+                    } else if (digits.isNotEmpty) {
+                      _otpFocusNodes[digits.length.clamp(0, 5)].requestFocus();
+                    }
+                  } else if (v.isNotEmpty) {
                     if (index < 5) {
                       _otpFocusNodes[index + 1].requestFocus();
                     } else {
                       _otpFocusNodes[index].unfocus();
                       _verifyAndProceed();
-                    }
-                  } else {
-                    if (index > 0) {
-                      _otpFocusNodes[index - 1].requestFocus();
                     }
                   }
                 },
@@ -482,11 +534,12 @@ class _LoginScreenState extends State<LoginScreen> {
             );
           }),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
 
         // Resend Timer Row
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               '00:${_secondsRemaining.toString().padLeft(2, '0')}',
@@ -519,7 +572,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
           ],
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 24),
 
         // Full-width Golden Yellow Verify OTP Button
         ElevatedButton(
@@ -527,9 +580,10 @@ class _LoginScreenState extends State<LoginScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.primary,
             foregroundColor: const Color(0xFF1A1A1A),
-            minimumSize: const Size.fromHeight(52),
+            minimumSize: const Size.fromHeight(54),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             elevation: 0,
+            alignment: Alignment.center,
           ),
           child: isLoading
               ? const SizedBox(
