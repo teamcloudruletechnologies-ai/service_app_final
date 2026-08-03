@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class UserAccount {
   final int id;
   final String role;
@@ -82,6 +84,29 @@ class ServiceCategory {
   }
 }
 
+class SubServiceItem {
+  final dynamic id;
+  final String name;
+  final double price;
+  final int estimatedTime;
+
+  const SubServiceItem({
+    required this.id,
+    required this.name,
+    required this.price,
+    this.estimatedTime = 45,
+  });
+
+  factory SubServiceItem.fromJson(Map<String, dynamic> json) {
+    return SubServiceItem(
+      id: json['id'],
+      name: json['name'] as String? ?? '',
+      price: (json['price'] is num) ? (json['price'] as num).toDouble() : (double.tryParse(json['price']?.toString() ?? '0') ?? 0.0),
+      estimatedTime: (json['estimated_time'] is num) ? (json['estimated_time'] as num).toInt() : (int.tryParse(json['estimated_time']?.toString() ?? '45') ?? 45),
+    );
+  }
+}
+
 class ServiceItem {
   final int id;
   final int? categoryId;
@@ -95,6 +120,7 @@ class ServiceItem {
   final int totalReviews;
   final int totalBookings;
   final int estimatedTime;
+  final List<SubServiceItem> subServices;
 
   double get basePrice => price;
 
@@ -111,9 +137,19 @@ class ServiceItem {
     this.totalReviews = 0,
     this.totalBookings = 0,
     this.estimatedTime = 60,
+    this.subServices = const [],
   });
 
   factory ServiceItem.fromJson(Map<String, dynamic> json) {
+    List<SubServiceItem> parsedSubs = [];
+    if (json['sub_services'] != null) {
+      try {
+        final raw = json['sub_services'];
+        final List list = raw is String ? (raw.isNotEmpty ? List.from(jsonDecode(raw)) : []) : (raw is List ? raw : []);
+        parsedSubs = list.map((e) => SubServiceItem.fromJson(Map<String, dynamic>.from(e))).toList();
+      } catch (_) {}
+    }
+
     return ServiceItem(
       id: json['id'] as int,
       categoryId: json['category_id'] as int?,
@@ -127,6 +163,7 @@ class ServiceItem {
       totalReviews: json['total_reviews'] as int? ?? 0,
       totalBookings: json['total_bookings'] as int? ?? 0,
       estimatedTime: json['estimated_time'] as int? ?? 60,
+      subServices: parsedSubs,
     );
   }
 }

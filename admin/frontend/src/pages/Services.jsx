@@ -57,9 +57,34 @@ export default function Services() {
     category_id: '',
     description: '',
     image: '',
-    status: 'active'
+    status: 'active',
+    sub_services: []
   });
   const [submitting, setSubmitting] = useState(false);
+
+  const handleAddSubService = () => {
+    setFormData(prev => ({
+      ...prev,
+      sub_services: [
+        ...prev.sub_services,
+        { id: Date.now(), name: '', price: '', estimated_time: '45' }
+      ]
+    }));
+  };
+
+  const handleRemoveSubService = (id) => {
+    setFormData(prev => ({
+      ...prev,
+      sub_services: prev.sub_services.filter(s => s.id !== id)
+    }));
+  };
+
+  const handleSubServiceChange = (id, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      sub_services: prev.sub_services.map(s => s.id === id ? { ...s, [field]: value } : s)
+    }));
+  };
 
   const fetchCategories = () => {
     servicesAPI.getCategories()
@@ -109,7 +134,8 @@ export default function Services() {
       category_id: '',
       description: '',
       image: '',
-      status: 'active'
+      status: 'active',
+      sub_services: []
     });
     setIsModalOpen(true);
   };
@@ -117,12 +143,19 @@ export default function Services() {
   // Handle open modal for edit
   const handleOpenEdit = (service) => {
     setEditingService(service);
+    let parsedSubs = [];
+    if (service.sub_services) {
+      parsedSubs = typeof service.sub_services === 'string'
+        ? JSON.parse(service.sub_services)
+        : service.sub_services;
+    }
     setFormData({
       name: service.name,
       category_id: service.category_id || '',
       description: service.description || '',
       image: service.image_url || '',
-      status: service.status || 'active'
+      status: service.status || 'active',
+      sub_services: Array.isArray(parsedSubs) ? parsedSubs : []
     });
     setIsModalOpen(true);
   };
@@ -138,7 +171,13 @@ export default function Services() {
       category_id: formData.category_id ? parseInt(formData.category_id) : null,
       description: formData.description || null,
       image: formData.image || '',
-      status: formData.status
+      status: formData.status,
+      sub_services: formData.sub_services.map(s => ({
+        id: s.id,
+        name: s.name,
+        price: parseFloat(s.price) || 0,
+        estimated_time: parseInt(s.estimated_time) || 45
+      }))
     };
 
     const savePromise = editingService
@@ -467,6 +506,75 @@ export default function Services() {
                   onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
                   style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none', fontFamily: 'monospace' }}
                 />
+              </div>
+
+              {/* Sub-Services / Packages Editor */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, border: '1px solid #E5E7EB', borderRadius: 10, padding: 12, backgroundColor: '#F9FAFB' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
+                    Sub-Services / Packages ({formData.sub_services.length})
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAddSubService}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: 6,
+                      border: 'none',
+                      backgroundColor: 'var(--primary-color, #1A1A1A)',
+                      color: '#FFF',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    + Add Sub-Service
+                  </button>
+                </div>
+
+                {formData.sub_services.length === 0 ? (
+                  <div style={{ fontSize: 12, color: '#9CA3AF', fontStyle: 'italic', padding: '6px 0' }}>
+                    No sub-services added yet. Click "+ Add Sub-Service" to add packages (e.g. AC Filter Cleaning, Gas Charging).
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+                    {formData.sub_services.map((sub, idx) => (
+                      <div key={sub.id || idx} style={{ display: 'flex', gap: 6, alignItems: 'center', backgroundColor: '#FFF', padding: 8, borderRadius: 8, border: '1px solid #E5E7EB' }}>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Sub-Service Name (e.g. Filter Wash)"
+                          value={sub.name}
+                          onChange={(e) => handleSubServiceChange(sub.id, 'name', e.target.value)}
+                          style={{ flex: 2, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                        />
+                        <input
+                          type="number"
+                          required
+                          placeholder="Price (₹)"
+                          value={sub.price}
+                          onChange={(e) => handleSubServiceChange(sub.id, 'price', e.target.value)}
+                          style={{ width: 90, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                        />
+                        <input
+                          type="number"
+                          placeholder="Time (mins)"
+                          value={sub.estimated_time}
+                          onChange={(e) => handleSubServiceChange(sub.id, 'estimated_time', e.target.value)}
+                          style={{ width: 85, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSubService(sub.id)}
+                          style={{ padding: '4px 8px', color: '#EF4444', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 14 }}
+                          title="Remove sub-service"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Status toggle selector */}

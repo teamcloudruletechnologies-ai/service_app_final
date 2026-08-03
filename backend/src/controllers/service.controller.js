@@ -132,12 +132,20 @@ async function createService(req, res, next) {
       image_url = await saveUpload(req.file, "services");
     }
 
+    let subServices = [];
+    if (req.body.sub_services) {
+      subServices = typeof req.body.sub_services === 'string' 
+        ? JSON.parse(req.body.sub_services) 
+        : req.body.sub_services;
+    }
+
     const service = await Service.create({
       name: req.body.name,
       category_id: req.body.category_id ? parseInt(req.body.category_id) : null,
       description: req.body.description || null,
       image_url,
       status: req.body.status,
+      sub_services: subServices
     });
     return success(res, "Service created successfully", service, 201);
   } catch (err) {
@@ -165,6 +173,11 @@ async function updateService(req, res, next) {
     if (req.body.description !== undefined) updateData.description = req.body.description;
     if (req.body.status !== undefined) updateData.status = req.body.status;
     if (req.body.image !== undefined) updateData.image_url = formatGoogleDriveUrl(req.body.image);
+    if (req.body.sub_services !== undefined) {
+      updateData.sub_services = typeof req.body.sub_services === 'string' 
+        ? JSON.parse(req.body.sub_services) 
+        : req.body.sub_services;
+    }
     if (req.file) {
       updateData.image_url = await saveUpload(req.file, "services");
     }
