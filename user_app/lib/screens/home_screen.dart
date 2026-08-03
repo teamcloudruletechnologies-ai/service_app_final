@@ -295,9 +295,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: catalog.loadingCategories
-                      ? const Center(
+                      ? const Padding(
                           padding: EdgeInsets.symmetric(vertical: 20),
-                          child: CircularProgressIndicator(color: AppTheme.primary, strokeWidth: 2),
+                          child: Center(
+                            child: CircularProgressIndicator(color: AppTheme.primary, strokeWidth: 2),
+                          ),
                         )
                       : (catalog.categories.isEmpty
                           ? GridView.builder(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static const primary = Color(0xFFFFC107); // Vibrant Warm Gold
   static const primaryDark = Color(0xFFFFB300); // Darker Gold Accent
+  static const accent = Color(0xFFFFB300); // Accent Gold
   static const secondary = Color(0xFF2563EB); // Royal Blue Accent
   static const surface = Color(0xFFFAFAFC); // Clean Light Background
   static const card = Colors.white;

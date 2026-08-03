@@ -35,8 +35,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final auth = context.read<AuthProvider>();
       final cleaned = _phoneCtrl.text.replaceAll(RegExp(r'\D'), '');
 
-      final success = await auth.phoneLogin(cleaned);
-      if (mounted && success) {
+      final res = await auth.phoneLogin(cleaned);
+      if (mounted && res != null) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const UserOnboardingScreen()),
         );
