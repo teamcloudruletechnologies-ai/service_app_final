@@ -30,13 +30,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _loadingCities = false;
 
   final List<String> _serviceTypes = [
-    'Cleaning',
-    'Plumbing',
-    'Electrical',
-    'Appliance Repair',
-    'Painting',
-    'Carpentry',
-    'Pest Control'
+    '🏠 Home Maintenance',
+    '❄️ Appliance Services',
+    '💄 Beauty & Wellness',
+    '🧼 Cleaning',
+    '📹 Security & CCTV',
   ];
 
   @override

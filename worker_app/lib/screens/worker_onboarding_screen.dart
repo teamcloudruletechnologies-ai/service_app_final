@@ -23,13 +23,11 @@ class _WorkerOnboardingScreenState extends State<WorkerOnboardingScreen> {
   String? _selectedServiceType;
 
   final List<String> _serviceTypes = [
-    'Cleaning',
-    'Plumbing',
-    'Electrical',
-    'Appliance Repair',
-    'Painting',
-    'Carpentry',
-    'Pest Control'
+    '🏠 Home Maintenance',
+    '❄️ Appliance Services',
+    '💄 Beauty & Wellness',
+    '🧼 Cleaning',
+    '📹 Security & CCTV',
   ];
 
   // Location variables
