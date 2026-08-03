@@ -232,12 +232,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                             ],
                                           ),
                                         ),
-                                        Text(
-                                          '₹${((sub.price > 0 ? sub.price : widget.service.price)).toStringAsFixed(0)}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w900,
-                                            color: isSelected ? AppTheme.primaryDark : const Color(0xFF0F172A),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: AppTheme.primary.withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: const Text(
+                                            'Inspection Quote',
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppTheme.primaryDark,
+                                            ),
                                           ),
                                         ),
                                       ],
@@ -333,14 +340,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Total Price',
+                    children: const [
+                      Text(
+                        'Estimate',
                         style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
                       ),
                       Text(
-                        '₹${effectivePrice.toStringAsFixed(0)}',
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)),
+                        'Price after inspection',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF0F172A)),
                       ),
                     ],
                   ),

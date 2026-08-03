@@ -237,7 +237,7 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
 
         const SizedBox(height: 16),
 
-        // Service Info
+        // Service & Sub-Service Info
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -250,22 +250,42 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Service', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
+              const Text('Requested Service', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
               const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      b.serviceName ?? 'Service #${b.serviceId}',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primary),
+              Text(
+                b.serviceName ?? 'Service #${b.serviceId}',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.check_circle_outline_rounded, color: AppTheme.primary, size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'CONFIRMED SUB-SERVICE TYPE',
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppTheme.primaryDark, letterSpacing: 0.5),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            b.serviceName ?? 'General Inspection',
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF1E293B)),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  Text(
-                    '₹${b.amount.toStringAsFixed(0)}',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppTheme.primary),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
