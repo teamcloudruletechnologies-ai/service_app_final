@@ -548,13 +548,6 @@ export default function Services() {
                           onChange={(e) => handleSubServiceChange(sub.id, 'name', e.target.value)}
                           style={{ flex: 1, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
                         />
-                        <input
-                          type="number"
-                          placeholder="Time (mins)"
-                          value={sub.estimated_time}
-                          onChange={(e) => handleSubServiceChange(sub.id, 'estimated_time', e.target.value)}
-                          style={{ width: 95, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
-                        />
                         <button
                           type="button"
                           onClick={() => handleRemoveSubService(sub.id)}
