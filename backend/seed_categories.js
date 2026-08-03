@@ -10,24 +10,29 @@ const pool = new Pool({
 
 const categories = [
   {
-    name: 'Plumbing',
-    description: 'Leak repairs, tap installations, pipe repairs, and other plumbing services',
-    icon_url: 'https://img.icons8.com/color/96/plumbing.png'
+    name: 'Home Maintenance',
+    description: 'Electrical, Plumbing, Carpentry, Painting and general home repairs',
+    icon_url: 'https://img.icons8.com/color/96/home.png'
+  },
+  {
+    name: 'Appliance Services',
+    description: 'AC, Washing machine, Refrigerator and TV repair & installation',
+    icon_url: 'https://img.icons8.com/color/96/air-conditioner.png'
+  },
+  {
+    name: 'Beauty & Wellness',
+    description: 'Salon at home, spa, massage, and grooming services for men and women',
+    icon_url: 'https://img.icons8.com/color/96/spa-care.png'
   },
   {
     name: 'Cleaning',
-    description: 'Deep home cleaning, bathroom cleaning, kitchen cleaning, and disinfection services',
+    description: 'Full home deep clean, kitchen, bathroom, sofa and carpet cleaning',
     icon_url: 'https://img.icons8.com/color/96/cleaning-service.png'
   },
   {
-    name: 'Electrical',
-    description: 'Fan installation, switchboard repair, wiring, and general electrical works',
-    icon_url: 'https://img.icons8.com/color/96/electricity.png'
-  },
-  {
-    name: 'AC Service',
-    description: 'AC installation, wet cleaning, gas charging, and repair services',
-    icon_url: 'https://img.icons8.com/color/96/air-conditioner.png'
+    name: 'Security & CCTV',
+    description: 'CCTV camera installation, smart locks, biometric security systems',
+    icon_url: 'https://img.icons8.com/color/96/security-camera.png'
   }
 ];
 

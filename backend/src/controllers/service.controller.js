@@ -8,6 +8,26 @@ const { success, error } = require("../utils/response");
 // CATEGORIES CONTROLLERS
 // ==========================================
 
+function formatGoogleDriveUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  const trimmed = url.trim();
+  if (!trimmed.includes("drive.google.com") && !trimmed.includes("googleusercontent.com")) return trimmed;
+
+  const matchD = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (matchD && matchD[1]) {
+    return `https://drive.google.com/thumbnail?id=${matchD[1]}&sz=w1000`;
+  }
+  const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (matchId && matchId[1]) {
+    return `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w1000`;
+  }
+  const matchLh3 = trimmed.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+  if (matchLh3 && matchLh3[1]) {
+    return `https://drive.google.com/thumbnail?id=${matchLh3[1]}&sz=w1000`;
+  }
+  return trimmed;
+}
+
 async function listCategories(req, res, next) {
   try {
     const paging = getPagination(req.query);
@@ -28,8 +48,8 @@ async function createCategory(req, res, next) {
     const existing = await Category.findByName(req.body.name);
     if (existing) return error(res, "Category with this name already exists", 409);
 
-    // Save icon file if uploaded
-    let icon_url = null;
+    // Save icon file if uploaded or format Google Drive URL
+    let icon_url = req.body.icon_url ? formatGoogleDriveUrl(req.body.icon_url) : null;
     if (req.file) {
       icon_url = await saveUpload(req.file, "categories");
     }
@@ -61,6 +81,8 @@ async function updateCategory(req, res, next) {
     const updateData = { ...req.body };
     if (req.file) {
       updateData.icon_url = await saveUpload(req.file, "categories");
+    } else if (updateData.icon_url) {
+      updateData.icon_url = formatGoogleDriveUrl(updateData.icon_url);
     }
 
     const category = await Category.update(categoryId, updateData);

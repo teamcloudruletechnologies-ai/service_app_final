@@ -13,6 +13,7 @@ import Support from './pages/Support';
 import Notifications from './pages/Notifications';
 import Roles from './pages/Roles';
 import Banners from './pages/Banners';
+import Categories from './pages/Categories';
 import Payments from './pages/Payments';
 import Reviews from './pages/Reviews';
 import Settings from './pages/Settings';
@@ -209,6 +210,8 @@ export default function App() {
         return <Users />;
       case 'services':
         return <Services />;
+      case 'categories':
+        return <Categories />;
       case 'banners':
         return <Banners />;
       case 'kyc':

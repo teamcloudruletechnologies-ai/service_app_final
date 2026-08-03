@@ -62,9 +62,10 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
     return Column(
       children: [
         SizedBox(
-          height: 155,
+          height: 160,
           child: PageView.builder(
             controller: _pageController,
+            scrollDirection: Axis.vertical,
             onPageChanged: (index) {
               setState(() {
                 _currentIndex = index % itemCount;
@@ -78,32 +79,43 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
               return AnimatedBuilder(
                 animation: _pageController,
                 builder: (context, child) {
-                  double value = 1.0;
+                  double pageOffset = 0.0;
                   if (_pageController.position.haveDimensions) {
-                    value = (_pageController.page! - index);
-                    value = (1 - (value.abs() * 0.06)).clamp(0.94, 1.0);
+                    pageOffset = (_pageController.page! - index);
                   }
-                  return Transform.scale(
-                    scale: value,
-                    child: child,
+
+                  // 3D vertical slide-up & backside stack effect
+                  final double scale = (1 - (pageOffset.abs() * 0.08)).clamp(0.88, 1.0);
+                  final double opacity = (1 - (pageOffset.abs() * 0.4)).clamp(0.2, 1.0);
+                  final double translateY = pageOffset * -15;
+
+                  return Transform.translate(
+                    offset: Offset(0, translateY),
+                    child: Transform.scale(
+                      scale: scale,
+                      child: Opacity(
+                        opacity: opacity,
+                        child: child,
+                      ),
+                    ),
                   );
                 },
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: Container(
                     decoration: BoxDecoration(
                       color: const Color(0xFF1A1A1A),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.08),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          color: Colors.black.withValues(alpha: 0.12),
+                          blurRadius: 14,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                       child: imgUrl.isNotEmpty
                           ? Image.network(
                               imgUrl,
@@ -132,18 +144,18 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
             },
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 10),
 
-        // ─── ANIMATED DOT INDICATORS ───
+        // ─── ANIMATED VERTICAL / HORIZONTAL INDICATOR DOTS ───
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(itemCount, (idx) {
             final isSelected = idx == _currentIndex;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 300),
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              height: 6,
-              width: isSelected ? 24 : 6,
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              height: isSelected ? 16 : 6,
+              width: 6,
               decoration: BoxDecoration(
                 color: isSelected ? AppTheme.primary : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(10),
