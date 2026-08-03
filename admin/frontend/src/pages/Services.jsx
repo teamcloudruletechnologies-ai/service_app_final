@@ -512,7 +512,7 @@ export default function Services() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, border: '1px solid #E5E7EB', borderRadius: 10, padding: 12, backgroundColor: '#F9FAFB' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-                    Sub-Services / Packages ({formData.sub_services.length})
+                    Sub-Services
                   </label>
                   <button
                     type="button"
