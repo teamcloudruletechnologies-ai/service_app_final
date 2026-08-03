@@ -11,8 +11,22 @@ class ApiConfig {
 
   static String resolveImageUrl(String? path) {
     if (path == null || path.trim().isEmpty) return '';
-    if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path;
-    final cleanPath = path.startsWith('/') ? path : '/$path';
+    String trimmed = path.trim();
+
+    // Auto-convert Google Drive URLs to direct image URLs
+    if (trimmed.contains('drive.google.com')) {
+      final matchD = RegExp(r'/file/d/([a-zA-Z0-9_-]+)').firstMatch(trimmed);
+      if (matchD != null && matchD.groupCount >= 1) {
+        return 'https://lh3.googleusercontent.com/d/${matchD.group(1)}';
+      }
+      final matchId = RegExp(r'[?&]id=([a-zA-Z0-9_-]+)').firstMatch(trimmed);
+      if (matchId != null && matchId.groupCount >= 1) {
+        return 'https://lh3.googleusercontent.com/d/${matchId.group(1)}';
+      }
+    }
+
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) return trimmed;
+    final cleanPath = trimmed.startsWith('/') ? trimmed : '/$trimmed';
     return '$uploadsBaseUrl$cleanPath';
   }
 

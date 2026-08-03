@@ -1,10 +1,27 @@
 import { useState, useEffect } from 'react';
 import { bannersAPI } from '../api';
 
+const formatGoogleDriveUrl = (url) => {
+  if (!url || typeof url !== 'string') return url;
+  const trimmed = url.trim();
+  if (!trimmed.includes('drive.google.com')) return trimmed;
+
+  const matchD = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (matchD && matchD[1]) {
+    return `https://lh3.googleusercontent.com/d/${matchD[1]}`;
+  }
+  const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (matchId && matchId[1]) {
+    return `https://lh3.googleusercontent.com/d/${matchId[1]}`;
+  }
+  return trimmed;
+};
+
 const resolveImageUrl = (url) => {
   if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
-  return `http://localhost:5000${url}`;
+  const formatted = formatGoogleDriveUrl(url);
+  if (formatted.startsWith('http://') || formatted.startsWith('https://') || formatted.startsWith('data:')) return formatted;
+  return `http://localhost:5000${formatted}`;
 };
 
 function StatCard({ label, value, icon, bg, fg, loading }) {
@@ -62,6 +79,7 @@ export default function Banners() {
   // Form states
   const [title, setTitle] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
+  const [imageUrlInput, setImageUrlInput] = useState('');
   const [status, setStatus] = useState('active');
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -87,6 +105,7 @@ export default function Banners() {
     setEditingBanner(null);
     setTitle('');
     setLinkUrl('');
+    setImageUrlInput('');
     setStatus('active');
     setSelectedFile(null);
     setPreviewUrl('');
@@ -97,6 +116,7 @@ export default function Banners() {
     setEditingBanner(banner);
     setTitle(banner.title || '');
     setLinkUrl(banner.link_url || '');
+    setImageUrlInput(banner.image_url || '');
     setStatus(banner.status || 'active');
     setSelectedFile(null);
     setPreviewUrl(resolveImageUrl(banner.image_url));
@@ -115,10 +135,19 @@ export default function Banners() {
     }
   };
 
+  const handleImageUrlChange = (e) => {
+    const rawVal = e.target.value;
+    const formatted = formatGoogleDriveUrl(rawVal);
+    setImageUrlInput(rawVal);
+    if (formatted) {
+      setPreviewUrl(formatted);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!editingBanner && !selectedFile) {
-      return alert('Please select a banner image to upload.');
+    if (!editingBanner && !selectedFile && !imageUrlInput.trim()) {
+      return alert('Please upload a banner image file or provide a Google Drive / Image URL.');
     }
 
     setSubmitting(true);
@@ -128,6 +157,8 @@ export default function Banners() {
     formData.append('status', status);
     if (selectedFile) {
       formData.append('image', selectedFile);
+    } else if (imageUrlInput.trim()) {
+      formData.append('image_url', formatGoogleDriveUrl(imageUrlInput.trim()));
     }
 
     const savePromise = editingBanner
@@ -433,10 +464,27 @@ export default function Banners() {
                   </select>
                 </div>
 
+                {/* Image Input Options */}
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
+                    Google Drive Link or Image URL
+                  </label>
+                  <input
+                    type="text"
+                    value={imageUrlInput}
+                    onChange={handleImageUrlChange}
+                    placeholder="Paste Google Drive link or image URL (e.g. https://drive.google.com/file/d/...)"
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: 13, boxSizing: 'border-box', marginBottom: 6 }}
+                  />
+                  <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 12 }}>
+                    💡 <b>Google Drive support:</b> Paste any Google Drive share link and it will automatically be converted to a direct image URL!
+                  </div>
+                </div>
+
                 {/* Image Upload */}
                 <div>
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 6 }}>
-                    Banner Image
+                    OR Upload Local File
                   </label>
                   <div style={{
                     border: '2px dashed #D1D5DB', borderRadius: 12, padding: '16px',

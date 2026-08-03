@@ -3,6 +3,22 @@ const { saveUpload } = require("../utils/fileUpload");
 const { getPagination } = require("../utils/pagination");
 const { success, error } = require("../utils/response");
 
+function formatGoogleDriveUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  const trimmed = url.trim();
+  if (!trimmed.includes("drive.google.com")) return trimmed;
+
+  const matchD = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (matchD && matchD[1]) {
+    return `https://lh3.googleusercontent.com/d/${matchD[1]}`;
+  }
+  const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (matchId && matchId[1]) {
+    return `https://lh3.googleusercontent.com/d/${matchId[1]}`;
+  }
+  return trimmed;
+}
+
 async function listBanners(req, res, next) {
   try {
     const paging = getPagination(req.query);
@@ -19,13 +35,18 @@ async function listBanners(req, res, next) {
 
 async function createBanner(req, res, next) {
   try {
-    if (!req.file) {
-      return error(res, "Banner image is required", 400);
+    let image_url = req.body.image_url;
+
+    if (req.file) {
+      const base64Data = req.file.buffer.toString("base64");
+      image_url = `data:${req.file.mimetype};base64,${base64Data}`;
+    } else if (image_url) {
+      image_url = formatGoogleDriveUrl(image_url);
     }
 
-    // Convert file buffer to Base64 data URL
-    const base64Data = req.file.buffer.toString("base64");
-    const image_url = `data:${req.file.mimetype};base64,${base64Data}`;
+    if (!image_url) {
+      return error(res, "Banner image file or image URL is required", 400);
+    }
 
     const banner = await Banner.create({
       title: req.body.title,
@@ -52,6 +73,8 @@ async function updateBanner(req, res, next) {
     if (req.file) {
       const base64Data = req.file.buffer.toString("base64");
       updateData.image_url = `data:${req.file.mimetype};base64,${base64Data}`;
+    } else if (updateData.image_url) {
+      updateData.image_url = formatGoogleDriveUrl(updateData.image_url);
     }
 
     const banner = await Banner.update(bannerId, updateData);
