@@ -10,6 +10,11 @@
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="true">
+        <!-- Google Maps API Key Configuration -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${GOOGLE_MAPS_API_KEY}" />
+
         <!-- FCM High Importance Default Notification Channel for System Header Banner -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
