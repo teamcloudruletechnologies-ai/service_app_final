@@ -302,60 +302,45 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         )
                       : (catalog.categories.isEmpty
-                          ? GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: _gridCategories.length,
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
-                                mainAxisSpacing: 16,
-                                crossAxisSpacing: 16,
-                                childAspectRatio: 0.85,
-                              ),
-                              itemBuilder: (context, index) {
-                                final item = _gridCategories[index];
-                                return InkWell(
-                                  onTap: () {
-                                    final matchedCat = catalog.categories.firstWhere(
-                                      (c) => c.name.toLowerCase().contains(item.$1.toLowerCase().substring(0, 3)),
-                                      orElse: () => catalog.categories.isNotEmpty ? catalog.categories[0] : ServiceCategory(id: 1, name: item.$1, status: 'active'),
-                                    );
-                                    catalog.selectCategory(matchedCat.id);
-                                  },
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        width: 56,
-                                        height: 56,
-                                        decoration: BoxDecoration(
-                                          color: item.$4,
-                                          borderRadius: BorderRadius.circular(16),
-                                          border: Border.all(color: item.$4.withValues(alpha: 0.8)),
-                                        ),
-                                        child: item.$2.isNotEmpty
-                                            ? ClipRRect(
-                                                borderRadius: BorderRadius.circular(16),
-                                                child: CachedNetworkImage(
-                                                  imageUrl: item.$2,
-                                                  fit: BoxFit.cover,
-                                                  errorWidget: (_, __, ___) => Icon(item.$3, color: const Color(0xFF1A1A1A), size: 26),
-                                                ),
-                                              )
-                                            : Icon(item.$3, color: const Color(0xFF1A1A1A), size: 26),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        item.$1,
-                                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A)),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                          ? Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: const Color(0xFFE2E8F0)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
                                   ),
-                                );
-                              },
+                                ],
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primary.withValues(alpha: 0.1),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.rocket_launch_rounded, color: AppTheme.primary, size: 28),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    'Categories Coming Soon 🚀',
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF1E293B)),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    'Service categories configured in Admin Panel will appear here.',
+                                    style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
                             )
                           : GridView.builder(
                               shrinkWrap: true,
