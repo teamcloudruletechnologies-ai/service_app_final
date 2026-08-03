@@ -6,15 +6,19 @@ const { success, error } = require("../utils/response");
 function formatGoogleDriveUrl(url) {
   if (!url || typeof url !== "string") return url;
   const trimmed = url.trim();
-  if (!trimmed.includes("drive.google.com")) return trimmed;
+  if (!trimmed.includes("drive.google.com") && !trimmed.includes("googleusercontent.com")) return trimmed;
 
   const matchD = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (matchD && matchD[1]) {
-    return `https://lh3.googleusercontent.com/d/${matchD[1]}`;
+    return `https://drive.google.com/thumbnail?id=${matchD[1]}&sz=w1000`;
   }
   const matchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (matchId && matchId[1]) {
-    return `https://lh3.googleusercontent.com/d/${matchId[1]}`;
+    return `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w1000`;
+  }
+  const matchLh3 = trimmed.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+  if (matchLh3 && matchLh3[1]) {
+    return `https://drive.google.com/thumbnail?id=${matchLh3[1]}&sz=w1000`;
   }
   return trimmed;
 }
