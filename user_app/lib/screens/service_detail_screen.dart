@@ -40,7 +40,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       'Post-service Cleaning & Inspection',
     ];
 
-    final effectivePrice = _selectedSubService != null ? _selectedSubService!.price : widget.service.price;
+    final effectivePrice = (_selectedSubService != null && _selectedSubService!.price > 0)
+        ? _selectedSubService!.price
+        : widget.service.price;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -231,7 +233,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                           ),
                                         ),
                                         Text(
-                                          '₹${sub.price.toStringAsFixed(0)}',
+                                          '₹${((sub.price > 0 ? sub.price : widget.service.price)).toStringAsFixed(0)}',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w900,
@@ -355,7 +357,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                 description: widget.service.description,
                                 imageUrl: widget.service.imageUrl,
                                 categoryName: widget.service.categoryName,
-                                price: _selectedSubService!.price,
+                                price: (_selectedSubService!.price > 0 ? _selectedSubService!.price : widget.service.price),
                                 status: widget.service.status,
                                 avgRating: widget.service.avgRating,
                                 totalReviews: widget.service.totalReviews,
