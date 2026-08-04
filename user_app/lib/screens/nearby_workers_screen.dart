@@ -271,13 +271,13 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ─── CONFIRMED LOCATION BAR (Zomato style) ───
+          // ─── CONFIRMED LOCATION BAR ───
           Container(
             color: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                const Icon(Icons.location_on, color: _red, size: 20),
+                const Icon(Icons.location_on_rounded, color: Color(0xFF0F172A), size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
@@ -287,8 +287,8 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
                         'SERVICE LOCATION',
                         style: TextStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF94A3B8),
                           letterSpacing: 1.0,
                         ),
                       ),
@@ -299,8 +299,8 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF111827),
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A),
                         ),
                       ),
                     ],
@@ -312,16 +312,16 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
 
           // ─── SERVICE SUMMARY ───
           Container(
-            color: const Color(0xFFFEF2F2),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            color: const Color(0xFFF1F5F9),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
             child: Row(
               children: [
-                const Icon(Icons.home_repair_service, color: _red, size: 18),
+                const Icon(Icons.home_repair_service_rounded, color: Color(0xFF0F172A), size: 18),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     widget.service.name,
-                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: Color(0xFF0F172A)),
                   ),
                 ),
               ],
@@ -333,12 +333,12 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
           // ─── SORT/FILTER BAR ───
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                Text(
+                const Text(
                   'Sort by:',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey.shade500),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF64748B)),
                 ),
                 const SizedBox(width: 8),
                 _SortFilterChip(
@@ -379,31 +379,31 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
 
           // ─── WORKERS SECTION HEADER ───
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
             child: Row(
               children: [
-                Text(
+                const Text(
                   'AVAILABLE EXPERTS NEAR YOU',
                   style: TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF94A3B8),
                     letterSpacing: 1.1,
                   ),
                 ),
                 const SizedBox(width: 8),
                 if (!_loading)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Colors.green.shade50,
+                      color: const Color(0xFFECFDF5),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       '${_workers.length} found',
-                      style: TextStyle(
-                        color: Colors.green.shade700,
-                        fontWeight: FontWeight.bold,
+                      style: const TextStyle(
+                        color: Color(0xFF059669),
+                        fontWeight: FontWeight.w800,
                         fontSize: 11,
                       ),
                     ),
@@ -415,7 +415,7 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
           // ─── WORKER LIST ───
           Expanded(
             child: _loading
-                ? const Center(child: CircularProgressIndicator(color: _red))
+                ? const Center(child: CircularProgressIndicator(color: Color(0xFF0F172A)))
                     : _workers.isEmpty
                         ? _buildEmptyState()
                         : ListView.builder(
@@ -430,18 +430,20 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-          child: OutlinedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(50),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              side: const BorderSide(color: _red, width: 1.5),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF0F172A),
+              foregroundColor: Colors.white,
+              minimumSize: const Size.fromHeight(52),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 0,
             ),
             onPressed: _bookingWorkerId != null ? null : () => _showScheduleAndBook(null),
             child: _bookingWorkerId == -1
-                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: _red, strokeWidth: 2.5))
+                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
                 : const Text(
                     'Book Any Available Expert',
-                    style: TextStyle(color: _red, fontWeight: FontWeight.bold, fontSize: 15),
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
                   ),
           ),
         ),
@@ -456,28 +458,35 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.2),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 12, offset: const Offset(0, 4)),
+          BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 4)),
         ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            // Avatar with initials
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: _red.withValues(alpha: 0.08),
-              backgroundImage: (w.photoUrl != null && w.photoUrl!.isNotEmpty)
-                  ? NetworkImage(w.photoUrl!)
-                  : null,
-              child: (w.photoUrl == null || w.photoUrl!.isEmpty)
-                  ? Text(
-                      (w.name.isNotEmpty ? w.name[0] : 'W').toUpperCase(),
-                      style: const TextStyle(color: _red, fontWeight: FontWeight.bold, fontSize: 20),
+            // Avatar with initials (Dark Slate Circle)
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+              ),
+              alignment: Alignment.center,
+              child: (w.photoUrl != null && w.photoUrl!.isNotEmpty)
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(26),
+                      child: Image.network(w.photoUrl!, width: 52, height: 52, fit: BoxFit.cover),
                     )
-                  : null,
+                  : Text(
+                      (w.name.isNotEmpty ? w.name[0] : 'W').toUpperCase(),
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18),
+                    ),
             ),
             const SizedBox(width: 14),
 
@@ -491,61 +500,61 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
                       Expanded(
                         child: Text(
                           w.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF111827)),
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: Color(0xFF0F172A)),
                         ),
                       ),
                       // Available badge
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade50,
+                          color: const Color(0xFFECFDF5),
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Available',
-                          style: TextStyle(color: Colors.green.shade700, fontSize: 9, fontWeight: FontWeight.bold),
+                          style: TextStyle(color: Color(0xFF059669), fontSize: 10, fontWeight: FontWeight.w800),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 5),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 14),
+                      const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 16),
                       const SizedBox(width: 3),
                       Text(
                         w.rating.toStringAsFixed(1),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFF0F172A)),
                       ),
                       const SizedBox(width: 10),
-                      Icon(Icons.work_outline, color: Colors.grey.shade400, size: 13),
+                      Icon(Icons.work_outline_rounded, color: Colors.grey.shade400, size: 14),
                       const SizedBox(width: 3),
                       Text(
                         '${w.experienceYears} yrs',
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.w500),
                       ),
                       if (w.distance != null) ...[
                         const SizedBox(width: 10),
-                        Icon(Icons.location_on, color: Colors.grey.shade400, size: 13),
+                        Icon(Icons.location_on_outlined, color: Colors.grey.shade400, size: 14),
                         const SizedBox(width: 2),
                         Text(
                           '${w.distance!.toStringAsFixed(1)} km',
-                          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                          style: const TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ],
                   ),
                   if (w.serviceType != null) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 6),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: _red.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(4),
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         w.serviceType!,
-                        style: TextStyle(color: _red, fontSize: 10, fontWeight: FontWeight.w600),
+                        style: const TextStyle(color: Color(0xFF475569), fontSize: 11, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -556,19 +565,20 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
 
             // Book button
             SizedBox(
-              width: 68,
+              width: 72,
+              height: 38,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _red,
+                  backgroundColor: const Color(0xFF0F172A),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
                 onPressed: (_bookingWorkerId != null) ? null : () => _showScheduleAndBook(w),
                 child: isBookingThis
                     ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Book', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    : const Text('Book', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
               ),
             ),
           ],
@@ -632,7 +642,7 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
   int _selectedSlotIndex = 0;
   final _notesCtrl = TextEditingController();
 
-  static const _red = Color(0xFF4A5343);
+  static const _themeDark = Color(0xFF0F172A);
 
   // Time slot configurations
   final List<String> _timeSlots = [
@@ -691,7 +701,7 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
 
               const Text(
                 'Select Booking Schedule',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF111827)),
+                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF0F172A), letterSpacing: -0.3),
               ),
               const SizedBox(height: 16),
 
@@ -702,8 +712,10 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                     child: ChoiceChip(
                       label: const Text('⚡ Instant Now', style: TextStyle(fontWeight: FontWeight.bold)),
                       selected: !_isScheduled,
-                      selectedColor: _red.withValues(alpha: 0.1),
-                      labelStyle: TextStyle(color: !_isScheduled ? _red : Colors.grey.shade700),
+                      selectedColor: _themeDark,
+                      backgroundColor: const Color(0xFFF8FAFC),
+                      side: BorderSide(color: !_isScheduled ? _themeDark : const Color(0xFFE2E8F0)),
+                      labelStyle: TextStyle(color: !_isScheduled ? Colors.white : const Color(0xFF475569)),
                       onSelected: (val) => setState(() => _isScheduled = false),
                     ),
                   ),
@@ -712,8 +724,10 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                     child: ChoiceChip(
                       label: const Text('📅 Schedule Later', style: TextStyle(fontWeight: FontWeight.bold)),
                       selected: _isScheduled,
-                      selectedColor: _red.withValues(alpha: 0.1),
-                      labelStyle: TextStyle(color: _isScheduled ? _red : Colors.grey.shade700),
+                      selectedColor: _themeDark,
+                      backgroundColor: const Color(0xFFF8FAFC),
+                      side: BorderSide(color: _isScheduled ? _themeDark : const Color(0xFFE2E8F0)),
+                      labelStyle: TextStyle(color: _isScheduled ? Colors.white : const Color(0xFF475569)),
                       onSelected: (val) => setState(() => _isScheduled = true),
                     ),
                   ),
@@ -724,7 +738,7 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                 const SizedBox(height: 20),
                 const Text(
                   'Select Date',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF374151)),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
                 ),
                 const SizedBox(height: 10),
                 SizedBox(
@@ -742,9 +756,9 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                           width: 80,
                           margin: const EdgeInsets.only(right: 10),
                           decoration: BoxDecoration(
-                            color: isSelected ? _red : Colors.white,
-                            border: Border.all(color: isSelected ? _red : Colors.grey.shade200),
-                            borderRadius: BorderRadius.circular(12),
+                            color: isSelected ? _themeDark : Colors.white,
+                            border: Border.all(color: isSelected ? _themeDark : const Color(0xFFE2E8F0)),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -754,7 +768,7 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
-                                  color: isSelected ? Colors.white : Colors.grey.shade500,
+                                  color: isSelected ? Colors.white70 : const Color(0xFF64748B),
                                 ),
                               ),
                               Text(
@@ -762,7 +776,7 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 13,
-                                  color: isSelected ? Colors.white : Color(0xFF111827),
+                                  color: isSelected ? Colors.white : const Color(0xFF0F172A),
                                 ),
                               ),
                             ],
@@ -776,7 +790,7 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                 const SizedBox(height: 20),
                 const Text(
                   'Select Time Slot',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF374151)),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
                 ),
                 const SizedBox(height: 10),
                 Wrap(
@@ -787,10 +801,12 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                     return ChoiceChip(
                       label: Text(_timeSlots[index]),
                       selected: isSelected,
-                      selectedColor: _red.withValues(alpha: 0.1),
+                      selectedColor: _themeDark,
+                      backgroundColor: const Color(0xFFF8FAFC),
+                      side: BorderSide(color: isSelected ? _themeDark : const Color(0xFFE2E8F0)),
                       labelStyle: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: isSelected ? _red : Color(0xFF374151),
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? Colors.white : const Color(0xFF374151),
                       ),
                       onSelected: (val) => setState(() => _selectedSlotIndex = index),
                     );
@@ -801,19 +817,19 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
               const SizedBox(height: 20),
               const Text(
                 'Booking Notes (Optional)',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF374151)),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
               ),
               const SizedBox(height: 8),
               TextField(
                 controller: _notesCtrl,
                 decoration: InputDecoration(
                   hintText: 'e.g. Please bring a ladder, contact gatekeeper...',
-                  hintStyle: const TextStyle(fontSize: 13),
+                  hintStyle: const TextStyle(fontSize: 13, color: Color(0xFF94A3B8)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: _red),
+                    borderSide: const BorderSide(color: _themeDark, width: 1.5),
                   ),
                 ),
                 maxLines: 2,
@@ -822,10 +838,10 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
               const SizedBox(height: 24),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _red,
+                  backgroundColor: _themeDark,
                   foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
                 onPressed: () {
@@ -837,7 +853,7 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                 },
                 child: const Text(
                   'Confirm & Proceed',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                 ),
               ),
             ],
@@ -860,21 +876,21 @@ class _SortFilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFFE23744) : Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          color: active ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: active ? const Color(0xFFE23744) : Colors.grey.shade300,
-            width: 1,
+            color: active ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
+            width: 1.2,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: active ? Colors.white : const Color(0xFF1A1A1A),
+            color: active ? Colors.white : const Color(0xFF475569),
             fontSize: 12,
-            fontWeight: FontWeight.w600,
+            fontWeight: active ? FontWeight.w800 : FontWeight.w600,
           ),
         ),
       ),

@@ -5,11 +5,9 @@ import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
 import '../theme/app_theme.dart';
 import 'bookings_screen.dart';
-import 'help_centre_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
-import 'notification_screen.dart';
-import 'profile_screen.dart';
+import 'menu_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key, this.initialTab = 0});
@@ -53,12 +51,12 @@ class _MainShellState extends State<MainShell> {
   static const List<Widget> _pages = [
     HomeScreen(),
     BookingsScreen(),
-    ProfileScreen(),
+    MenuScreen(),
   ];
 
   Widget _buildNavItem(int index, IconData outlineIcon, IconData solidIcon, String label) {
     final isSelected = _index == index;
-    final activeColor = AppTheme.primary;
+    final activeColor = const Color(0xFF0F172A);
     final inactiveColor = const Color(0xFF94A3B8);
 
     return GestureDetector(
@@ -120,7 +118,7 @@ class _MainShellState extends State<MainShell> {
           children: [
             _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, 'Home'),
             _buildNavItem(1, Icons.calendar_today_outlined, Icons.calendar_month_rounded, 'Bookings'),
-            _buildNavItem(2, Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+            _buildNavItem(2, Icons.grid_view_outlined, Icons.grid_view_rounded, 'Menu'),
           ],
         ),
       ),

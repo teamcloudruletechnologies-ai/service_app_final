@@ -192,7 +192,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const CircularProgressIndicator(color: AppTheme.primary),
+                  const CircularProgressIndicator(color: Color(0xFF0F172A)),
                   const SizedBox(height: 16),
                   Text(
                     'Processing secure payment...',

@@ -13,6 +13,7 @@ import '../widgets/auto_slider_banner_widget.dart';
 import 'bookings_screen.dart';
 import 'location_picker_screen.dart';
 import 'notification_screen.dart';
+import 'profile_screen.dart';
 import 'service_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -140,30 +141,72 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                      const SizedBox(width: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Notification Icon Button
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: IconButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const NotificationScreen()),
-                            );
-                          },
-                          icon: const Icon(Icons.notifications_none_rounded, color: Color(0xFF1E293B), size: 22),
-                          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                          padding: EdgeInsets.zero,
-                        ),
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                                );
+                              },
+                              icon: const Icon(Icons.notifications_none_rounded, color: Color(0xFF1E293B), size: 22),
+                              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                              padding: EdgeInsets.zero,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
+                          // Profile Initial Avatar Button (Opened from Top Header)
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(22),
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E293B),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                (user?.name.trim().isNotEmpty == true) ? user!.name.trim()[0].toUpperCase() : 'U',
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -298,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? const Padding(
                           padding: EdgeInsets.symmetric(vertical: 20),
                           child: Center(
-                            child: CircularProgressIndicator(color: AppTheme.primary, strokeWidth: 2),
+                            child: CircularProgressIndicator(color: Color(0xFF0F172A), strokeWidth: 2),
                           ),
                         )
                       : (catalog.categories.isEmpty
@@ -442,7 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: const Color(0xFFE2E8F0)),
                           ),
-                          child: const Center(child: CircularProgressIndicator(color: AppTheme.primary, strokeWidth: 2)),
+                          child: const Center(child: CircularProgressIndicator(color: Color(0xFF0F172A), strokeWidth: 2)),
                         )
                       : (catalog.services.isEmpty
                           ? Container(
