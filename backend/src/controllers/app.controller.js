@@ -153,7 +153,7 @@ async function getMyBooking(req, res, next) {
   try {
     const booking = await Booking.findById(req.params.id);
     if (!booking) return error(res, "Booking not found", 404);
-    if (req.auth.role === "worker" && booking.worker_id !== req.auth.id) {
+    if (req.auth.role === "worker" && booking.worker_id && booking.worker_id !== req.auth.id) {
       return error(res, "You do not have permission to access this booking", 403);
     }
     if (req.auth.role === "user" && booking.user_id !== req.auth.id) {
