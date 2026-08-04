@@ -10,7 +10,7 @@ class ApiConfig {
       const String.fromEnvironment('UPLOADS_URL', defaultValue: _defaultRenderUrl);
 
   static String get googleMapsApiKey => 
-      const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: 'YOUR_GOOGLE_MAPS_API_KEY');
+      const String.fromEnvironment('GOOGLE_MAPS_API_KEY', defaultValue: 'AIzaSyA_jA1prYlOoL9y2O2cbBmMDu1C5PjncRg');
 
   static String resolveImageUrl(String? path) {
     if (path == null || path.trim().isEmpty) return '';

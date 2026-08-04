@@ -274,6 +274,20 @@ class MenuScreen extends StatelessWidget {
                   const Divider(height: 1, indent: 76, endIndent: 16, color: Color(0xFFF1F5F9)),
                   _buildMenuItemTile(
                     context: context,
+                    icon: Icons.map_rounded,
+                    iconColor: const Color(0xFF2563EB),
+                    iconBg: const Color(0xFFDBEAFE),
+                    title: 'Open Service Map',
+                    subtitle: 'Explore nearby workers & set location pin',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+                      );
+                    },
+                  ),
+                  const Divider(height: 1, indent: 76, endIndent: 16, color: Color(0xFFF1F5F9)),
+                  _buildMenuItemTile(
+                    context: context,
                     icon: Icons.notifications_rounded,
                     iconColor: const Color(0xFF059669),
                     iconBg: const Color(0xFFD1FAE5),

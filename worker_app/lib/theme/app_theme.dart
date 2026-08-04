@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // ─── Brand Palette ─────────────────────────────────────────────
-  static const primary   = Color(0xFF006837); // Rich Emerald Green
+  static const primary   = Color(0xFF0F172A); // Sleek Matte Slate
   static const sandal    = Color(0xFFE3D0BA); // Warm Sandal
-  static const olive     = Color(0xFF4A5343); // Muted Olive Green
+  static const olive     = Color(0xFF4A5343); // Muted Olive
+  static const amber     = Color(0xFFD97706); // Warm Amber Gold
   static const milkWhite = Color(0xFFF5F5F3); // Crisp Milk White
   static const matteBlack = Color(0xFF1A1A1A); // Pure Matte Black
   static const zomatoRed = Color(0xFFE23744); // Zomato Red (pending/new)
+  static const textPrimary = Color(0xFF1A1A1A); // Dark Matte Text
+  static const textSecondary = Color(0xFF718096); // Slate Muted Text
 
   // Aliases for legacy usage
-  static const primaryDark = Color(0xFF004D28);
-  static const accent      = Color(0xFFE3D0BA); // Warm Sandal
-  static const secondary   = Color(0xFF4A5343); // Olive
+  static const primaryDark = Color(0xFF020617);
+  static const accent      = Color(0xFFD97706); // Warm Amber Gold
+  static const secondary   = Color(0xFF0F172A); // Slate
   static const surface     = Color(0xFFF5F5F3); // Milk White
   static const card        = Colors.white;
 
@@ -22,7 +25,7 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: primary,
         primary:   primary,
-        secondary: olive,
+        secondary: amber,
         tertiary:  sandal,
         surface:   surface,
         onSurface: primary,

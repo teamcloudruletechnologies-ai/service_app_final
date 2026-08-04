@@ -308,15 +308,15 @@ class _WorkerCreateInvoiceScreenState extends State<WorkerCreateInvoiceScreen> {
               child: ElevatedButton(
                 onPressed: _submitting ? null : _submitInvoice,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppTheme.olive,
+                  foregroundColor: AppTheme.matteBlack,
                   minimumSize: const Size.fromHeight(52),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 child: _submitting
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator(color: AppTheme.matteBlack)
                     : Text(
-                        'Submit Invoice (₹${_totalAmount.toStringAsFixed(2)}) & Finish',
+                        'Preview Invoice (₹${_totalAmount.toStringAsFixed(2)})',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
               ),

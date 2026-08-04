@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../theme/app_theme.dart';
 import '../providers/language_provider.dart';
 
 class HelpCentreScreen extends StatefulWidget {
@@ -48,92 +47,90 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F3),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Text(
           context.translate('help_centre'),
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: Color(0xFF0F172A), letterSpacing: -0.3),
         ),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        foregroundColor: const Color(0xFF0F172A),
         elevation: 0,
-        surfaceTintColor: Colors.white,
+        scrolledUnderElevation: 0,
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header Search Box
+            // ─── SEARCH BAR ───
             Container(
               color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
-              child: Column(
-                children: [
-                  Container(
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F3),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200, width: 1.2),
-                    ),
-                    child: TextField(
-                      controller: _searchCtrl,
-                      cursorColor: AppTheme.primary,
-                      style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: context.translate('search_hint'),
-                        hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
-                        prefixIcon: const Icon(Icons.search, color: AppTheme.secondary, size: 20),
-                        suffixIcon: _searchQuery.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear, size: 18),
-                                onPressed: () {
-                                  setState(() {
-                                    _searchCtrl.clear();
-                                    _searchQuery = '';
-                                  });
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      ),
-                      onChanged: (val) {
-                        setState(() {
-                          _searchQuery = val;
-                        });
-                      },
-                    ),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
+              child: Container(
+                height: 48,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+                ),
+                child: TextField(
+                  controller: _searchCtrl,
+                  cursorColor: const Color(0xFF0F172A),
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF0F172A)),
+                  decoration: InputDecoration(
+                    hintText: context.translate('search_hint'),
+                    hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                    prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 20),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.close_rounded, size: 18, color: Color(0xFF64748B)),
+                            onPressed: () {
+                              setState(() {
+                                _searchCtrl.clear();
+                                _searchQuery = '';
+                              });
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // FAQs Section Title
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Text(
-                context.translate('faq_title'),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                  color: AppTheme.primary,
+                  onChanged: (val) {
+                    setState(() {
+                      _searchQuery = val;
+                    });
+                  },
                 ),
               ),
             ),
 
-            // FAQs Accordion List
+            const SizedBox(height: 20),
+
+            // ─── FAQS SECTION TITLE ───
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: Text(
+                'FREQUENTLY ASKED QUESTIONS',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 11,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ),
+
+            // ─── FAQS ACCORDION LIST ───
             if (filteredFaqs.isEmpty)
               const Padding(
                 padding: EdgeInsets.all(40.0),
                 child: Center(
                   child: Text(
                     'No matching FAQs found.',
-                    style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.w700),
                   ),
                 ),
               )
@@ -141,16 +138,23 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                 itemCount: filteredFaqs.length,
                 itemBuilder: (context, index) {
                   final faq = filteredFaqs[index];
-                  return Card(
+                  return Container(
                     margin: const EdgeInsets.only(bottom: 12),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: Colors.grey.shade200),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Theme(
                       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -158,22 +162,23 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
                         title: Text(
                           faq['q']!,
                           style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: AppTheme.primary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14.5,
+                            color: Color(0xFF0F172A),
                           ),
                         ),
                         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                         expandedAlignment: Alignment.topLeft,
-                        iconColor: AppTheme.secondary,
-                        collapsedIconColor: Colors.grey,
+                        iconColor: const Color(0xFF0F172A),
+                        collapsedIconColor: const Color(0xFF94A3B8),
                         children: [
                           Text(
                             faq['a']!,
-                            style: TextStyle(
-                              color: Colors.grey.shade700,
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
                               fontSize: 13,
-                              height: 1.4,
+                              height: 1.5,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -185,42 +190,49 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
 
             const SizedBox(height: 24),
 
-            // Contact Support Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            // ─── CONTACT SUPPORT SECTION ───
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               child: Text(
-                context.translate('contact_support'),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                  color: AppTheme.primary,
+                'CONTACT SUPPORT',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 11,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 1.0,
                 ),
               ),
             ),
 
-            // Contact Options Grid
+            // ─── CONTACT OPTIONS GRID ───
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               child: Row(
                 children: [
                   Expanded(
                     child: _ContactCard(
-                      icon: Icons.phone_outlined,
+                      icon: Icons.phone_rounded,
                       title: context.translate('call_us'),
                       value: '+91 98765 43210',
-                      color: Colors.blue.shade50,
-                      iconColor: Colors.blue.shade700,
+                      bgColor: const Color(0xFFEFF6FF),
+                      borderColor: const Color(0xFFDBEAFE),
+                      titleColor: const Color(0xFF1E40AF),
+                      valueColor: const Color(0xFF0F172A),
+                      iconColor: const Color(0xFF2563EB),
                       onTap: () => _copyToClipboard(context, '+919876543210', 'Phone number copied to clipboard!'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _ContactCard(
-                      icon: Icons.email_outlined,
+                      icon: Icons.email_rounded,
                       title: context.translate('email_us'),
                       value: 'support@urbanserve.com',
-                      color: Colors.orange.shade50,
-                      iconColor: Colors.orange.shade700,
+                      bgColor: const Color(0xFFFFF7ED),
+                      borderColor: const Color(0xFFFFEDD5),
+                      titleColor: const Color(0xFF92400E),
+                      valueColor: const Color(0xFF0F172A),
+                      iconColor: const Color(0xFFD97706),
                       onTap: () => _copyToClipboard(context, 'support@urbanserve.com', 'Email copied to clipboard!'),
                     ),
                   ),
@@ -228,16 +240,19 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: _ContactCard(
-                icon: Icons.chat_bubble_outline_rounded,
+                icon: Icons.chat_bubble_rounded,
                 title: context.translate('chat_whatsapp'),
                 value: 'Connect instantly with support team',
-                color: Colors.green.shade50,
-                iconColor: Colors.green.shade700,
+                bgColor: const Color(0xFFECFDF5),
+                borderColor: const Color(0xFFA7F3D0),
+                titleColor: const Color(0xFF065F46),
+                valueColor: const Color(0xFF0F172A),
+                iconColor: const Color(0xFF059669),
                 fullWidth: true,
                 onTap: () => _copyToClipboard(context, 'https://wa.me/919876543210', 'Support link copied to clipboard!'),
               ),
@@ -256,14 +271,14 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 18),
+            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
             const SizedBox(width: 8),
-            Text(message),
+            Text(message, style: const TextStyle(fontWeight: FontWeight.w700)),
           ],
         ),
-        backgroundColor: AppTheme.secondary,
+        backgroundColor: const Color(0xFF0F172A),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }
@@ -273,7 +288,10 @@ class _ContactCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String value;
-  final Color color;
+  final Color bgColor;
+  final Color borderColor;
+  final Color titleColor;
+  final Color valueColor;
   final Color iconColor;
   final bool fullWidth;
   final VoidCallback onTap;
@@ -282,7 +300,10 @@ class _ContactCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.value,
-    required this.color,
+    required this.bgColor,
+    required this.borderColor,
+    required this.titleColor,
+    required this.valueColor,
     required this.iconColor,
     this.fullWidth = false,
     required this.onTap,
@@ -290,14 +311,15 @@ class _ContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: iconColor.withOpacity(0.1)),
+          color: bgColor,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: borderColor, width: 1.2),
         ),
         child: Row(
           children: [
@@ -318,18 +340,18 @@ class _ContactCard extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       fontSize: 13,
-                      color: iconColor.withOpacity(0.8),
+                      color: titleColor,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     value,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 11,
-                      color: AppTheme.primary,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11.5,
+                      color: valueColor,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

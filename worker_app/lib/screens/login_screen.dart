@@ -375,8 +375,8 @@ class _LoginScreenState extends State<LoginScreen> {
           ElevatedButton(
             onPressed: (isLoading || !_isPhoneValid) ? null : _onGetOtpPressed,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _isPhoneValid ? const Color(0xFF111827) : const Color(0xFFF3F4F6),
-              foregroundColor: _isPhoneValid ? Colors.white : const Color(0xFF9CA3AF),
+              backgroundColor: _isPhoneValid ? AppTheme.olive : const Color(0xFFF3F4F6),
+              foregroundColor: _isPhoneValid ? AppTheme.matteBlack : const Color(0xFF9CA3AF),
               disabledBackgroundColor: const Color(0xFFF3F4F6),
               disabledForegroundColor: const Color(0xFF9CA3AF),
               minimumSize: const Size.fromHeight(56),
@@ -391,7 +391,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,
-                color: _isPhoneValid ? Colors.white : const Color(0xFF9CA3AF),
+                color: _isPhoneValid ? AppTheme.matteBlack : const Color(0xFF9CA3AF),
               ),
             ),
           ),
