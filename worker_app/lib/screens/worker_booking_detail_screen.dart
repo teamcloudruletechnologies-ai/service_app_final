@@ -31,24 +31,33 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
     _loadBooking();
   }
 
-  Future<void> _loadBooking() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
+  Future<void> _loadBooking({bool isSilent = false}) async {
+    if (!isSilent) {
+      setState(() {
+        _loading = true;
+        _error = null;
+      });
+    }
 
     try {
       final api = context.read<ApiService>();
       final item = await api.fetchBooking(widget.bookingId);
-      setState(() {
-        _booking = item;
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _booking = item;
+          _loading = false;
+          _error = null;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          if (!isSilent && _booking == null) {
+            _error = e.toString();
+          }
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -118,48 +127,42 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
         },
       );
       if (otpInput == null) return; // Cancelled
+      await Future.delayed(const Duration(milliseconds: 150));
     }
 
-    setState(() {
-      _updating = true;
-    });
-
-    final bookingProv = context.read<BookingProvider>();
-    final ok = await bookingProv.updateBookingStatus(widget.bookingId, status, otp: otpInput);
-
     if (!mounted) return;
-    setState(() {
-      _updating = false;
-    });
+    try {
+      setState(() {
+        _updating = true;
+      });
 
-    if (ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Booking status updated to $status')),
-      );
-      await _loadBooking();
+      final bookingProv = context.read<BookingProvider>();
+      final ok = await bookingProv.updateBookingStatus(widget.bookingId, status, otp: otpInput);
 
-      // Job accepted & started (OTP verified) — take the worker straight to
-      // in-app navigation, instead of waiting for a separate tap.
-      if (status == 'in_progress' && mounted) {
-        final b = _booking;
-        if (b != null && b.address != null && b.address!.isNotEmpty) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => WorkerInAppNavigationScreen(
-                bookingId: b.id,
-                customerName: b.userName ?? 'Customer',
-                customerAddress: b.address!,
-                initialLat: b.latitude,
-                initialLng: b.longitude,
-              ),
-            ),
-          );
-        }
+      if (!mounted) return;
+
+      if (ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Booking status updated to $status')),
+        );
+        await _loadBooking(isSilent: true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(bookingProv.error ?? 'Failed to update status')),
+        );
       }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(bookingProv.error ?? 'Failed to update status')),
-      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _updating = false;
+        });
+      }
     }
   }
 
@@ -190,7 +193,7 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
         elevation: 0,
       ),
       body: _buildBody(),
-      bottomNavigationBar: _booking != null && !_updating
+      bottomNavigationBar: _booking != null
           ? _buildActionButton()
           : null,
     );
@@ -337,11 +340,11 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
                 label: b.address ?? 'No address provided',
                 trailing: null,
               ),
-              if (b.address != null && b.address!.isNotEmpty && b.status == 'in_progress') ...[
+              if (b.address != null && b.address!.isNotEmpty && (b.status == 'confirmed' || b.status == 'in_progress')) ...[
                 const SizedBox(height: 14),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
+                  onPressed: () async {
+                    await Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => WorkerInAppNavigationScreen(
                           bookingId: b.id,
@@ -352,6 +355,9 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
                         ),
                       ),
                     );
+                    if (mounted) {
+                      _loadBooking();
+                    }
                   },
                   icon: const Icon(Icons.map_rounded, color: Colors.white, size: 18),
                   label: const Text('Start In-App Map Navigation 📍', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
@@ -530,7 +536,7 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
       label = 'Start Job';
       color = AppTheme.olive;
       showCancel = true;
-      onPressed = () => _promptOtpAndStart();
+      onPressed = () => _updateStatus('in_progress');
     } else if (status == 'in_progress') {
       label = 'Generate Custom Invoice & Finish';
       color = AppTheme.olive;
@@ -554,17 +560,23 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
 
     final mainButton = Expanded(
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: _updating ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
           foregroundColor: AppTheme.matteBlack,
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
-        child: Text(
-          label,
-          style: const TextStyle(color: AppTheme.matteBlack, fontWeight: FontWeight.bold, fontSize: 16),
-        ),
+        child: _updating
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(strokeWidth: 2.5, color: AppTheme.matteBlack),
+              )
+            : Text(
+                label,
+                style: const TextStyle(color: AppTheme.matteBlack, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
       ),
     );
 
@@ -616,47 +628,8 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
       ),
     );
     if (confirmed == true) {
+      await Future.delayed(const Duration(milliseconds: 150));
       _updateStatus('cancelled');
-    }
-  }
-
-  Future<void> _promptOtpAndStart() async {
-    final ctrl = TextEditingController();
-    final otp = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Enter Customer Start OTP', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Ask the customer for the 4-digit OTP shown on their app to verify arrival.'),
-            const SizedBox(height: 14),
-            TextField(
-              controller: ctrl,
-              keyboardType: TextInputType.number,
-              maxLength: 6,
-              autofocus: true,
-              decoration: const InputDecoration(
-                hintText: 'e.g. 4829',
-                counterText: '',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
-            child: const Text('Verify & Start'),
-          ),
-        ],
-      ),
-    );
-
-    if (otp != null && otp.isNotEmpty) {
-      _updateStatus('in_progress', otp: otp);
     }
   }
 }

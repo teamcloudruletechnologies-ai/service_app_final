@@ -21,8 +21,8 @@ class BookingProvider extends ChangeNotifier {
     try {
       final result = await _api.fetchBookings(status: status);
       bookings = result.items;
-    } on ApiException catch (e) {
-      error = e.message;
+    } catch (e) {
+      error = e is ApiException ? e.message : e.toString();
     } finally {
       loading = false;
       notifyListeners();
@@ -49,8 +49,8 @@ class BookingProvider extends ChangeNotifier {
       loading = false;
       notifyListeners();
       return booking;
-    } on ApiException catch (e) {
-      error = e.message;
+    } catch (e) {
+      error = e is ApiException ? e.message : e.toString();
       loading = false;
       notifyListeners();
       return null;
@@ -63,8 +63,8 @@ class BookingProvider extends ChangeNotifier {
       bookings = bookings.map((b) => b.id == id ? updated : b).toList();
       notifyListeners();
       return true;
-    } on ApiException catch (e) {
-      error = e.message;
+    } catch (e) {
+      error = e is ApiException ? e.message : e.toString();
       notifyListeners();
       return false;
     }
@@ -76,8 +76,8 @@ class BookingProvider extends ChangeNotifier {
       bookings = bookings.map((b) => b.id == id ? updated : b).toList();
       notifyListeners();
       return true;
-    } on ApiException catch (e) {
-      error = e.message;
+    } catch (e) {
+      error = e is ApiException ? e.message : e.toString();
       notifyListeners();
       return false;
     }
