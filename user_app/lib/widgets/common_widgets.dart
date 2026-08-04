@@ -22,7 +22,7 @@ class LoadingView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator(color: AppTheme.primary),
+          const CircularProgressIndicator(color: Color(0xFF0F172A)),
           if (message != null) ...[
             const SizedBox(height: 12),
             Text(message!, style: TextStyle(color: Colors.grey.shade600)),
@@ -266,15 +266,30 @@ class BookingCard extends StatelessWidget {
   Color _statusColor(String status) {
     switch (status) {
       case 'completed':
-        return AppTheme.primary;
+        return const Color(0xFF059669);
       case 'cancelled':
-        return const Color(0xFFD97706);
+        return const Color(0xFFDC2626);
       case 'in_progress':
-        return const Color(0xFFCA8A04);
+        return const Color(0xFF7C3AED);
       case 'confirmed':
-        return AppTheme.primaryDark;
+        return const Color(0xFF2563EB);
       default:
-        return const Color(0xFFEAB308);
+        return const Color(0xFFD97706);
+    }
+  }
+
+  Color _statusBgColor(String status) {
+    switch (status) {
+      case 'completed':
+        return const Color(0xFFECFDF5);
+      case 'cancelled':
+        return const Color(0xFFFEF2F2);
+      case 'in_progress':
+        return const Color(0xFFF3E8FF);
+      case 'confirmed':
+        return const Color(0xFFEFF6FF);
+      default:
+        return const Color(0xFFFEF3C7);
     }
   }
 
@@ -309,7 +324,7 @@ class BookingCard extends StatelessWidget {
           Expanded(
             child: Container(
               height: 2,
-              color: filled ? AppTheme.secondary : Colors.grey.shade300,
+              color: filled ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
             ),
           ),
         );
@@ -325,16 +340,16 @@ class BookingCard extends StatelessWidget {
                 height: 10,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: filled ? AppTheme.secondary : Colors.grey.shade300,
+                  color: filled ? const Color(0xFF0F172A) : const Color(0xFFCBD5E1),
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 5),
               Text(
                 steps[step],
                 style: TextStyle(
-                  fontSize: 8,
-                  fontWeight: filled ? FontWeight.bold : FontWeight.w500,
-                  color: filled ? const Color(0xFF1A1A1A) : Colors.grey.shade400,
+                  fontSize: 9.5,
+                  fontWeight: filled ? FontWeight.w800 : FontWeight.w500,
+                  color: filled ? const Color(0xFF0F172A) : const Color(0xFF94A3B8),
                 ),
               ),
             ],
@@ -344,7 +359,7 @@ class BookingCard extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.only(top: 14),
       child: SizedBox(
         width: double.infinity,
         child: Row(
@@ -363,11 +378,12 @@ class BookingCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 12,
+              color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+              blurRadius: 16,
               offset: const Offset(0, 4),
             ),
           ],
@@ -382,13 +398,13 @@ class BookingCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       booking.serviceName ?? 'Service #${booking.serviceId}',
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Color(0xFF0F172A)),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _statusColor(booking.status).withValues(alpha: 0.12),
+                      color: _statusBgColor(booking.status),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -396,7 +412,7 @@ class BookingCard extends StatelessWidget {
                       style: TextStyle(
                         color: _statusColor(booking.status),
                         fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
@@ -406,11 +422,11 @@ class BookingCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(Icons.person_outline, size: 14, color: Colors.grey.shade500),
+                    const Icon(Icons.person_outline_rounded, size: 14, color: Color(0xFF64748B)),
                     const SizedBox(width: 4),
                     Text(
                       booking.workerName ?? '',
-                      style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                      style: const TextStyle(color: Color(0xFF334155), fontSize: 13, fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -422,14 +438,14 @@ class BookingCard extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey.shade500),
+                        const Icon(Icons.calendar_today_outlined, size: 14, color: Color(0xFF94A3B8)),
                         const SizedBox(width: 4),
                         Flexible(
                           child: Text(
                             dateFmt.format(booking.scheduledAt ?? booking.createdAt),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
-                            style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.w500),
                           ),
                         ),
                       ],
@@ -441,8 +457,8 @@ class BookingCard extends StatelessWidget {
                         ? '₹${booking.amount.toStringAsFixed(0)}'
                         : 'Price after inspection',
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: (booking.status == 'completed' && booking.amount > 0) ? AppTheme.primary : AppTheme.secondary,
+                      fontWeight: FontWeight.w700,
+                      color: (booking.status == 'completed' && booking.amount > 0) ? const Color(0xFF0F172A) : const Color(0xFF64748B),
                       fontSize: 13,
                     ),
                   ),
@@ -454,26 +470,19 @@ class BookingCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: booking.status == 'in_progress'
-                        ? Colors.purple.shade50
-                        : AppTheme.secondary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: booking.status == 'in_progress'
-                          ? Colors.purple.shade200
-                          : AppTheme.secondary.withOpacity(0.3),
-                      width: 1.2,
-                    ),
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
                   ),
                   child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: booking.status == 'in_progress' ? Colors.purple : AppTheme.secondary,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF0F172A),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.key, size: 16, color: Colors.white),
+                        child: const Icon(Icons.key_rounded, size: 16, color: Colors.white),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -482,11 +491,11 @@ class BookingCard extends StatelessWidget {
                           children: [
                             Text(
                               booking.status == 'in_progress' ? 'JOB COMPLETION OTP' : 'JOB START OTP',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.w900,
                                 fontSize: 11,
                                 letterSpacing: 0.5,
-                                color: booking.status == 'in_progress' ? Colors.purple.shade900 : AppTheme.primary,
+                                color: Color(0xFF0F172A),
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -494,27 +503,25 @@ class BookingCard extends StatelessWidget {
                               booking.status == 'in_progress'
                                   ? 'Share with worker when work finishes'
                                   : 'Share with worker when they arrive',
-                              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                              style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: booking.status == 'in_progress' ? Colors.purple : AppTheme.secondary,
-                          ),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFF0F172A), width: 1.5),
                         ),
                         child: Text(
                           booking.otp ?? '',
-                          style: TextStyle(
-                            fontSize: 18,
+                          style: const TextStyle(
+                            fontSize: 17,
                             fontWeight: FontWeight.w900,
-                            color: booking.status == 'in_progress' ? Colors.purple.shade900 : AppTheme.primary,
-                            letterSpacing: 3,
+                            color: Color(0xFF0F172A),
+                            letterSpacing: 3.5,
                           ),
                         ),
                       ),
@@ -532,7 +539,8 @@ class BookingCard extends StatelessWidget {
                   children: [
                     TextButton(
                       onPressed: onCancel,
-                      child: const Text('Cancel', style: TextStyle(color: Colors.red, fontSize: 13)),
+                      style: TextButton.styleFrom(foregroundColor: const Color(0xFFDC2626)),
+                      child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                     ),
                   ],
                 ),

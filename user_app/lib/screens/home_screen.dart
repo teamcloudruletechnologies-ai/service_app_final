@@ -13,6 +13,7 @@ import '../widgets/auto_slider_banner_widget.dart';
 import 'bookings_screen.dart';
 import 'location_picker_screen.dart';
 import 'notification_screen.dart';
+import 'profile_screen.dart';
 import 'service_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -140,30 +141,72 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
+                      const SizedBox(width: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Notification Icon Button
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: IconButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (_) => const NotificationScreen()),
-                            );
-                          },
-                          icon: const Icon(Icons.notifications_none_rounded, color: Color(0xFF1E293B), size: 22),
-                          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
-                          padding: EdgeInsets.zero,
-                        ),
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                                );
+                              },
+                              icon: const Icon(Icons.notifications_none_rounded, color: Color(0xFF1E293B), size: 22),
+                              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                              padding: EdgeInsets.zero,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
+                          // Profile Initial Avatar Button (Opened from Top Header)
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(22),
+                            child: Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E293B),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.08),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                (user?.name.trim().isNotEmpty == true) ? user!.name.trim()[0].toUpperCase() : 'U',
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -298,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? const Padding(
                           padding: EdgeInsets.symmetric(vertical: 20),
                           child: Center(
-                            child: CircularProgressIndicator(color: AppTheme.primary, strokeWidth: 2),
+                            child: CircularProgressIndicator(color: Color(0xFF0F172A), strokeWidth: 2),
                           ),
                         )
                       : (catalog.categories.isEmpty
@@ -349,8 +392,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 4,
                                 mainAxisSpacing: 16,
-                                crossAxisSpacing: 16,
-                                childAspectRatio: 0.85,
+                                crossAxisSpacing: 12,
+                                childAspectRatio: 0.70,
                               ),
                               itemBuilder: (context, index) {
                                 final cat = catalog.categories[index];
@@ -365,41 +408,53 @@ class _HomeScreenState extends State<HomeScreen> {
                                       catalog.selectCategory(cat.id);
                                     }
                                   },
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(20),
                                   child: Column(
                                     children: [
-                                      Container(
-                                        width: 56,
-                                        height: 56,
+                                      AnimatedContainer(
+                                        duration: const Duration(milliseconds: 200),
+                                        width: 68,
+                                        height: 68,
+                                        padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
-                                          color: isSelected ? AppTheme.primary.withValues(alpha: 0.15) : const Color(0xFFF1F5F9),
-                                          borderRadius: BorderRadius.circular(16),
+                                          color: isSelected ? const Color(0xFFFFFBEB) : Colors.white,
+                                          borderRadius: BorderRadius.circular(20),
                                           border: Border.all(
-                                            color: isSelected ? AppTheme.primary : const Color(0xFFE2E8F0),
-                                            width: isSelected ? 2 : 1,
+                                            color: isSelected ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
+                                            width: isSelected ? 2.0 : 1.2,
                                           ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: isSelected
+                                                  ? const Color(0xFFF59E0B).withValues(alpha: 0.20)
+                                                  : Colors.black.withValues(alpha: 0.05),
+                                              blurRadius: isSelected ? 12 : 8,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
                                         ),
                                         child: imgUrl.isNotEmpty
                                             ? ClipRRect(
-                                                borderRadius: BorderRadius.circular(15),
+                                                borderRadius: BorderRadius.circular(16),
                                                 child: CachedNetworkImage(
                                                   imageUrl: imgUrl,
                                                   fit: BoxFit.cover,
-                                                  errorWidget: (_, __, ___) => const Icon(Icons.category_rounded, color: Color(0xFF1E293B), size: 24),
+                                                  errorWidget: (_, __, ___) => const Icon(Icons.category_rounded, color: Color(0xFF1E293B), size: 28),
                                                 ),
                                               )
-                                            : const Icon(Icons.category_rounded, color: Color(0xFF1E293B), size: 24),
+                                            : const Icon(Icons.category_rounded, color: Color(0xFF1E293B), size: 28),
                                       ),
-                                      const SizedBox(height: 6),
+                                      const SizedBox(height: 8),
                                       Text(
                                         cat.name,
                                         style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                          color: isSelected ? AppTheme.primaryDark : const Color(0xFF1A1A1A),
+                                          fontSize: 12,
+                                          height: 1.2,
+                                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
+                                          color: isSelected ? const Color(0xFFB45309) : const Color(0xFF0F172A),
                                         ),
                                         textAlign: TextAlign.center,
-                                        maxLines: 1,
+                                        maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ],
@@ -430,7 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: const Color(0xFFE2E8F0)),
                           ),
-                          child: const Center(child: CircularProgressIndicator(color: AppTheme.primary, strokeWidth: 2)),
+                          child: const Center(child: CircularProgressIndicator(color: Color(0xFF0F172A), strokeWidth: 2)),
                         )
                       : (catalog.services.isEmpty
                           ? Container(

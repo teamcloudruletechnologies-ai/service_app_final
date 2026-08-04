@@ -69,7 +69,7 @@ class _RatingScreenState extends State<RatingScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(title: const Text('Rate Service')),
       body: _submitting
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.primary))
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF0F172A)))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: Column(

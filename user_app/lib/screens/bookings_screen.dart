@@ -59,29 +59,36 @@ class _BookingsScreenState extends State<BookingsScreen> {
   Widget _buildProfileButton(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
     final user = auth.user;
-    final initial = (user?.name.isNotEmpty == true ? user!.name[0] : 'U').toUpperCase();
-    return GestureDetector(
+    final initial = (user?.name.trim().isNotEmpty == true ? user!.name.trim()[0] : 'U').toUpperCase();
+    return InkWell(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => const ProfileScreen()),
         );
       },
-      child: Hero(
-        tag: 'profile_avatar_hero_bookings',
-        child: CircleAvatar(
-          radius: 20,
-          backgroundColor: const Color(0xFFE3D0BA),
-          child: CircleAvatar(
-            radius: 18,
-            backgroundColor: const Color(0xFF1A1A1A),
-            child: Text(
-              initial,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E293B),
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
+          ],
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          initial,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
           ),
         ),
       ),
@@ -239,34 +246,40 @@ class _BookingsScreenState extends State<BookingsScreen> {
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.all(20),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.secondary.withOpacity(0.08),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFF1F5F9),
                                         shape: BoxShape.circle,
                                       ),
-                                      child: const Icon(Icons.receipt_long_outlined, size: 56, color: AppTheme.secondary),
+                                      child: const Icon(Icons.receipt_long_rounded, size: 54, color: Color(0xFF475569)),
                                     ),
                                     const SizedBox(height: 20),
                                     const Text(
                                       'No Bookings Found',
-                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF0F172A),
+                                        letterSpacing: -0.3,
+                                      ),
                                     ),
                                     const SizedBox(height: 8),
-                                    Text(
+                                    const Text(
                                       'You have no active or previous service bookings under this filter.',
                                       textAlign: TextAlign.center,
-                                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                                      style: TextStyle(fontSize: 13, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                                     ),
-                                    const SizedBox(height: 20),
+                                    const SizedBox(height: 22),
                                     ElevatedButton.icon(
                                       onPressed: _load,
-                                      icon: const Icon(Icons.refresh, size: 18),
-                                      label: const Text('Refresh Bookings'),
+                                      icon: const Icon(Icons.refresh_rounded, size: 18),
+                                      label: const Text('Refresh Bookings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                                       style: ElevatedButton.styleFrom(
                                         minimumSize: Size.zero,
-                                        backgroundColor: AppTheme.primary,
+                                        backgroundColor: const Color(0xFF0F172A),
                                         foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
                                       ),
                                     ),
                                   ],
@@ -342,19 +355,20 @@ class _FilterChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onSelected,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
           decoration: BoxDecoration(
-            color: selected ? AppTheme.secondary : Colors.white,
+            color: selected ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: selected ? AppTheme.secondary : Colors.grey.shade300,
+              color: selected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
+              width: 1.2,
             ),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? Colors.white : const Color(0xFF1A1A1A),
-              fontWeight: FontWeight.w600,
+              color: selected ? Colors.white : const Color(0xFF475569),
+              fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
               fontSize: 13,
             ),
           ),

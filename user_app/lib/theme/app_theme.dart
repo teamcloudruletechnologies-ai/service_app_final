@@ -21,6 +21,7 @@ class AppTheme {
         surface: surface,
         onSurface: textPrimary,
       ),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(color: Color(0xFF0F172A)),
       scaffoldBackgroundColor: surface,
       fontFamily: 'sans-serif',
       appBarTheme: const AppBarTheme(

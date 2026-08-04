@@ -356,7 +356,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                 OutlinedButton.icon(
                   onPressed: _loadingLocation ? null : _fetchLocation,
                   icon: _loadingLocation
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary))
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0F172A)))
                       : const Icon(Icons.my_location_rounded, color: AppTheme.primaryDark),
                   label: Text(_lat != null ? '📍 GPS Location Detected' : 'Use Current GPS Location'),
                   style: OutlinedButton.styleFrom(

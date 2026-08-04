@@ -226,7 +226,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                       backgroundColor: Colors.white,
                       elevation: 4,
                       child: _loadingLocation
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary))
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0F172A)))
                           : const Icon(Icons.my_location_rounded, color: Colors.blue),
                     ),
                   ),
