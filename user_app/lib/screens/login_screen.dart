@@ -155,64 +155,28 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Animated Top Back Navigation Button (Screen 2 & 3 Mockup)
-              AnimatedCrossFade(
-                duration: const Duration(milliseconds: 200),
-                crossFadeState: _showOtpStep ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                firstChild: const SizedBox(height: 60),
-                secondChild: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          _showOtpStep = false;
-                        });
-                      },
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: Color(0xFF1A1A1A)),
-                            SizedBox(width: 6),
-                            Text(
-                              'Back',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF1A1A1A),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  child: Center(
+                    child: AnimatedCrossFade(
+                      duration: const Duration(milliseconds: 250),
+                      crossFadeState: !_showOtpStep ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                      firstChild: _buildPhoneEntryStep(isLoading),
+                      secondChild: _buildOtpVerificationStep(isLoading),
                     ),
                   ),
                 ),
               ),
-
-              AnimatedCrossFade(
-                duration: const Duration(milliseconds: 250),
-                crossFadeState: !_showOtpStep ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-                firstChild: _buildPhoneEntryStep(isLoading),
-                secondChild: _buildOtpVerificationStep(isLoading),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -224,6 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
       key: _phoneFormKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
             'Welcome Back! 👋',
@@ -401,7 +366,46 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildOtpVerificationStep(bool isLoading) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
+        // Back Button positioned neatly right above Verify OTP Title
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _showOtpStep = false;
+                });
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: Color(0xFF1A1A1A)),
+                    SizedBox(width: 6),
+                    Text(
+                      'Back',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
         const Text(
           'Verify OTP',
           style: TextStyle(
