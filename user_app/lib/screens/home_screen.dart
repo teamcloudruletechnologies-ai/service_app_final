@@ -15,6 +15,7 @@ import 'location_picker_screen.dart';
 import 'notification_screen.dart';
 import 'profile_screen.dart';
 import 'service_detail_screen.dart';
+import 'nearby_workers_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -215,88 +216,96 @@ class _HomeScreenState extends State<HomeScreen> {
                 // SEARCH BAR (Mockup Screen 5 & 6)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Container(
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(26),
-                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF0F172A).withValues(alpha: 0.05),
-                          blurRadius: 16,
-                          spreadRadius: 0,
-                          offset: const Offset(0, 4),
-                        ),
-                        BoxShadow(
-                          color: const Color(0xFF0F172A).withValues(alpha: 0.02),
-                          blurRadius: 4,
-                          spreadRadius: 0,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 16),
-                        const Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 22),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            controller: _searchCtrl,
-                            textAlignVertical: TextAlignVertical.center,
-                            onChanged: (val) {
-                              catalog.setSearchQuery(val);
-                              setState(() {});
-                            },
-                            style: const TextStyle(
-                              color: Color(0xFF1E293B),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(26),
+                          border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+                              blurRadius: 16,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 4),
                             ),
-                            decoration: const InputDecoration(
-                              hintText: 'Search for services...',
-                              hintStyle: TextStyle(
-                                color: Color(0xFF94A3B8),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: -0.2,
+                            BoxShadow(
+                              color: const Color(0xFF0F172A).withValues(alpha: 0.02),
+                              blurRadius: 4,
+                              spreadRadius: 0,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 16),
+                            const Icon(Icons.search_rounded, color: Color(0xFF64748B), size: 22),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                controller: _searchCtrl,
+                                textAlignVertical: TextAlignVertical.center,
+                                onChanged: (val) {
+                                  catalog.setSearchQuery(val);
+                                  setState(() {});
+                                },
+                                style: const TextStyle(
+                                  color: Color(0xFF1E293B),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                decoration: const InputDecoration(
+                                  hintText: 'Search for services...',
+                                  hintStyle: TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: -0.2,
+                                  ),
+                                  border: InputBorder.none,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                ),
                               ),
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              isDense: true,
-                              contentPadding: EdgeInsets.zero,
                             ),
-                          ),
-                        ),
-                        if (_searchCtrl.text.isNotEmpty)
-                          GestureDetector(
-                            onTap: () {
-                              _searchCtrl.clear();
-                              catalog.setSearchQuery('');
-                              setState(() {});
-                            },
-                            child: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12),
-                              child: Icon(Icons.cancel_rounded, color: Color(0xFF94A3B8), size: 18),
-                            ),
-                          )
-                        else
-                          Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: Container(
-                              padding: const EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAFC),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: const Color(0xFFF1F5F9)),
+                            if (_searchCtrl.text.isNotEmpty)
+                              GestureDetector(
+                                onTap: () {
+                                  _searchCtrl.clear();
+                                  catalog.setSearchQuery('');
+                                  setState(() {});
+                                },
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 12),
+                                  child: Icon(Icons.cancel_rounded, color: Color(0xFF94A3B8), size: 18),
+                                ),
+                              )
+                            else
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Container(
+                                  padding: const EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF8FAFC),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: const Color(0xFFF1F5F9)),
+                                  ),
+                                  child: const Icon(Icons.tune_rounded, color: Color(0xFF475569), size: 16),
+                                ),
                               ),
-                              child: const Icon(Icons.tune_rounded, color: Color(0xFF475569), size: 16),
-                            ),
-                          ),
+                          ],
+                        ),
+                      ),
+                      if (_searchCtrl.text.trim().isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        _buildSearchPopupOverlay(context, catalog),
                       ],
-                    ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -614,6 +623,203 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSearchPopupOverlay(BuildContext context, CatalogProvider catalog) {
+    final query = _searchCtrl.text.trim();
+    if (query.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(top: 4),
+      constraints: const BoxConstraints(maxHeight: 340),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.12),
+            blurRadius: 24,
+            spreadRadius: 0,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header bar in popup
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              border: Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.manage_search_rounded, size: 18, color: Color(0xFF0F172A)),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'Matching Services',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                  ],
+                ),
+                if (catalog.loadingServices)
+                  const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0F172A)),
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${catalog.services.length} found',
+                      style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w800),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // Service items list inside popup
+          Flexible(
+            child: catalog.loadingServices
+                ? const Padding(
+                    padding: EdgeInsets.all(24),
+                    child: Center(
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF0F172A)),
+                    ),
+                  )
+                : (catalog.services.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.search_off_rounded, size: 36, color: Color(0xFF94A3B8)),
+                            const SizedBox(height: 8),
+                            Text(
+                              'No services matching "$query"',
+                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Color(0xFF64748B)),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.separated(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.all(8),
+                        itemCount: catalog.services.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                        itemBuilder: (context, index) {
+                          final service = catalog.services[index];
+                          final imgUrl = ApiConfig.resolveImageUrl(service.imageUrl);
+
+                          return InkWell(
+                            onTap: () {
+                              FocusScope.of(context).unfocus();
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => ServiceDetailScreen(service: service),
+                                ),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 44,
+                                    height: 44,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF8FAFC),
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                                    ),
+                                    child: imgUrl.isNotEmpty
+                                        ? ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: CachedNetworkImage(
+                                              imageUrl: imgUrl,
+                                              fit: BoxFit.cover,
+                                              errorWidget: (_, __, ___) => const Icon(Icons.handyman_rounded, color: Color(0xFF0F172A), size: 20),
+                                            ),
+                                          )
+                                        : const Icon(Icons.handyman_rounded, color: Color(0xFF0F172A), size: 20),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          service.name,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 14,
+                                            color: Color(0xFF0F172A),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          'Starting from ₹${service.basePrice.toStringAsFixed(0)}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                            color: Color(0xFF64748B),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF0F172A),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Book',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        SizedBox(width: 2),
+                                        Icon(Icons.chevron_right_rounded, color: Colors.white, size: 14),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      )),
+          ),
+        ],
       ),
     );
   }
