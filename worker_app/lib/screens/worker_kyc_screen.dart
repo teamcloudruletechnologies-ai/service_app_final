@@ -16,16 +16,13 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
   final _formKey = GlobalKey<FormState>();
   final _aadhaarNumCtrl = TextEditingController();
   final _panNumCtrl = TextEditingController();
-  final _bankAccCtrl = TextEditingController();
 
   String? _aadhaarUrl;
   String? _panUrl;
-  String? _bankPassbookUrl;
   String? _selfieUrl;
 
   bool _uploadingAadhaar = false;
   bool _uploadingPan = false;
-  bool _uploadingPassbook = false;
   bool _uploadingSelfie = false;
   bool _submitting = false;
 
@@ -33,7 +30,6 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
   void dispose() {
     _aadhaarNumCtrl.dispose();
     _panNumCtrl.dispose();
-    _bankAccCtrl.dispose();
     super.dispose();
   }
 
@@ -51,7 +47,6 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
     setState(() {
       if (docType == 'aadhaar') _uploadingAadhaar = true;
       if (docType == 'pan') _uploadingPan = true;
-      if (docType == 'passbook') _uploadingPassbook = true;
       if (docType == 'selfie') _uploadingSelfie = true;
     });
 
@@ -70,10 +65,6 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
           _uploadingPan = false;
           _panUrl = uploadedUrl;
         }
-        if (docType == 'passbook') {
-          _uploadingPassbook = false;
-          _bankPassbookUrl = uploadedUrl;
-        }
         if (docType == 'selfie') {
           _uploadingSelfie = false;
           _selfieUrl = uploadedUrl;
@@ -88,7 +79,6 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
       setState(() {
         if (docType == 'aadhaar') _uploadingAadhaar = false;
         if (docType == 'pan') _uploadingPan = false;
-        if (docType == 'passbook') _uploadingPassbook = false;
         if (docType == 'selfie') _uploadingSelfie = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -100,7 +90,7 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_aadhaarUrl == null || _panUrl == null || _bankPassbookUrl == null || _selfieUrl == null) {
+    if (_aadhaarUrl == null || _panUrl == null || _selfieUrl == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please upload all required documents/selfie')),
       );
@@ -118,8 +108,8 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
         aadhaarUrl: _aadhaarUrl!,
         panNumber: _panNumCtrl.text.trim().toUpperCase(),
         panUrl: _panUrl!,
-        bankAccountNumber: _bankAccCtrl.text.trim(),
-        bankPassbookUrl: _bankPassbookUrl!,
+        bankAccountNumber: 'NOT_PROVIDED',
+        bankPassbookUrl: 'NOT_PROVIDED',
         selfieUrl: _selfieUrl!,
       );
 
@@ -224,34 +214,8 @@ class _WorkerKycScreenState extends State<WorkerKycScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Bank Account Section
-                const Text('3. Payout Bank Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _bankAccCtrl,
-                  keyboardType: TextInputType.number,
-                  cursorColor: Colors.black,
-                  decoration: const InputDecoration(
-                    labelText: 'Bank Account Number',
-                  ),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) {
-                      return 'Bank Account Number is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 8),
-                _UploadButton(
-                  label: 'Bank Passbook / Cancelled Cheque Photo',
-                  hasFile: _bankPassbookUrl != null,
-                  loading: _uploadingPassbook,
-                  onTap: () => _pickAndUpload('passbook'),
-                ),
-                const SizedBox(height: 24),
-
                 // Selfie Section
-                const Text('4. Profile Selfie Photo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const Text('3. Profile Selfie Photo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 8),
                 _UploadButton(
                   label: 'Take Selfie Live Photo',

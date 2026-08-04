@@ -8,6 +8,8 @@ class AppTheme {
   static const milkWhite = Color(0xFFF5F5F3); // Crisp Milk White
   static const matteBlack = Color(0xFF1A1A1A); // Pure Matte Black
   static const zomatoRed = Color(0xFFE23744); // Zomato Red (pending/new)
+  static const textPrimary = Color(0xFF1A1A1A); // Dark Matte Text
+  static const textSecondary = Color(0xFF718096); // Slate Muted Text
 
   // Aliases for legacy usage
   static const primaryDark = Color(0xFF004D28);

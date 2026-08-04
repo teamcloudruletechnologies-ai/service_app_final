@@ -978,7 +978,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                         ? 'Verification failed. Click below to re-submit your documents.'
                         : status == 'pending'
                             ? 'Admin is actively reviewing your KYC documents.'
-                            : 'Submit Aadhaar Card and Bank Details to unlock your profile.',
+                            : 'Submit your KYC documents to unlock your profile.',
                     style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                   ),
                 ),

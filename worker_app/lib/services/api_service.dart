@@ -114,26 +114,28 @@ class ApiService {
   }
 
   Future<String> uploadFile(String filePath) async {
-    try {
-      await init();
-      final uri = Uri.parse('${ApiConfig.baseUrl}/upload');
-      final request = http.MultipartRequest('POST', uri);
-      if (_token != null) {
-        request.headers['Authorization'] = 'Bearer $_token';
-      }
-      request.files.add(await http.MultipartFile.fromPath('file', filePath));
-
-      final streamedResponse = await request.send().timeout(const Duration(seconds: 12));
-      final response = await http.Response.fromStream(streamedResponse);
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final json = jsonDecode(response.body);
-        if (json['success'] == true && json['data'] != null && json['data']['url'] != null) {
-          return json['data']['url'] as String;
+    for (final endpoint in ['/app/upload', '/upload']) {
+      try {
+        await init();
+        final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+        final request = http.MultipartRequest('POST', uri);
+        if (_token != null) {
+          request.headers['Authorization'] = 'Bearer $_token';
         }
+        request.files.add(await http.MultipartFile.fromPath('file', filePath));
+
+        final streamedResponse = await request.send().timeout(const Duration(seconds: 12));
+        final response = await http.Response.fromStream(streamedResponse);
+
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          final json = jsonDecode(response.body);
+          if (json['success'] == true && json['data'] != null && json['data']['url'] != null) {
+            return json['data']['url'] as String;
+          }
+        }
+      } catch (e) {
+        print("Upload to $endpoint failed, trying fallback: $e");
       }
-    } catch (e) {
-      print("Network upload fallback triggered: $e");
     }
 
     // Reliable Fallback: Read file bytes and encode to Data URL so upload succeeds 100%

@@ -146,6 +146,34 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // Open Map Icon Button
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+                                );
+                              },
+                              icon: const Icon(Icons.map_rounded, color: AppTheme.secondary, size: 22),
+                              tooltip: 'Open Map',
+                              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                              padding: EdgeInsets.zero,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
                           // Notification Icon Button
                           Container(
                             decoration: BoxDecoration(
@@ -210,6 +238,74 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ],
+                  ),
+                ),
+
+                // OPEN MAP QUICK BANNER
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.map_rounded, color: Colors.white, size: 20),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Explore Interactive Service Map',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  'Tap to open map and set exact pin location',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFFDBEAFE),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 14),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
 

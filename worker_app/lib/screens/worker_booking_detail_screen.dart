@@ -137,7 +137,26 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Booking status updated to $status')),
       );
-      _loadBooking();
+      await _loadBooking();
+
+      // Job accepted & started (OTP verified) — take the worker straight to
+      // in-app navigation, instead of waiting for a separate tap.
+      if (status == 'in_progress' && mounted) {
+        final b = _booking;
+        if (b != null && b.address != null && b.address!.isNotEmpty) {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => WorkerInAppNavigationScreen(
+                bookingId: b.id,
+                customerName: b.userName ?? 'Customer',
+                customerAddress: b.address!,
+                initialLat: b.latitude,
+                initialLng: b.longitude,
+              ),
+            ),
+          );
+        }
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(bookingProv.error ?? 'Failed to update status')),
@@ -319,7 +338,7 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
                 label: b.address ?? 'No address provided',
                 trailing: null,
               ),
-              if (b.address != null && b.address!.isNotEmpty && (b.status == 'confirmed' || b.status == 'in_progress')) ...[
+              if (b.address != null && b.address!.isNotEmpty && b.status == 'in_progress') ...[
                 const SizedBox(height: 14),
                 ElevatedButton.icon(
                   onPressed: () {
@@ -501,18 +520,21 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
     String label;
     Color color;
     VoidCallback? onPressed;
+    bool showCancel = false;
 
     if (status == 'pending') {
       label = 'Accept Job';
       color = AppTheme.olive;
+      showCancel = true;
       onPressed = () => _updateStatus('confirmed');
     } else if (status == 'confirmed') {
-      label = 'Enter Customer OTP to Start';
-      color = Colors.blue;
+      label = 'Start Job';
+      color = AppTheme.olive;
+      showCancel = true;
       onPressed = () => _promptOtpAndStart();
     } else if (status == 'in_progress') {
       label = 'Generate Custom Invoice & Finish';
-      color = AppTheme.primary;
+      color = AppTheme.olive;
       onPressed = () async {
         final res = await Navigator.of(context).push(
           MaterialPageRoute(
@@ -531,23 +553,72 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
       return null;
     }
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            minimumSize: const Size.fromHeight(52),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-          ),
-          child: Text(
-            label,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-          ),
+    final mainButton = Expanded(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: color,
+          foregroundColor: AppTheme.matteBlack,
+          minimumSize: const Size.fromHeight(52),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(color: AppTheme.matteBlack, fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ),
     );
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: showCancel
+            ? Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => _confirmCancel(),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.zomatoRed,
+                        side: const BorderSide(color: AppTheme.zomatoRed, width: 1.5),
+                        minimumSize: const Size.fromHeight(52),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: const Text(
+                        'Cancel Job',
+                        style: TextStyle(color: AppTheme.zomatoRed, fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  mainButton,
+                ],
+              )
+            : mainButton,
+      ),
+    );
+  }
+
+  Future<void> _confirmCancel() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Cancel this job?', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('The customer will be notified that you cancelled this job.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('No')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.zomatoRed, foregroundColor: Colors.white),
+            child: const Text('Yes, Cancel'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      _updateStatus('cancelled');
+    }
   }
 
   Future<void> _promptOtpAndStart() async {
