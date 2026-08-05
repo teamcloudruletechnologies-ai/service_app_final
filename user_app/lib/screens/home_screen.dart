@@ -302,23 +302,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                   setState(() {});
                                 },
                                 child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
+                                  padding: EdgeInsets.symmetric(horizontal: 14),
                                   child: Icon(Icons.cancel_rounded, color: Color(0xFF94A3B8), size: 18),
                                 ),
                               )
                             else
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: Container(
-                                  padding: const EdgeInsets.all(7),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF8FAFC),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: const Color(0xFFF1F5F9)),
-                                  ),
-                                  child: const Icon(Icons.tune_rounded, color: Color(0xFF475569), size: 16),
-                                ),
-                              ),
+                              const SizedBox(width: 16),
                           ],
                         ),
                       ),
@@ -781,27 +770,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          service.name,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 14,
-                                            color: Color(0xFF0F172A),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'Starting from ₹${service.basePrice.toStringAsFixed(0)}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12,
-                                            color: Color(0xFF64748B),
-                                          ),
-                                        ),
-                                      ],
+                                    child: Text(
+                                      service.name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 14,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   Container(
