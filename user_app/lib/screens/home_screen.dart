@@ -572,7 +572,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisCount: 2,
                                 mainAxisSpacing: 14,
                                 crossAxisSpacing: 14,
-                                childAspectRatio: 0.82,
+                                childAspectRatio: 0.90,
                               ),
                               itemBuilder: (context, idx) {
                                 final s = catalog.services[idx];
@@ -603,7 +603,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: Container(
                                             width: double.infinity,
                                             decoration: const BoxDecoration(
-                                              color: Color(0xFFEDF2F7),
+                                              color: Color(0xFFF1F5F9),
                                               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                                             ),
                                             child: ClipRRect(
@@ -617,25 +617,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                         ),
                                         Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                s.name,
-                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1A1A1A)),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Row(
-                                                children: const [
-                                                  Icon(Icons.star_rounded, size: 16, color: Colors.amber),
-                                                  SizedBox(width: 4),
-                                                  Text('4.8', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1A1A1A))),
-                                                ],
-                                              ),
-                                            ],
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                          child: Text(
+                                            s.name,
+                                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF0F172A)),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                       ],
