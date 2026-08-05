@@ -15,13 +15,14 @@ const modelByRole = {
 function authPayload(account, role) {
   const payload = {
     id: account.id,
-    role,
+    role: account.role || role,
     name: account.name,
     email: account.email,
     phone: account.phone,
     state: account.state,
     address: account.address,
     status: account.status,
+    permissions: account.permissions || [],
   };
   if (role === "worker") {
     payload.kyc_status = account.kyc_status;

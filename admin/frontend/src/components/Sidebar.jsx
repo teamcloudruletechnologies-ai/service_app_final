@@ -57,7 +57,7 @@ const NAV = [
   },
 ];
 
-export default function Sidebar({ activeKey, onNav, onLogout }) {
+export default function Sidebar({ activeKey, onNav, onLogout, currentAdmin }) {
   const [hovered, setHovered] = useState(null);
 
   // Dark black with olive accent
@@ -67,6 +67,38 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
   const activeBg = '#4A5343'; // Muted Olive Green for active
   const textActive = '#FAF7F0';
   const textInactive = '#A89E91';
+
+  const hasPermission = (page) => {
+    if (!currentAdmin) return true;
+    if (currentAdmin.role === 'super_admin' || currentAdmin.role === 'admin') return true;
+    if (page === 'roles') return false;
+
+    const permissionMap = {
+      users: 'users',
+      workers: 'workers',
+      kyc: 'kyc',
+      bookings: 'bookings',
+      invoices: 'invoices',
+      services: 'services',
+      categories: 'services',
+      banners: 'banners',
+      support: 'complaints',
+      notifications: 'notifications',
+      dashboard: 'dashboard',
+      locations: 'locations',
+    };
+
+    const requiredPerm = permissionMap[page];
+    if (requiredPerm) {
+      return currentAdmin.permissions?.includes(requiredPerm);
+    }
+    return false;
+  };
+
+  const filteredNav = NAV.map(section => ({
+    ...section,
+    items: section.items.filter(item => hasPermission(item.key))
+  })).filter(section => section.items.length > 0);
 
   return (
     <aside style={{
@@ -111,7 +143,7 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
 
       {/* Nav - scrollable */}
       <nav style={{ flex: 1, paddingTop: 10, overflowY: 'auto' }}>
-        {NAV.map((section, si) => (
+        {filteredNav.map((section, si) => (
           <div key={si} style={{ padding: '8px 12px 4px' }}>
             {section.label && (
               <div style={{
@@ -195,10 +227,12 @@ export default function Sidebar({ activeKey, onNav, onLogout }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexShrink: 0,
           border: '1.5px solid #2F362C',
-        }}>PA</div>
+        }}>{currentAdmin?.name ? currentAdmin.name.substring(0, 2).toUpperCase() : 'AD'}</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#FAF7F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Prakash A.</div>
-          <div style={{ fontSize: 11, color: '#A89E91', fontWeight: 500, marginTop: 2 }}>Super Admin</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#FAF7F0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentAdmin?.name || 'Admin'}</div>
+          <div style={{ fontSize: 11, color: '#A89E91', fontWeight: 500, marginTop: 2 }}>
+            {currentAdmin?.role === 'super_admin' ? 'Super Admin' : currentAdmin?.role === 'sub_admin' ? 'Sub Admin' : 'Admin'}
+          </div>
         </div>
         <button
           onClick={onLogout}

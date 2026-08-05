@@ -17,7 +17,17 @@ import Categories from './pages/Categories';
 import Payments from './pages/Payments';
 import Reviews from './pages/Reviews';
 import Settings from './pages/Settings';
-import { bookingsAPI } from './api';
+import { bookingsAPI, authAPI } from './api';
+
+const Forbidden = () => (
+  <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, system-ui, sans-serif', color: 'var(--text-muted)', fontSize: 14 }}>
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
+      <div style={{ fontWeight: 600, color: 'var(--status-red-fg)', marginBottom: 4, fontSize: 18 }}>Access Denied</div>
+      <div>You do not have permission to view this module.</div>
+    </div>
+  </div>
+);
 
 /* ── New Booking Toast Popup ── */
 function NewBookingToast({ bookings, onDismiss, onViewBookings }) {
@@ -141,8 +151,23 @@ export default function App() {
     setActivePageState(page);
   };
   const [newBookings, setNewBookings] = useState([]);
+  const [currentAdmin, setCurrentAdmin] = useState(null);
   const lastSeenIdRef = useRef(null);
   const pollingRef = useRef(null);
+
+  // Fetch Admin Profile
+  useEffect(() => {
+    if (!token) return;
+    authAPI.me()
+      .then(res => {
+        if (res?.success && res?.data) {
+          setCurrentAdmin(res.data);
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching admin profile:', err);
+      });
+  }, [token]);
 
   // Poll for new bookings every 30 seconds
   useEffect(() => {
@@ -198,7 +223,38 @@ export default function App() {
     );
   }
 
+  const hasPermission = (page) => {
+    if (!currentAdmin) return true; // Let it render initially while loading, or handle loading state
+    if (currentAdmin.role === 'super_admin' || currentAdmin.role === 'admin') return true;
+    
+    if (page === 'roles') return false; // Sub-admins can never access roles
+
+    const permissionMap = {
+      users: 'users',
+      workers: 'workers',
+      kyc: 'kyc',
+      bookings: 'bookings',
+      invoices: 'invoices',
+      services: 'services',
+      categories: 'services',
+      banners: 'banners',
+      support: 'complaints',
+      notifications: 'notifications',
+      dashboard: 'dashboard',
+      locations: 'locations',
+    };
+
+    const requiredPerm = permissionMap[page];
+    if (requiredPerm) {
+      return currentAdmin.permissions?.includes(requiredPerm);
+    }
+    
+    return false; // Deny unmapped pages for sub_admins
+  };
+
   function renderPage() {
+    if (!hasPermission(activePage)) return <Forbidden />;
+
     switch (activePage) {
       case 'dashboard':
         return <Dashboard />;
@@ -250,7 +306,7 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-app)', color: 'var(--text-primary)' }}>
-      <Sidebar activeKey={activePage} onNav={setActivePage} onLogout={handleLogout} />
+      <Sidebar activeKey={activePage} onNav={setActivePage} onLogout={handleLogout} currentAdmin={currentAdmin} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <Topbar activePage={activePage} />
         {renderPage()}
