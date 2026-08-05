@@ -46,9 +46,11 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final catalog = context.read<CatalogProvider>();
-      catalog.loadBanners();
-      catalog.loadCategories();
-      catalog.loadServices();
+      Future.wait([
+        catalog.loadBanners(),
+        catalog.loadCategories(),
+        catalog.loadServices(),
+      ]);
     });
   }
 
@@ -61,18 +63,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _scrollToServices() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(const Duration(milliseconds: 50), () {
-        if (!mounted) return;
-        final keyContext = _servicesKey.currentContext;
-        if (keyContext != null) {
-          Scrollable.ensureVisible(
-            keyContext,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOutCubic,
-            alignment: 0.05,
-          );
-        }
-      });
+      if (!mounted) return;
+      final keyContext = _servicesKey.currentContext;
+      if (keyContext != null) {
+        Scrollable.ensureVisible(
+          keyContext,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+          alignment: 0.05,
+        );
+      }
     });
   }
 
@@ -95,9 +95,11 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
-              await catalog.loadBanners();
-              await catalog.loadCategories();
-              await catalog.loadServices();
+              await Future.wait([
+                catalog.loadBanners(),
+                catalog.loadCategories(),
+                catalog.loadServices(forceRefresh: true),
+              ]);
             },
           color: AppTheme.primary,
           child: SingleChildScrollView(
@@ -422,13 +424,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                 final isSelected = catalog.selectedCategoryId == cat.id;
                                 final imgUrl = ApiConfig.resolveImageUrl(cat.iconUrl);
 
-                                return InkWell(
+                                 return InkWell(
                                   onTap: () {
+                                    final isScrolledDown = _scrollController.hasClients && _scrollController.offset > 220.0;
                                     if (isSelected) {
                                       catalog.selectCategory(null);
                                     } else {
                                       catalog.selectCategory(cat.id);
-                                      _scrollToServices();
+                                      if (!isScrolledDown) {
+                                        _scrollToServices();
+                                      }
                                     }
                                   },
                                   borderRadius: BorderRadius.circular(24),

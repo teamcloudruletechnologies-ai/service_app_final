@@ -100,12 +100,13 @@ class CatalogProvider extends ChangeNotifier {
 
   List<ServiceItem> _allServices = [];
 
-  Future<void> loadServices({int? categoryId, String? search}) async {
-    selectedCategoryId = categoryId ?? selectedCategoryId;
+  Future<void> loadServices({int? categoryId, String? search, bool forceRefresh = false}) async {
+    selectedCategoryId = categoryId;
 
-    // Instant local filtering if full services catalog is already cached (0ms delay)
     final isSearching = search != null && search.trim().isNotEmpty;
-    if (_allServices.isNotEmpty && !isSearching) {
+
+    // Instant 0ms local filtering when full catalog is cached (Zero network call on category tap)
+    if (_allServices.isNotEmpty && !isSearching && !forceRefresh) {
       if (categoryId != null) {
         services = _allServices.where((s) => s.categoryId == categoryId).toList();
       } else {
@@ -113,19 +114,27 @@ class CatalogProvider extends ChangeNotifier {
       }
       loadingServices = false;
       notifyListeners();
-    } else if (services.isEmpty) {
+      return;
+    }
+
+    if (services.isEmpty) {
       loadingServices = true;
       error = null;
       notifyListeners();
     }
 
     try {
-      final result = await _api.fetchServices(categoryId: categoryId, search: search);
-      services = result.items;
+      final result = await _api.fetchServices(categoryId: isSearching ? null : categoryId, search: search);
 
-      // Update cached master list when full catalog is fetched
-      if (categoryId == null && !isSearching) {
+      if (!isSearching && (categoryId == null || forceRefresh)) {
         _allServices = List.from(result.items);
+        if (categoryId != null) {
+          services = _allServices.where((s) => s.categoryId == categoryId).toList();
+        } else {
+          services = List.from(result.items);
+        }
+      } else {
+        services = result.items;
       }
     } on ApiException catch (e) {
       if (services.isEmpty) {
