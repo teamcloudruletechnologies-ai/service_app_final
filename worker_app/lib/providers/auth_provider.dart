@@ -156,6 +156,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final res = await _api.phoneLoginOrRegister(phone);
+      try {
+        final token = await FirebaseMessaging.instance.getToken();
+        if (token != null && token.isNotEmpty) {
+          await _api.updateFcmToken(token);
+        }
+      } catch (_) {}
       loading = false;
       notifyListeners();
       return res;
