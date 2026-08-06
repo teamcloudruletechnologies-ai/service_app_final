@@ -94,7 +94,7 @@ class ApiService {
     if (_token == null) return;
     try {
       await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/worker/fcm-token'),
+        Uri.parse('${ApiConfig.baseUrl}/app/worker/fcm-token'),
         headers: _headers(auth: true),
         body: jsonEncode({'fcmToken': token}),
       );
