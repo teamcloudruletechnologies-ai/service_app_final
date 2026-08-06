@@ -123,7 +123,7 @@ class ApiService {
     try {
       await http.post(
         Uri.parse('${ApiConfig.baseUrl}/user/fcm-token'),
-        headers: _headers(),
+        headers: _headers(auth: true),
         body: jsonEncode({'fcmToken': token}),
       );
     } catch (_) {}
