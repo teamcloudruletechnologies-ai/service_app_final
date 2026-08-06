@@ -8,7 +8,10 @@ let isFcmInitialized = false;
 
 try {
   admin = require("firebase-admin");
-  const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || path.join(__dirname, "../config/serviceAccountKey.json");
+  let serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || "/etc/secrets/serviceAccountKey.json";
+  if (!fs.existsSync(serviceAccountPath)) {
+    serviceAccountPath = path.join(__dirname, "../config/serviceAccountKey.json");
+  }
 
   const getCert = (sa) => (admin.credential?.cert ? admin.credential.cert(sa) : admin.cert(sa));
 
