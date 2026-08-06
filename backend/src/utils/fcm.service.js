@@ -77,6 +77,12 @@ async function sendToUser(userId, { title, body, data = {} }) {
         token: fcmToken,
         notification: { title, body },
         data: Object.fromEntries(Object.entries(data).map(([k, v]) => [k, String(v)])),
+        android: {
+          priority: "high",
+          notification: {
+            channelId: "high_importance_channel"
+          }
+        }
       };
       const response = await admin.messaging().send(message);
       logger.info(`[FCM Push Success] Sent to User #${userId}: ${response}`);
@@ -117,6 +123,12 @@ async function sendToWorker(workerId, { title, body, data = {} }) {
         token: fcmToken,
         notification: { title, body },
         data: Object.fromEntries(Object.entries(data).map(([k, v]) => [k, String(v)])),
+        android: {
+          priority: "high",
+          notification: {
+            channelId: "high_importance_channel"
+          }
+        }
       };
       const response = await admin.messaging().send(message);
       logger.info(`[FCM Push Success] Sent to Worker #${workerId}: ${response}`);

@@ -1,4 +1,4 @@
-package com.urbanservice.urban_service_user
+package com.urbanserve.user
 
 import android.os.Bundle
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
