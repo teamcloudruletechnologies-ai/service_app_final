@@ -80,7 +80,12 @@ async function sendToUser(userId, { title, body, data = {} }) {
         android: {
           priority: "high",
           notification: {
-            channelId: "high_importance_channel"
+            channelId: "high_importance_channel",
+            priority: "high",
+            sound: "default",
+            defaultSound: true,
+            defaultVibrateTimings: true,
+            visibility: "public",
           }
         }
       };
@@ -126,7 +131,12 @@ async function sendToWorker(workerId, { title, body, data = {} }) {
         android: {
           priority: "high",
           notification: {
-            channelId: "high_importance_channel"
+            channelId: "high_importance_channel",
+            priority: "high",
+            sound: "default",
+            defaultSound: true,
+            defaultVibrateTimings: true,
+            visibility: "public",
           }
         }
       };
