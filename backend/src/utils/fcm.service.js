@@ -3,29 +3,28 @@ const fs = require("fs");
 const db = require("../config/db");
 const logger = require("./logger");
 
-let admin = null;
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getMessaging } = require("firebase-admin/messaging");
+
 let isFcmInitialized = false;
 
 try {
-  admin = require("firebase-admin");
   let serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || "/etc/secrets/serviceAccountKey.json";
   if (!fs.existsSync(serviceAccountPath)) {
     serviceAccountPath = path.join(__dirname, "../config/serviceAccountKey.json");
   }
 
-  const getCert = (sa) => (admin.credential?.cert ? admin.credential.cert(sa) : admin.cert(sa));
-
   if (fs.existsSync(serviceAccountPath)) {
     const serviceAccount = require(serviceAccountPath);
-    admin.initializeApp({
-      credential: getCert(serviceAccount),
+    initializeApp({
+      credential: cert(serviceAccount),
     });
     isFcmInitialized = true;
     logger.info("Firebase Admin SDK initialized successfully with service account.");
   } else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-    admin.initializeApp({
-      credential: getCert(serviceAccount),
+    initializeApp({
+      credential: cert(serviceAccount),
     });
     isFcmInitialized = true;
     logger.info("Firebase Admin SDK initialized successfully with environment JSON.");
@@ -75,7 +74,7 @@ async function sendToUser(userId, { title, body, data = {} }) {
       return false;
     }
 
-    if (isFcmInitialized && admin) {
+    if (isFcmInitialized) {
       const message = {
         token: fcmToken,
         notification: { title, body },
@@ -92,7 +91,7 @@ async function sendToUser(userId, { title, body, data = {} }) {
         }
       };
       try {
-        const response = await admin.messaging().send(message);
+        const response = await getMessaging().send(message);
         logger.info(`[FCM Push Success] Sent to User #${userId}: ${response}`);
         return true;
       } catch (sendErr) {
@@ -132,7 +131,7 @@ async function sendToWorker(workerId, { title, body, data = {} }) {
       return false;
     }
 
-    if (isFcmInitialized && admin) {
+    if (isFcmInitialized) {
       const message = {
         token: fcmToken,
         notification: { title, body },
@@ -149,7 +148,7 @@ async function sendToWorker(workerId, { title, body, data = {} }) {
         }
       };
       try {
-        const response = await admin.messaging().send(message);
+        const response = await getMessaging().send(message);
         logger.info(`[FCM Push Success] Sent to Worker #${workerId}: ${response}`);
         return true;
       } catch (sendErr) {
