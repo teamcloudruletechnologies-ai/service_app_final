@@ -26,6 +26,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _servicesKey = GlobalKey();
 
   // 8 Categories with real image thumbnails for the 4x2 Grid
   final List<(String, String, IconData, Color)> _gridCategories = [
@@ -44,16 +46,34 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final catalog = context.read<CatalogProvider>();
-      catalog.loadBanners();
-      catalog.loadCategories();
-      catalog.loadServices();
+      Future.wait([
+        catalog.loadBanners(),
+        catalog.loadCategories(),
+        catalog.loadServices(),
+      ]);
     });
   }
 
   @override
   void dispose() {
     _searchCtrl.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToServices() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final keyContext = _servicesKey.currentContext;
+      if (keyContext != null) {
+        Scrollable.ensureVisible(
+          keyContext,
+          duration: const Duration(milliseconds: 350),
+          curve: Curves.easeOutCubic,
+          alignment: 0.05,
+        );
+      }
+    });
   }
 
   @override
@@ -75,12 +95,15 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
-              await catalog.loadBanners();
-              await catalog.loadCategories();
-              await catalog.loadServices();
+              await Future.wait([
+                catalog.loadBanners(),
+                catalog.loadCategories(),
+                catalog.loadServices(forceRefresh: true),
+              ]);
             },
           color: AppTheme.primary,
           child: SingleChildScrollView(
+            controller: _scrollController,
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.only(bottom: 24),
             child: Column(
@@ -281,23 +304,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                   setState(() {});
                                 },
                                 child: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12),
+                                  padding: EdgeInsets.symmetric(horizontal: 14),
                                   child: Icon(Icons.cancel_rounded, color: Color(0xFF94A3B8), size: 18),
                                 ),
                               )
                             else
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8),
-                                child: Container(
-                                  padding: const EdgeInsets.all(7),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF8FAFC),
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: const Color(0xFFF1F5F9)),
-                                  ),
-                                  child: const Icon(Icons.tune_rounded, color: Color(0xFF475569), size: 16),
-                                ),
-                              ),
+                              const SizedBox(width: 16),
                           ],
                         ),
                       ),
@@ -329,24 +341,27 @@ class _HomeScreenState extends State<HomeScreen> {
                         'Categories',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
                       ),
-                      if (catalog.selectedCategoryId != null)
-                        TextButton(
-                          onPressed: () {
-                            catalog.selectCategory(null);
-                          },
-                          child: const Text(
-                            'Show All',
-                            style: TextStyle(color: AppTheme.primaryDark, fontWeight: FontWeight.bold, fontSize: 13),
+                      TextButton(
+                        onPressed: () {
+                          catalog.selectCategory(null);
+                        },
+                        child: Text(
+                          'Show All',
+                          style: TextStyle(
+                            color: catalog.selectedCategoryId != null ? const Color(0xFF0F172A) : const Color(0xFF0F172A),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
                           ),
                         ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: catalog.loadingCategories
+                  child: catalog.categories.isEmpty && catalog.loadingCategories
                       ? const Padding(
                           padding: EdgeInsets.symmetric(vertical: 20),
                           child: Center(
@@ -399,68 +414,73 @@ class _HomeScreenState extends State<HomeScreen> {
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: catalog.categories.length,
                               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
-                                mainAxisSpacing: 16,
+                                crossAxisCount: 3,
+                                mainAxisSpacing: 10,
                                 crossAxisSpacing: 12,
-                                childAspectRatio: 0.70,
+                                childAspectRatio: 0.88,
                               ),
                               itemBuilder: (context, index) {
                                 final cat = catalog.categories[index];
                                 final isSelected = catalog.selectedCategoryId == cat.id;
                                 final imgUrl = ApiConfig.resolveImageUrl(cat.iconUrl);
 
-                                return InkWell(
+                                 return InkWell(
                                   onTap: () {
+                                    final isScrolledDown = _scrollController.hasClients && _scrollController.offset > 220.0;
                                     if (isSelected) {
                                       catalog.selectCategory(null);
                                     } else {
                                       catalog.selectCategory(cat.id);
+                                      if (!isScrolledDown) {
+                                        _scrollToServices();
+                                      }
                                     }
                                   },
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(24),
                                   child: Column(
                                     children: [
                                       AnimatedContainer(
                                         duration: const Duration(milliseconds: 200),
-                                        width: 68,
-                                        height: 68,
-                                        padding: const EdgeInsets.all(4),
+                                        width: 82,
+                                        height: 82,
+                                        padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
-                                          color: isSelected ? const Color(0xFFFFFBEB) : Colors.white,
-                                          borderRadius: BorderRadius.circular(20),
+                                          color: isSelected ? const Color(0xFFF8FAFC) : Colors.white,
+                                          borderRadius: BorderRadius.circular(24),
                                           border: Border.all(
-                                            color: isSelected ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
-                                            width: isSelected ? 2.0 : 1.2,
+                                            color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
+                                            width: isSelected ? 2.2 : 1.2,
                                           ),
                                           boxShadow: [
                                             BoxShadow(
                                               color: isSelected
-                                                  ? const Color(0xFFF59E0B).withValues(alpha: 0.20)
+                                                  ? const Color(0xFF0F172A).withValues(alpha: 0.15)
                                                   : Colors.black.withValues(alpha: 0.05),
-                                              blurRadius: isSelected ? 12 : 8,
+                                              blurRadius: isSelected ? 14 : 8,
                                               offset: const Offset(0, 4),
                                             ),
                                           ],
                                         ),
                                         child: imgUrl.isNotEmpty
                                             ? ClipRRect(
-                                                borderRadius: BorderRadius.circular(16),
+                                                borderRadius: BorderRadius.circular(18),
                                                 child: CachedNetworkImage(
                                                   imageUrl: imgUrl,
                                                   fit: BoxFit.cover,
-                                                  errorWidget: (_, __, ___) => const Icon(Icons.category_rounded, color: Color(0xFF1E293B), size: 28),
+                                                  errorWidget: (_, __, ___) => const Icon(Icons.category_rounded, color: Color(0xFF0F172A), size: 32),
                                                 ),
                                               )
-                                            : const Icon(Icons.category_rounded, color: Color(0xFF1E293B), size: 28),
+                                            : const Icon(Icons.category_rounded, color: Color(0xFF0F172A), size: 32),
                                       ),
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: 10),
                                       Text(
                                         cat.name,
                                         style: TextStyle(
-                                          fontSize: 12,
-                                          height: 1.2,
-                                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                                          color: isSelected ? const Color(0xFFB45309) : const Color(0xFF0F172A),
+                                          fontSize: 13.5,
+                                          height: 1.25,
+                                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w800,
+                                          color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF1E293B),
+                                          letterSpacing: -0.2,
                                         ),
                                         textAlign: TextAlign.center,
                                         maxLines: 2,
@@ -475,9 +495,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 28),
 
                 // OUR SERVICES 2-COLUMN GRID (Heading changed & 2 Columns Grid Layout)
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
+                Padding(
+                  key: _servicesKey,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: const Text(
                     'Our Services',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
                   ),
@@ -486,7 +507,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: catalog.loadingServices
+                  child: catalog.services.isEmpty && catalog.loadingServices
                       ? Container(
                           height: 120,
                           decoration: BoxDecoration(
@@ -545,7 +566,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 crossAxisCount: 2,
                                 mainAxisSpacing: 14,
                                 crossAxisSpacing: 14,
-                                childAspectRatio: 0.82,
+                                childAspectRatio: 0.90,
                               ),
                               itemBuilder: (context, idx) {
                                 final s = catalog.services[idx];
@@ -576,7 +597,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           child: Container(
                                             width: double.infinity,
                                             decoration: const BoxDecoration(
-                                              color: Color(0xFFEDF2F7),
+                                              color: Color(0xFFF1F5F9),
                                               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                                             ),
                                             child: ClipRRect(
@@ -590,25 +611,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                         ),
                                         Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                s.name,
-                                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1A1A1A)),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Row(
-                                                children: const [
-                                                  Icon(Icons.star_rounded, size: 16, color: Colors.amber),
-                                                  SizedBox(width: 4),
-                                                  Text('4.8', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1A1A1A))),
-                                                ],
-                                              ),
-                                            ],
+                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                          child: Text(
+                                            s.name,
+                                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF0F172A)),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                       ],
@@ -767,27 +775,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          service.name,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w800,
-                                            fontSize: 14,
-                                            color: Color(0xFF0F172A),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          'Starting from ₹${service.basePrice.toStringAsFixed(0)}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12,
-                                            color: Color(0xFF64748B),
-                                          ),
-                                        ),
-                                      ],
+                                    child: Text(
+                                      service.name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 14,
+                                        color: Color(0xFF0F172A),
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   Container(
