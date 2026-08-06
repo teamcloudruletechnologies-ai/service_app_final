@@ -3,26 +3,28 @@ const fs = require("fs");
 const db = require("../config/db");
 const logger = require("./logger");
 
-let admin = null;
+const { initializeApp, cert } = require("firebase-admin/app");
+const { getMessaging } = require("firebase-admin/messaging");
+
 let isFcmInitialized = false;
 
 try {
-  admin = require("firebase-admin");
-  const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || path.join(__dirname, "../config/serviceAccountKey.json");
-
-  const getCert = (sa) => (admin.credential?.cert ? admin.credential.cert(sa) : admin.cert(sa));
+  let serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH || "/etc/secrets/serviceAccountKey.json";
+  if (!fs.existsSync(serviceAccountPath)) {
+    serviceAccountPath = path.join(__dirname, "../config/serviceAccountKey.json");
+  }
 
   if (fs.existsSync(serviceAccountPath)) {
     const serviceAccount = require(serviceAccountPath);
-    admin.initializeApp({
-      credential: getCert(serviceAccount),
+    initializeApp({
+      credential: cert(serviceAccount),
     });
     isFcmInitialized = true;
     logger.info("Firebase Admin SDK initialized successfully with service account.");
   } else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
-    admin.initializeApp({
-      credential: getCert(serviceAccount),
+    initializeApp({
+      credential: cert(serviceAccount),
     });
     isFcmInitialized = true;
     logger.info("Firebase Admin SDK initialized successfully with environment JSON.");
@@ -72,7 +74,7 @@ async function sendToUser(userId, { title, body, data = {} }) {
       return false;
     }
 
-    if (isFcmInitialized && admin) {
+    if (isFcmInitialized) {
       const message = {
         token: fcmToken,
         notification: { title, body },
@@ -81,7 +83,6 @@ async function sendToUser(userId, { title, body, data = {} }) {
           priority: "high",
           notification: {
             channelId: "high_importance_channel",
-            priority: "high",
             sound: "default",
             defaultSound: true,
             defaultVibrateTimings: true,
@@ -89,11 +90,18 @@ async function sendToUser(userId, { title, body, data = {} }) {
           }
         }
       };
-      const response = await admin.messaging().send(message);
-      logger.info(`[FCM Push Success] Sent to User #${userId}: ${response}`);
-      return true;
+      try {
+        const response = await getMessaging().send(message);
+        logger.info(`[FCM Push Success] Sent to User #${userId}: ${response}`);
+        return true;
+      } catch (sendErr) {
+        logger.error(`Error sending FCM push to User #${userId}: ${sendErr.message}`);
+        await db.query("INSERT INTO notifications (title, message, type, priority, entity_id, created_at) VALUES ('[FCM ERROR User]', $1, 'admin_log', 'high', $2, NOW())", [String(sendErr.message), String(userId)]);
+        return false;
+      }
     } else {
       logger.info(`[FCM Push Fallback] User #${userId} (Token: ${fcmToken.slice(0, 10)}...): "${title}" - ${body}`);
+      await db.query("INSERT INTO notifications (title, message, type, priority, entity_id, created_at) VALUES ('[FCM FALLBACK User]', 'FCM Not Initialized', 'admin_log', 'high', $1, NOW())", [String(userId)]);
       return true;
     }
   } catch (err) {
@@ -123,7 +131,7 @@ async function sendToWorker(workerId, { title, body, data = {} }) {
       return false;
     }
 
-    if (isFcmInitialized && admin) {
+    if (isFcmInitialized) {
       const message = {
         token: fcmToken,
         notification: { title, body },
@@ -132,7 +140,6 @@ async function sendToWorker(workerId, { title, body, data = {} }) {
           priority: "high",
           notification: {
             channelId: "high_importance_channel",
-            priority: "high",
             sound: "default",
             defaultSound: true,
             defaultVibrateTimings: true,
@@ -140,11 +147,18 @@ async function sendToWorker(workerId, { title, body, data = {} }) {
           }
         }
       };
-      const response = await admin.messaging().send(message);
-      logger.info(`[FCM Push Success] Sent to Worker #${workerId}: ${response}`);
-      return true;
+      try {
+        const response = await getMessaging().send(message);
+        logger.info(`[FCM Push Success] Sent to Worker #${workerId}: ${response}`);
+        return true;
+      } catch (sendErr) {
+        logger.error(`Error sending FCM push to Worker #${workerId}: ${sendErr.message}`);
+        await db.query("INSERT INTO notifications (title, message, type, priority, entity_id, created_at) VALUES ('[FCM ERROR Worker]', $1, 'admin_log', 'high', $2, NOW())", [String(sendErr.message), String(workerId)]);
+        return false;
+      }
     } else {
       logger.info(`[FCM Push Fallback] Worker #${workerId} (Token: ${fcmToken.slice(0, 10)}...): "${title}" - ${body}`);
+      await db.query("INSERT INTO notifications (title, message, type, priority, entity_id, created_at) VALUES ('[FCM FALLBACK Worker]', 'FCM Not Initialized', 'admin_log', 'high', $1, NOW())", [String(workerId)]);
       return true;
     }
   } catch (err) {

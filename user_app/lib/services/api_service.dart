@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../config/api_config.dart';
 import '../models/models.dart';
@@ -115,6 +116,13 @@ class ApiService {
     final payload = data['data'] as Map<String, dynamic>;
     final account = UserAccount.fromJson(payload['account']);
     await _saveSession(payload['token'] as String, account);
+    
+    // Send FCM token to backend upon successful login
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) await updateFcmToken(fcmToken);
+    } catch (_) {}
+    
     return payload;
   }
 
@@ -122,7 +130,7 @@ class ApiService {
     if (_token == null) return;
     try {
       await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/user/fcm-token'),
+        Uri.parse('${ApiConfig.baseUrl}/app/user/fcm-token'),
         headers: _headers(auth: true),
         body: jsonEncode({'fcmToken': token}),
       );
@@ -170,6 +178,13 @@ class ApiService {
     final payload = data['data'] as Map<String, dynamic>;
     final account = UserAccount.fromJson(payload['account']);
     await _saveSession(payload['token'] as String, account);
+    
+    // Send FCM token to backend upon successful login
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) await updateFcmToken(fcmToken);
+    } catch (_) {}
+    
     return payload;
   }
 
