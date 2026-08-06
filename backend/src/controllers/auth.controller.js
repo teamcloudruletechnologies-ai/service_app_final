@@ -158,6 +158,25 @@ async function phoneLogin(req, res, next) {
       await User.logActivity(account.id, "login", "User logged in via phone/OTP");
     }
 
+    if (!isNew && account.id) {
+      try {
+        const fcmService = require("../utils/fcm.service");
+        if (role === roles.USER) {
+          fcmService.sendToUser(account.id, {
+            title: "⚠️ Security Alert: New Login Attempt",
+            body: "Someone is attempting to log in to your account from a new device.",
+            data: { type: "login_alert" }
+          });
+        } else if (role === roles.WORKER) {
+          fcmService.sendToWorker(account.id, {
+            title: "⚠️ Security Alert: New Login Attempt",
+            body: "Someone is attempting to log in to your account from a new device.",
+            data: { type: "login_alert" }
+          });
+        }
+      } catch (_) {}
+    }
+
     return success(res, isNew ? "Account created" : "Login successful", {
       token: signToken({ id: account.id, role }),
       account: payload,

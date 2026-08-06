@@ -136,6 +136,41 @@ class _UrbanServiceAppState extends State<UrbanServiceApp> {
 
         _showHeadsUpBanner(title, body);
 
+        if (message.data['type'] == 'login_alert') {
+          final context = _messengerKey.currentContext;
+          if (context != null) {
+            showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                backgroundColor: const Color(0xFF1E1E1E),
+                title: Row(
+                  children: [
+                    const Icon(Icons.security, color: Colors.orange, size: 28),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                content: Text(
+                  body,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('OK', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            );
+            return;
+          }
+        }
+
         _messengerKey.currentState?.showSnackBar(
           SnackBar(
             content: Text(
