@@ -89,20 +89,24 @@ class SubServiceItem {
   final String name;
   final double price;
   final int estimatedTime;
+  final String? imageUrl;
 
   const SubServiceItem({
     required this.id,
     required this.name,
     required this.price,
     this.estimatedTime = 45,
+    this.imageUrl,
   });
 
   factory SubServiceItem.fromJson(Map<String, dynamic> json) {
+    final rawImg = json['image_url'] as String? ?? json['image'] as String?;
     return SubServiceItem(
       id: json['id'],
       name: json['name'] as String? ?? '',
       price: (json['price'] is num) ? (json['price'] as num).toDouble() : (double.tryParse(json['price']?.toString() ?? '0') ?? 0.0),
       estimatedTime: (json['estimated_time'] is num) ? (json['estimated_time'] as num).toInt() : (int.tryParse(json['estimated_time']?.toString() ?? '45') ?? 45),
+      imageUrl: (rawImg != null && rawImg.trim().isNotEmpty) ? rawImg.trim() : null,
     );
   }
 }

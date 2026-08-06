@@ -196,7 +196,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                               separatorBuilder: (context, index) => const SizedBox(height: 12),
                               itemBuilder: (context, idx) {
                                 final sub = widget.service.subServices[idx];
-                                final isSelected = _selectedSubService?.id == sub.id || (_selectedSubService == null && idx == 0);
+                                final hasSubImage = sub.imageUrl != null && sub.imageUrl!.trim().isNotEmpty;
 
                                 return InkWell(
                                   onTap: () {
@@ -205,84 +205,84 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                     });
                                   },
                                   borderRadius: BorderRadius.circular(16),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 220),
-                                    curve: Curves.easeInOut,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                                    decoration: BoxDecoration(
-                                      color: isSelected ? const Color(0xFFFFFBEB) : Colors.white,
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: isSelected ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
-                                        width: isSelected ? 2.0 : 1.0,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: isSelected
-                                              ? const Color(0xFFF59E0B).withValues(alpha: 0.12)
-                                              : Colors.black.withValues(alpha: 0.03),
-                                          blurRadius: isSelected ? 12 : 8,
-                                          offset: const Offset(0, 3),
-                                        ),
-                                      ],
+                                  child: Container(
+                                  margin: const EdgeInsets.only(bottom: 2),
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: const Color(0xFFE2E8F0),
+                                      width: 1.0,
                                     ),
-                                    child: Row(
-                                      children: [
-                                        // Premium Custom Checkmark Selection Circle Indicator
-                                        AnimatedContainer(
-                                          duration: const Duration(milliseconds: 200),
-                                          width: 22,
-                                          height: 22,
-                                          decoration: BoxDecoration(
-                                            color: isSelected ? const Color(0xFFF59E0B) : Colors.transparent,
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: isSelected ? const Color(0xFFF59E0B) : const Color(0xFFCBD5E1),
-                                              width: isSelected ? 0 : 2,
-                                            ),
-                                          ),
-                                          child: isSelected
-                                              ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
-                                              : null,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.03),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      // ─── LEFT SIDE: Clean Rounded Image Box ───
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(14),
+                                        child: Container(
+                                          width: 95,
+                                          height: 95,
+                                          color: const Color(0xFFF1F5F9),
+                                          child: hasSubImage
+                                              ? CachedNetworkImage(
+                                                  imageUrl: ApiConfig.resolveImageUrl(sub.imageUrl),
+                                                  fit: BoxFit.cover,
+                                                  errorWidget: (context, error, stackTrace) => const Center(
+                                                    child: Icon(Icons.build_rounded, size: 32, color: AppTheme.primary),
+                                                  ),
+                                                )
+                                              : const Center(
+                                                  child: Icon(Icons.build_rounded, size: 32, color: AppTheme.primary),
+                                                ),
                                         ),
-                                        const SizedBox(width: 14),
+                                      ),
+                                      const SizedBox(width: 24), // Moved text rightwards
 
-                                        // Package Name
-                                        Expanded(
-                                          child: Text(
-                                            sub.name,
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                                              color: isSelected ? const Color(0xFF78350F) : const Color(0xFF0F172A),
-                                              letterSpacing: -0.2,
-                                            ),
-                                          ),
-                                        ),
-
-                                        // Right Price Badge
-                                        if (sub.price > 0)
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                            decoration: BoxDecoration(
-                                              color: isSelected ? const Color(0xFFF59E0B) : const Color(0xFFFEF3C7),
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: Text(
-                                              '₹${sub.price.toInt()}',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w900,
-                                                color: isSelected ? Colors.white : const Color(0xFF92400E),
+                                      // ─── RIGHT SIDE: Sub Service Name & Price ───
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              sub.name,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFF0F172A),
+                                                letterSpacing: -0.3,
+                                                height: 1.25,
                                               ),
                                             ),
-                                          ),
-                                      ],
-                                    ),
+                                            if (sub.price > 0 || widget.service.price > 0) ...[
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                '₹${(sub.price > 0 ? sub.price : widget.service.price).toInt()}',
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w900,
+                                                  color: Color(0xFF0F172A),
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
+                          ),
                             const SizedBox(height: 20),
                           ],
 
