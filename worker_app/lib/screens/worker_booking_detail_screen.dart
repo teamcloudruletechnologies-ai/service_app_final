@@ -608,26 +608,24 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
       return null;
     }
 
-    final mainButton = Expanded(
-      child: ElevatedButton(
-        onPressed: _updating ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: AppTheme.matteBlack,
-          minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        ),
-        child: _updating
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(strokeWidth: 2.5, color: AppTheme.matteBlack),
-              )
-            : Text(
-                label,
-                style: const TextStyle(color: AppTheme.matteBlack, fontWeight: FontWeight.bold, fontSize: 16),
-              ),
+    final mainButton = ElevatedButton(
+      onPressed: _updating ? null : onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: AppTheme.matteBlack,
+        minimumSize: const Size.fromHeight(52),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
+      child: _updating
+          ? const SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(strokeWidth: 2.5, color: AppTheme.matteBlack),
+            )
+          : Text(
+              label,
+              style: const TextStyle(color: AppTheme.matteBlack, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
     );
 
     return SafeArea(
@@ -652,7 +650,7 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  mainButton,
+                  Expanded(child: mainButton),
                 ],
               )
             : mainButton,
