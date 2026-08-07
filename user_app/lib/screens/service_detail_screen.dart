@@ -224,65 +224,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: widget.service.subServices.length,
-                              separatorBuilder: (context, index) => const SizedBox(height: 12),
+                              separatorBuilder: (context, index) => const SizedBox(height: 14),
                               itemBuilder: (context, idx) {
                                 final sub = widget.service.subServices[idx];
                                 final hasSubImage = sub.imageUrl != null && sub.imageUrl!.trim().isNotEmpty;
                                 final hasName = sub.name.trim().isNotEmpty;
                                 final hasPrice = sub.price > 0;
+                                final imgPath = hasSubImage ? sub.imageUrl : widget.service.imageUrl;
 
-                                // Case 1: Only image is uploaded by admin (no name & no price)
-                                if (!hasName && !hasPrice && hasSubImage) {
-                                  final isSelected = _selectedSubService == sub;
-                                  return InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedSubService = sub;
-                                      });
-                                      _proceedToBooking(sub);
-                                    },
-                                    borderRadius: BorderRadius.circular(14),
-                                    child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
-                                      margin: const EdgeInsets.only(bottom: 4),
-                                      height: 185,
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(14),
-                                        border: Border.all(
-                                          color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
-                                          width: isSelected ? 2.5 : 1.0,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: isSelected
-                                                ? const Color(0xFF0F172A).withValues(alpha: 0.12)
-                                                : Colors.black.withValues(alpha: 0.03),
-                                            blurRadius: isSelected ? 12 : 6,
-                                            offset: const Offset(0, 3),
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(13),
-                                        child: CachedNetworkImage(
-                                          imageUrl: ApiConfig.resolveImageUrl(sub.imageUrl),
-                                          width: double.infinity,
-                                          height: 185,
-                                          fit: BoxFit.cover,
-                                          alignment: Alignment.center,
-                                          errorWidget: (context, error, stackTrace) => const Center(
-                                            child: Icon(Icons.build_rounded, size: 32, color: AppTheme.primary),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
-
-                                final isSelected = _selectedSubService == sub;
-                                // Case 2: Name or Price is provided by admin
                                 return InkWell(
                                   onTap: () {
                                     setState(() {
@@ -290,82 +239,82 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                     });
                                     _proceedToBooking(sub);
                                   },
-                                  borderRadius: BorderRadius.circular(11),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    margin: const EdgeInsets.only(bottom: 4),
-                                    padding: const EdgeInsets.all(12),
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Container(
+                                    height: 185,
+                                    width: double.infinity,
                                     decoration: BoxDecoration(
                                       color: Colors.white,
-                                      borderRadius: BorderRadius.circular(11),
-                                      border: Border.all(
-                                        color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
-                                        width: isSelected ? 2.2 : 1.0,
-                                      ),
+                                      borderRadius: BorderRadius.circular(16),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: isSelected
-                                              ? const Color(0xFF0F172A).withValues(alpha: 0.10)
-                                              : Colors.black.withValues(alpha: 0.03),
-                                          blurRadius: isSelected ? 10 : 6,
-                                          offset: const Offset(0, 2),
+                                          color: Colors.black.withValues(alpha: 0.08),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 3),
                                         ),
                                       ],
                                     ),
-                                    child: Row(
-                                      children: [
-                                        // ─── LEFT SIDE: Clean Rounded Image Box ───
-                                        if (hasSubImage) ...[
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(10),
-                                            child: Container(
-                                              width: 80,
-                                              height: 80,
-                                              color: const Color(0xFFF1F5F9),
-                                              child: CachedNetworkImage(
-                                                imageUrl: ApiConfig.resolveImageUrl(sub.imageUrl),
-                                                fit: BoxFit.cover,
-                                                errorWidget: (context, error, stackTrace) => const Center(
-                                                  child: Icon(Icons.build_rounded, size: 28, color: AppTheme.primary),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Stack(
+                                        children: [
+                                          // 1. FULL SIZE BANNER IMAGE (Always 185px height!)
+                                          CachedNetworkImage(
+                                            imageUrl: ApiConfig.resolveImageUrl(imgPath),
+                                            width: double.infinity,
+                                            height: 185,
+                                            fit: BoxFit.cover,
+                                            alignment: Alignment.center,
+                                            errorWidget: (context, error, stackTrace) => const Center(
+                                              child: Icon(Icons.build_rounded, size: 36, color: AppTheme.primary),
+                                            ),
+                                          ),
+
+                                          // 2. RIGHT DOWN SUB SERVICE OVERLAY BADGE (Without any background shadow on image!)
+                                          if (hasName || hasPrice)
+                                            Positioned(
+                                              bottom: 12,
+                                              right: 14,
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withValues(alpha: 0.80),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(color: Colors.white24, width: 0.8),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    if (hasName)
+                                                      Text(
+                                                        sub.name,
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 13.5,
+                                                          fontWeight: FontWeight.w800,
+                                                          letterSpacing: -0.2,
+                                                        ),
+                                                      ),
+                                                    if (hasName && hasPrice)
+                                                      const Padding(
+                                                        padding: EdgeInsets.symmetric(horizontal: 6),
+                                                        child: Text('•', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                                      ),
+                                                    if (hasPrice)
+                                                      Text(
+                                                        '₹${sub.price.toInt()}',
+                                                        style: const TextStyle(
+                                                          color: AppTheme.primary,
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.w900,
+                                                        ),
+                                                      ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                          const SizedBox(width: 20),
                                         ],
-
-                                        // ─── RIGHT SIDE: Sub Service Name & Price ───
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              if (hasName)
-                                                Text(
-                                                  sub.name,
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: Color(0xFF0F172A),
-                                                    letterSpacing: -0.3,
-                                                    height: 1.25,
-                                                  ),
-                                                ),
-                                              if (hasPrice) ...[
-                                                if (hasName) const SizedBox(height: 8),
-                                                Text(
-                                                  '₹${sub.price.toInt()}',
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.w900,
-                                                    color: Color(0xFF0F172A),
-                                                  ),
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
                                   ),
                                 );
