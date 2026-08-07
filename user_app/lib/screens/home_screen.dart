@@ -329,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     banners: catalog.banners,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 10),
 
                 // DYNAMIC CATEGORIES GRID (Loaded from Backend / Admin Panel)
                 Padding(
@@ -409,87 +409,91 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                             )
-                          : GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: catalog.categories.length,
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 12,
-                                childAspectRatio: 0.88,
-                              ),
-                              itemBuilder: (context, index) {
-                                final cat = catalog.categories[index];
-                                final isSelected = catalog.selectedCategoryId == cat.id;
-                                final imgUrl = ApiConfig.resolveImageUrl(cat.iconUrl);
+                          : SizedBox(
+                              height: 250,
+                              child: GridView.builder(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: catalog.categories.length,
+                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  mainAxisSpacing: 14,
+                                  crossAxisSpacing: 10,
+                                  childAspectRatio: 1.22,
+                                ),
+                                itemBuilder: (context, index) {
+                                  final cat = catalog.categories[index];
+                                  final isSelected = catalog.selectedCategoryId == cat.id;
+                                  final imgUrl = ApiConfig.resolveImageUrl(cat.iconUrl);
 
-                                 return InkWell(
-                                  onTap: () {
-                                    final isScrolledDown = _scrollController.hasClients && _scrollController.offset > 220.0;
-                                    if (isSelected) {
-                                      catalog.selectCategory(null);
-                                    } else {
-                                      catalog.selectCategory(cat.id);
-                                      if (!isScrolledDown) {
-                                        _scrollToServices();
+                                  return InkWell(
+                                    onTap: () {
+                                      final isScrolledDown = _scrollController.hasClients && _scrollController.offset > 220.0;
+                                      if (isSelected) {
+                                        catalog.selectCategory(null);
+                                      } else {
+                                        catalog.selectCategory(cat.id);
+                                        if (!isScrolledDown) {
+                                          _scrollToServices();
+                                        }
                                       }
-                                    }
-                                  },
-                                  borderRadius: BorderRadius.circular(24),
-                                  child: Column(
-                                    children: [
-                                      AnimatedContainer(
-                                        duration: const Duration(milliseconds: 200),
-                                        width: 82,
-                                        height: 82,
-                                        padding: const EdgeInsets.all(6),
-                                        decoration: BoxDecoration(
-                                          color: isSelected ? const Color(0xFFF8FAFC) : Colors.white,
-                                          borderRadius: BorderRadius.circular(24),
-                                          border: Border.all(
-                                            color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
-                                            width: isSelected ? 2.2 : 1.2,
-                                          ),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: isSelected
-                                                  ? const Color(0xFF0F172A).withValues(alpha: 0.15)
-                                                  : Colors.black.withValues(alpha: 0.05),
-                                              blurRadius: isSelected ? 14 : 8,
-                                              offset: const Offset(0, 4),
+                                    },
+                                    borderRadius: BorderRadius.circular(24),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        AnimatedContainer(
+                                          duration: const Duration(milliseconds: 200),
+                                          width: 82,
+                                          height: 82,
+                                          padding: const EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: isSelected ? const Color(0xFFF8FAFC) : Colors.white,
+                                            borderRadius: BorderRadius.circular(24),
+                                            border: Border.all(
+                                              color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
+                                              width: isSelected ? 2.5 : 1.2,
                                             ),
-                                          ],
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: isSelected
+                                                    ? const Color(0xFF0F172A).withValues(alpha: 0.15)
+                                                    : Colors.black.withValues(alpha: 0.05),
+                                                blurRadius: isSelected ? 14 : 8,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ],
+                                          ),
+                                          child: imgUrl.isNotEmpty
+                                              ? ClipRRect(
+                                                  borderRadius: BorderRadius.circular(19),
+                                                  child: CachedNetworkImage(
+                                                    imageUrl: imgUrl,
+                                                    fit: BoxFit.cover,
+                                                    errorWidget: (_, __, ___) => const Icon(Icons.category_rounded, color: Color(0xFF0F172A), size: 34),
+                                                  ),
+                                                )
+                                              : const Icon(Icons.category_rounded, color: Color(0xFF0F172A), size: 34),
                                         ),
-                                        child: imgUrl.isNotEmpty
-                                            ? ClipRRect(
-                                                borderRadius: BorderRadius.circular(18),
-                                                child: CachedNetworkImage(
-                                                  imageUrl: imgUrl,
-                                                  fit: BoxFit.cover,
-                                                  errorWidget: (_, __, ___) => const Icon(Icons.category_rounded, color: Color(0xFF0F172A), size: 32),
-                                                ),
-                                              )
-                                            : const Icon(Icons.category_rounded, color: Color(0xFF0F172A), size: 32),
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        cat.name,
-                                        style: TextStyle(
-                                          fontSize: 13.5,
-                                          height: 1.25,
-                                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w800,
-                                          color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF1E293B),
-                                          letterSpacing: -0.2,
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          cat.name,
+                                          style: TextStyle(
+                                            fontSize: 13.5,
+                                            height: 1.15,
+                                            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w800,
+                                            color: const Color(0xFF0F172A),
+                                            letterSpacing: -0.3,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        textAlign: TextAlign.center,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
                             )),
                 ),
                 const SizedBox(height: 28),
