@@ -136,25 +136,36 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
         _updating = true;
       });
 
-      final bookingProv = context.read<BookingProvider>();
-      final ok = await bookingProv.updateBookingStatus(widget.bookingId, status, otp: otpInput);
+      final api = context.read<ApiService>();
+      final updatedItem = await api.updateBookingStatus(widget.bookingId, status, otp: otpInput);
 
       if (!mounted) return;
 
-      if (ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Booking status updated to $status')),
-        );
-        await _loadBooking(isSilent: true);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(bookingProv.error ?? 'Failed to update status')),
-        );
-      }
+      setState(() {
+        _booking = updatedItem;
+        _updating = false;
+      });
+
+      // Also refresh provider list in background so home/dashboard lists are fresh
+      try {
+        context.read<BookingProvider>().loadBookings();
+      } catch (_) {}
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Booking status updated to ${status.replaceAll('_', ' ')}'),
+          backgroundColor: Colors.green.shade700,
+        ),
+      );
     } catch (e) {
       if (mounted) {
+        final errorMsg = e is ApiException ? e.message : 'Error updating status: $e';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: AppTheme.zomatoRed,
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
     } finally {
@@ -192,7 +203,46 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: _buildBody(),
+      body: Stack(
+        children: [
+          _buildBody(),
+          if (_updating)
+            Container(
+              color: Colors.black.withValues(alpha: 0.3),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2.5, color: AppTheme.primary),
+                      ),
+                      SizedBox(width: 14),
+                      Text(
+                        'Verifying OTP...',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.primary),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
       bottomNavigationBar: _booking != null
           ? _buildActionButton()
           : null,
