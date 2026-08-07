@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../models/models.dart';
 import '../services/api_service.dart';
@@ -13,7 +14,6 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final ApiService _api = ApiService();
   bool _isLoading = true;
   String? _error;
   List<NotificationItem> _notifications = [];
@@ -31,7 +31,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
     });
 
     try {
-      final pagedResult = await _api.fetchNotifications();
+      final api = context.read<ApiService>();
+      final pagedResult = await api.fetchNotifications();
       if (mounted) {
         setState(() {
           _notifications = pagedResult.items;
@@ -55,7 +56,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
     });
 
     try {
-      await _api.deleteNotification(id);
+      final api = context.read<ApiService>();
+      await api.deleteNotification(id);
     } catch (e) {
       // Revert if API fails
       if (mounted) {

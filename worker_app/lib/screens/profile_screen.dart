@@ -15,7 +15,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _apiService = ApiService();
   bool _editMode = false;
   bool _saving = false;
   late TextEditingController _nameCtrl;
@@ -29,7 +28,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _nameCtrl = TextEditingController(text: user?.name ?? '');
     _emailCtrl = TextEditingController(text: user?.email ?? '');
     _phoneCtrl = TextEditingController(text: user?.phone ?? '');
-    _apiService.init();
   }
 
   @override
@@ -52,14 +50,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _saveProfile() async {
     setState(() => _saving = true);
     try {
-      await _apiService.updateWorkerProfile(
+      final apiService = context.read<ApiService>();
+      await apiService.updateWorkerProfile(
         name: _nameCtrl.text.trim(),
         email: _emailCtrl.text.trim(),
       );
       if (mounted) {
-        setState(() { _editMode = false; _saving = false; });
+        await context.read<AuthProvider>().reloadProfile();
+        setState(() => _editMode = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated!'), backgroundColor: AppTheme.olive),
+          const SnackBar(content: Text('Profile updated successfully!')),
         );
       }
     } catch (e) {

@@ -47,8 +47,9 @@ void main() async {
     debugPrint("=================================================");
 
     final apiService = ApiService();
+    await apiService.init(); // <--- ALWAYS INIT THE API SERVICE FIRST
+
     if (token != null && token.isNotEmpty) {
-      await apiService.init();
       await apiService.updateFcmToken(token);
     }
 
@@ -61,6 +62,7 @@ void main() async {
   } catch (e) {
     debugPrint("Firebase init failed: $e");
     final apiService = ApiService();
+    await apiService.init(); // <--- ALWAYS INIT THE API SERVICE FIRST
     runApp(UrbanServiceApp(apiService: apiService));
   }
 }

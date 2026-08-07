@@ -156,7 +156,7 @@ async function findNearbyWorkers(lat, lng, radiusKm = 10, serviceType = null) {
 
   let allWorkers = [...gpsResult.rows];
 
-  if (nearestCity && minDist <= 100) {
+  if (nearestCity) {
     // Fetch active+approved workers whose registered city matches the detected city
     const params2 = [nearestCity.toLowerCase()];
     let where2 = "status = 'active' AND kyc_status = 'approved' AND LOWER(city) = $1";
@@ -182,6 +182,25 @@ async function findNearbyWorkers(lat, lng, radiusKm = 10, serviceType = null) {
         allWorkers.push(w);
       }
     }
+  }
+
+  // ── Stage 3: Ultimate Fallback (Return any matching workers in DB) ──
+  if (allWorkers.length === 0) {
+    const params3 = [];
+    let where3 = "status = 'active' AND kyc_status = 'approved'";
+    if (serviceType) {
+      params3.push(`%${serviceType}%`);
+      where3 += ` AND service_type ILIKE $${params3.length}`;
+    }
+    const fallbackQuery = `
+      SELECT ${publicFields}, current_lat, current_lng, last_location_update,
+             NULL::numeric AS distance
+      FROM workers
+      WHERE ${where3}
+      LIMIT 10
+    `;
+    const fallbackResult = await db.query(fallbackQuery, params3);
+    allWorkers = fallbackResult.rows;
   }
 
   return allWorkers;

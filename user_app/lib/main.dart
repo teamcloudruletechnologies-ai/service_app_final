@@ -60,6 +60,7 @@ void main() async {
   );
 
   final apiService = ApiService();
+  await apiService.init(); // <--- ALWAYS INIT THE API SERVICE FIRST
   runApp(UrbanServiceApp(apiService: apiService));
 
   // Do the notification-permission dialog + token fetch AFTER the UI
@@ -88,7 +89,6 @@ Future<void> _setupFcmPermissionsAndToken(ApiService apiService) async {
     debugPrint("=================================================");
 
     if (token != null && token.isNotEmpty) {
-      await apiService.init();
       await apiService.updateFcmToken(token);
     }
 

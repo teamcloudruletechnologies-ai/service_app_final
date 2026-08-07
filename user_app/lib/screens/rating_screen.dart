@@ -16,16 +16,9 @@ class RatingScreen extends StatefulWidget {
 }
 
 class _RatingScreenState extends State<RatingScreen> {
-  final _apiService = ApiService();
   int _rating = 5;
   final _commentCtrl = TextEditingController();
   bool _submitting = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _apiService.init();
-  }
 
   @override
   void dispose() {
@@ -36,7 +29,8 @@ class _RatingScreenState extends State<RatingScreen> {
   Future<void> _submit() async {
     setState(() => _submitting = true);
     try {
-      await _apiService.submitReview(
+      final apiService = context.read<ApiService>();
+      await apiService.submitReview(
         bookingId: widget.booking.id,
         rating: _rating,
         comment: _commentCtrl.text.trim().isEmpty ? null : _commentCtrl.text.trim(),
