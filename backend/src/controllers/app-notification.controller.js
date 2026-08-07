@@ -5,8 +5,8 @@ const db = require("../config/db");
 async function listMyNotifications(req, res, next) {
   try {
     const { page, limit, read } = req.query;
-    const entityId = req.user.id;
-    const type = req.user.role === 'worker' ? 'worker_push' : 'user_push';
+    const entityId = req.auth.id;
+    const type = req.auth.role === 'worker' ? 'worker_push' : 'user_push';
 
     const result = await notificationModel.listNotifications({
       page: page ? parseInt(page, 10) : 1,
@@ -24,8 +24,8 @@ async function listMyNotifications(req, res, next) {
 async function markMyNotificationRead(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
-    const entityId = req.user.id;
-    const type = req.user.role === 'worker' ? 'worker_push' : 'user_push';
+    const entityId = req.auth.id;
+    const type = req.auth.role === 'worker' ? 'worker_push' : 'user_push';
 
     // Verify ownership
     const check = await db.query("SELECT id FROM notifications WHERE id = $1 AND entity_id = $2 AND type = $3", [id, entityId, type]);
@@ -42,8 +42,8 @@ async function markMyNotificationRead(req, res, next) {
 
 async function markAllMyNotificationsRead(req, res, next) {
   try {
-    const entityId = req.user.id;
-    const type = req.user.role === 'worker' ? 'worker_push' : 'user_push';
+    const entityId = req.auth.id;
+    const type = req.auth.role === 'worker' ? 'worker_push' : 'user_push';
 
     const result = await db.query(
       "UPDATE notifications SET read = TRUE, updated_at = NOW() WHERE entity_id = $1 AND type = $2 AND read = FALSE RETURNING id",
@@ -58,8 +58,8 @@ async function markAllMyNotificationsRead(req, res, next) {
 async function deleteMyNotification(req, res, next) {
   try {
     const id = parseInt(req.params.id, 10);
-    const entityId = req.user.id;
-    const type = req.user.role === 'worker' ? 'worker_push' : 'user_push';
+    const entityId = req.auth.id;
+    const type = req.auth.role === 'worker' ? 'worker_push' : 'user_push';
 
     // Verify ownership
     const check = await db.query("SELECT id FROM notifications WHERE id = $1 AND entity_id = $2 AND type = $3", [id, entityId, type]);
