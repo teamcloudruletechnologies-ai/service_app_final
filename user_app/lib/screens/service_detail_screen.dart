@@ -170,7 +170,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
                     // ─── MAIN CONTENT CONTAINER ───
                     Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -178,13 +178,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           Text(
                             widget.service.name,
                             style: const TextStyle(
-                              fontSize: 24,
+                              fontSize: 22,
                               fontWeight: FontWeight.w900,
                               color: Color(0xFF0F172A),
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
 
                           // ─── DYNAMIC SERVICE PACKAGES (SUB-SERVICES) ───
                           if (hasSubServices) ...[
@@ -194,7 +194,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                 const Text(
                                   'Select Service Package',
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w800,
                                     color: Color(0xFF0F172A),
                                   ),
@@ -217,9 +217,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 20),
 
                             ListView.separated(
+                              padding: EdgeInsets.zero,
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: widget.service.subServices.length,
