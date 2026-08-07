@@ -16,7 +16,7 @@ async function listNotifications({ page = 1, limit = 10, read, type, entityId } 
   }
 
   if (entityId !== undefined && entityId !== "") {
-    queryParams.push(entityId);
+    queryParams.push(String(entityId));
     whereClauses.push(`entity_id = $${queryParams.length}`);
   }
 

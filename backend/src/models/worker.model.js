@@ -113,8 +113,8 @@ async function findNearbyWorkers(lat, lng, radiusKm = 10, serviceType = null) {
   let where1 = "status = 'active' AND kyc_status = 'approved' AND current_lat IS NOT NULL AND current_lng IS NOT NULL";
 
   if (serviceType) {
-    params1.push(serviceType);
-    where1 += ` AND service_type = $${params1.length}`;
+    params1.push(`%${serviceType}%`);
+    where1 += ` AND service_type ILIKE $${params1.length}`;
   }
 
   const gpsQuery = `
@@ -140,6 +140,7 @@ async function findNearbyWorkers(lat, lng, radiusKm = 10, serviceType = null) {
     { name: 'hyderabad', lat: 17.3850, lng: 78.4867 },
     { name: 'kolkata',   lat: 22.5726, lng: 88.3639 },
     { name: 'pune',      lat: 18.5204, lng: 73.8567 },
+    { name: 'madurai',   lat: 9.9252,  lng: 78.1198 },
   ];
 
   const toRad = (d) => (d * Math.PI) / 180;
@@ -161,8 +162,8 @@ async function findNearbyWorkers(lat, lng, radiusKm = 10, serviceType = null) {
     let where2 = "status = 'active' AND kyc_status = 'approved' AND LOWER(city) = $1";
 
     if (serviceType) {
-      params2.push(serviceType);
-      where2 += ` AND service_type = $${params2.length}`;
+      params2.push(`%${serviceType}%`);
+      where2 += ` AND service_type ILIKE $${params2.length}`;
     }
 
     const cityQuery = `
