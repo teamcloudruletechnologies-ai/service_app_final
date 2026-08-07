@@ -632,4 +632,34 @@ class ApiService {
     final data = _decode(response) as Map<String, dynamic>;
     return data['data'] as Map<String, dynamic>;
   }
+
+  // --- NOTIFICATIONS ---
+
+  Future<PagedResult<NotificationItem>> fetchNotifications({int page = 1, int limit = 50}) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/app/notifications?page=$page&limit=$limit');
+    final response = await http.get(uri, headers: _headers(auth: true));
+    final data = _decode(response) as Map<String, dynamic>;
+    return _parsePaged(data['data'] as Map<String, dynamic>, NotificationItem.fromJson);
+  }
+
+  Future<void> markNotificationRead(int id) async {
+    await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/app/notifications/$id/read'),
+      headers: _headers(auth: true),
+    );
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/app/notifications/read-all'),
+      headers: _headers(auth: true),
+    );
+  }
+
+  Future<void> deleteNotification(int id) async {
+    await http.delete(
+      Uri.parse('${ApiConfig.baseUrl}/app/notifications/$id'),
+      headers: _headers(auth: true),
+    );
+  }
 }

@@ -379,6 +379,35 @@ double _toDouble(dynamic val, [double defaultValue = 0.0]) {
   return defaultValue;
 }
 
+class NotificationItem {
+  final int id;
+  final String title;
+  final String message;
+  final String? type;
+  bool read;
+  final DateTime createdAt;
+
+  NotificationItem({
+    required this.id,
+    required this.title,
+    required this.message,
+    this.type,
+    this.read = false,
+    required this.createdAt,
+  });
+
+  factory NotificationItem.fromJson(Map<String, dynamic> json) {
+    return NotificationItem(
+      id: json['id'] as int,
+      title: json['title'] as String? ?? '',
+      message: json['message'] as String? ?? '',
+      type: json['type'] as String?,
+      read: json['read'] == true,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
+}
+
 double? _toNullableDouble(dynamic val) {
   if (val == null) return null;
   if (val is num) return val.toDouble();

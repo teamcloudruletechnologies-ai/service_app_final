@@ -140,6 +140,8 @@ router.get(
   controller.getMyBooking
 );
 
+router.use("/notifications", require("./app-notification.routes"));
+
 router.patch(
   "/bookings/:id/status",
   allowRoles(roles.USER, roles.WORKER),
