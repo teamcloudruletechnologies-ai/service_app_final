@@ -560,8 +560,7 @@ export default function Services() {
                           ) : null}
                           <input
                             type="text"
-                            required
-                            placeholder="Sub-Service Name (e.g. Filter Wash)"
+                            placeholder="Sub-Service Name (optional)"
                             value={sub.name}
                             onChange={(e) => handleSubServiceChange(sub.id, 'name', e.target.value)}
                             style={{ flex: 1, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}

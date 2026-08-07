@@ -28,11 +28,43 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     }
   }
 
+  void _proceedToBooking(SubServiceItem? sub) {
+    final user = context.read<AuthProvider>().user;
+    final address = user?.address ?? '';
+    final targetSub = sub ?? _selectedSubService;
+
+    final customServiceItem = targetSub != null
+        ? ServiceItem(
+            id: widget.service.id,
+            categoryId: widget.service.categoryId,
+            name: targetSub.name.trim().isNotEmpty ? targetSub.name : widget.service.name,
+            description: widget.service.description,
+            imageUrl: (targetSub.imageUrl != null && targetSub.imageUrl!.trim().isNotEmpty)
+                ? targetSub.imageUrl
+                : widget.service.imageUrl,
+            categoryName: widget.service.categoryName,
+            price: (targetSub.price > 0 ? targetSub.price : widget.service.price),
+            status: widget.service.status,
+            avgRating: widget.service.avgRating,
+            totalReviews: widget.service.totalReviews,
+            totalBookings: widget.service.totalBookings,
+            estimatedTime: targetSub.estimatedTime,
+            subServices: widget.service.subServices,
+          )
+        : widget.service;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LocationPickerScreen(
+          service: customServiceItem,
+          initialAddress: address,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().user;
-    final address = user?.address ?? '';
-
     final hasSubServices = widget.service.subServices.isNotEmpty;
     final hasDescription = widget.service.description != null && widget.service.description!.trim().isNotEmpty;
 
@@ -40,15 +72,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
         top: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ─── HERO IMAGE HEADER ───
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ─── HERO IMAGE HEADER ───
                     Stack(
                       children: [
                         ClipRRect(
@@ -197,92 +227,149 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                               itemBuilder: (context, idx) {
                                 final sub = widget.service.subServices[idx];
                                 final hasSubImage = sub.imageUrl != null && sub.imageUrl!.trim().isNotEmpty;
+                                final hasName = sub.name.trim().isNotEmpty;
+                                final hasPrice = sub.price > 0;
 
+                                // Case 1: Only image is uploaded by admin (no name & no price)
+                                if (!hasName && !hasPrice && hasSubImage) {
+                                  final isSelected = _selectedSubService == sub;
+                                  return InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        _selectedSubService = sub;
+                                      });
+                                      _proceedToBooking(sub);
+                                    },
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      margin: const EdgeInsets.only(bottom: 4),
+                                      height: 185,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(14),
+                                        border: Border.all(
+                                          color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
+                                          width: isSelected ? 2.5 : 1.0,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: isSelected
+                                                ? const Color(0xFF0F172A).withValues(alpha: 0.12)
+                                                : Colors.black.withValues(alpha: 0.03),
+                                            blurRadius: isSelected ? 12 : 6,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(13),
+                                        child: CachedNetworkImage(
+                                          imageUrl: ApiConfig.resolveImageUrl(sub.imageUrl),
+                                          width: double.infinity,
+                                          height: 185,
+                                          fit: BoxFit.cover,
+                                          alignment: Alignment.center,
+                                          errorWidget: (context, error, stackTrace) => const Center(
+                                            child: Icon(Icons.build_rounded, size: 32, color: AppTheme.primary),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                final isSelected = _selectedSubService == sub;
+                                // Case 2: Name or Price is provided by admin
                                 return InkWell(
                                   onTap: () {
                                     setState(() {
                                       _selectedSubService = sub;
                                     });
+                                    _proceedToBooking(sub);
                                   },
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: Container(
-                                  margin: const EdgeInsets.only(bottom: 2),
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: const Color(0xFFE2E8F0),
-                                      width: 1.0,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.03),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
+                                  borderRadius: BorderRadius.circular(11),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    margin: const EdgeInsets.only(bottom: 4),
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(11),
+                                      border: Border.all(
+                                        color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
+                                        width: isSelected ? 2.2 : 1.0,
                                       ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      // ─── LEFT SIDE: Clean Rounded Image Box ───
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(14),
-                                        child: Container(
-                                          width: 95,
-                                          height: 95,
-                                          color: const Color(0xFFF1F5F9),
-                                          child: hasSubImage
-                                              ? CachedNetworkImage(
-                                                  imageUrl: ApiConfig.resolveImageUrl(sub.imageUrl),
-                                                  fit: BoxFit.cover,
-                                                  errorWidget: (context, error, stackTrace) => const Center(
-                                                    child: Icon(Icons.build_rounded, size: 32, color: AppTheme.primary),
-                                                  ),
-                                                )
-                                              : const Center(
-                                                  child: Icon(Icons.build_rounded, size: 32, color: AppTheme.primary),
-                                                ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: isSelected
+                                              ? const Color(0xFF0F172A).withValues(alpha: 0.10)
+                                              : Colors.black.withValues(alpha: 0.03),
+                                          blurRadius: isSelected ? 10 : 6,
+                                          offset: const Offset(0, 2),
                                         ),
-                                      ),
-                                      const SizedBox(width: 24), // Moved text rightwards
-
-                                      // ─── RIGHT SIDE: Sub Service Name & Price ───
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              sub.name,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xFF0F172A),
-                                                letterSpacing: -0.3,
-                                                height: 1.25,
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        // ─── LEFT SIDE: Clean Rounded Image Box ───
+                                        if (hasSubImage) ...[
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(10),
+                                            child: Container(
+                                              width: 80,
+                                              height: 80,
+                                              color: const Color(0xFFF1F5F9),
+                                              child: CachedNetworkImage(
+                                                imageUrl: ApiConfig.resolveImageUrl(sub.imageUrl),
+                                                fit: BoxFit.cover,
+                                                errorWidget: (context, error, stackTrace) => const Center(
+                                                  child: Icon(Icons.build_rounded, size: 28, color: AppTheme.primary),
+                                                ),
                                               ),
                                             ),
-                                            if (sub.price > 0 || widget.service.price > 0) ...[
-                                              const SizedBox(height: 8),
-                                              Text(
-                                                '₹${(sub.price > 0 ? sub.price : widget.service.price).toInt()}',
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: Color(0xFF0F172A),
+                                          ),
+                                          const SizedBox(width: 20),
+                                        ],
+
+                                        // ─── RIGHT SIDE: Sub Service Name & Price ───
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              if (hasName)
+                                                Text(
+                                                  sub.name,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Color(0xFF0F172A),
+                                                    letterSpacing: -0.3,
+                                                    height: 1.25,
+                                                  ),
                                                 ),
-                                              ),
+                                              if (hasPrice) ...[
+                                                if (hasName) const SizedBox(height: 8),
+                                                Text(
+                                                  '₹${sub.price.toInt()}',
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w900,
+                                                    color: Color(0xFF0F172A),
+                                                  ),
+                                                ),
+                                              ],
                                             ],
-                                          ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
+                                );
+                              },
+                            ),
                             const SizedBox(height: 20),
                           ],
 
@@ -330,76 +417,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ─── STICKY BOTTOM BOOK NOW BAR ───
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 16,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final customServiceItem = _selectedSubService != null
-                        ? ServiceItem(
-                            id: widget.service.id,
-                            categoryId: widget.service.categoryId,
-                            name: _selectedSubService!.name,
-                            description: widget.service.description,
-                            imageUrl: widget.service.imageUrl,
-                            categoryName: widget.service.categoryName,
-                            price: (_selectedSubService!.price > 0 ? _selectedSubService!.price : widget.service.price),
-                            status: widget.service.status,
-                            avgRating: widget.service.avgRating,
-                            totalReviews: widget.service.totalReviews,
-                            totalBookings: widget.service.totalBookings,
-                            estimatedTime: _selectedSubService!.estimatedTime,
-                            subServices: widget.service.subServices,
-                          )
-                        : widget.service;
-
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => LocationPickerScreen(
-                          service: customServiceItem,
-                          initialAddress: address,
-                        ),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    foregroundColor: const Color(0xFF1A1A1A),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Book Now',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
-                      color: Color(0xFF1A1A1A),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

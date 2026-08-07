@@ -329,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     banners: catalog.banners,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 10),
 
                 // DYNAMIC CATEGORIES GRID (Loaded from Backend / Admin Panel)
                 Padding(
@@ -415,9 +415,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               itemCount: catalog.categories.length,
                               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 3,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 12,
-                                childAspectRatio: 0.88,
+                                mainAxisSpacing: 12,
+                                crossAxisSpacing: 10,
+                                childAspectRatio: 0.78,
                               ),
                               itemBuilder: (context, index) {
                                 final cat = catalog.categories[index];
@@ -436,20 +436,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                       }
                                     }
                                   },
-                                  borderRadius: BorderRadius.circular(24),
+                                  borderRadius: BorderRadius.circular(26),
                                   child: Column(
                                     children: [
                                       AnimatedContainer(
                                         duration: const Duration(milliseconds: 200),
-                                        width: 82,
-                                        height: 82,
-                                        padding: const EdgeInsets.all(6),
+                                        width: 90,
+                                        height: 90,
+                                        padding: const EdgeInsets.all(4),
                                         decoration: BoxDecoration(
                                           color: isSelected ? const Color(0xFFF8FAFC) : Colors.white,
-                                          borderRadius: BorderRadius.circular(24),
+                                          borderRadius: BorderRadius.circular(26),
                                           border: Border.all(
                                             color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFE2E8F0),
-                                            width: isSelected ? 2.2 : 1.2,
+                                            width: isSelected ? 2.5 : 1.2,
                                           ),
                                           boxShadow: [
                                             BoxShadow(
@@ -463,24 +463,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                         child: imgUrl.isNotEmpty
                                             ? ClipRRect(
-                                                borderRadius: BorderRadius.circular(18),
+                                                borderRadius: BorderRadius.circular(21),
                                                 child: CachedNetworkImage(
                                                   imageUrl: imgUrl,
                                                   fit: BoxFit.cover,
-                                                  errorWidget: (_, __, ___) => const Icon(Icons.category_rounded, color: Color(0xFF0F172A), size: 32),
+                                                  errorWidget: (_, __, ___) => const Icon(Icons.category_rounded, color: Color(0xFF0F172A), size: 36),
                                                 ),
                                               )
-                                            : const Icon(Icons.category_rounded, color: Color(0xFF0F172A), size: 32),
+                                            : const Icon(Icons.category_rounded, color: Color(0xFF0F172A), size: 36),
                                       ),
-                                      const SizedBox(height: 10),
+                                      const SizedBox(height: 8),
                                       Text(
                                         cat.name,
                                         style: TextStyle(
-                                          fontSize: 13.5,
-                                          height: 1.25,
+                                          fontSize: 15.0,
+                                          height: 1.2,
                                           fontWeight: isSelected ? FontWeight.w900 : FontWeight.w800,
-                                          color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF1E293B),
-                                          letterSpacing: -0.2,
+                                          color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF0F172A),
+                                          letterSpacing: -0.3,
                                         ),
                                         textAlign: TextAlign.center,
                                         maxLines: 2,
