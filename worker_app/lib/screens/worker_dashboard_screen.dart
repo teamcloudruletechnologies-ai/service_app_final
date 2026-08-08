@@ -299,14 +299,17 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        user?.city != null && user!.city!.isNotEmpty ? '${user.city}, Tamil Nadu' : 'Madurai, Tamil Nadu',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
+                      Builder(builder: (ctx) {
+                        final userCity = user?.city;
+                        return Text(
+                          (userCity != null && userCity.isNotEmpty) ? '$userCity, Tamil Nadu' : 'Madurai, Tamil Nadu',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF0F172A),
+                          ),
+                        );
+                      }),
                       const SizedBox(width: 4),
                       const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: Color(0xFF0F172A)),
                     ],

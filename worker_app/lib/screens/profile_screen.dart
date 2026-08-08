@@ -99,9 +99,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
+    final userName = user?.name ?? '';
+    final userPhone = user?.phone;
+    final userRating = user?.rating;
 
-    final ratingDisplay = (user?.rating ?? 0) > 0
-        ? user!.rating!.toStringAsFixed(1)
+    final ratingDisplay = (userRating != null && userRating > 0)
+        ? userRating.toStringAsFixed(1)
         : '4.0';
 
     return Scaffold(
@@ -145,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          (user?.name.isNotEmpty == true ? user!.name[0] : 'P').toUpperCase(),
+                          (userName.isNotEmpty ? userName[0] : 'P').toUpperCase(),
                           style: const TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.w800,
@@ -178,7 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // Worker Name
                 Text(
-                  user?.name ?? 'Praveen Kumar',
+                  userName.isNotEmpty ? userName : 'Praveen Kumar',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -215,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Icon(Icons.phone_rounded, size: 14, color: Color(0xFF64748B)),
                     const SizedBox(width: 6),
                     Text(
-                      user?.phone != null && user!.phone.isNotEmpty ? user!.phone : '+91 96116 43210',
+                      (userPhone != null && userPhone.isNotEmpty) ? userPhone : '+91 96116 43210',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
