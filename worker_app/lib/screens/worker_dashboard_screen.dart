@@ -26,7 +26,6 @@ class WorkerDashboardScreen extends StatefulWidget {
 }
 
 class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
-  final ApiService _api = ApiService();
   bool _isOnline = false;
   String _activeTab = 'active';
   Timer? _locationTimer;

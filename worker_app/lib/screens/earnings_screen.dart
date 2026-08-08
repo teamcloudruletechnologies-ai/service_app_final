@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
@@ -12,7 +13,6 @@ class EarningsScreen extends StatefulWidget {
 }
 
 class _EarningsScreenState extends State<EarningsScreen> {
-  final _apiService = ApiService();
   bool _loading = true;
   String? _error;
   Map<String, dynamic> _stats = {};
@@ -31,8 +31,8 @@ class _EarningsScreenState extends State<EarningsScreen> {
     });
 
     try {
-      await _apiService.init();
-      final data = await _apiService.fetchWorkerEarnings();
+      final api = context.read<ApiService>();
+      final data = await api.fetchWorkerEarnings();
       setState(() {
         _stats = data['stats'] as Map<String, dynamic>? ?? {};
         _history = data['history'] as List? ?? [];

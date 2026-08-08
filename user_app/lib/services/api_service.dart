@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../config/api_config.dart';
 import '../models/models.dart';
@@ -115,6 +116,13 @@ class ApiService {
     final payload = data['data'] as Map<String, dynamic>;
     final account = UserAccount.fromJson(payload['account']);
     await _saveSession(payload['token'] as String, account);
+    
+    // Send FCM token to backend upon successful login
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) await updateFcmToken(fcmToken);
+    } catch (_) {}
+    
     return payload;
   }
 
@@ -122,8 +130,8 @@ class ApiService {
     if (_token == null) return;
     try {
       await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/user/fcm-token'),
-        headers: _headers(),
+        Uri.parse('${ApiConfig.baseUrl}/app/user/fcm-token'),
+        headers: _headers(auth: true),
         body: jsonEncode({'fcmToken': token}),
       );
     } catch (_) {}
@@ -170,6 +178,13 @@ class ApiService {
     final payload = data['data'] as Map<String, dynamic>;
     final account = UserAccount.fromJson(payload['account']);
     await _saveSession(payload['token'] as String, account);
+    
+    // Send FCM token to backend upon successful login
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) await updateFcmToken(fcmToken);
+    } catch (_) {}
+    
     return payload;
   }
 
@@ -616,5 +631,35 @@ class ApiService {
     );
     final data = _decode(response) as Map<String, dynamic>;
     return data['data'] as Map<String, dynamic>;
+  }
+
+  // --- NOTIFICATIONS ---
+
+  Future<PagedResult<NotificationItem>> fetchNotifications({int page = 1, int limit = 50}) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/app/notifications?page=$page&limit=$limit');
+    final response = await http.get(uri, headers: _headers(auth: true));
+    final data = _decode(response) as Map<String, dynamic>;
+    return _parsePaged(data['data'] as Map<String, dynamic>, NotificationItem.fromJson);
+  }
+
+  Future<void> markNotificationRead(int id) async {
+    await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/app/notifications/$id/read'),
+      headers: _headers(auth: true),
+    );
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/app/notifications/read-all'),
+      headers: _headers(auth: true),
+    );
+  }
+
+  Future<void> deleteNotification(int id) async {
+    await http.delete(
+      Uri.parse('${ApiConfig.baseUrl}/app/notifications/$id'),
+      headers: _headers(auth: true),
+    );
   }
 }

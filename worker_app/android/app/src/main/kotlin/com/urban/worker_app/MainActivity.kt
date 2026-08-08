@@ -1,4 +1,4 @@
-package com.urbanservice.urban_service_user
+package com.urban.worker_app
 
 import io.flutter.embedding.android.FlutterActivity
 

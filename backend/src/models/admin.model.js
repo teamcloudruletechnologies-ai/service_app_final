@@ -13,12 +13,28 @@ async function create(admin) {
 }
 
 async function findByEmail(email) {
-  const result = await db.query("SELECT * FROM admins WHERE email = $1", [email]);
+  const result = await db.query(
+    `SELECT a.*, 
+            COALESCE(json_agg(p.permission) FILTER (WHERE p.permission IS NOT NULL), '[]') as permissions
+     FROM admins a
+     LEFT JOIN admin_permissions p ON a.id = p.admin_id
+     WHERE a.email = $1
+     GROUP BY a.id`,
+    [email]
+  );
   return result.rows[0];
 }
 
 async function findById(id) {
-  const result = await db.query(`SELECT ${publicFields} FROM admins WHERE id = $1`, [id]);
+  const result = await db.query(
+    `SELECT a.id, a.name, a.email, a.role, a.status, a.created_at, a.updated_at,
+            COALESCE(json_agg(p.permission) FILTER (WHERE p.permission IS NOT NULL), '[]') as permissions
+     FROM admins a
+     LEFT JOIN admin_permissions p ON a.id = p.admin_id
+     WHERE a.id = $1
+     GROUP BY a.id`,
+    [id]
+  );
   return result.rows[0];
 }
 

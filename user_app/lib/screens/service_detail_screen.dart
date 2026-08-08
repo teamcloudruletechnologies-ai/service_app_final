@@ -28,11 +28,43 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     }
   }
 
+  void _proceedToBooking(SubServiceItem? sub) {
+    final user = context.read<AuthProvider>().user;
+    final address = user?.address ?? '';
+    final targetSub = sub ?? _selectedSubService;
+
+    final customServiceItem = targetSub != null
+        ? ServiceItem(
+            id: widget.service.id,
+            categoryId: widget.service.categoryId,
+            name: targetSub.name.trim().isNotEmpty ? targetSub.name : widget.service.name,
+            description: widget.service.description,
+            imageUrl: (targetSub.imageUrl != null && targetSub.imageUrl!.trim().isNotEmpty)
+                ? targetSub.imageUrl
+                : widget.service.imageUrl,
+            categoryName: widget.service.categoryName,
+            price: (targetSub.price > 0 ? targetSub.price : widget.service.price),
+            status: widget.service.status,
+            avgRating: widget.service.avgRating,
+            totalReviews: widget.service.totalReviews,
+            totalBookings: widget.service.totalBookings,
+            estimatedTime: targetSub.estimatedTime,
+            subServices: widget.service.subServices,
+          )
+        : widget.service;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LocationPickerScreen(
+          service: customServiceItem,
+          initialAddress: address,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthProvider>().user;
-    final address = user?.address ?? '';
-
     final hasSubServices = widget.service.subServices.isNotEmpty;
     final hasDescription = widget.service.description != null && widget.service.description!.trim().isNotEmpty;
 
@@ -40,15 +72,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
         top: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ─── HERO IMAGE HEADER ───
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ─── HERO IMAGE HEADER ───
                     Stack(
                       children: [
                         ClipRRect(
@@ -140,7 +170,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
                     // ─── MAIN CONTENT CONTAINER ───
                     Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -148,13 +178,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                           Text(
                             widget.service.name,
                             style: const TextStyle(
-                              fontSize: 24,
+                              fontSize: 22,
                               fontWeight: FontWeight.w900,
                               color: Color(0xFF0F172A),
                               letterSpacing: -0.5,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
 
                           // ─── DYNAMIC SERVICE PACKAGES (SUB-SERVICES) ───
                           if (hasSubServices) ...[
@@ -164,7 +194,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                 const Text(
                                   'Select Service Package',
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w800,
                                     color: Color(0xFF0F172A),
                                   ),
@@ -187,97 +217,104 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 20),
 
                             ListView.separated(
+                              padding: EdgeInsets.zero,
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: widget.service.subServices.length,
-                              separatorBuilder: (context, index) => const SizedBox(height: 12),
+                              separatorBuilder: (context, index) => const SizedBox(height: 14),
                               itemBuilder: (context, idx) {
                                 final sub = widget.service.subServices[idx];
-                                final isSelected = _selectedSubService?.id == sub.id || (_selectedSubService == null && idx == 0);
+                                final hasSubImage = sub.imageUrl != null && sub.imageUrl!.trim().isNotEmpty;
+                                final hasName = sub.name.trim().isNotEmpty;
+                                final hasPrice = sub.price > 0;
+                                final imgPath = hasSubImage ? sub.imageUrl : widget.service.imageUrl;
 
                                 return InkWell(
                                   onTap: () {
                                     setState(() {
                                       _selectedSubService = sub;
                                     });
+                                    _proceedToBooking(sub);
                                   },
                                   borderRadius: BorderRadius.circular(16),
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 220),
-                                    curve: Curves.easeInOut,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  child: Container(
+                                    height: 185,
+                                    width: double.infinity,
                                     decoration: BoxDecoration(
-                                      color: isSelected ? const Color(0xFFFFFBEB) : Colors.white,
+                                      color: Colors.white,
                                       borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: isSelected ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
-                                        width: isSelected ? 2.0 : 1.0,
-                                      ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: isSelected
-                                              ? const Color(0xFFF59E0B).withValues(alpha: 0.12)
-                                              : Colors.black.withValues(alpha: 0.03),
-                                          blurRadius: isSelected ? 12 : 8,
+                                          color: Colors.black.withValues(alpha: 0.08),
+                                          blurRadius: 10,
                                           offset: const Offset(0, 3),
                                         ),
                                       ],
                                     ),
-                                    child: Row(
-                                      children: [
-                                        // Premium Custom Checkmark Selection Circle Indicator
-                                        AnimatedContainer(
-                                          duration: const Duration(milliseconds: 200),
-                                          width: 22,
-                                          height: 22,
-                                          decoration: BoxDecoration(
-                                            color: isSelected ? const Color(0xFFF59E0B) : Colors.transparent,
-                                            shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: isSelected ? const Color(0xFFF59E0B) : const Color(0xFFCBD5E1),
-                                              width: isSelected ? 0 : 2,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Stack(
+                                        children: [
+                                          // 1. FULL SIZE BANNER IMAGE (Always 185px height!)
+                                          CachedNetworkImage(
+                                            imageUrl: ApiConfig.resolveImageUrl(imgPath),
+                                            width: double.infinity,
+                                            height: 185,
+                                            fit: BoxFit.cover,
+                                            alignment: Alignment.center,
+                                            errorWidget: (context, error, stackTrace) => const Center(
+                                              child: Icon(Icons.build_rounded, size: 36, color: AppTheme.primary),
                                             ),
                                           ),
-                                          child: isSelected
-                                              ? const Icon(Icons.check_rounded, size: 14, color: Colors.white)
-                                              : null,
-                                        ),
-                                        const SizedBox(width: 14),
 
-                                        // Package Name
-                                        Expanded(
-                                          child: Text(
-                                            sub.name,
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w700,
-                                              color: isSelected ? const Color(0xFF78350F) : const Color(0xFF0F172A),
-                                              letterSpacing: -0.2,
-                                            ),
-                                          ),
-                                        ),
-
-                                        // Right Price Badge
-                                        if (sub.price > 0)
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                            decoration: BoxDecoration(
-                                              color: isSelected ? const Color(0xFFF59E0B) : const Color(0xFFFEF3C7),
-                                              borderRadius: BorderRadius.circular(12),
-                                            ),
-                                            child: Text(
-                                              '₹${sub.price.toInt()}',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.w900,
-                                                color: isSelected ? Colors.white : const Color(0xFF92400E),
+                                          // 2. RIGHT DOWN SUB SERVICE OVERLAY BADGE (Without any background shadow on image!)
+                                          if (hasName || hasPrice)
+                                            Positioned(
+                                              bottom: 12,
+                                              right: 14,
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withValues(alpha: 0.80),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(color: Colors.white24, width: 0.8),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    if (hasName)
+                                                      Text(
+                                                        sub.name,
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 13.5,
+                                                          fontWeight: FontWeight.w800,
+                                                          letterSpacing: -0.2,
+                                                        ),
+                                                      ),
+                                                    if (hasName && hasPrice)
+                                                      const Padding(
+                                                        padding: EdgeInsets.symmetric(horizontal: 6),
+                                                        child: Text('•', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                                                      ),
+                                                    if (hasPrice)
+                                                      Text(
+                                                        '₹${sub.price.toInt()}',
+                                                        style: const TextStyle(
+                                                          color: AppTheme.primary,
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.w900,
+                                                        ),
+                                                      ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 );
@@ -330,76 +367,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-
-            // ─── STICKY BOTTOM BOOK NOW BAR ───
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 16,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: () {
-                    final customServiceItem = _selectedSubService != null
-                        ? ServiceItem(
-                            id: widget.service.id,
-                            categoryId: widget.service.categoryId,
-                            name: _selectedSubService!.name,
-                            description: widget.service.description,
-                            imageUrl: widget.service.imageUrl,
-                            categoryName: widget.service.categoryName,
-                            price: (_selectedSubService!.price > 0 ? _selectedSubService!.price : widget.service.price),
-                            status: widget.service.status,
-                            avgRating: widget.service.avgRating,
-                            totalReviews: widget.service.totalReviews,
-                            totalBookings: widget.service.totalBookings,
-                            estimatedTime: _selectedSubService!.estimatedTime,
-                            subServices: widget.service.subServices,
-                          )
-                        : widget.service;
-
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => LocationPickerScreen(
-                          service: customServiceItem,
-                          initialAddress: address,
-                        ),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    foregroundColor: const Color(0xFF1A1A1A),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Book Now',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 0.5,
-                      color: Color(0xFF1A1A1A),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

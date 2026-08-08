@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
-import '../theme/app_theme.dart';
 
 class WorkerTrackingMapScreen extends StatefulWidget {
   const WorkerTrackingMapScreen({super.key, required this.bookingId});
@@ -69,10 +68,14 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
         _lastUpdate = DateTime.now();
       });
 
-      // Move map to center on worker
+      // Move map to center on worker safely
       if (result.workerLat != null && result.workerLng != null) {
         final pos = LatLng(result.workerLat!, result.workerLng!);
-        _mapController.move(pos, _mapController.camera.zoom);
+        try {
+          _mapController.move(pos, 14.5);
+        } catch (e) {
+          // Ignore uninitialized map controller before mount
+        }
       }
     } else {
       if (!isSilent) {
@@ -105,20 +108,20 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
       appBar: AppBar(
         title: const Text(
           'Live Tracking',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: Color(0xFF0F172A), letterSpacing: -0.3),
         ),
         backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1A1A1A),
+        foregroundColor: const Color(0xFF0F172A),
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF0F172A)),
             onPressed: () => _loadData(),
           )
         ],
       ),
       body: _loading && _booking == null
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.secondary))
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF0F172A), strokeWidth: 2))
           : _error != null
               ? Center(
                   child: Padding(
@@ -126,14 +129,18 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                        const Icon(Icons.error_outline_rounded, size: 48, color: Color(0xFFDC2626)),
                         const SizedBox(height: 12),
-                        Text(_error!, textAlign: TextAlign.center),
+                        Text(_error!, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF64748B))),
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () => _loadData(),
-                          style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
-                          child: const Text('Retry'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0F172A),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('Retry', style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -166,10 +173,10 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
                                       height: 45,
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: AppTheme.secondary.withOpacity(0.2),
+                                          color: const Color(0xFF0F172A).withValues(alpha: 0.15),
                                           shape: BoxShape.circle,
                                         ),
-                                        child: const Icon(Icons.person_pin_circle, color: AppTheme.secondary, size: 36),
+                                        child: const Icon(Icons.person_pin_circle_rounded, color: Color(0xFF0F172A), size: 36),
                                       ),
                                     ),
                                   // Worker Marker
@@ -183,11 +190,11 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
                                           color: Colors.white,
                                           shape: BoxShape.circle,
                                           boxShadow: [
-                                            BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 6, offset: const Offset(0, 2))
+                                            BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.20), blurRadius: 8, offset: const Offset(0, 3))
                                           ],
-                                          border: Border.all(color: AppTheme.primary, width: 2),
+                                          border: Border.all(color: const Color(0xFF0F172A), width: 2.2),
                                         ),
-                                        child: const Icon(Icons.engineering_rounded, color: AppTheme.primary, size: 28),
+                                        child: const Icon(Icons.engineering_rounded, color: Color(0xFF0F172A), size: 28),
                                       ),
                                     ),
                                 ],
@@ -201,8 +208,15 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.8),
+                                color: const Color(0xFF0F172A),
                                 borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Row(
                                 children: [
@@ -210,14 +224,14 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
                                     width: 8,
                                     height: 8,
                                     decoration: const BoxDecoration(
-                                      color: Colors.green,
+                                      color: Color(0xFF22C55E),
                                       shape: BoxShape.circle,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   const Text(
                                     'LIVE TRACKING',
-                                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
+                                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
                                   ),
                                 ],
                               ),
@@ -240,16 +254,40 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
     final status = _booking!.status;
     final otp = _booking!.otp;
 
+    Color statusBgColor;
+    Color statusTextColor;
+
+    switch (status) {
+      case 'completed':
+        statusBgColor = const Color(0xFFECFDF5);
+        statusTextColor = const Color(0xFF059669);
+        break;
+      case 'in_progress':
+        statusBgColor = const Color(0xFFF3E8FF);
+        statusTextColor = const Color(0xFF7C3AED);
+        break;
+      case 'confirmed':
+        statusBgColor = const Color(0xFFEFF6FF);
+        statusTextColor = const Color(0xFF2563EB);
+        break;
+      default:
+        statusBgColor = const Color(0xFFFEF3C7);
+        statusTextColor = const Color(0xFFD97706);
+        break;
+    }
+
+    final workerName = _booking!.workerName ?? 'Assigned Partner';
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, -6),
           )
         ],
       ),
@@ -261,84 +299,112 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.08),
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF1E293B),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.person, color: AppTheme.primary, size: 28),
+                alignment: Alignment.center,
+                child: Text(
+                  workerName.trim().isNotEmpty ? workerName.trim()[0].toUpperCase() : 'W',
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Colors.white),
+                ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _booking!.workerName ?? 'Assigned Partner',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primary),
+                      workerName,
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Color(0xFF0F172A)),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       _booking!.serviceName ?? 'Professional Service',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                      style: const TextStyle(color: Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: status == 'in_progress' ? Colors.purple.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
+                  color: statusBgColor,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   status.replaceAll('_', ' ').toUpperCase(),
                   style: TextStyle(
-                    color: status == 'in_progress' ? Colors.purple : Colors.blue,
-                    fontWeight: FontWeight.bold,
+                    color: statusTextColor,
+                    fontWeight: FontWeight.w800,
                     fontSize: 11,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
           // OTP Banner
           if ((status == 'confirmed' || status == 'in_progress') && otp != null) ...[
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: AppTheme.secondary.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.secondary.withOpacity(0.2)),
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        status == 'confirmed' ? 'Start Verification OTP' : 'Completion Verification OTP',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppTheme.primary),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        status == 'confirmed'
-                            ? 'Share this OTP with partner to start work'
-                            : 'Share this OTP with partner when work is finished',
-                        style: const TextStyle(fontSize: 11, color: Colors.grey),
-                      ),
-                    ],
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF0F172A),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.key_rounded, size: 16, color: Colors.white),
                   ),
-                  Text(
-                    otp,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: AppTheme.secondary,
-                      letterSpacing: 2,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          status == 'confirmed' ? 'JOB START OTP' : 'JOB COMPLETION OTP',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 11,
+                            letterSpacing: 0.5,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          status == 'confirmed'
+                              ? 'Share with worker when they arrive'
+                              : 'Share with worker when work finishes',
+                          style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFF0F172A), width: 1.5),
+                    ),
+                    child: Text(
+                      otp,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: 3.5,
+                      ),
                     ),
                   ),
                 ],
@@ -353,20 +419,26 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
             children: [
               Text(
                 'Last updated: ${_lastUpdate.hour.toString().padLeft(2, '0')}:${_lastUpdate.minute.toString().padLeft(2, '0')}:${_lastUpdate.second.toString().padLeft(2, '0')}',
-                style: TextStyle(color: Colors.grey.shade400, fontSize: 11),
+                style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.w500),
               ),
               if (_booking!.workerPhone != null && _booking!.workerPhone!.isNotEmpty)
                 ElevatedButton.icon(
                   onPressed: () {
-                    // Quick contact placeholder
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Calling ${_booking!.workerPhone}...')),
+                      SnackBar(
+                        content: Text('Calling ${_booking!.workerPhone}...', style: const TextStyle(fontWeight: FontWeight.w700)),
+                        backgroundColor: const Color(0xFF0F172A),
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
                     );
                   },
-                  icon: const Icon(Icons.phone, size: 16, color: Colors.white),
-                  label: const Text('Contact Partner', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                  icon: const Icon(Icons.phone_rounded, size: 15, color: Colors.white),
+                  label: const Text('Contact Partner', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 12)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
+                    backgroundColor: const Color(0xFF0F172A),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   ),

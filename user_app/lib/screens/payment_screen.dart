@@ -18,14 +18,12 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  final _apiService = ApiService();
   bool _loading = false;
   late Razorpay _razorpay;
 
   @override
   void initState() {
     super.initState();
-    _apiService.init();
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
@@ -69,7 +67,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }) async {
     setState(() => _loading = true);
     try {
-      await _apiService.verifyPayment(
+      final apiService = context.read<ApiService>();
+      await apiService.verifyPayment(
         bookingId: widget.booking.id,
         razorpayPaymentId: paymentId,
         razorpaySignature: signature,
@@ -127,8 +126,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _processPayment() async {
     setState(() => _loading = true);
     try {
-      // 1. Create order on backend
-      final orderData = await _apiService.createPaymentOrder(widget.booking.id);
+      final apiService = context.read<ApiService>();
+      final orderData = await apiService.createPaymentOrder(widget.booking.id);
       final nowMs = DateTime.now().millisecondsSinceEpoch;
       final orderId = (orderData['orderId'] ?? 'order_mock_$nowMs') as String;
       final keyId = (orderData['keyId'] ?? 'rzp_test_mock') as String;
@@ -151,8 +150,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
         'description': widget.booking.serviceName ?? 'Home Service Booking',
         'timeout': 300,
         'prefill': {
-          'contact': _apiService.account?.phone ?? '9876543210',
-          'email': _apiService.account?.email ?? 'customer@urbanserve.com',
+          'contact': apiService.account?.phone ?? '9876543210',
+          'email': apiService.account?.email ?? 'customer@urbanserve.com',
         }
       };
 

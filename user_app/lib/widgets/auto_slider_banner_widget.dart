@@ -62,7 +62,7 @@ class _AutoSliderBannerWidgetState extends State<AutoSliderBannerWidget> {
     return Column(
       children: [
         SizedBox(
-          height: 175,
+          height: 195,
           child: PageView.builder(
             controller: _pageController,
             scrollDirection: Axis.horizontal,

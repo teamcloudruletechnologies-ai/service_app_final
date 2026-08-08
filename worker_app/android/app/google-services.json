@@ -7,25 +7,6 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:153565702824:android:5fddba16470326e486f09d",
-        "android_client_info": {
-          "package_name": "com.urban.service_app"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyD4I7_gCW980ko7os3_fB0dl3jiqwDKDcY"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:153565702824:android:371464917a21626b86f09d",
         "android_client_info": {
           "package_name": "com.urban.worker_app"
@@ -45,9 +26,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:153565702824:android:5fddba16470326e486f09d",
+        "mobilesdk_app_id": "1:153565702824:android:621c05e86a19b9f586f09d",
         "android_client_info": {
-          "package_name": "com.urbanservice.urban_service_user"
+          "package_name": "com.urbanserve.user"
         }
       },
       "oauth_client": [],

@@ -10,11 +10,13 @@ import 'providers/booking_provider.dart';
 import 'providers/catalog_provider.dart';
 import 'providers/language_provider.dart';
 import 'screens/splash_screen.dart';
+import 'screens/main_shell.dart';
 import 'services/api_service.dart';
 import 'theme/app_theme.dart';
 
 const _splashBlack = Color(0xFF050505);
 final GlobalKey<ScaffoldMessengerState> _messengerKey = GlobalKey<ScaffoldMessengerState>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -60,6 +62,7 @@ void main() async {
   );
 
   final apiService = ApiService();
+  await apiService.init(); // <--- ALWAYS INIT THE API SERVICE FIRST
   runApp(UrbanServiceApp(apiService: apiService));
 
   // Do the notification-permission dialog + token fetch AFTER the UI
@@ -88,7 +91,6 @@ Future<void> _setupFcmPermissionsAndToken(ApiService apiService) async {
     debugPrint("=================================================");
 
     if (token != null && token.isNotEmpty) {
-      await apiService.init();
       await apiService.updateFcmToken(token);
     }
 
@@ -124,7 +126,10 @@ class _UrbanServiceAppState extends State<UrbanServiceApp> {
     try {
       const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
       const initSettings = InitializationSettings(android: androidSettings);
-      await _localNotifications.initialize(settings: initSettings);
+      await _localNotifications.initialize(
+        settings: initSettings,
+        onDidReceiveNotificationResponse: (details) => _navigateToHome(),
+      );
 
       const channel = AndroidNotificationChannel(
         'high_importance_channel',
@@ -164,12 +169,57 @@ class _UrbanServiceAppState extends State<UrbanServiceApp> {
 
   void _setupFCM() {
     try {
+      FirebaseMessaging.instance.getInitialMessage().then((message) {
+        if (message != null) {
+          Future.delayed(const Duration(milliseconds: 500), () => _navigateToHome());
+        }
+      });
+
+      FirebaseMessaging.onMessageOpenedApp.listen((message) {
+        _navigateToHome();
+      });
+
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         final notification = message.notification;
         final title = notification?.title ?? message.data['title'] ?? 'Notification';
         final body = notification?.body ?? message.data['body'] ?? 'New update received';
 
         _showHeadsUpBanner(title, body);
+
+        if (message.data['type'] == 'login_alert') {
+          final context = _messengerKey.currentContext;
+          if (context != null) {
+            showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                backgroundColor: const Color(0xFF1E1E1E),
+                title: Row(
+                  children: [
+                    const Icon(Icons.security, color: Colors.orange, size: 28),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                content: Text(
+                  body,
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: const Text('OK', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            );
+            return;
+          }
+        }
 
         _messengerKey.currentState?.showSnackBar(
           SnackBar(
@@ -187,6 +237,19 @@ class _UrbanServiceAppState extends State<UrbanServiceApp> {
     }
   }
 
+  void _navigateToHome() {
+    final context = navigatorKey.currentContext;
+    if (context != null) {
+      final auth = context.read<AuthProvider>();
+      if (auth.isLoggedIn) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const MainShell()),
+          (route) => false,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -201,6 +264,7 @@ class _UrbanServiceAppState extends State<UrbanServiceApp> {
         builder: (context, languageProvider, _) {
           return MaterialApp(
             title: 'Urban Service',
+            navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
             scaffoldMessengerKey: _messengerKey,
             theme: AppTheme.light().copyWith(

@@ -15,13 +15,14 @@ const modelByRole = {
 function authPayload(account, role) {
   const payload = {
     id: account.id,
-    role,
+    role: account.role || role,
     name: account.name,
     email: account.email,
     phone: account.phone,
     state: account.state,
     address: account.address,
     status: account.status,
+    permissions: account.permissions || [],
   };
   if (role === "worker") {
     payload.kyc_status = account.kyc_status;
@@ -155,6 +156,25 @@ async function phoneLogin(req, res, next) {
     const payload = authPayload(account, role);
     if (role === roles.USER && !isNew) {
       await User.logActivity(account.id, "login", "User logged in via phone/OTP");
+    }
+
+    if (!isNew && account.id) {
+      try {
+        const fcmService = require("../utils/fcm.service");
+        if (role === roles.USER) {
+          fcmService.sendToUser(account.id, {
+            title: "⚠️ Security Alert: New Login Attempt",
+            body: "Someone is attempting to log in to your account from a new device.",
+            data: { type: "login_alert" }
+          });
+        } else if (role === roles.WORKER) {
+          fcmService.sendToWorker(account.id, {
+            title: "⚠️ Security Alert: New Login Attempt",
+            body: "Someone is attempting to log in to your account from a new device.",
+            data: { type: "login_alert" }
+          });
+        }
+      } catch (_) {}
     }
 
     return success(res, isNew ? "Account created" : "Login successful", {

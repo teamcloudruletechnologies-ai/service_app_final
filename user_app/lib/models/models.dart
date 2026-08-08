@@ -89,20 +89,24 @@ class SubServiceItem {
   final String name;
   final double price;
   final int estimatedTime;
+  final String? imageUrl;
 
   const SubServiceItem({
     required this.id,
     required this.name,
     required this.price,
     this.estimatedTime = 45,
+    this.imageUrl,
   });
 
   factory SubServiceItem.fromJson(Map<String, dynamic> json) {
+    final rawImg = json['image_url'] as String? ?? json['image'] as String?;
     return SubServiceItem(
       id: json['id'],
       name: json['name'] as String? ?? '',
       price: (json['price'] is num) ? (json['price'] as num).toDouble() : (double.tryParse(json['price']?.toString() ?? '0') ?? 0.0),
       estimatedTime: (json['estimated_time'] is num) ? (json['estimated_time'] as num).toInt() : (int.tryParse(json['estimated_time']?.toString() ?? '45') ?? 45),
+      imageUrl: (rawImg != null && rawImg.trim().isNotEmpty) ? rawImg.trim() : null,
     );
   }
 }
@@ -373,6 +377,35 @@ double _toDouble(dynamic val, [double defaultValue = 0.0]) {
   if (val is num) return val.toDouble();
   if (val is String) return double.tryParse(val) ?? defaultValue;
   return defaultValue;
+}
+
+class NotificationItem {
+  final int id;
+  final String title;
+  final String message;
+  final String? type;
+  bool read;
+  final DateTime createdAt;
+
+  NotificationItem({
+    required this.id,
+    required this.title,
+    required this.message,
+    this.type,
+    this.read = false,
+    required this.createdAt,
+  });
+
+  factory NotificationItem.fromJson(Map<String, dynamic> json) {
+    return NotificationItem(
+      id: json['id'] as int,
+      title: json['title'] as String? ?? '',
+      message: json['message'] as String? ?? '',
+      type: json['type'] as String?,
+      read: json['read'] == true,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
 }
 
 double? _toNullableDouble(dynamic val) {
