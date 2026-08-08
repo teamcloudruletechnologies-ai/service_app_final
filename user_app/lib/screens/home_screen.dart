@@ -43,6 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ('More', '', Icons.grid_view_rounded, const Color(0xFFEDF2F7)),
   ];
 
+  bool _hasPromptedLocationOnEntry = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,233 +55,23 @@ class _HomeScreenState extends State<HomeScreen> {
         catalog.loadCategories(),
         catalog.loadServices(),
       ]);
+
+      if (!_hasPromptedLocationOnEntry) {
+        _hasPromptedLocationOnEntry = true;
+        _showLocationModal();
+      }
     });
   }
 
   void _showLocationModal() {
-    final user = context.read<AuthProvider>().user;
-    final manualCtrl = TextEditingController(text: user?.address ?? '');
-    bool isDetecting = false;
-    String liveGpsAddress = (user?.address != null && user!.address!.isNotEmpty)
-        ? user.address!
-        : 'Anna Nagar, Madurai, Tamil Nadu 625020';
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF111827),
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 24,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Select Service Location',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
-                        onPressed: () => Navigator.pop(ctx),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // ─── 1. PRIMARY ADDRESS: LIVE GPS LOCATION ───
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF), // Light Blue Primary Box
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFBFDBFE), width: 1.5),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF2563EB),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: const Text(
-                                'PRIMARY (GPS LOCATION)',
-                                style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            const Icon(Icons.my_location_rounded, color: Color(0xFF2563EB), size: 22),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                liveGpsAddress,
-                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        ElevatedButton.icon(
-                          onPressed: isDetecting
-                              ? null
-                              : () async {
-                                  setModalState(() => isDetecting = true);
-                                  try {
-                                    final pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-                                    final gpsAddress = 'Anna Nagar, Madurai, Tamil Nadu 625020 (GPS Verified)';
-                                    setModalState(() {
-                                      liveGpsAddress = gpsAddress;
-                                      isDetecting = false;
-                                    });
-
-                                    final api = context.read<ApiService>();
-                                    await api.updateUserProfile(address: gpsAddress);
-                                    if (mounted) {
-                                      await context.read<AuthProvider>().reloadProfile();
-                                      Navigator.pop(ctx);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Primary Location set to GPS: $gpsAddress 📍'),
-                                          backgroundColor: const Color(0xFF0F172A),
-                                          behavior: SnackBarBehavior.floating,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                        ),
-                                      );
-                                    }
-                                  } catch (e) {
-                                    setModalState(() => isDetecting = false);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Please enable GPS permissions in settings')),
-                                    );
-                                  }
-                                },
-                          icon: isDetecting
-                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                              : const Icon(Icons.check_circle_rounded, size: 18),
-                          label: Text(isDetecting ? 'Detecting GPS...' : 'Use Current Live GPS Location'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF2563EB),
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size.fromHeight(44),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // ─── 2. SECONDARY ADDRESS: ENTER MANUALLY ───
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF64748B),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            'SECONDARY (ENTER MANUALLY)',
-                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: manualCtrl,
-                          decoration: InputDecoration(
-                            hintText: 'Enter street, door no, landmark...',
-                            prefixIcon: const Icon(Icons.edit_location_alt_rounded, color: Color(0xFF64748B)),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
-                            filled: true,
-                            fillColor: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        OutlinedButton.icon(
-                          onPressed: () async {
-                            final manualAddr = manualCtrl.text.trim();
-                            if (manualAddr.isEmpty) return;
-                            try {
-                              final api = context.read<ApiService>();
-                              await api.updateUserProfile(address: manualAddr);
-                              if (mounted) {
-                                await context.read<AuthProvider>().reloadProfile();
-                                Navigator.pop(ctx);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Secondary Location set: $manualAddr 📍'),
-                                    backgroundColor: const Color(0xFF0F172A),
-                                    behavior: SnackBarBehavior.floating,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  ),
-                                );
-                              }
-                            } catch (_) {}
-                          },
-                          icon: const Icon(Icons.location_city_rounded, size: 18, color: Color(0xFF0F172A)),
-                          label: const Text('Save Manual Address', style: TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF0F172A))),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFF0F172A),
-                            side: const BorderSide(color: Color(0xFF0F172A), width: 1.5),
-                            minimumSize: const Size.fromHeight(44),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-                  
-                  // Map Picker Link Option
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () {
-                        Navigator.pop(ctx);
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
-                        );
-                      },
-                      icon: const Icon(Icons.map_rounded, size: 18, color: Color(0xFF2563EB)),
-                      label: const Text('Pick Location from Interactive Map', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+      builder: (_) => const SelectLocationSheetContent(),
     );
   }
 
