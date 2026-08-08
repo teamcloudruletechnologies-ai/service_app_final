@@ -27,13 +27,13 @@ class _WorkerPersonalInfoScreenState extends State<WorkerPersonalInfoScreen> {
   void initState() {
     super.initState();
     final user = context.read<AuthProvider>().user;
-    _nameCtrl = TextEditingController(text: user?.name ?? 'Praveen Kumar');
-    _emailCtrl = TextEditingController(text: user?.email ?? 'praveenkumar@gmail.com');
-    _phoneCtrl = TextEditingController(text: user?.phone ?? '+91 96116 43210');
-    _dobCtrl = TextEditingController(text: '27 May 2005');
+    _nameCtrl = TextEditingController(text: user?.name ?? '');
+    _emailCtrl = TextEditingController(text: user?.email ?? '');
+    _phoneCtrl = TextEditingController(text: user?.phone ?? '');
+    _dobCtrl = TextEditingController(text: '15 Aug 1995');
     _genderCtrl = TextEditingController(text: 'Male');
-    _addressCtrl = TextEditingController(text: user?.city != null ? '${user!.city}, Tamil Nadu, India' : 'Madurai, Tamil Nadu, India');
-    _emergencyCtrl = TextEditingController(text: 'Karthik Kumar (Brother)\n+91 98765 43210');
+    _addressCtrl = TextEditingController(text: user?.city != null && user!.city!.isNotEmpty ? '${user.city}, Tamil Nadu, India' : 'Tamil Nadu, India');
+    _emergencyCtrl = TextEditingController(text: user?.phone ?? '');
   }
 
   @override
@@ -121,7 +121,7 @@ class _WorkerPersonalInfoScreenState extends State<WorkerPersonalInfoScreen> {
                     ),
                     child: Center(
                       child: Text(
-                        (user?.name.isNotEmpty == true ? user!.name[0] : 'P').toUpperCase(),
+                        (user?.name.isNotEmpty == true ? user!.name[0] : 'W').toUpperCase(),
                         style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.w800,
@@ -132,7 +132,7 @@ class _WorkerPersonalInfoScreenState extends State<WorkerPersonalInfoScreen> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    user?.name ?? 'Praveen Kumar',
+                    user?.name.isNotEmpty == true ? user!.name : 'Worker Partner',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -141,7 +141,7 @@ class _WorkerPersonalInfoScreenState extends State<WorkerPersonalInfoScreen> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    user?.phone ?? '+91 96116 43210',
+                    user?.phone ?? '',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,

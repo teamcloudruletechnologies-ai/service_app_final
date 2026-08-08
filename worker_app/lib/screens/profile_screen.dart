@@ -147,7 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       child: Center(
                         child: Text(
-                          (userName.isNotEmpty ? userName[0] : 'P').toUpperCase(),
+                          (userName.isNotEmpty ? userName[0] : 'W').toUpperCase(),
                           style: const TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.w800,
@@ -180,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // Worker Name
                 Text(
-                  userName.isNotEmpty ? userName : 'Praveen Kumar',
+                  userName.isNotEmpty ? userName : 'Worker Partner',
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,

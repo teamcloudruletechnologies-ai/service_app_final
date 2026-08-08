@@ -12,7 +12,6 @@ class WorkerServiceSkillsScreen extends StatefulWidget {
 }
 
 class _WorkerServiceSkillsScreenState extends State<WorkerServiceSkillsScreen> {
-  final ApiService _api = ApiService();
   bool _saving = false;
 
   final List<Map<String, dynamic>> _services = [
@@ -164,16 +163,52 @@ class _WorkerServiceSkillsScreenState extends State<WorkerServiceSkillsScreen> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    final user = context.read<AuthProvider>().user;
+    if (user?.serviceType != null && user!.serviceType!.isNotEmpty) {
+      final types = user.serviceType!.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      if (types.isNotEmpty) {
+        _services.clear();
+        for (var t in types) {
+          _services.add({
+            'title': t,
+            'level': 'Expert',
+            'icon': _getIconForService(t),
+            'badgeColor': const Color(0xFFDCFCE7),
+            'textColor': const Color(0xFF15803D),
+          });
+        }
+      }
+    }
+  }
+
+  IconData _getIconForService(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('clean')) return Icons.cleaning_services_rounded;
+    if (lower.contains('plumb')) return Icons.plumbing_rounded;
+    if (lower.contains('electr')) return Icons.electric_bolt_rounded;
+    if (lower.contains('appliance') || lower.contains('repair')) return Icons.home_repair_service_rounded;
+    return Icons.build_rounded;
+  }
+
   Future<void> _saveChanges() async {
     setState(() => _saving = true);
     try {
-      final primaryService = _services.isNotEmpty ? _services.first['title'] as String : 'General Service';
-      await _api.updateWorkerProfile(serviceType: primaryService);
+      final selectedTitles = _services.map((s) => s['title'] as String).toList();
+      final serviceTypeStr = selectedTitles.join(', ');
+
+      final api = context.read<ApiService>();
+      await api.updateWorkerProfile(
+        serviceType: serviceTypeStr.isNotEmpty ? serviceTypeStr : 'General Service',
+      );
+
       if (mounted) {
         await context.read<AuthProvider>().reloadProfile();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Services & Skills updated successfully!'),
+            content: Text('Services updated: ${serviceTypeStr.isNotEmpty ? serviceTypeStr : "General Service"} 🛠️'),
             backgroundColor: const Color(0xFF0F172A),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
