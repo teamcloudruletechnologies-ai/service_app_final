@@ -414,3 +414,153 @@ double? _toNullableDouble(dynamic val) {
   if (val is String) return double.tryParse(val);
   return null;
 }
+
+class SupportTicket {
+  final int id;
+  final String ticketNumber;
+  final int userId;
+  final int? bookingId;
+  final int? categoryId;
+  final String? categoryName;
+  final String subject;
+  final String description;
+  final String status;
+  final String priority;
+  final String? lastMessage;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final List<TicketMessage> messages;
+
+  SupportTicket({
+    required this.id,
+    required this.ticketNumber,
+    required this.userId,
+    this.bookingId,
+    this.categoryId,
+    this.categoryName,
+    required this.subject,
+    required this.description,
+    required this.status,
+    required this.priority,
+    this.lastMessage,
+    required this.createdAt,
+    required this.updatedAt,
+    this.messages = const [],
+  });
+
+  factory SupportTicket.fromJson(Map<String, dynamic> json) {
+    List<TicketMessage> msgs = [];
+    if (json['messages'] is List) {
+      msgs = (json['messages'] as List)
+          .map((m) => TicketMessage.fromJson(Map<String, dynamic>.from(m)))
+          .toList();
+    }
+    return SupportTicket(
+      id: json['id'] as int,
+      ticketNumber: json['ticket_number'] as String? ?? 'SUP-000000',
+      userId: json['user_id'] as int,
+      bookingId: json['booking_id'] as int?,
+      categoryId: json['category_id'] as int?,
+      categoryName: json['category_name'] as String?,
+      subject: json['subject'] as String? ?? '',
+      description: json['description'] as String? ?? '',
+      status: json['status'] as String? ?? 'Open',
+      priority: json['priority'] as String? ?? 'Medium',
+      lastMessage: json['last_message'] as String?,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
+      messages: msgs,
+    );
+  }
+}
+
+class TicketMessage {
+  final int id;
+  final int ticketId;
+  final String senderType;
+  final int senderId;
+  final String? senderName;
+  final String message;
+  final bool isInternalNote;
+  final String? attachmentUrl;
+  final DateTime createdAt;
+
+  TicketMessage({
+    required this.id,
+    required this.ticketId,
+    required this.senderType,
+    required this.senderId,
+    this.senderName,
+    required this.message,
+    this.isInternalNote = false,
+    this.attachmentUrl,
+    required this.createdAt,
+  });
+
+  factory TicketMessage.fromJson(Map<String, dynamic> json) {
+    return TicketMessage(
+      id: json['id'] as int,
+      ticketId: json['ticket_id'] as int,
+      senderType: json['sender_type'] as String? ?? 'user',
+      senderId: json['sender_id'] as int,
+      senderName: json['sender_display_name'] as String? ?? json['sender_name'] as String?,
+      message: json['message'] as String? ?? '',
+      isInternalNote: json['is_internal_note'] == true,
+      attachmentUrl: json['attachment_url'] as String?,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
+}
+
+class SupportFaq {
+  final int id;
+  final String category;
+  final String question;
+  final String answer;
+  final int sortOrder;
+
+  SupportFaq({
+    required this.id,
+    required this.category,
+    required this.question,
+    required this.answer,
+    this.sortOrder = 0,
+  });
+
+  factory SupportFaq.fromJson(Map<String, dynamic> json) {
+    return SupportFaq(
+      id: json['id'] as int,
+      category: json['category'] as String? ?? 'General',
+      question: json['question'] as String? ?? '',
+      answer: json['answer'] as String? ?? '',
+      sortOrder: json['sort_order'] as int? ?? 0,
+    );
+  }
+}
+
+class SupportPolicy {
+  final int id;
+  final String slug;
+  final String title;
+  final String content;
+  final DateTime updatedAt;
+
+  SupportPolicy({
+    required this.id,
+    required this.slug,
+    required this.title,
+    required this.content,
+    required this.updatedAt,
+  });
+
+  factory SupportPolicy.fromJson(Map<String, dynamic> json) {
+    return SupportPolicy(
+      id: json['id'] as int,
+      slug: json['slug'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      content: json['content'] as String? ?? '',
+      updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
+}
+

@@ -9,6 +9,9 @@ import '../screens/payment_screen.dart';
 import '../screens/rating_screen.dart';
 import '../screens/invoice_screen.dart';
 import '../screens/worker_tracking_map_screen.dart';
+import '../screens/raise_ticket_screen.dart';
+import '../screens/report_professional_screen.dart';
+import '../screens/help_centre_screen.dart';
 import '../providers/language_provider.dart';
 
 class LoadingView extends StatelessWidget {
@@ -646,8 +649,82 @@ class BookingCard extends StatelessWidget {
                   ],
                 ),
               ],
+              const SizedBox(height: 10),
+              const Divider(height: 1, color: Color(0xFFF1F5F9)),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => _showBookingHelpSheet(context),
+                    icon: const Icon(Icons.help_outline_rounded, size: 15, color: Color(0xFF64748B)),
+                    label: const Text(
+                      'Need Help?',
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: Color(0xFF64748B)),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showBookingHelpSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Text('Booking Help Options', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF0F172A))),
+                const Spacer(),
+                IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close_rounded)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ListTile(
+              leading: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF2563EB)),
+              title: const Text('Chat regarding this booking', style: TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: const Text('Raise a support ticket prefilled with Booking ID'),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => RaiseTicketScreen(prefilledBookingId: booking.id)));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.report_problem_outlined, color: Color(0xFFDC2626)),
+              title: const Text('Report Professional', style: TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: const Text('Complain about worker conduct or quality'),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => ReportProfessionalScreen(booking: booking)));
+              },
+            ),
+            if (booking.workerPhone != null)
+              ListTile(
+                leading: const Icon(Icons.phone_outlined, color: Color(0xFF059669)),
+                title: const Text('Call Technician', style: TextStyle(fontWeight: FontWeight.w700)),
+                subtitle: Text(booking.workerPhone!),
+                onTap: () => Navigator.pop(ctx),
+              ),
+            ListTile(
+              leading: const Icon(Icons.headset_mic_outlined, color: Color(0xFF7C3AED)),
+              title: const Text('Contact Customer Support', style: TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: const Text('Open main Help Centre options'),
+              onTap: () {
+                Navigator.pop(ctx);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpCentreScreen()));
+              },
+            ),
+          ],
         ),
       ),
     );
