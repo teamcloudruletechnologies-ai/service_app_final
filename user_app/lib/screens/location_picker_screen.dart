@@ -516,43 +516,107 @@ class _SelectLocationSheetContentState extends State<SelectLocationSheetContent>
               const SizedBox(height: 20),
             ],
 
-            // 4. LOCATION ACTIONS CARD CONTAINER MATCHING SCREENSHOT 2
+            // 4. PRIMARY ADDRESS BOX (From Onboarding / Saved)
             Container(
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.5), width: 1.5),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Use current location row
-                  ListTile(
-                    onTap: _detectingGps ? null : _useCurrentLocation,
-                    leading: _detectingGps
-                        ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary))
-                        : const Icon(Icons.my_location_rounded, color: AppTheme.primary, size: 22),
-                    title: const Text(
-                      'Use current location',
-                      style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 15),
-                    ),
-                    trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text(
+                          'PRIMARY ADDRESS (ONBOARDING)',
+                          style: TextStyle(color: Color(0xFF0F172A), fontSize: 10, fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                      const Spacer(),
+                      const Icon(Icons.check_circle_rounded, color: AppTheme.primary, size: 20),
+                    ],
                   ),
-                  const Divider(color: Color(0xFF334155), height: 1, indent: 16, endIndent: 16),
-
-                  // Add Address row
-                  ListTile(
-                    onTap: () {
-                      _showAddAddressDialog(context);
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(Icons.home_rounded, color: Colors.white, size: 22),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          currentAddr,
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text('Phone number: $userPhone', style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      final api = context.read<ApiService>();
+                      await api.updateUserProfile(address: currentAddr);
+                      if (mounted) {
+                        await context.read<AuthProvider>().reloadProfile();
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Primary Address selected: $currentAddr',
+                              style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold),
+                            ),
+                            backgroundColor: AppTheme.primary,
+                          ),
+                        );
+                      }
                     },
-                    leading: const Icon(Icons.add_rounded, color: AppTheme.primary, size: 24),
-                    title: const Text(
-                      'Add Address',
-                      style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 15),
+                    icon: const Icon(Icons.check_rounded, size: 18),
+                    label: const Text('Use Primary Address'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary,
+                      foregroundColor: const Color(0xFF0F172A),
+                      minimumSize: const Size.fromHeight(44),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
                   ),
-                  const Divider(color: Color(0xFF334155), height: 1, indent: 16, endIndent: 16),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
 
-                  // Select from Interactive Map row
+            // 5. SECONDARY ADDRESS BOX (Search on Interactive Map / Manual)
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFF334155), width: 1.2),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF64748B),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'SECONDARY ADDRESS (MAP SEARCH)',
+                      style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Search Location on Map button
                   ListTile(
                     onTap: () {
                       Navigator.pop(context);
@@ -560,129 +624,53 @@ class _SelectLocationSheetContentState extends State<SelectLocationSheetContent>
                         MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
                       );
                     },
-                    leading: const Icon(Icons.map_rounded, color: AppTheme.primary, size: 22),
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.map_rounded, color: AppTheme.primary, size: 24),
                     title: const Text(
-                      'Select from Interactive Map',
-                      style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 15),
+                      'Search Location on Interactive Map',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
                     ),
+                    subtitle: const Text('Pick any street or drag map pin to update location', style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
                     trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
                   ),
+                  const SizedBox(height: 10),
+
+                  // Secondary Manual Textfield
+                  TextField(
+                    controller: _manualCtrl,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Enter secondary address manually...',
+                      hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
+                      prefixIcon: const Icon(Icons.edit_location_alt_rounded, color: AppTheme.primary),
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.arrow_forward_rounded, color: AppTheme.primary),
+                        onPressed: () async {
+                          final manual = _manualCtrl.text.trim();
+                          if (manual.isEmpty) return;
+                          final api = context.read<ApiService>();
+                          await api.updateUserProfile(address: manual);
+                          if (mounted) {
+                            await context.read<AuthProvider>().reloadProfile();
+                            Navigator.pop(context);
+                          }
+                        },
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xFF0F172A),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    ),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
 
-            // 5. SAVED ADDRESSES SECTION MATCHING SCREENSHOT 2 & 3
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'SAVED ADDRESSES',
-                  style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
-                ),
-                TextButton(
-                  onPressed: () {},
-                  child: const Text('See all', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 12)),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Saved Address Card
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E293B),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.4), width: 1.5),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.home_rounded, color: Colors.white, size: 22),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'Home',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                      ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text('Default', style: TextStyle(color: AppTheme.primary, fontSize: 10, fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    currentAddr,
-                    style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 13, height: 1.4),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Phone number: $userPhone',
-                    style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.more_horiz_rounded, color: AppTheme.primary, size: 20),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.share_outlined, color: AppTheme.primary, size: 20),
-                        onPressed: () {},
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined, color: AppTheme.primary, size: 20),
-                        onPressed: () => _showAddAddressDialog(context),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // 6. SEARCH LOCATION MANUALLY BOTTOM INPUT MATCHING SCREENSHOT 3
-            TextField(
-              controller: _manualCtrl,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Search location manually',
-                hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
-                prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primary),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.arrow_forward_rounded, color: AppTheme.primary),
-                  onPressed: () async {
-                    final manual = _manualCtrl.text.trim();
-                    if (manual.isEmpty) return;
-                    final api = context.read<ApiService>();
-                    await api.updateUserProfile(address: manual);
-                    if (mounted) {
-                      await context.read<AuthProvider>().reloadProfile();
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-                filled: true,
-                fillColor: const Color(0xFF1E293B),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // 7. FOOTER BRANDING MATCHING SCREENSHOT 2 (powered by Google)
+            // 6. FOOTER BRANDING MATCHING SCREENSHOT 2 (powered by Google)
             Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -698,7 +686,6 @@ class _SelectLocationSheetContentState extends State<SelectLocationSheetContent>
       ),
     );
   }
-
   void _showAddAddressDialog(BuildContext ctx) {
     final ctrl = TextEditingController();
     showDialog(

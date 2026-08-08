@@ -43,6 +43,8 @@ class _HomeScreenState extends State<HomeScreen> {
     ('More', '', Icons.grid_view_rounded, const Color(0xFFEDF2F7)),
   ];
 
+  bool _hasPromptedLocationOnEntry = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +55,11 @@ class _HomeScreenState extends State<HomeScreen> {
         catalog.loadCategories(),
         catalog.loadServices(),
       ]);
+
+      if (!_hasPromptedLocationOnEntry) {
+        _hasPromptedLocationOnEntry = true;
+        _showLocationModal();
+      }
     });
   }
 
