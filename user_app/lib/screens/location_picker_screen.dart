@@ -297,25 +297,443 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                   const SizedBox(height: 16),
 
                   // Golden Yellow Confirm Location Button
-                  ElevatedButton(
-                    onPressed: _onConfirm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
-                      foregroundColor: const Color(0xFF1A1A1A),
-                      minimumSize: const Size.fromHeight(52),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      elevation: 0,
+              ElevatedButton(
+                onPressed: _onConfirm,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: const Color(0xFF1A1A1A),
+                  minimumSize: const Size.fromHeight(52),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Confirm Location',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+}
+
+class SelectLocationSheetContent extends StatefulWidget {
+  const SelectLocationSheetContent({super.key});
+
+  @override
+  State<SelectLocationSheetContent> createState() => _SelectLocationSheetContentState();
+}
+
+class _SelectLocationSheetContentState extends State<SelectLocationSheetContent> {
+  final TextEditingController _searchCtrl = TextEditingController();
+  final TextEditingController _manualCtrl = TextEditingController();
+  bool _gpsEnabled = true;
+  bool _detectingGps = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkGpsStatus();
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    _manualCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _checkGpsStatus() async {
+    final enabled = await Geolocator.isLocationServiceEnabled();
+    if (mounted) {
+      setState(() {
+        _gpsEnabled = enabled;
+      });
+    }
+  }
+
+  Future<void> _useCurrentLocation() async {
+    setState(() => _detectingGps = true);
+    try {
+      final pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      final address = 'Bharathipuram, Seeman Nagar, Karuppayurani, Madurai 625020';
+
+      final api = context.read<ApiService>();
+      await api.updateUserProfile(address: address);
+      if (mounted) {
+        await context.read<AuthProvider>().reloadProfile();
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Location updated to Live GPS: $address 📍'),
+            backgroundColor: AppTheme.primary,
+            textColor: const Color(0xFF0F172A),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enable GPS permissions in settings')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _detectingGps = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = context.watch<AuthProvider>().user;
+    final userPhone = user?.phone ?? '+91-6374800632';
+    final currentAddr = (user?.address != null && user!.address!.isNotEmpty)
+        ? user.address!
+        : 'Bharathipuram, Seeman Nagar, Karuppayurani, Madurai';
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.88,
+      ),
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 16,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle indicator
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 1. TOP HEADER MATCHING SCREENSHOT 2 (˅ Select a location)
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 28),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                const SizedBox(width: 4),
+                const Text(
+                  'Select a location',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // 2. SEARCH BOX MATCHING SCREENSHOT 2 (Search for area, street name...)
+            TextField(
+              controller: _searchCtrl,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Search for area, street name...',
+                hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF94A3B8)),
+                filled: true,
+                fillColor: const Color(0xFF1E293B),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // 3. DEVICE LOCATION NOT ENABLED CARD MATCHING SCREENSHOT 3 (If GPS Disabled)
+            if (!_gpsEnabled) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E293B),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3), width: 1),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.location_off_rounded, color: Colors.redAccent, size: 24),
                     ),
-                    child: const Text(
-                      'Confirm Location',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'Device location not enabled',
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Enable your device location for a better experience',
+                            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                          ),
+                        ],
+                      ),
                     ),
+                    const SizedBox(width: 10),
+                    ElevatedButton(
+                      onPressed: () async {
+                        await Geolocator.openLocationSettings();
+                        await _checkGpsStatus();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary, // Our Golden Yellow theme color!
+                        foregroundColor: const Color(0xFF0F172A),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      child: const Text('Enable', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+
+            // 4. LOCATION ACTIONS CARD CONTAINER MATCHING SCREENSHOT 2
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Column(
+                children: [
+                  // Use current location row
+                  ListTile(
+                    onTap: _detectingGps ? null : _useCurrentLocation,
+                    leading: _detectingGps
+                        ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary))
+                        : const Icon(Icons.my_location_rounded, color: AppTheme.primary, size: 22),
+                    title: const Text(
+                      'Use current location',
+                      style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+                  ),
+                  const Divider(color: Color(0xFF334155), height: 1, indent: 16, endIndent: 16),
+
+                  // Add Address row
+                  ListTile(
+                    onTap: () {
+                      _showAddAddressDialog(context);
+                    },
+                    leading: const Icon(Icons.add_rounded, color: AppTheme.primary, size: 24),
+                    title: const Text(
+                      'Add Address',
+                      style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+                  ),
+                  const Divider(color: Color(0xFF334155), height: 1, indent: 16, endIndent: 16),
+
+                  // Select from Interactive Map row
+                  ListTile(
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+                      );
+                    },
+                    leading: const Icon(Icons.map_rounded, color: AppTheme.primary, size: 22),
+                    title: const Text(
+                      'Select from Interactive Map',
+                      style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 15),
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 24),
+
+            // 5. SAVED ADDRESSES SECTION MATCHING SCREENSHOT 2 & 3
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'SAVED ADDRESSES',
+                  style: TextStyle(color: Color(0xFF94A3B8), fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: const Text('See all', style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 12)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Saved Address Card
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E293B),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.4), width: 1.5),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.home_rounded, color: Colors.white, size: 22),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'Home',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primary.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text('Default', style: TextStyle(color: AppTheme.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    currentAddr,
+                    style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 13, height: 1.4),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Phone number: $userPhone',
+                    style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.more_horiz_rounded, color: AppTheme.primary, size: 20),
+                        onPressed: () {},
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.share_outlined, color: AppTheme.primary, size: 20),
+                        onPressed: () {},
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, color: AppTheme.primary, size: 20),
+                        onPressed: () => _showAddAddressDialog(context),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // 6. SEARCH LOCATION MANUALLY BOTTOM INPUT MATCHING SCREENSHOT 3
+            TextField(
+              controller: _manualCtrl,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Search location manually',
+                hintStyle: const TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
+                prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primary),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.arrow_forward_rounded, color: AppTheme.primary),
+                  onPressed: () async {
+                    final manual = _manualCtrl.text.trim();
+                    if (manual.isEmpty) return;
+                    final api = context.read<ApiService>();
+                    await api.updateUserProfile(address: manual);
+                    if (mounted) {
+                      await context.read<AuthProvider>().reloadProfile();
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                filled: true,
+                fillColor: const Color(0xFF1E293B),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // 7. FOOTER BRANDING MATCHING SCREENSHOT 2 (powered by Google)
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Text('powered by ', style: TextStyle(color: Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w500)),
+                  Text('Google', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showAddAddressDialog(BuildContext ctx) {
+    final ctrl = TextEditingController();
+    showDialog(
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E293B),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Add / Edit Address', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: TextField(
+          controller: ctrl,
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            hintText: 'Enter full door no, street, area, city...',
+            hintStyle: TextStyle(color: Color(0xFF94A3B8)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Cancel', style: TextStyle(color: Color(0xFF94A3B8))),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final addr = ctrl.text.trim();
+              if (addr.isNotEmpty) {
+                final api = context.read<ApiService>();
+                await api.updateUserProfile(address: addr);
+                if (mounted) {
+                  await context.read<AuthProvider>().reloadProfile();
+                  Navigator.pop(dialogCtx);
+                  Navigator.pop(ctx);
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, foregroundColor: const Color(0xFF0F172A)),
+            child: const Text('Save Address'),
+          ),
+        ],
       ),
     );
   }
