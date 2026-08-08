@@ -18,6 +18,9 @@ const bannerRoutes = require("./banner.routes");
 const { adminListReviews } = require("../controllers/review.controller");
 const auth = require("../middlewares/auth.middleware");
 
+const supportRoutes = require("./support.routes");
+const adminSupportRoutes = require("./admin_support.routes");
+
 const router = express.Router();
 
 const userAddressRoutes = require("./user-address.routes");
@@ -35,8 +38,11 @@ router.use("/admin/services", checkPermission("services"), serviceRoutes);
 router.use("/admin/bookings", checkPermission("bookings"), bookingRoutes);
 router.use("/admin/invoices", checkPermission("invoices"), invoiceRoutes);
 router.use("/admin/complaints", checkPermission("complaints"), complaintRoutes);
+router.use("/admin/support", checkPermission("complaints"), adminSupportRoutes);
 router.use("/admin/locations", checkPermission("locations"), locationRoutes);
 router.use("/app/locations", userLocationRoutes);
+router.use("/app/support", supportRoutes);
+router.use("/support", supportRoutes); // Alias route support for /api/support/*
 router.use("/user-addresses", userAddressRoutes);
 router.use("/app/addresses", userAddressRoutes);
 router.use("/app", appRoutes);
