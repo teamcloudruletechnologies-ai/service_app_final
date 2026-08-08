@@ -169,7 +169,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // INTERACTIVE MAP VIEW WITH CENTER PIN (Screen 8 Mockup)
+            // INTERACTIVE MAP VIEW WITH CENTER PIN
             Expanded(
               child: Stack(
                 children: [
@@ -235,7 +235,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
               ),
             ),
 
-            // SELECTED LOCATION BOTTOM CARD (Primary GPS & Secondary Manual)
+            // SELECTED LOCATION BOTTOM CARD
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
