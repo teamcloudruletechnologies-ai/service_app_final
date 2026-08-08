@@ -188,6 +188,158 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     } catch (_) {}
   }
 
+  bool _detectingLocation = false;
+
+  void _updateLocationFromGps() {
+    final user = context.read<AuthProvider>().user;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Update Your Location',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF0F172A)),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Live GPS Detect Button
+                  ElevatedButton.icon(
+                    onPressed: _detectingLocation
+                        ? null
+                        : () async {
+                            setModalState(() => _detectingLocation = true);
+                            try {
+                              final pos = await _determinePosition();
+                              String detectedCity = 'Madurai';
+                              if (pos != null) {
+                                final lat = pos.latitude;
+                                final lng = pos.longitude;
+                                if ((lat - 13.08).abs() < 0.8 && (lng - 80.27).abs() < 0.8) {
+                                  detectedCity = 'Chennai';
+                                } else if ((lat - 11.01).abs() < 0.8 && (lng - 76.95).abs() < 0.8) {
+                                  detectedCity = 'Coimbatore';
+                                } else if ((lat - 10.79).abs() < 0.8 && (lng - 78.70).abs() < 0.8) {
+                                  detectedCity = 'Tiruchirappalli';
+                                } else if ((lat - 8.71).abs() < 0.8 && (lng - 77.72).abs() < 0.8) {
+                                  detectedCity = 'Tirunelveli';
+                                } else if ((lat - 11.66).abs() < 0.8 && (lng - 78.14).abs() < 0.8) {
+                                  detectedCity = 'Salem';
+                                } else {
+                                  detectedCity = 'Madurai';
+                                }
+
+                                final api = context.read<ApiService>();
+                                await api.updateWorkerLocation(lat, lng);
+                                await api.updateWorkerProfile(city: detectedCity);
+                                if (mounted) {
+                                  await context.read<AuthProvider>().reloadProfile();
+                                  Navigator.pop(ctx);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('GPS Location updated to $detectedCity, Tamil Nadu 📍'),
+                                      backgroundColor: const Color(0xFF0F172A),
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    ),
+                                  );
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('GPS permission required to fetch live location')),
+                                );
+                              }
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Failed to update location: $e')),
+                              );
+                            } finally {
+                              setModalState(() => _detectingLocation = false);
+                            }
+                          },
+                    icon: _detectingLocation
+                        ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.my_location_rounded, size: 20),
+                    label: Text(_detectingLocation ? 'Detecting GPS...' : 'Use Current Live GPS Location'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F172A),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(50),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      elevation: 0,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  const Text('Or Quick Select City:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF64748B))),
+                  const SizedBox(height: 10),
+
+                  // Quick City Selection Chips
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: ['Madurai', 'Chennai', 'Coimbatore', 'Tiruchirappalli', 'Salem', 'Tirunelveli'].map((city) {
+                      final isSelected = (user?.city ?? 'Madurai').toLowerCase() == city.toLowerCase();
+                      return ChoiceChip(
+                        label: Text(city),
+                        selected: isSelected,
+                        selectedColor: const Color(0xFF0F172A),
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : const Color(0xFF0F172A),
+                          fontWeight: FontWeight.bold,
+                        ),
+                        onSelected: (selected) async {
+                          if (selected) {
+                            try {
+                              final api = context.read<ApiService>();
+                              await api.updateWorkerProfile(city: city);
+                              if (mounted) {
+                                await context.read<AuthProvider>().reloadProfile();
+                                Navigator.pop(ctx);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Location updated to $city, Tamil Nadu'),
+                                    backgroundColor: const Color(0xFF0F172A),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  ),
+                                );
+                              }
+                            } catch (_) {}
+                          }
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _toggleOnlineStatus(bool online) async {
     setState(() {
       _isOnline = online;
@@ -296,23 +448,30 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Builder(builder: (ctx) {
-                        final userCity = user?.city;
-                        return Text(
-                          (userCity != null && userCity.isNotEmpty) ? '$userCity, Tamil Nadu' : 'Madurai, Tamil Nadu',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF0F172A),
-                          ),
-                        );
-                      }),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: Color(0xFF0F172A)),
-                    ],
+                  InkWell(
+                    onTap: _updateLocationFromGps,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Builder(builder: (ctx) {
+                            final userCity = user?.city;
+                            return Text(
+                              (userCity != null && userCity.isNotEmpty) ? '$userCity, Tamil Nadu' : 'Madurai, Tamil Nadu',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F172A),
+                              ),
+                            );
+                          }),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.keyboard_arrow_down_rounded, size: 20, color: Color(0xFF0F172A)),
+                        ],
+                      ),
+                    ),
                   ),
                   CircleAvatar(
                     radius: 20,
