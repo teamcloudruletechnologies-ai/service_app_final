@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../models/models.dart';
+import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
 import '../theme/app_theme.dart';
 import 'main_shell.dart';
@@ -29,8 +30,13 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialAddress != null) {
+    final user = context.read<AuthProvider>().user;
+    if (widget.initialAddress != null && widget.initialAddress!.trim().isNotEmpty) {
       _addressCtrl.text = widget.initialAddress!;
+    } else if (user?.address != null && user!.address!.trim().isNotEmpty) {
+      _addressCtrl.text = user.address!;
+    } else {
+      _addressCtrl.text = 'Anna Nagar, Madurai, Tamil Nadu 625020';
     }
   }
 

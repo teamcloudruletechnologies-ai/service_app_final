@@ -234,7 +234,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
               ),
             ),
 
-            // SELECTED LOCATION BOTTOM CARD (Screen 8 Mockup)
+            // SELECTED LOCATION BOTTOM CARD (Primary GPS & Secondary Manual)
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -252,31 +252,51 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'Selected Location',
-                    style: TextStyle(fontSize: 13, color: Color(0xFF718096), fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 6),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Text(
-                          _addressCtrl.text,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2563EB),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          // Allow editing address
-                        },
-                        child: const Text('Change', style: TextStyle(color: AppTheme.primaryDark, fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          'PRIMARY ADDRESS (GPS LOCATION)',
+                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900),
+                        ),
                       ),
                     ],
                   ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Icon(Icons.my_location_rounded, color: Color(0xFF2563EB), size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _addressCtrl.text,
+                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+
+                  // SECONDARY MANUAL ADDRESS ENTRY
+                  TextField(
+                    controller: _addressCtrl,
+                    onChanged: (val) => setState(() {}),
+                    decoration: InputDecoration(
+                      labelText: 'Secondary Address (Enter Manually)',
+                      hintText: 'Door No, Street, Landmark...',
+                      prefixIcon: const Icon(Icons.edit_location_alt_rounded, color: Color(0xFF64748B)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    ),
+                  ),
                   const SizedBox(height: 16),
 
-                  // Golden Yellow Confirm Location Button (Screen 8 Mockup)
+                  // Golden Yellow Confirm Location Button
                   ElevatedButton(
                     onPressed: _onConfirm,
                     style: ElevatedButton.styleFrom(
