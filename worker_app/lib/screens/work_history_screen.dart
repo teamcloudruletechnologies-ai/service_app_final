@@ -6,6 +6,7 @@ import '../models/models.dart';
 import '../providers/booking_provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
+import '../widgets/common_widgets.dart';
 import 'worker_booking_detail_screen.dart';
 
 class WorkHistoryScreen extends StatefulWidget {
@@ -119,7 +120,7 @@ class _WorkHistoryScreenState extends State<WorkHistoryScreen> {
           // ─── 2. WORK HISTORY CARDS LIST ───
           Expanded(
             child: bookingProv.loading && filteredList.isEmpty
-                ? const LoadingView(message: 'Loading work history...')
+                ? LoadingView(message: 'Loading work history...')
                 : bookingProv.error != null
                     ? ErrorView(message: bookingProv.error!, onRetry: _loadData)
                     : filteredList.isEmpty

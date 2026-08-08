@@ -100,8 +100,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().user;
 
-    final ratingDisplay = user?.rating != null && user!.rating > 0
-        ? user.rating.toStringAsFixed(1)
+    final ratingDisplay = (user?.rating ?? 0) > 0
+        ? user!.rating!.toStringAsFixed(1)
         : '4.0';
 
     return Scaffold(
@@ -215,7 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const Icon(Icons.phone_rounded, size: 14, color: Color(0xFF64748B)),
                     const SizedBox(width: 6),
                     Text(
-                      user?.phone != null && user!.phone.isNotEmpty ? user.phone : '+91 96116 43210',
+                      user?.phone != null && user!.phone.isNotEmpty ? user!.phone : '+91 96116 43210',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
