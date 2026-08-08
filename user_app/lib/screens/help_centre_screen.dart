@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import '../services/api_service.dart';
+import '../models/models.dart';
 import '../providers/language_provider.dart';
+import 'raise_ticket_screen.dart';
+import 'my_tickets_screen.dart';
+import 'report_professional_screen.dart';
+import 'account_help_screen.dart';
+import 'policies_screen.dart';
+import 'bookings_screen.dart';
 
 class HelpCentreScreen extends StatefulWidget {
   const HelpCentreScreen({super.key});
@@ -12,6 +21,14 @@ class HelpCentreScreen extends StatefulWidget {
 class _HelpCentreScreenState extends State<HelpCentreScreen> {
   final _searchCtrl = TextEditingController();
   String _searchQuery = '';
+  List<SupportFaq> _dynamicFaqs = [];
+  bool _loadingFaqs = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFaqs();
+  }
 
   @override
   void dispose() {
@@ -19,28 +36,51 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
     super.dispose();
   }
 
+  Future<void> _loadFaqs() async {
+    setState(() => _loadingFaqs = true);
+    try {
+      final apiService = context.read<ApiService>();
+      final faqs = await apiService.fetchDynamicFaqs();
+      if (faqs.isNotEmpty) {
+        setState(() {
+          _dynamicFaqs = faqs;
+        });
+      }
+    } catch (_) {}
+    setState(() => _loadingFaqs = false);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final faqs = [
+    // Fallback static FAQs if backend dynamic FAQs fail or empty
+    final fallbackFaqs = [
       {
-        'q': context.translate('faq_1_q'),
-        'a': context.translate('faq_1_a'),
+        'q': 'How do I book a service on Urban Serve?',
+        'a': 'Select a service category from the home screen, select your location, pick a scheduled time, and confirm your booking.',
       },
       {
-        'q': context.translate('faq_2_q'),
-        'a': context.translate('faq_2_a'),
+        'q': 'How are professional service charges calculated?',
+        'a': 'Service partners perform an initial inspection upon arrival. Final pricing depends on spare parts and labor scope agreed before work starts.',
       },
       {
-        'q': context.translate('faq_3_q'),
-        'a': context.translate('faq_3_a'),
+        'q': 'What is the job start OTP?',
+        'a': 'The start OTP is a 4-digit code shown in your booking card. Share it with your assigned professional only when they arrive at your location.',
       },
       {
-        'q': context.translate('faq_4_q'),
-        'a': context.translate('faq_4_a'),
+        'q': 'How can I report poor service quality or rude behavior?',
+        'a': 'Go to Help Centre -> Report Professional or tap Need Help on your booking card to lodge a formal safety report.',
       },
     ];
 
-    final filteredFaqs = faqs.where((faq) {
+    List<Map<String, String>> displayedFaqs = [];
+
+    if (_dynamicFaqs.isNotEmpty) {
+      displayedFaqs = _dynamicFaqs.map((f) => {'q': f.question, 'a': f.answer}).toList();
+    } else {
+      displayedFaqs = fallbackFaqs;
+    }
+
+    final filteredFaqs = displayedFaqs.where((faq) {
       final query = _searchQuery.toLowerCase();
       return faq['q']!.toLowerCase().contains(query) ||
           faq['a']!.toLowerCase().contains(query);
@@ -108,6 +148,137 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
             ),
 
             const SizedBox(height: 20),
+
+            // ─── SUPPORT SERVICES GRID/CARDS ───
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: Text(
+                'SUPPORT SERVICES',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 11,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ServiceOptionCard(
+                          icon: Icons.confirmation_number_rounded,
+                          title: 'Raise a Ticket',
+                          subtitle: 'Create a new support request',
+                          iconBg: const Color(0xFFEFF6FF),
+                          iconColor: const Color(0xFF2563EB),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const RaiseTicketScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _ServiceOptionCard(
+                          icon: Icons.receipt_long_rounded,
+                          title: 'My Support Tickets',
+                          subtitle: 'View active ticket history',
+                          iconBg: const Color(0xFFECFDF5),
+                          iconColor: const Color(0xFF059669),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const MyTicketsScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ServiceOptionCard(
+                          icon: Icons.build_circle_rounded,
+                          title: 'Booking Help',
+                          subtitle: 'Issues with active booking',
+                          iconBg: const Color(0xFFFFF7ED),
+                          iconColor: const Color(0xFFD97706),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const BookingsScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _ServiceOptionCard(
+                          icon: Icons.report_problem_rounded,
+                          title: 'Report Professional',
+                          subtitle: 'Complain about partner behavior',
+                          iconBg: const Color(0xFFFEF2F2),
+                          iconColor: const Color(0xFFDC2626),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const ReportProfessionalScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ServiceOptionCard(
+                          icon: Icons.manage_accounts_rounded,
+                          title: 'Account Help',
+                          subtitle: 'Mobile, password & deletion',
+                          iconBg: const Color(0xFFF3E8FF),
+                          iconColor: const Color(0xFF7C3AED),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AccountHelpScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _ServiceOptionCard(
+                          icon: Icons.gavel_rounded,
+                          title: 'Policies & Legal',
+                          subtitle: 'Privacy, terms & refunds',
+                          iconBg: const Color(0xFFF1F5F9),
+                          iconColor: const Color(0xFF475569),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const PoliciesScreen()),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
 
             // ─── FAQS SECTION TITLE ───
             const Padding(
@@ -194,7 +365,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               child: Text(
-                'CONTACT SUPPORT',
+                'DIRECT CHANNELS',
                 style: TextStyle(
                   fontWeight: FontWeight.w900,
                   fontSize: 11,
@@ -279,6 +450,76 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
         backgroundColor: const Color(0xFF0F172A),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+}
+
+class _ServiceOptionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color iconBg;
+  final Color iconColor;
+  final VoidCallback onTap;
+
+  const _ServiceOptionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.iconBg,
+    required this.iconColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconColor, size: 22),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Color(0xFF0F172A)),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

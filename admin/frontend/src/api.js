@@ -157,6 +157,26 @@ export const complaintsAPI = {
   addNotes: (id, notes) => api.post(`/admin/complaints/${id}/notes`, { note: notes }),
 };
 
+// ─── Support Hub ─────────────────────────────────────────────
+export const supportAPI = {
+  getAnalytics: () => api.get("/admin/support/analytics"),
+  getTickets: (params) => api.get("/admin/support/tickets", { params }),
+  getTicketById: (id) => api.get(`/admin/support/tickets/${id}`),
+  updateTicketStatus: (id, status, notes) => api.patch(`/admin/support/tickets/${id}/status`, { status, notes }),
+  assignTicket: (id, adminId) => api.patch(`/admin/support/tickets/${id}/assign`, { adminId }),
+  replyTicket: (id, message, isInternalNote = false) => api.post(`/admin/support/tickets/${id}/reply`, { message, isInternalNote }),
+  getWorkerComplaints: (params) => api.get("/admin/support/complaints", { params }),
+  updateWorkerComplaint: (id, data) => api.patch(`/admin/support/complaints/${id}`, data),
+  getAccountRequests: (params) => api.get("/admin/support/account-requests", { params }),
+  updateAccountRequest: (id, status, adminNotes) => api.patch(`/admin/support/account-requests/${id}`, { status, adminNotes }),
+  getFaqs: () => api.get("/app/support/faqs"),
+  createFaq: (data) => api.post("/admin/support/faqs", data),
+  updateFaq: (id, data) => api.put(`/admin/support/faqs/${id}`, data),
+  deleteFaq: (id) => api.delete(`/admin/support/faqs/${id}`),
+  getPolicies: () => api.get("/app/support/policies"),
+  updatePolicy: (slug, data) => api.put(`/admin/support/policies/${slug}`, data),
+};
+
 // ─── Locations ───────────────────────────────────────────────
 export const locationsAPI = {
   getZones: () => api.get("/admin/locations/zones"),

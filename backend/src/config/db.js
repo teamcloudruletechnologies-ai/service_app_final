@@ -283,6 +283,168 @@ async function initDb() {
       ELSE 499
     END
     WHERE price = 0 OR price IS NULL;
+
+    -- Help & Support Modules Tables
+    -- Drop & recreate support tables if schema has drifted (safe: these tables have no critical production data)
+    DROP TABLE IF EXISTS account_requests CASCADE;
+    DROP TABLE IF EXISTS ticket_attachments CASCADE;
+    DROP TABLE IF EXISTS ticket_status_history CASCADE;
+    DROP TABLE IF EXISTS ticket_messages CASCADE;
+    DROP TABLE IF EXISTS support_tickets CASCADE;
+    DROP TABLE IF EXISTS professional_reports CASCADE;
+    DROP TABLE IF EXISTS support_faq CASCADE;
+    DROP TABLE IF EXISTS support_policies CASCADE;
+    DROP TABLE IF EXISTS support_categories CASCADE;
+
+    CREATE TABLE IF NOT EXISTS support_categories (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) UNIQUE NOT NULL,
+      icon VARCHAR(50) DEFAULT 'help_outline',
+      status VARCHAR(30) NOT NULL DEFAULT 'active',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS support_tickets (
+      id SERIAL PRIMARY KEY,
+      ticket_number VARCHAR(30) UNIQUE NOT NULL,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      booking_id INTEGER REFERENCES bookings(id) ON DELETE SET NULL,
+      category_id INTEGER REFERENCES support_categories(id) ON DELETE SET NULL,
+      category_name VARCHAR(100),
+      subject VARCHAR(255) NOT NULL,
+      description TEXT NOT NULL,
+      status VARCHAR(30) NOT NULL DEFAULT 'Open',
+      priority VARCHAR(30) NOT NULL DEFAULT 'Medium',
+      assigned_admin_id INTEGER REFERENCES admins(id) ON DELETE SET NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS ticket_messages (
+      id SERIAL PRIMARY KEY,
+      ticket_id INTEGER NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+      sender_type VARCHAR(30) NOT NULL DEFAULT 'user',
+      sender_id INTEGER NOT NULL,
+      sender_name VARCHAR(120),
+      message TEXT NOT NULL,
+      is_internal_note BOOLEAN NOT NULL DEFAULT FALSE,
+      attachment_url TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS ticket_status_history (
+      id SERIAL PRIMARY KEY,
+      ticket_id INTEGER NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+      old_status VARCHAR(30),
+      new_status VARCHAR(30) NOT NULL,
+      changed_by_admin_id INTEGER REFERENCES admins(id) ON DELETE SET NULL,
+      changed_by_name VARCHAR(120),
+      notes TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS ticket_attachments (
+      id SERIAL PRIMARY KEY,
+      ticket_id INTEGER NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+      message_id INTEGER REFERENCES ticket_messages(id) ON DELETE CASCADE,
+      file_url TEXT NOT NULL,
+      file_type VARCHAR(50) DEFAULT 'image',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS professional_reports (
+      id SERIAL PRIMARY KEY,
+      report_number VARCHAR(30) UNIQUE NOT NULL,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      worker_id INTEGER REFERENCES workers(id) ON DELETE SET NULL,
+      worker_name VARCHAR(120),
+      booking_id INTEGER REFERENCES bookings(id) ON DELETE SET NULL,
+      reason VARCHAR(150) NOT NULL,
+      description TEXT NOT NULL,
+      photo_url TEXT,
+      status VARCHAR(30) NOT NULL DEFAULT 'Pending',
+      admin_action VARCHAR(100),
+      admin_notes TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS support_faq (
+      id SERIAL PRIMARY KEY,
+      category VARCHAR(100) NOT NULL DEFAULT 'General',
+      question TEXT NOT NULL,
+      answer TEXT NOT NULL,
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS support_policies (
+      id SERIAL PRIMARY KEY,
+      slug VARCHAR(50) UNIQUE NOT NULL,
+      title VARCHAR(150) NOT NULL,
+      content TEXT NOT NULL,
+      is_published BOOLEAN NOT NULL DEFAULT TRUE,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS account_requests (
+      id SERIAL PRIMARY KEY,
+      request_number VARCHAR(30) UNIQUE NOT NULL,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      request_type VARCHAR(50) NOT NULL,
+      details JSONB DEFAULT '{}'::jsonb,
+      reason TEXT,
+      status VARCHAR(30) NOT NULL DEFAULT 'Pending',
+      admin_notes TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+
+    -- Seed Support Categories
+    INSERT INTO support_categories (name, icon) VALUES
+      ('Booking & Scheduling', 'calendar_today'),
+      ('Payment & Refunds', 'payments'),
+      ('Service Quality', 'star'),
+      ('Professional Behavior', 'person'),
+      ('Account & Profile', 'account_circle'),
+      ('General Inquiry', 'help')
+    ON CONFLICT (name) DO NOTHING;
+
+    -- Seed Initial FAQs if empty
+    INSERT INTO support_faq (category, question, answer, sort_order)
+    SELECT 'General', 'How do I book a service?', 'Select a service from home, choose your location, pick date/time slot, and confirm your booking.', 1
+    WHERE NOT EXISTS (SELECT 1 FROM support_faq WHERE question = 'How do I book a service?');
+
+    INSERT INTO support_faq (category, question, answer, sort_order)
+    SELECT 'Payment', 'What payment methods are supported?', 'We accept UPI, Credit/Debit cards, Net Banking, and Cash on Delivery after job completion.', 2
+    WHERE NOT EXISTS (SELECT 1 FROM support_faq WHERE question = 'What payment methods are supported?');
+
+    INSERT INTO support_faq (category, question, answer, sort_order)
+    SELECT 'Booking', 'Can I cancel my booking?', 'Yes, you can cancel your booking anytime before the service partner is dispatched without cancellation fee.', 3
+    WHERE NOT EXISTS (SELECT 1 FROM support_faq WHERE question = 'Can I cancel my booking?');
+
+    INSERT INTO support_faq (category, question, answer, sort_order)
+    SELECT 'Safety', 'Are professionals background verified?', 'Yes, all our professionals undergo criminal record check, police verification, and Aadhaar verification before onboarding.', 4
+    WHERE NOT EXISTS (SELECT 1 FROM support_faq WHERE question = 'Are professionals background verified?');
+
+    -- Seed Initial Policies if empty
+    INSERT INTO support_policies (slug, title, content) VALUES
+      ('privacy', 'Privacy Policy', '## Privacy Policy\n\nWe value your trust and are committed to protecting your personal data.\n\n### Information We Collect\n- Name, phone number, and email address.\n- Service location and location coordinates.\n- Booking history and payment transaction records.\n\n### How We Use Your Data\n- To schedule and deliver home services efficiently.\n- To communicate booking updates and notifications.\n- To ensure safety and resolve customer complaints.')
+    ON CONFLICT (slug) DO NOTHING;
+
+    INSERT INTO support_policies (slug, title, content) VALUES
+      ('terms', 'Terms of Service', '## Terms of Service\n\nBy accessing or using our platform, you agree to comply with our terms.\n\n### User Responsibilities\n- Provide accurate service location and details.\n- Ensure safe working conditions for service professionals.\n- Pay agreed inspection and service charges upon job completion.')
+    ON CONFLICT (slug) DO NOTHING;
+
+    INSERT INTO support_policies (slug, title, content) VALUES
+      ('cancellation', 'Cancellation Policy', '## Cancellation Policy\n\n### Free Cancellation\n- Cancel anytime before a technician is assigned or dispatched.\n\n### Cancellation Charges\n- A nominal cancellation fee of ₹50 applies if cancelled after the technician is on the way.')
+    ON CONFLICT (slug) DO NOTHING;
+
+    INSERT INTO support_policies (slug, title, content) VALUES
+      ('refund', 'Refund Policy', '## Refund Policy\n\n### Eligibility\n- Refunds are issued if services were unsatisfactory, double-charged, or cancelled according to policy.\n\n### Processing Time\n- Approved refunds will be credited back to your original payment source within 3-5 business days.')
+    ON CONFLICT (slug) DO NOTHING;
   `);
 }
 

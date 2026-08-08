@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
+import '../models/models.dart';
 import '../providers/booking_provider.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
-import 'reviews_screen.dart';
+import '../widgets/common_widgets.dart';
 import 'worker_booking_detail_screen.dart';
 
 class WorkHistoryScreen extends StatefulWidget {
@@ -16,6 +17,14 @@ class WorkHistoryScreen extends StatefulWidget {
 }
 
 class _WorkHistoryScreenState extends State<WorkHistoryScreen> {
+  String _selectedTab = 'All';
+
+  final List<String> _tabs = [
+    'All',
+    'Completed',
+    'Cancelled',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -26,268 +35,288 @@ class _WorkHistoryScreenState extends State<WorkHistoryScreen> {
     context.read<BookingProvider>().loadBookings();
   }
 
+  List<BookingItem> _filterBookings(List<BookingItem> allBookings) {
+    switch (_selectedTab) {
+      case 'Completed':
+        return allBookings.where((b) => b.status == 'completed').toList();
+      case 'Cancelled':
+        return allBookings.where((b) => b.status == 'cancelled').toList();
+      case 'All':
+      default:
+        // Shows completed and cancelled (finished/past work history)
+        return allBookings.where((b) => b.status == 'completed' || b.status == 'cancelled' || b.status == 'confirmed').toList();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bookingProv = context.watch<BookingProvider>();
-    final auth = context.watch<AuthProvider>();
-    final user = auth.user;
-
-    final completedBookings = bookingProv.bookings
-        .where((b) => b.status == 'completed')
-        .toList();
-
-    final totalJobs = completedBookings.length;
-    final totalRevenue = completedBookings.fold<double>(0.0, (sum, b) => sum + b.amount);
-    final avgRating = user?.rating ?? 4.5;
-
-    final currencyFmt = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
-    final dateFmt = DateFormat('dd MMM yyyy, hh:mm a');
+    final filteredList = _filterBookings(bookingProv.bookings);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Work History'),
-        automaticallyImplyLeading: false,
+        title: const Text(
+          'Work History',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 18,
+            color: Color(0xFF0F172A),
+          ),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF0F172A),
+        elevation: 0,
+        scrolledUnderElevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded),
+            icon: const Icon(Icons.refresh_rounded, color: Color(0xFF0F172A)),
             onPressed: _loadData,
-          )
+          ),
         ],
       ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async => _loadData(),
-          color: AppTheme.olive,
-          child: bookingProv.loading && completedBookings.isEmpty
-              ? const Center(child: CircularProgressIndicator(color: AppTheme.olive))
-              : ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(20),
-                  children: [
-                    // Stats Section Card
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.primary.withValues(alpha: 0.15),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          )
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          const Text(
-                            'TOTAL REVENUE EARNED',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            currencyFmt.format(totalRevenue),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          const Divider(color: Colors.white10, height: 1),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Column(
-                                children: [
-                                  const Text(
-                                    'COMPLETED JOBS',
-                                    style: TextStyle(color: Colors.white60, fontSize: 9, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '$totalJobs',
-                                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              Container(width: 1, height: 24, color: Colors.white10),
-                              Column(
-                                children: [
-                                  const Text(
-                                    'RATING',
-                                    style: TextStyle(color: Colors.white60, fontSize: 9, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.star, color: AppTheme.sandal, size: 16),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        avgRating.toStringAsFixed(1),
-                                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
+      body: Column(
+        children: [
+          // ─── 1. CATEGORY TABS WITH YELLOW UNDERLINE INDICATOR ───
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: _tabs.map((tab) {
+                final isSelected = _selectedTab == tab;
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedTab = tab;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: isSelected ? const Color(0xFFFACC15) : Colors.transparent, // Yellow Active Indicator
+                          width: 3.5,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 24),
-
-                    // Section header + View Reviews button
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Completed Tasks Log',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                        if (user != null)
-                          TextButton.icon(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => ReviewsScreen(workerId: user.id),
-                                ),
-                              );
-                            },
-                            icon: const Icon(Icons.star_outline_rounded, size: 16),
-                            label: const Text('View Reviews', style: TextStyle(fontSize: 12)),
-                          ),
-                      ],
+                    child: Text(
+                      tab,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                        color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
 
-                    if (completedBookings.isEmpty)
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(24),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.olive.withValues(alpha: 0.08),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.engineering_outlined, size: 64, color: AppTheme.olive),
-                              ),
-                              const SizedBox(height: 20),
-                              const Text(
-                                'No Completed Jobs Yet',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Your completed service orders and payouts will appear here after job completion.',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.grey.shade600, fontSize: 13, height: 1.4),
-                              ),
-                              const SizedBox(height: 24),
-                              ElevatedButton.icon(
-                                onPressed: _loadData,
-                                icon: const Icon(Icons.refresh_rounded, size: 18),
-                                label: const Text('Refresh Orders'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.primary,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    else
-                      ...completedBookings.map((item) {
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => WorkerBookingDetailScreen(bookingId: item.id),
-                              ),
-                            ).then((_) => _loadData());
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: Colors.grey.shade100, width: 1.2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.03),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
+          const SizedBox(height: 12),
+
+          // ─── 2. WORK HISTORY CARDS LIST ───
+          Expanded(
+            child: bookingProv.loading && filteredList.isEmpty
+                ? LoadingView(message: 'Loading work history...')
+                : bookingProv.error != null
+                    ? ErrorView(message: bookingProv.error!, onRetry: _loadData)
+                    : filteredList.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.olive.withValues(alpha: 0.08),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Icons.check, color: AppTheme.olive, size: 20),
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item.serviceName ?? 'Service #${item.serviceId}',
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.primary),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Client: ${item.userName ?? 'Customer'}',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        dateFmt.format(item.scheduledAt ?? item.createdAt),
-                                        style: TextStyle(fontSize: 11, color: Colors.grey.shade400),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
+                                Icon(Icons.history_rounded, size: 44, color: Colors.grey.shade300),
+                                const SizedBox(height: 12),
                                 Text(
-                                  currencyFmt.format(item.amount),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                    color: AppTheme.primary,
+                                  'No $_selectedTab work records found',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey.shade600,
                                   ),
                                 ),
                               ],
                             ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: () async => _loadData(),
+                            color: const Color(0xFF0F172A),
+                            child: ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              itemCount: filteredList.length,
+                              itemBuilder: (context, index) {
+                                final item = filteredList[index];
+                                return _buildWorkCard(context, item);
+                              },
+                            ),
                           ),
-                        );
-                      }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── WORK HISTORY LOG CARD COMPONENT (Matching Screenshot 5) ───
+  Widget _buildWorkCard(BuildContext context, BookingItem booking) {
+    final dateFmt = DateFormat('dd MMM yyyy');
+    final formattedDate = dateFmt.format(booking.scheduledAt ?? booking.createdAt);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Top Row (Avatar, Title, Date, Invoice Price)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Center(
+                  child: Icon(Icons.person_rounded, size: 24, color: Color(0xFF0F172A)),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      booking.serviceName ?? 'Service #${booking.serviceId}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      formattedDate,
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
                   ],
                 ),
+              ),
+              Text(
+                '₹${booking.amount.toStringAsFixed(0)}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF0F172A),
+                  letterSpacing: -0.3,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Bottom Row (Status Badge & View Details Button)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildStatusBadge(booking.status),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => WorkerBookingDetailScreen(bookingId: booking.id),
+                    ),
+                  ).then((_) => _loadData());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF1F5F9),
+                  foregroundColor: const Color(0xFF0F172A),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text(
+                  'View Details',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── STATUS BADGE PILL COMPONENT ───
+  Widget _buildStatusBadge(String status) {
+    Color bgColor;
+    Color textColor;
+    String label;
+
+    switch (status) {
+      case 'completed':
+        bgColor = const Color(0xFFDCFCE7);
+        textColor = const Color(0xFF15803D);
+        label = 'Completed';
+        break;
+      case 'confirmed':
+        bgColor = const Color(0xFFDCFCE7);
+        textColor = const Color(0xFF15803D);
+        label = 'Confirmed';
+        break;
+      case 'in_progress':
+        bgColor = const Color(0xFFFEF3C7);
+        textColor = const Color(0xFFB45309);
+        label = 'In Progress';
+        break;
+      case 'cancelled':
+        bgColor = const Color(0xFFF1F5F9);
+        textColor = const Color(0xFF64748B);
+        label = 'Cancelled';
+        break;
+      default:
+        bgColor = const Color(0xFFF1F5F9);
+        textColor = const Color(0xFF64748B);
+        label = status.replaceAll('_', ' ').toUpperCase();
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 11.5,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );

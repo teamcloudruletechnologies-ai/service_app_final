@@ -632,4 +632,153 @@ class ApiService {
     final data = _decode(response) as Map<String, dynamic>;
     return data['data'] as Map<String, dynamic>;
   }
+
+  // --- NOTIFICATIONS ---
+
+  Future<PagedResult<NotificationItem>> fetchNotifications({int page = 1, int limit = 50}) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/app/notifications?page=$page&limit=$limit');
+    final response = await http.get(uri, headers: _headers(auth: true));
+    final data = _decode(response) as Map<String, dynamic>;
+    return _parsePaged(data['data'] as Map<String, dynamic>, NotificationItem.fromJson);
+  }
+
+  Future<void> markNotificationRead(int id) async {
+    await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/app/notifications/$id/read'),
+      headers: _headers(auth: true),
+    );
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await http.patch(
+      Uri.parse('${ApiConfig.baseUrl}/app/notifications/read-all'),
+      headers: _headers(auth: true),
+    );
+  }
+
+  Future<void> deleteNotification(int id) async {
+    await http.delete(
+      Uri.parse('${ApiConfig.baseUrl}/app/notifications/$id'),
+      headers: _headers(auth: true),
+    );
+  }
+
+  // --- HELP & SUPPORT ---
+
+  Future<PagedResult<SupportTicket>> fetchSupportTickets({int page = 1, int limit = 20}) async {
+    final uri = Uri.parse('${ApiConfig.baseUrl}/app/support/tickets?page=$page&limit=$limit');
+    final response = await http.get(uri, headers: _headers(auth: true));
+    final data = _decode(response) as Map<String, dynamic>;
+    return _parsePaged(data['data'] as Map<String, dynamic>, SupportTicket.fromJson);
+  }
+
+  Future<SupportTicket> createSupportTicket({
+    required String subject,
+    required String description,
+    int? bookingId,
+    int? categoryId,
+    String? categoryName,
+    String? priority,
+    String? attachmentUrl,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/app/support/tickets'),
+      headers: _headers(auth: true),
+      body: jsonEncode({
+        'subject': subject,
+        'description': description,
+        if (bookingId != null) 'bookingId': bookingId,
+        if (categoryId != null) 'categoryId': categoryId,
+        if (categoryName != null) 'categoryName': categoryName,
+        if (priority != null) 'priority': priority,
+        if (attachmentUrl != null) 'attachmentUrl': attachmentUrl,
+      }),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return SupportTicket.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<SupportTicket> fetchSupportTicketDetails(int id) async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/support/tickets/$id'),
+      headers: _headers(auth: true),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return SupportTicket.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<TicketMessage> sendTicketReply(int ticketId, String message, {String? attachmentUrl}) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/app/support/tickets/$ticketId/reply'),
+      headers: _headers(auth: true),
+      body: jsonEncode({
+        'message': message,
+        if (attachmentUrl != null) 'attachmentUrl': attachmentUrl,
+      }),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return TicketMessage.fromJson(data['data'] as Map<String, dynamic>);
+  }
+
+  Future<Map<String, dynamic>> reportProfessional({
+    required String reason,
+    required String description,
+    int? workerId,
+    int? bookingId,
+    String? photoUrl,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/app/support/report-professional'),
+      headers: _headers(auth: true),
+      body: jsonEncode({
+        'reason': reason,
+        'description': description,
+        if (workerId != null) 'workerId': workerId,
+        if (bookingId != null) 'bookingId': bookingId,
+        if (photoUrl != null) 'photoUrl': photoUrl,
+      }),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    return data['data'] as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> submitAccountRequest({
+    required String requestType,
+    Map<String, dynamic>? details,
+    String? reason,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/app/support/account-request'),
+      headers: _headers(auth: true),
+      body: jsonEncode({
+        'requestType': requestType,
+        if (details != null) 'details': details,
+        if (reason != null) 'reason': reason,
+      }),
+    );
+    return _decode(response) as Map<String, dynamic>;
+  }
+
+  Future<List<SupportFaq>> fetchDynamicFaqs({String? category, String? search}) async {
+    final params = <String, String>{};
+    if (category != null) params['category'] = category;
+    if (search != null && search.isNotEmpty) params['search'] = search;
+
+    final uri = Uri.parse('${ApiConfig.baseUrl}/app/support/faqs').replace(queryParameters: params);
+    final response = await http.get(uri, headers: _headers());
+    final data = _decode(response) as Map<String, dynamic>;
+    final rows = (data['data'] as List? ?? []);
+    return rows.map((e) => SupportFaq.fromJson(e as Map<String, dynamic>)).toList();
+  }
+
+  Future<List<SupportPolicy>> fetchDynamicPolicies() async {
+    final response = await http.get(
+      Uri.parse('${ApiConfig.baseUrl}/app/support/policies'),
+      headers: _headers(),
+    );
+    final data = _decode(response) as Map<String, dynamic>;
+    final rows = (data['data'] as List? ?? []);
+    return rows.map((e) => SupportPolicy.fromJson(e as Map<String, dynamic>)).toList();
+  }
 }
+

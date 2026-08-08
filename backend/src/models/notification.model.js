@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-async function listNotifications({ page = 1, limit = 10, read, type } = {}) {
+async function listNotifications({ page = 1, limit = 10, read, type, entityId } = {}) {
   const offset = (page - 1) * limit;
   const queryParams = [];
   let whereClauses = [];
@@ -13,6 +13,11 @@ async function listNotifications({ page = 1, limit = 10, read, type } = {}) {
   if (type !== undefined && type !== "") {
     queryParams.push(type);
     whereClauses.push(`type = $${queryParams.length}`);
+  }
+
+  if (entityId !== undefined && entityId !== "") {
+    queryParams.push(String(entityId));
+    whereClauses.push(`entity_id = $${queryParams.length}`);
   }
 
   const whereSql = whereClauses.length > 0 ? "WHERE " + whereClauses.join(" AND ") : "";
