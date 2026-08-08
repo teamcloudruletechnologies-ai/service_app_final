@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../models/models.dart';
 import '../services/api_service.dart';
@@ -15,7 +16,6 @@ class ReviewsScreen extends StatefulWidget {
 }
 
 class _ReviewsScreenState extends State<ReviewsScreen> {
-  final _apiService = ApiService();
   bool _loading = true;
   String? _error;
   List<ReviewItem> _reviews = [];
@@ -33,8 +33,9 @@ class _ReviewsScreenState extends State<ReviewsScreen> {
     });
 
     try {
-      await _apiService.init();
-      final pagedResult = await _apiService.fetchReviews(workerId: widget.workerId);
+      final apiService = context.read<ApiService>();
+      await apiService.init();
+      final pagedResult = await apiService.fetchReviews(workerId: widget.workerId);
       setState(() {
         _reviews = pagedResult.items;
       });

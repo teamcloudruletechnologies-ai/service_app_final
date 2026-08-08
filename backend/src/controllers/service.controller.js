@@ -134,9 +134,15 @@ async function createService(req, res, next) {
 
     let subServices = [];
     if (req.body.sub_services) {
-      subServices = typeof req.body.sub_services === 'string' 
+      const rawSubs = typeof req.body.sub_services === 'string' 
         ? JSON.parse(req.body.sub_services) 
         : req.body.sub_services;
+      if (Array.isArray(rawSubs)) {
+        subServices = rawSubs.map(s => ({
+          ...s,
+          image_url: s.image_url ? formatGoogleDriveUrl(s.image_url) : (s.image ? formatGoogleDriveUrl(s.image) : '')
+        }));
+      }
     }
 
     const service = await Service.create({
@@ -174,9 +180,17 @@ async function updateService(req, res, next) {
     if (req.body.status !== undefined) updateData.status = req.body.status;
     if (req.body.image !== undefined) updateData.image_url = formatGoogleDriveUrl(req.body.image);
     if (req.body.sub_services !== undefined) {
-      updateData.sub_services = typeof req.body.sub_services === 'string' 
+      const rawSubs = typeof req.body.sub_services === 'string' 
         ? JSON.parse(req.body.sub_services) 
         : req.body.sub_services;
+      if (Array.isArray(rawSubs)) {
+        updateData.sub_services = rawSubs.map(s => ({
+          ...s,
+          image_url: s.image_url ? formatGoogleDriveUrl(s.image_url) : (s.image ? formatGoogleDriveUrl(s.image) : '')
+        }));
+      } else {
+        updateData.sub_services = [];
+      }
     }
     if (req.file) {
       updateData.image_url = await saveUpload(req.file, "services");

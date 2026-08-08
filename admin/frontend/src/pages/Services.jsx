@@ -67,7 +67,7 @@ export default function Services() {
       ...prev,
       sub_services: [
         ...prev.sub_services,
-        { id: Date.now(), name: '', estimated_time: '45' }
+        { id: Date.now(), name: '', image_url: '', estimated_time: '45' }
       ]
     }));
   };
@@ -155,7 +155,15 @@ export default function Services() {
       description: service.description || '',
       image: service.image_url || '',
       status: service.status || 'active',
-      sub_services: Array.isArray(parsedSubs) ? parsedSubs : []
+      sub_services: Array.isArray(parsedSubs)
+        ? parsedSubs.map(s => ({
+            id: s.id || (Date.now() + Math.random()),
+            name: s.name || '',
+            image_url: s.image_url || s.image || '',
+            price: s.price || 0,
+            estimated_time: s.estimated_time || 45
+          }))
+        : []
     });
     setIsModalOpen(true);
   };
@@ -175,6 +183,7 @@ export default function Services() {
       sub_services: formData.sub_services.map(s => ({
         id: s.id,
         name: s.name,
+        image_url: s.image_url || s.image || '',
         price: parseFloat(s.price) || 0,
         estimated_time: parseInt(s.estimated_time) || 45
       }))
@@ -537,25 +546,41 @@ export default function Services() {
                     No sub-services added yet. Click "+ Add Sub-Service" to add packages (e.g. AC Filter Cleaning, Gas Charging).
                   </div>
                 ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
                     {formData.sub_services.map((sub, idx) => (
-                      <div key={sub.id || idx} style={{ display: 'flex', gap: 8, alignItems: 'center', backgroundColor: '#FFF', padding: 8, borderRadius: 8, border: '1px solid #E5E7EB' }}>
+                      <div key={sub.id || idx} style={{ display: 'flex', flexDirection: 'column', gap: 6, backgroundColor: '#FFF', padding: 10, borderRadius: 8, border: '1px solid #E5E7EB' }}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                          {sub.image_url ? (
+                            <img
+                              src={sub.image_url}
+                              alt={sub.name || 'Sub-service'}
+                              style={{ width: 34, height: 34, borderRadius: 6, objectFit: 'cover', border: '1px solid #E5E7EB' }}
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                          ) : null}
+                          <input
+                            type="text"
+                            placeholder="Sub-Service Name (optional)"
+                            value={sub.name}
+                            onChange={(e) => handleSubServiceChange(sub.id, 'name', e.target.value)}
+                            style={{ flex: 1, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSubService(sub.id)}
+                            style={{ padding: '4px 8px', color: '#EF4444', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 14 }}
+                            title="Remove sub-service"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                         <input
                           type="text"
-                          required
-                          placeholder="Sub-Service Name (e.g. Filter Wash)"
-                          value={sub.name}
-                          onChange={(e) => handleSubServiceChange(sub.id, 'name', e.target.value)}
-                          style={{ flex: 1, padding: '6px 10px', border: '1px solid #D1D5DB', borderRadius: 6, fontSize: 12, outline: 'none' }}
+                          placeholder="Sub-Service Image URL (optional)"
+                          value={sub.image_url || ''}
+                          onChange={(e) => handleSubServiceChange(sub.id, 'image_url', e.target.value)}
+                          style={{ width: '100%', padding: '5px 10px', border: '1px solid #E5E7EB', borderRadius: 6, fontSize: 11, outline: 'none', fontFamily: 'monospace', color: '#374151' }}
                         />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSubService(sub.id)}
-                          style={{ padding: '4px 8px', color: '#EF4444', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 14 }}
-                          title="Remove sub-service"
-                        >
-                          🗑️
-                        </button>
                       </div>
                     ))}
                   </div>
