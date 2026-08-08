@@ -11,181 +11,310 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final List<Map<String, dynamic>> _mockNotifications = [
+  String _selectedTab = 'All';
+
+  final List<Map<String, dynamic>> _notifications = [
     {
       'id': '1',
-      'title': 'New Job Request 🛠️',
-      'message': 'You have received a new booking request for Service #104. Tap to review details.',
-      'time': DateTime.now().subtract(const Duration(minutes: 2)),
+      'title': 'New job request received',
+      'subtitle': 'Plumbing Service',
+      'timeAgo': 'Just now',
       'read': false,
-      'type': 'booking',
+      'type': 'request',
     },
     {
       'id': '2',
-      'title': 'Payout Processed 💰',
-      'message': 'Your weekly payout of ₹4,250 has been successfully credited to your bank account.',
-      'time': DateTime.now().subtract(const Duration(hours: 3)),
+      'title': 'Your booking has been confirmed',
+      'subtitle': 'AC Service',
+      'timeAgo': '10 min ago',
       'read': false,
-      'type': 'payout',
+      'type': 'confirmed',
     },
     {
       'id': '3',
-      'title': 'KYC Verified ✅',
-      'message': 'Your documents verification is completed. You are now authorized to accept premium bookings.',
-      'time': DateTime.now().subtract(const Duration(days: 2)),
-      'read': true,
-      'type': 'kyc',
+      'title': 'Payment of ₹299 received',
+      'subtitle': 'Plumbing Service',
+      'timeAgo': '1 hour ago',
+      'read': false,
+      'type': 'payment',
     },
     {
       'id': '4',
-      'title': 'Tips for High Ratings 🌟',
-      'message': 'Keep your response time under 15 minutes to increase customer satisfaction by 40%.',
-      'time': DateTime.now().subtract(const Duration(days: 5)),
+      'title': 'Customer has rated you',
+      'subtitle': '5.0 rating received',
+      'timeAgo': '3 hours ago',
       'read': true,
-      'type': 'tip',
-    }
+      'type': 'rating',
+    },
+    {
+      'id': '5',
+      'title': 'Weekly payout of ₹2,350 successful',
+      'subtitle': 'Direct bank deposit',
+      'timeAgo': '1 day ago',
+      'read': true,
+      'type': 'payout',
+    },
   ];
 
   void _markAllRead() {
     setState(() {
-      for (var n in _mockNotifications) {
+      for (var n in _notifications) {
         n['read'] = true;
       }
     });
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('All notifications marked as read')),
+      SnackBar(
+        content: const Text('All notifications marked as read'),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF0F172A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
+  }
+
+  List<Map<String, dynamic>> get _filteredList {
+    if (_selectedTab == 'Unread') {
+      return _notifications.where((n) => n['read'] == false).toList();
+    }
+    return _notifications;
   }
 
   @override
   Widget build(BuildContext context) {
-    final timeFmt = DateFormat('hh:mm a');
-    final dateFmt = DateFormat('dd MMM');
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Notifications'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.mark_chat_read_outlined),
-            onPressed: _markAllRead,
-            tooltip: 'Mark all as read',
-          )
+        title: const Text(
+          'Notifications',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 18,
+            color: Color(0xFF0F172A),
+          ),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF0F172A),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+      ),
+      body: Column(
+        children: [
+          // ─── 1. TOP CATEGORY TABS (All / Unread) WITH YELLOW UNDERLINE INDICATOR ───
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildTabItem('All'),
+                _buildTabItem('Unread'),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // ─── 2. NOTIFICATIONS LIST ───
+          Expanded(
+            child: _filteredList.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.notifications_none_rounded, size: 48, color: Colors.grey.shade300),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No $_selectedTab notifications',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    itemCount: _filteredList.length,
+                    itemBuilder: (context, index) {
+                      final item = _filteredList[index];
+                      return _buildNotificationCard(item);
+                    },
+                  ),
+          ),
+
+          // ─── 3. MARK ALL AS READ BOTTOM BUTTON ───
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Center(
+                child: TextButton(
+                  onPressed: _markAllRead,
+                  child: const Text(
+                    'Mark all as read',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
-      body: _mockNotifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.notifications_none, size: 64, color: Colors.grey.shade300),
-                  const SizedBox(height: 16),
-                  Text('No notifications yet', style: TextStyle(color: Colors.grey.shade600, fontSize: 16)),
-                ],
-              ),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              itemCount: _mockNotifications.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, indent: 72),
-              itemBuilder: (context, index) {
-                final item = _mockNotifications[index];
-                final isRead = item['read'] as bool;
-                final time = item['time'] as DateTime;
-                final isToday = DateTime.now().difference(time).inDays == 0;
-
-                return Container(
-                  color: isRead ? Colors.transparent : AppTheme.primary.withOpacity(0.04),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: _getIconBgColor(item['type'] as String),
-                        child: Icon(_getIcon(item['type'] as String), color: _getIconColor(item['type'] as String), size: 20),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  item['title'] as String,
-                                  style: TextStyle(
-                                    fontWeight: isRead ? FontWeight.w600 : FontWeight.bold,
-                                    fontSize: 14,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                                Text(
-                                  isToday ? timeFmt.format(time) : dateFmt.format(time),
-                                  style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              item['message'] as String,
-                              style: TextStyle(color: Colors.grey.shade700, fontSize: 13, height: 1.3),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
     );
   }
 
-  IconData _getIcon(String type) {
-    switch (type) {
-      case 'booking':
-        return Icons.event_note_outlined;
-      case 'payout':
-        return Icons.monetization_on_outlined;
-      case 'kyc':
-        return Icons.verified_user_outlined;
-      case 'tip':
-        return Icons.lightbulb_outline;
-      default:
-        return Icons.notifications;
-    }
+  // ─── TAB BUTTON COMPONENT ───
+  Widget _buildTabItem(String label) {
+    final isSelected = _selectedTab == label;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedTab = label;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: isSelected ? const Color(0xFFFACC15) : Colors.transparent, // Yellow Underline Indicator
+              width: 3.5,
+            ),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+          ),
+        ),
+      ),
+    );
   }
 
-  Color _getIconBgColor(String type) {
-    switch (type) {
-      case 'booking':
-        return Colors.blue.shade50;
-      case 'payout':
-        return Colors.green.shade50;
-      case 'kyc':
-        return Colors.teal.shade50;
-      case 'tip':
-        return Colors.amber.shade50;
-      default:
-        return Colors.grey.shade100;
-    }
-  }
+  // ─── NOTIFICATION CARD ITEM COMPONENT (Matching Screenshot 8) ───
+  Widget _buildNotificationCard(Map<String, dynamic> item) {
+    final type = item['type'] as String;
+    final isRead = item['read'] as bool;
 
-  Color _getIconColor(String type) {
+    Color iconBg;
+    Color iconColor;
+    IconData icon;
+
     switch (type) {
-      case 'booking':
-        return Colors.blue;
+      case 'request':
+        iconBg = const Color(0xFFF1F5F9);
+        iconColor = const Color(0xFF0F172A);
+        icon = Icons.home_repair_service_rounded;
+        break;
+      case 'confirmed':
+        iconBg = const Color(0xFFDCFCE7);
+        iconColor = const Color(0xFF15803D);
+        icon = Icons.check_circle_outline_rounded;
+        break;
+      case 'payment':
+        iconBg = const Color(0xFFDCFCE7);
+        iconColor = const Color(0xFF15803D);
+        icon = Icons.account_balance_wallet_rounded;
+        break;
+      case 'rating':
+        iconBg = const Color(0xFFFEF3C7);
+        iconColor = const Color(0xFFD97706);
+        icon = Icons.star_rounded;
+        break;
       case 'payout':
-        return Colors.green;
-      case 'kyc':
-        return Colors.teal;
-      case 'tip':
-        return Colors.amber;
+        iconBg = const Color(0xFFF1F5F9);
+        iconColor = const Color(0xFF0F172A);
+        icon = Icons.payments_rounded;
+        break;
       default:
-        return Colors.grey;
+        iconBg = const Color(0xFFF1F5F9);
+        iconColor = const Color(0xFF0F172A);
+        icon = Icons.notifications_rounded;
     }
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          item['read'] = true;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isRead ? Colors.white : const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isRead ? const Color(0xFFF1F5F9) : const Color(0xFFE2E8F0),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Center(
+                child: Icon(icon, size: 20, color: iconColor),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item['title'] as String,
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: isRead ? FontWeight.w700 : FontWeight.w900,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    item['subtitle'] as String,
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              item['timeAgo'] as String,
+              style: const TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF94A3B8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

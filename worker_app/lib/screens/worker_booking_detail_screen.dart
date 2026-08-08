@@ -72,7 +72,10 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
           final ctrl = TextEditingController();
           final formKey = GlobalKey<FormState>();
           return AlertDialog(
-            title: Text(isStart ? 'Enter Job Start OTP' : 'Enter Job Completion OTP', style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(
+              isStart ? 'Enter Job Start OTP' : 'Enter Job Completion OTP',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             content: Form(
               key: formKey,
               child: Column(
@@ -119,8 +122,11 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
                     Navigator.pop(ctx, ctrl.text.trim());
                   }
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary),
-                child: Text(isStart ? 'Verify & Start' : 'Verify & Complete', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFACC15)),
+                child: Text(
+                  isStart ? 'Verify & Start' : 'Verify & Complete',
+                  style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           );
@@ -146,7 +152,6 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
         _updating = false;
       });
 
-      // Also refresh provider list in background so home/dashboard lists are fresh
       try {
         context.read<BookingProvider>().loadBookings();
       } catch (_) {}
@@ -177,31 +182,29 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
     }
   }
 
-  Color _statusColor(String status) {
-    switch (status) {
-      case 'pending':
-        return AppTheme.primary;
-      case 'confirmed':
-        return AppTheme.primaryDark;
-      case 'in_progress':
-        return const Color(0xFFCA8A04);
-      case 'completed':
-        return AppTheme.primary;
-      case 'cancelled':
-        return const Color(0xFFD97706);
-      default:
-        return const Color(0xFFEAB308);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Order Details'),
+        title: const Text(
+          'Booking Details',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 18,
+            color: Color(0xFF0F172A),
+          ),
+        ),
         backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF0F172A),
         elevation: 0,
+        scrolledUnderElevation: 0,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Icon(Icons.chevron_right_rounded, color: Color(0xFF0F172A), size: 24),
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -229,12 +232,12 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
                       SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2.5, color: AppTheme.primary),
+                        child: CircularProgressIndicator(strokeWidth: 2.5, color: Color(0xFF0F172A)),
                       ),
                       SizedBox(width: 14),
                       Text(
-                        'Verifying OTP...',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.primary),
+                        'Updating Job...',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
                       ),
                     ],
                   ),
@@ -243,417 +246,398 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: _booking != null
-          ? _buildActionButton()
-          : null,
+      bottomNavigationBar: _booking != null ? _buildActionButtons() : null,
     );
   }
 
   Widget _buildBody() {
-    if (_loading) return const LoadingView(message: 'Loading order details...');
+    if (_loading) return const LoadingView(message: 'Loading booking details...');
     if (_error != null) return ErrorView(message: _error!, onRetry: _loadBooking);
-    if (_booking == null) return const Center(child: Text('Order not found'));
+    if (_booking == null) return const Center(child: Text('Booking not found'));
 
     final b = _booking!;
     final dateFmt = DateFormat('dd MMM yyyy, hh:mm a');
+    final formattedDate = dateFmt.format(b.scheduledAt ?? b.createdAt);
 
     return ListView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       children: [
-        // Order #ID and Status Badge
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
-            ],
+        // ─── 1. TOP ID & STATUS BADGE ROW ───
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'ID. #US${b.id}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF64748B),
+              ),
+            ),
+            _buildStatusBadge(b.status),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        // ─── 2. CUSTOMER DETAILS SECTION (Phone Call & Camera Icons REMOVED per user directive) ───
+        const Text(
+          'Customer Details',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F172A),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
+        ),
+
+        const SizedBox(height: 12),
+
+        Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: const Center(
+                child: Icon(Icons.person_rounded, size: 26, color: Color(0xFF0F172A)),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Order #${b.id}',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
+                    b.userName ?? 'Ramesh Kumar',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    b.userPhone != null && b.userPhone!.isNotEmpty ? b.userPhone! : '+91 98765 43210',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 18),
+        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+        const SizedBox(height: 18),
+
+        // ─── 3. SERVICE SECTION ───
+        const Text(
+          'Service',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF64748B),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          b.serviceName ?? 'Plumbing Service',
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F172A),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          b.notes != null && b.notes!.isNotEmpty ? b.notes! : 'Bathroom Pipe Leak',
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF64748B),
+          ),
+        ),
+
+        const SizedBox(height: 18),
+        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+        const SizedBox(height: 18),
+
+        // ─── 4. DATE & TIME SECTION ───
+        const Text(
+          'Date & Time',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF64748B),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          formattedDate,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF0F172A),
+          ),
+        ),
+
+        const SizedBox(height: 18),
+        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+        const SizedBox(height: 18),
+
+        // ─── 5. LOCATION SECTION ───
+        const Text(
+          'Location',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF64748B),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    b.address != null && b.address!.isNotEmpty ? b.address! : 'Anna Nagar, Madurai',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
+                    ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    dateFmt.format(b.createdAt),
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                  ),
-                ],
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _statusColor(b.status).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  b.status.replaceAll('_', ' ').toUpperCase(),
-                  style: TextStyle(
-                    color: _statusColor(b.status),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 11,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Service & Sub-Service Info
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Requested Service', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
-              const SizedBox(height: 8),
-              Text(
-                b.serviceName ?? 'Service #${b.serviceId}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primary),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.check_circle_outline_rounded, color: AppTheme.primary, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'CONFIRMED SUB-SERVICE TYPE',
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppTheme.primaryDark, letterSpacing: 0.5),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            b.serviceName ?? 'General Inspection',
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF1E293B)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Customer Info
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Customer', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
-              const SizedBox(height: 12),
-              _CustomerRow(
-                icon: Icons.person_outline,
-                label: b.userName ?? 'Guest Customer',
-                trailing: null,
-              ),
-              const SizedBox(height: 14),
-              _CustomerRow(
-                icon: Icons.location_on_outlined,
-                label: b.address ?? 'No address provided',
-                trailing: null,
-              ),
-              if (b.address != null && b.address!.isNotEmpty && (b.status == 'confirmed' || b.status == 'in_progress')) ...[
-                const SizedBox(height: 14),
-                ElevatedButton.icon(
-                  onPressed: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => WorkerInAppNavigationScreen(
-                          bookingId: b.id,
-                          customerName: b.userName ?? 'Customer',
-                          customerAddress: b.address!,
-                          initialLat: b.latitude,
-                          initialLng: b.longitude,
+                  Row(
+                    children: const [
+                      Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF64748B)),
+                      SizedBox(width: 4),
+                      Text(
+                        '1.2 km away',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF64748B),
                         ),
                       ),
-                    );
-                    if (mounted) {
-                      _loadBooking();
-                    }
-                  },
-                  icon: const Icon(Icons.map_rounded, color: Colors.white, size: 18),
-                  label: const Text('Start In-App Map Navigation 📍', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primary,
-                    minimumSize: const Size.fromHeight(44),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ],
                   ),
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => WorkerInAppNavigationScreen(
+                      bookingId: b.id,
+                      customerName: b.userName ?? 'Customer',
+                      customerAddress: b.address ?? 'Customer Location',
+                      initialLat: b.latitude,
+                      initialLng: b.longitude,
+                    ),
+                  ),
+                ).then((_) => _loadBooking());
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFF1F5F9),
+                foregroundColor: const Color(0xFF0F172A),
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text(
+                'View on Map',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0F172A),
                 ),
-              ],
-            ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 18),
+        const Divider(height: 1, color: Color(0xFFF1F5F9)),
+        const SizedBox(height: 18),
+
+        // ─── 6. AMOUNT SECTION ───
+        const Text(
+          'Amount',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF64748B),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          '₹${b.amount.toStringAsFixed(0)}',
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF0F172A),
           ),
         ),
 
-        const SizedBox(height: 16),
-
-        // Schedule & Notes
-        if (b.scheduledAt != null || (b.notes != null && b.notes!.isNotEmpty))
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Details', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
-                const SizedBox(height: 12),
-                if (b.scheduledAt != null) ...[
-                  _DetailRow(
-                    icon: Icons.calendar_today_outlined,
-                    label: 'Scheduled At',
-                    value: dateFmt.format(b.scheduledAt!),
-                  ),
-                  if (b.notes != null && b.notes!.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    const Divider(height: 1),
-                    const SizedBox(height: 12),
-                  ],
-                ],
-                if (b.notes != null && b.notes!.isNotEmpty)
-                  _DetailRow(
-                    icon: Icons.note_alt_outlined,
-                    label: 'Notes',
-                    value: b.notes!,
-                  ),
-              ],
-            ),
-          ),
-
-        const SizedBox(height: 16),
-
-        // Status Timeline
-        _buildTimeline(b),
-
-        const SizedBox(height: 24),
+        const SizedBox(height: 30),
       ],
     );
   }
 
-  Widget _buildTimeline(BookingItem b) {
-    final statuses = [
-      {'label': 'Booked', 'status': 'pending', 'icon': Icons.receipt_long_outlined},
-      {'label': 'Confirmed', 'status': 'confirmed', 'icon': Icons.check_circle_outline},
-      {'label': 'In Progress', 'status': 'in_progress', 'icon': Icons.play_circle_outline},
-      {'label': 'Completed', 'status': 'completed', 'icon': Icons.done_all_outlined},
-    ];
+  // ─── STATUS BADGE PILL COMPONENT ───
+  Widget _buildStatusBadge(String status) {
+    Color bgColor;
+    Color textColor;
+    String label;
 
-    final statusOrder = ['pending', 'confirmed', 'in_progress', 'completed'];
-    final currentIdx = statusOrder.indexOf(b.status);
-    final isCancelled = b.status == 'cancelled';
+    switch (status) {
+      case 'confirmed':
+        bgColor = const Color(0xFFDCFCE7);
+        textColor = const Color(0xFF15803D);
+        label = 'Confirmed';
+        break;
+      case 'in_progress':
+        bgColor = const Color(0xFFFEF3C7);
+        textColor = const Color(0xFFB45309);
+        label = 'In Progress';
+        break;
+      case 'pending':
+        bgColor = const Color(0xFFFFEDD5);
+        textColor = const Color(0xFFC2410C);
+        label = 'Pending';
+        break;
+      case 'completed':
+        bgColor = const Color(0xFFDCFCE7);
+        textColor = const Color(0xFF15803D);
+        label = 'Completed';
+        break;
+      case 'cancelled':
+        bgColor = const Color(0xFFF1F5F9);
+        textColor = const Color(0xFF64748B);
+        label = 'Cancelled';
+        break;
+      default:
+        bgColor = const Color(0xFFF1F5F9);
+        textColor = const Color(0xFF64748B);
+        label = status.replaceAll('_', ' ').toUpperCase();
+    }
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Order Timeline', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.grey)),
-          const SizedBox(height: 16),
-          ...statuses.asMap().entries.map((entry) {
-            final idx = entry.key;
-            final s = entry.value;
-            final isCompleted = !isCancelled && idx <= currentIdx;
-            final isCurrent = !isCancelled && idx == currentIdx;
-
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  children: [
-                    Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCompleted ? AppTheme.olive : Colors.grey.shade200,
-                      ),
-                      child: Icon(
-                        s['icon'] as IconData,
-                        size: 14,
-                        color: isCompleted ? Colors.white : Colors.grey.shade400,
-                      ),
-                    ),
-                    if (idx < statuses.length - 1)
-                      Container(
-                        width: 2,
-                        height: 32,
-                        color: isCompleted ? AppTheme.olive.withValues(alpha: 0.3) : Colors.grey.shade200,
-                      ),
-                  ],
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 3),
-                    child: Text(
-                      '${s['label']}${isCurrent ? ' (Current)' : ''}',
-                      style: TextStyle(
-                        fontWeight: isCompleted ? FontWeight.bold : FontWeight.w500,
-                        color: isCompleted ? AppTheme.primary : Colors.grey.shade400,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          }),
-          if (isCancelled)
-            Padding(
-              padding: const EdgeInsets.only(left: 40, top: 8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'CANCELLED',
-                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 11),
-                ),
-              ),
-            ),
-        ],
+      child: Text(
+        label,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
 
-  Widget? _buildActionButton() {
+  // ─── BOTTOM ACTION BUTTONS (Cancel Job & Start Job) ───
+  Widget? _buildActionButtons() {
     if (_booking == null) return null;
     final b = _booking!;
     final status = b.status;
 
-    String label;
-    Color color;
-    VoidCallback? onPressed;
-    bool showCancel = false;
+    if (status == 'completed' || status == 'cancelled') return null;
 
+    String startLabel = 'Start Job';
     if (status == 'pending') {
-      label = 'Accept Job';
-      color = AppTheme.olive;
-      showCancel = true;
-      onPressed = () => _updateStatus('confirmed');
-    } else if (status == 'confirmed') {
-      label = 'Start Job';
-      color = AppTheme.olive;
-      showCancel = true;
-      onPressed = () => _updateStatus('in_progress');
+      startLabel = 'Accept Job';
     } else if (status == 'in_progress') {
-      label = 'Generate Custom Invoice & Finish';
-      color = AppTheme.olive;
-      onPressed = () async {
-        final res = await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => WorkerCreateInvoiceScreen(
-              bookingId: b.id,
-              serviceName: b.serviceName ?? 'Service #${b.serviceId}',
-              customerName: b.userName ?? 'Customer',
-            ),
-          ),
-        );
-        if (res == true) {
-          _loadBooking();
-        }
-      };
-    } else {
-      return null;
+      startLabel = 'Finish & Invoice';
     }
-
-    final mainButton = ElevatedButton(
-      onPressed: _updating ? null : onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: AppTheme.matteBlack,
-        minimumSize: const Size.fromHeight(52),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
-      child: _updating
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2.5, color: AppTheme.matteBlack),
-            )
-          : Text(
-              label,
-              style: const TextStyle(color: AppTheme.matteBlack, fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-    );
 
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: showCancel
-            ? Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => _confirmCancel(),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.zomatoRed,
-                        side: const BorderSide(color: AppTheme.zomatoRed, width: 1.5),
-                        minimumSize: const Size.fromHeight(52),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      ),
-                      child: const Text(
-                        'Cancel Job',
-                        style: TextStyle(color: AppTheme.zomatoRed, fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+        child: Row(
+          children: [
+            // Left Button: Cancel Job
+            if (status == 'pending' || status == 'confirmed')
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _updating ? null : () => _confirmCancel(),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFEF4444),
+                    side: const BorderSide(color: Color(0xFFFCA5A5), width: 1.5),
+                    minimumSize: const Size.fromHeight(50),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                  child: const Text(
+                    'Cancel Job',
+                    style: TextStyle(
+                      color: Color(0xFFEF4444),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(child: mainButton),
-                ],
-              )
-            : mainButton,
+                ),
+              ),
+
+            if (status == 'pending' || status == 'confirmed') const SizedBox(width: 14),
+
+            // Right Button: Start Job / Accept Job / Finish & Invoice
+            Expanded(
+              child: ElevatedButton(
+                onPressed: _updating
+                    ? null
+                    : () {
+                        if (status == 'pending') {
+                          _updateStatus('confirmed');
+                        } else if (status == 'confirmed') {
+                          _updateStatus('in_progress');
+                        } else if (status == 'in_progress') {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => WorkerCreateInvoiceScreen(
+                                bookingId: b.id,
+                                serviceName: b.serviceName ?? 'Service #${b.serviceId}',
+                                customerName: b.userName ?? 'Customer',
+                              ),
+                            ),
+                          ).then((res) {
+                            if (res == true) _loadBooking();
+                          });
+                        }
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFACC15), // Vibrant Yellow Accent
+                  foregroundColor: const Color(0xFF0F172A),
+                  minimumSize: const Size.fromHeight(50),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: Text(
+                  startLabel,
+                  style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontWeight: FontWeight.w900,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -669,7 +653,7 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('No')),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.zomatoRed, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF4444), foregroundColor: Colors.white),
             child: const Text('Yes, Cancel'),
           ),
         ],
@@ -679,62 +663,5 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
       await Future.delayed(const Duration(milliseconds: 150));
       _updateStatus('cancelled');
     }
-  }
-}
-
-class _CustomerRow extends StatelessWidget {
-  const _CustomerRow({required this.icon, required this.label, this.trailing});
-
-  final IconData icon;
-  final String label;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: Colors.grey.shade500),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.primary),
-          ),
-        ),
-        if (trailing != null) trailing!,
-      ],
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.icon, required this.label, required this.value});
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 18, color: Colors.grey.shade500),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.primary),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
   }
 }
