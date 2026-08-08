@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'nearby_workers_screen.dart';
 
@@ -368,9 +369,11 @@ class _SelectLocationSheetContentState extends State<SelectLocationSheetContent>
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Location updated to Live GPS: $address 📍'),
+            content: Text(
+              'Location updated to Live GPS: $address 📍',
+              style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold),
+            ),
             backgroundColor: AppTheme.primary,
-            textColor: const Color(0xFF0F172A),
           ),
         );
       }
