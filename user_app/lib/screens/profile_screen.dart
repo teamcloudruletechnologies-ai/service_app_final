@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
-import '../theme/app_theme.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -50,57 +49,43 @@ class ProfileScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF1A1A1A),
+                          color: Color(0xFF0F172A),
                           letterSpacing: -0.5,
                         ),
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
                       Center(
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundColor: const Color(0xFFF5F5F3),
-                              child: Text(
-                                user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
-                                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            TextButton(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFF4A5343),
-                                textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-                              ),
-                              child: const Text('Change Photo'),
-                            ),
-                          ],
+                        child: CircleAvatar(
+                          radius: 40,
+                          backgroundColor: const Color(0xFF0F172A),
+                          child: Text(
+                            user.name.isNotEmpty ? user.name[0].toUpperCase() : 'U',
+                            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      _buildTextField('Full Name', nameCtrl, Icons.badge_outlined),
+                      const SizedBox(height: 24),
+                      _buildTextField('Full Name', nameCtrl, Icons.person_outline_rounded),
                       const SizedBox(height: 16),
-                      _buildTextField('Email Address', emailCtrl, Icons.email_outlined),
+                      _buildTextField('Email Address', emailCtrl, Icons.mail_outline_rounded),
                       const SizedBox(height: 16),
                       _buildTextField('Phone Number', phoneCtrl, Icons.phone_outlined),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 28),
                       Row(
                         children: [
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () => Navigator.pop(dialogContext),
                               style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(56),
-                                side: const BorderSide(color: Colors.grey),
+                                minimumSize: const Size.fromHeight(52),
+                                side: const BorderSide(color: Color(0xFFCBD5E1)),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
-                                foregroundColor: const Color(0xFF4B5563),
-                                backgroundColor: Colors.transparent,
+                                foregroundColor: const Color(0xFF475569),
                               ),
-                              child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.bold)),
+                              child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -129,15 +114,15 @@ class ProfileScreen extends StatelessWidget {
                                 }
                               },
                               style: ElevatedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(56),
-                                backgroundColor: const Color(0xFF0A1128),
+                                minimumSize: const Size.fromHeight(52),
+                                backgroundColor: const Color(0xFF0F172A),
                                 foregroundColor: Colors.white,
                                 elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                              child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.w800)),
                             ),
                           ),
                         ],
@@ -159,29 +144,29 @@ class ProfileScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF1A1A1A)),
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: Color(0xFF334155)),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         TextFormField(
           controller: ctrl,
-          cursorColor: const Color(0xFF1A1A1A),
-          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          cursorColor: const Color(0xFF0F172A),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF0F172A)),
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFF9FAFB),
-            prefixIcon: Icon(icon, color: Colors.grey, size: 20),
+            fillColor: const Color(0xFFF8FAFC),
+            prefixIcon: Icon(icon, color: const Color(0xFF64748B), size: 20),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF1A1A1A), width: 1.5),
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFF0F172A), width: 1.8),
             ),
           ),
           validator: (v) {
@@ -199,91 +184,254 @@ class ProfileScreen extends StatelessWidget {
     final user = context.watch<AuthProvider>().user;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text('Profile')),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Center(
-            child: Hero(
-              // FIX: was 'profile_avatar_hero' which collided with the same
-              // tag used in bookings_screen.dart. Because MainShell uses an
-              // IndexedStack, all tab screens (Home, Bookings, Profile, Menu)
-              // stay mounted simultaneously (just offstage), so two Hero
-              // widgets sharing one tag existed in the tree at the same time.
-              // That triggered "multiple heroes that share the same tag
-              // within a subtree", which cascaded into the layout crashes
-              // (infinite width / RenderBox not laid out / blank bookings
-              // list) seen in the logs. Giving each screen's Hero its own
-              // unique tag fixes it.
-              tag: 'profile_avatar_hero_profile',
-              child: CircleAvatar(
-                radius: 48,
-                backgroundColor: AppTheme.primary.withOpacity(0.15),
-                child: Text(
-                  (user?.name.isNotEmpty == true ? user!.name[0] : 'U').toUpperCase(),
-                  style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: AppTheme.primary),
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        title: const Text(
+          'My Profile',
+          style: TextStyle(
+            color: Color(0xFF0F172A),
+            fontWeight: FontWeight.w900,
+            fontSize: 20,
+            letterSpacing: -0.5,
+          ),
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        centerTitle: true,
+        surfaceTintColor: Colors.white,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: const Color(0xFFE2E8F0), height: 1),
+        ),
+      ),
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ─── ULTRA PREMIUM HERO USER HEADER CARD ───
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF0F172A).withValues(alpha: 0.25),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(3.5),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF38BDF8), Color(0xFF818CF8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF38BDF8).withValues(alpha: 0.35),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 46,
+                      backgroundColor: const Color(0xFF0F172A),
+                      child: Text(
+                        (user?.name.isNotEmpty == true ? user!.name[0] : 'U').toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 38,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    user?.name ?? 'User',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // ─── SECTION 1: ACCOUNT DETAILS ───
+            const Padding(
+              padding: EdgeInsets.only(left: 4, bottom: 10),
+              child: Text(
+                'ACCOUNT DETAILS',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF64748B),
+                  letterSpacing: 0.8,
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: Text(
-              user?.name ?? 'User',
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-          ),
-          const SizedBox(height: 24),
-          _InfoTile(icon: Icons.email_outlined, label: 'Email', value: user?.email ?? 'Not set'),
-          _InfoTile(icon: Icons.phone_outlined, label: 'Phone', value: user?.phone ?? 'Not set'),
-          _InfoTile(icon: Icons.verified_outlined, label: 'Status', value: user?.status ?? 'active'),
-          const SizedBox(height: 32),
-          if (user != null) ...[
-            ElevatedButton.icon(
-              onPressed: () => _showEditDialog(context, user),
-              icon: const Icon(Icons.edit_outlined),
-              label: const Text('Edit Profile'),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
-                backgroundColor: AppTheme.primary,
-                foregroundColor: const Color(0xFF1E293B),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Column(
+                children: [
+                  _ProfileDetailRow(
+                    icon: Icons.mail_rounded,
+                    iconBg: const Color(0xFFEEF2FF),
+                    iconColor: const Color(0xFF4F46E5),
+                    title: 'Email Address',
+                    value: user?.email ?? 'Not set',
+                  ),
+                  const Divider(height: 1, color: Color(0xFFF1F5F9), indent: 64, endIndent: 16),
+                  _ProfileDetailRow(
+                    icon: Icons.phone_rounded,
+                    iconBg: const Color(0xFFECFDF5),
+                    iconColor: const Color(0xFF059669),
+                    title: 'Phone Number',
+                    value: user?.phone ?? 'Not set',
+                  ),
+                  const Divider(height: 1, color: Color(0xFFF1F5F9), indent: 64, endIndent: 16),
+                  _ProfileDetailRow(
+                    icon: Icons.verified_user_rounded,
+                    iconBg: const Color(0xFFFEF3C7),
+                    iconColor: const Color(0xFFD97706),
+                    title: 'Account Status',
+                    value: (user?.status ?? 'active').toUpperCase(),
+                    isBadge: true,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-          ],
-          OutlinedButton.icon(
-            onPressed: () => _logout(context),
-            icon: const Icon(Icons.logout, color: Colors.red),
-            label: const Text('Logout', style: TextStyle(color: Colors.red)),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
-              side: const BorderSide(color: Colors.red),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            const SizedBox(height: 32),
+
+            // ─── ACTION BUTTONS ───
+            if (user != null) ...[
+              ElevatedButton.icon(
+                onPressed: () => _showEditDialog(context, user),
+                icon: const Icon(Icons.edit_rounded, size: 20),
+                label: const Text(
+                  'Edit Profile',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                ),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(54),
+                  backgroundColor: const Color(0xFF0F172A),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+              ),
+              const SizedBox(height: 14),
+            ],
+            OutlinedButton.icon(
+              onPressed: () => _logout(context),
+              icon: const Icon(Icons.logout_rounded, size: 20, color: Color(0xFFDC2626)),
+              label: const Text(
+                'Logout',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFFDC2626)),
+              ),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+                backgroundColor: const Color(0xFFFEF2F2),
+                side: const BorderSide(color: Color(0xFFFCA5A5), width: 1),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _InfoTile extends StatelessWidget {
-  const _InfoTile({required this.icon, required this.label, required this.value});
+class _ProfileDetailRow extends StatelessWidget {
+  const _ProfileDetailRow({
+    required this.icon,
+    required this.iconBg,
+    required this.iconColor,
+    required this.title,
+    required this.value,
+    this.isBadge = false,
+  });
 
   final IconData icon;
-  final String label;
+  final Color iconBg;
+  final Color iconColor;
+  final String title;
   final String value;
+  final bool isBadge;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: Icon(icon, color: AppTheme.primary),
-        title: Text(label, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
-        subtitle: Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor, size: 22),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
