@@ -70,7 +70,7 @@ class ApiService {
 
   Map<String, String> _headers({bool auth = false}) {
     final headers = {'Content-Type': 'application/json'};
-    if (auth && _token != null) {
+    if (auth && _token != null && _token!.isNotEmpty) {
       headers['Authorization'] = 'Bearer $_token';
     }
     return headers;
@@ -254,6 +254,7 @@ class ApiService {
   }
 
   Future<UserAccount> fetchProfile() async {
+    if (_token == null) await init();
     final response = await http.get(
       Uri.parse('${ApiConfig.baseUrl}/auth/me'),
       headers: _headers(auth: true),
@@ -413,6 +414,7 @@ class ApiService {
     String? serviceType,
     int? experienceYears,
   }) async {
+    if (_token == null) await init();
     final response = await http.patch(
       Uri.parse('${ApiConfig.baseUrl}/app/worker/profile'),
       headers: _headers(auth: true),

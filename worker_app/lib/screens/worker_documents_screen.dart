@@ -36,20 +36,6 @@ class WorkerDocumentsScreen extends StatelessWidget {
         'bgColor': const Color(0xFFDCFCE7),
         'icon': Icons.portrait_rounded,
       },
-      {
-        'title': 'Address Proof',
-        'status': 'Pending',
-        'statusColor': const Color(0xFFC2410C),
-        'bgColor': const Color(0xFFFFEDD5),
-        'icon': Icons.home_outlined,
-      },
-      {
-        'title': 'Service Certificate',
-        'status': 'Not Uploaded',
-        'statusColor': const Color(0xFFEF4444),
-        'bgColor': const Color(0xFFFEE2E2),
-        'icon': Icons.description_outlined,
-      },
     ];
 
     return Scaffold(

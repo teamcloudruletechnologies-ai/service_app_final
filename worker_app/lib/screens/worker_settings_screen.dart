@@ -94,17 +94,45 @@ class _WorkerSettingsScreenState extends State<WorkerSettingsScreen> {
                     title: 'Language',
                     trailingText: _language,
                     onTap: () {
-                      setState(() {
-                        _language = _language == 'English' ? 'Tamil' : 'English';
-                      });
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.white,
+                        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+                        builder: (ctx) {
+                          return Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Select Language / மொழியைத் தேர்ந்தெடுக்கவும்',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                ),
+                                const SizedBox(height: 16),
+                                ListTile(
+                                  title: const Text('English'),
+                                  trailing: _language == 'English' ? const Icon(Icons.check_circle, color: Color(0xFF0F172A)) : null,
+                                  onTap: () {
+                                    setState(() => _language = 'English');
+                                    Navigator.pop(ctx);
+                                  },
+                                ),
+                                const Divider(height: 1),
+                                ListTile(
+                                  title: const Text('தமிழ் (Tamil)'),
+                                  trailing: _language == 'Tamil' ? const Icon(Icons.check_circle, color: Color(0xFF0F172A)) : null,
+                                  onTap: () {
+                                    setState(() => _language = 'Tamil');
+                                    Navigator.pop(ctx);
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
                     },
-                  ),
-                  const Divider(height: 1, indent: 56, endIndent: 20, color: Color(0xFFF1F5F9)),
-                  _buildSettingRow(
-                    icon: Icons.wb_sunny_outlined,
-                    title: 'Appearance',
-                    trailingText: 'Light Mode',
-                    onTap: () {},
                   ),
                   const Divider(height: 1, indent: 56, endIndent: 20, color: Color(0xFFF1F5F9)),
                   _buildSettingRow(

@@ -5,7 +5,6 @@ import 'bookings_screen.dart';
 import 'profile_screen.dart';
 import 'worker_dashboard_screen.dart';
 import 'earnings_screen.dart';
-import 'work_history_screen.dart';
 import 'reviews_screen.dart';
 
 class MainShell extends StatefulWidget {
@@ -23,17 +22,17 @@ class _MainShellState extends State<MainShell> {
     final pages = <Widget>[
       const WorkerDashboardScreen(),
       const BookingsScreen(),
-      const WorkHistoryScreen(),
+      const EarningsScreen(),
       const ReviewsScreen(),
       const ProfileScreen(),
     ];
 
     final destinations = const [
-      NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-      NavigationDestination(icon: Icon(Icons.work_outline), selectedIcon: Icon(Icons.work), label: 'My Jobs'),
-      NavigationDestination(icon: Icon(Icons.today_outlined), selectedIcon: Icon(Icons.today), label: 'Today Jobs'),
-      NavigationDestination(icon: Icon(Icons.star_outline), selectedIcon: Icon(Icons.star), label: 'Reviews'),
-      NavigationDestination(icon: Icon(Icons.account_balance_wallet_outlined), selectedIcon: Icon(Icons.account_balance_wallet), label: 'Payments'),
+      NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home_rounded), label: 'Home'),
+      NavigationDestination(icon: Icon(Icons.work_outline_rounded), selectedIcon: Icon(Icons.work_rounded), label: 'My Jobs'),
+      NavigationDestination(icon: Icon(Icons.account_balance_wallet_outlined), selectedIcon: Icon(Icons.account_balance_wallet_rounded), label: 'Earnings'),
+      NavigationDestination(icon: Icon(Icons.star_outline_rounded), selectedIcon: Icon(Icons.star_rounded), label: 'Reviews'),
+      NavigationDestination(icon: Icon(Icons.person_outline_rounded), selectedIcon: Icon(Icons.person_rounded), label: 'Profile'),
     ];
 
     return Scaffold(

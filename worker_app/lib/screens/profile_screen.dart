@@ -6,7 +6,6 @@ import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'worker_personal_info_screen.dart';
-import 'worker_bank_details_screen.dart';
 import 'worker_service_skills_screen.dart';
 import 'worker_documents_screen.dart';
 import 'worker_help_support_screen.dart';
@@ -260,19 +259,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const Divider(height: 1, indent: 60, endIndent: 20, color: Color(0xFFF1F5F9)),
 
-                // Item 2: Bank Details ➔ Opens WorkerBankDetailsScreen
-                _ProfileMenuItem(
-                  icon: Icons.account_balance_outlined,
-                  title: 'Bank Details',
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const WorkerBankDetailsScreen()),
-                    );
-                  },
-                ),
-                const Divider(height: 1, indent: 60, endIndent: 20, color: Color(0xFFF1F5F9)),
-
-                // Item 3: Service & Skills ➔ Opens WorkerServiceSkillsScreen
+                // Item 2: Service & Skills ➔ Opens WorkerServiceSkillsScreen
                 _ProfileMenuItem(
                   icon: Icons.construction_rounded,
                   title: 'Service & Skills',
@@ -284,7 +271,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const Divider(height: 1, indent: 60, endIndent: 20, color: Color(0xFFF1F5F9)),
 
-                // Item 4: Documents ➔ Opens WorkerDocumentsScreen
+                // Item 3: Documents ➔ Opens WorkerDocumentsScreen
                 _ProfileMenuItem(
                   icon: Icons.folder_open_rounded,
                   title: 'Documents',
@@ -296,7 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const Divider(height: 1, indent: 60, endIndent: 20, color: Color(0xFFF1F5F9)),
 
-                // Item 5: Help & Support ➔ Opens WorkerHelpSupportScreen
+                // Item 4: Help & Support ➔ Opens WorkerHelpSupportScreen
                 _ProfileMenuItem(
                   icon: Icons.help_outline_rounded,
                   title: 'Help & Support',
@@ -308,7 +295,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const Divider(height: 1, indent: 60, endIndent: 20, color: Color(0xFFF1F5F9)),
 
-                // Item 6: Settings ➔ Opens WorkerSettingsScreen
+                // Item 5: Settings ➔ Opens WorkerSettingsScreen
                 _ProfileMenuItem(
                   icon: Icons.settings_outlined,
                   title: 'Settings',
