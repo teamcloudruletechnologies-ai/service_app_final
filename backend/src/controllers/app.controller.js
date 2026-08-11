@@ -79,7 +79,7 @@ async function createBooking(req, res, next) {
     if (worker_id) {
       const db = require("../config/db");
       const workerCheck = await db.query(
-        `SELECT id FROM workers WHERE id = $1`,
+        `SELECT id FROM workers WHERE id = $1 AND status = 'active' AND kyc_status = 'approved'`,
         [worker_id]
       );
       if (workerCheck.rows.length === 0) {
