@@ -24,7 +24,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
   final _stateCtrl = TextEditingController(text: 'Tamil Nadu');
   final _pincodeCtrl = TextEditingController();
 
-  String _userType = 'Home Owner'; // 'Home Owner' or 'Tenant' (Screen 4 Mockup)
+  String _userType = 'Home'; // 'Home' or 'Other'
   bool _loadingLocation = false;
   bool _saving = false;
   double? _lat;
@@ -233,28 +233,12 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Circular Profile Avatar with Camera Badge (Screen 4 Mockup)
+                // Circular Profile Avatar
                 Center(
-                  child: Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 46,
-                        backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
-                        child: const Icon(Icons.person_rounded, size: 52, color: Color(0xFF1A1A1A)),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: AppTheme.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.camera_alt_rounded, size: 16, color: Color(0xFF1A1A1A)),
-                        ),
-                      ),
-                    ],
+                  child: CircleAvatar(
+                    radius: 46,
+                    backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
+                    child: const Icon(Icons.person_rounded, size: 52, color: Color(0xFF1A1A1A)),
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -283,7 +267,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // Select Your Type (Home Owner vs Tenant - Screen 4 Mockup)
+                // Select Your Type (Home vs Other)
                 const Text(
                   'Select Your Type',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1A1A1A)),
@@ -293,14 +277,14 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => _userType = 'Home Owner'),
+                        onTap: () => setState(() => _userType = 'Home'),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: _userType == 'Home Owner' ? AppTheme.primary.withValues(alpha: 0.15) : Colors.white,
+                            color: _userType == 'Home' ? AppTheme.primary.withValues(alpha: 0.15) : Colors.white,
                             border: Border.all(
-                              color: _userType == 'Home Owner' ? AppTheme.primary : const Color(0xFFE2E8F0),
-                              width: _userType == 'Home Owner' ? 2 : 1,
+                              color: _userType == 'Home' ? AppTheme.primary : const Color(0xFFE2E8F0),
+                              width: _userType == 'Home' ? 2 : 1,
                             ),
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -308,12 +292,12 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                _userType == 'Home Owner' ? Icons.radio_button_checked : Icons.radio_button_off,
-                                color: _userType == 'Home Owner' ? AppTheme.primaryDark : const Color(0xFFA0AEC0),
+                                _userType == 'Home' ? Icons.radio_button_checked : Icons.radio_button_off,
+                                color: _userType == 'Home' ? AppTheme.primaryDark : const Color(0xFFA0AEC0),
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
-                              const Text('Home Owner', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                              const Text('Home', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                             ],
                           ),
                         ),
@@ -322,14 +306,14 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => setState(() => _userType = 'Tenant'),
+                        onTap: () => setState(() => _userType = 'Other'),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: _userType == 'Tenant' ? AppTheme.primary.withValues(alpha: 0.15) : Colors.white,
+                            color: _userType == 'Other' ? AppTheme.primary.withValues(alpha: 0.15) : Colors.white,
                             border: Border.all(
-                              color: _userType == 'Tenant' ? AppTheme.primary : const Color(0xFFE2E8F0),
-                              width: _userType == 'Tenant' ? 2 : 1,
+                              color: _userType == 'Other' ? AppTheme.primary : const Color(0xFFE2E8F0),
+                              width: _userType == 'Other' ? 2 : 1,
                             ),
                             borderRadius: BorderRadius.circular(14),
                           ),
@@ -337,12 +321,12 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                _userType == 'Tenant' ? Icons.radio_button_checked : Icons.radio_button_off,
-                                color: _userType == 'Tenant' ? AppTheme.primaryDark : const Color(0xFFA0AEC0),
+                                _userType == 'Other' ? Icons.radio_button_checked : Icons.radio_button_off,
+                                color: _userType == 'Other' ? AppTheme.primaryDark : const Color(0xFFA0AEC0),
                                 size: 20,
                               ),
                               const SizedBox(width: 8),
-                              const Text('Tenant', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                              const Text('Other', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                             ],
                           ),
                         ),
