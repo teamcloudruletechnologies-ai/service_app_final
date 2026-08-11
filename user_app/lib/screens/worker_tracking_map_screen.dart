@@ -173,7 +173,7 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
                                       height: 45,
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: const Color(0xFF0F172A).withValues(alpha: 0.15),
+                                          color: const Color(0xFF0F172A).withOpacity(0.15),
                                           shape: BoxShape.circle,
                                         ),
                                         child: const Icon(Icons.person_pin_circle_rounded, color: Color(0xFF0F172A), size: 36),
@@ -190,7 +190,7 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
                                           color: Colors.white,
                                           shape: BoxShape.circle,
                                           boxShadow: [
-                                            BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.20), blurRadius: 8, offset: const Offset(0, 3))
+                                            BoxShadow(color: const Color(0xFF0F172A).withOpacity(0.20), blurRadius: 8, offset: const Offset(0, 3))
                                           ],
                                           border: Border.all(color: const Color(0xFF0F172A), width: 2.2),
                                         ),
@@ -212,7 +212,7 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.15),
+                                    color: Colors.black.withOpacity(0.15),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -285,7 +285,7 @@ class _WorkerTrackingMapScreenState extends State<WorkerTrackingMapScreen> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.08),
+            color: const Color(0xFF0F172A).withOpacity(0.08),
             blurRadius: 20,
             offset: const Offset(0, -6),
           )

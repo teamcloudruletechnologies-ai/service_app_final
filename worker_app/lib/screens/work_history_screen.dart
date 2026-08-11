@@ -172,7 +172,7 @@ class _WorkHistoryScreenState extends State<WorkHistoryScreen> {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            color: const Color(0xFF0F172A).withOpacity(0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

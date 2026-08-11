@@ -132,7 +132,7 @@ class MenuScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(22),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withOpacity(0.08),
                     blurRadius: 16,
                     offset: const Offset(0, 6),
                   ),
@@ -197,9 +197,9 @@ class MenuScreen extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.12),
+                        color: Colors.white.withOpacity(0.12),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                        border: Border.all(color: Colors.white.withOpacity(0.2)),
                       ),
                       child: const Text(
                         'Edit Profile',
@@ -236,7 +236,7 @@ class MenuScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+                    color: const Color(0xFF0F172A).withOpacity(0.04),
                     blurRadius: 20,
                     offset: const Offset(0, 6),
                   ),
@@ -324,7 +324,7 @@ class MenuScreen extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFF1F5F9), width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+                    color: const Color(0xFF0F172A).withOpacity(0.04),
                     blurRadius: 20,
                     offset: const Offset(0, 6),
                   ),
@@ -374,7 +374,7 @@ class MenuScreen extends StatelessWidget {
                     border: Border.all(color: const Color(0xFFFECDD3), width: 1.2),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFFF43F5E).withValues(alpha: 0.06),
+                        color: const Color(0xFFF43F5E).withOpacity(0.06),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),

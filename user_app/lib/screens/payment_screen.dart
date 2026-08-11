@@ -256,7 +256,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppTheme.primary.withValues(alpha: 0.08),
+                                color: AppTheme.primary.withOpacity(0.08),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(

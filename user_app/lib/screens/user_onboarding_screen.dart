@@ -239,7 +239,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                     children: [
                       CircleAvatar(
                         radius: 46,
-                        backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
+                        backgroundColor: AppTheme.primary.withOpacity(0.15),
                         child: const Icon(Icons.person_rounded, size: 52, color: Color(0xFF1A1A1A)),
                       ),
                       Positioned(
@@ -297,7 +297,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: _userType == 'Home Owner' ? AppTheme.primary.withValues(alpha: 0.15) : Colors.white,
+                            color: _userType == 'Home Owner' ? AppTheme.primary.withOpacity(0.15) : Colors.white,
                             border: Border.all(
                               color: _userType == 'Home Owner' ? AppTheme.primary : const Color(0xFFE2E8F0),
                               width: _userType == 'Home Owner' ? 2 : 1,
@@ -326,7 +326,7 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            color: _userType == 'Tenant' ? AppTheme.primary.withValues(alpha: 0.15) : Colors.white,
+                            color: _userType == 'Tenant' ? AppTheme.primary.withOpacity(0.15) : Colors.white,
                             border: Border.all(
                               color: _userType == 'Tenant' ? AppTheme.primary : const Color(0xFFE2E8F0),
                               width: _userType == 'Tenant' ? 2 : 1,

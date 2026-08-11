@@ -197,7 +197,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                             point: _selectedCenter,
                             radius: 80,
                             useRadiusInMeter: true,
-                            color: Colors.blue.withValues(alpha: 0.18),
+                            color: Colors.blue.withOpacity(0.18),
                             borderColor: Colors.blue,
                             borderStrokeWidth: 2,
                           ),
@@ -243,7 +243,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: Colors.black.withOpacity(0.08),
                     blurRadius: 16,
                     offset: const Offset(0, -4),
                   ),
@@ -466,14 +466,14 @@ class _SelectLocationSheetContentState extends State<SelectLocationSheetContent>
                 decoration: BoxDecoration(
                   color: const Color(0xFF1E293B),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3), width: 1),
+                  border: Border.all(color: Colors.redAccent.withOpacity(0.3), width: 1),
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.redAccent.withValues(alpha: 0.15),
+                        color: Colors.redAccent.withOpacity(0.15),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(Icons.location_off_rounded, color: Colors.redAccent, size: 24),
@@ -522,7 +522,7 @@ class _SelectLocationSheetContentState extends State<SelectLocationSheetContent>
               decoration: BoxDecoration(
                 color: const Color(0xFF1E293B),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.5), width: 1.5),
+                border: Border.all(color: AppTheme.primary.withOpacity(0.5), width: 1.5),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

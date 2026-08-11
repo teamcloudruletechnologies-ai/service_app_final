@@ -58,7 +58,7 @@ class AppTheme {
         shadowColor: Colors.transparent,
         elevation: 0,
         indicatorColor: Colors.white,
-        overlayColor: WidgetStatePropertyAll(Colors.white.withValues(alpha: 0.2)),
+        overlayColor: WidgetStatePropertyAll(Colors.white.withOpacity(0.2)),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const IconThemeData(color: primary, size: 24);
@@ -77,7 +77,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: card,
         elevation: 1,
-        shadowColor: Colors.black.withValues(alpha: 0.08),
+        shadowColor: Colors.black.withOpacity(0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),

@@ -124,7 +124,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF0F172A).withValues(alpha: 0.15),
+                            color: const Color(0xFF0F172A).withOpacity(0.15),
                             blurRadius: 16,
                             offset: const Offset(0, 6),
                           )
@@ -193,7 +193,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+                                  color: const Color(0xFF0F172A).withOpacity(0.03),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),
@@ -256,7 +256,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+                                  color: const Color(0xFF0F172A).withOpacity(0.03),
                                   blurRadius: 10,
                                   offset: const Offset(0, 4),
                                 ),
@@ -364,7 +364,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+                                    color: const Color(0xFF0F172A).withOpacity(0.03),
                                     blurRadius: 10,
                                     offset: const Offset(0, 2),
                                   ),

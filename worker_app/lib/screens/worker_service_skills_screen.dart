@@ -274,7 +274,7 @@ class _WorkerServiceSkillsScreenState extends State<WorkerServiceSkillsScreen> {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+                    color: const Color(0xFF0F172A).withOpacity(0.03),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

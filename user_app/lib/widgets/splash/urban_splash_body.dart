@@ -129,7 +129,7 @@ class UrbanSplashBody extends StatelessWidget {
                             Text(
                               'SERVICES',
                               style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.82),
+                                color: Colors.white.withOpacity(0.82),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w300,
                                 letterSpacing: 8,
@@ -142,7 +142,7 @@ class UrbanSplashBody extends StatelessWidget {
                     const SizedBox(height: 18),
                     SizedBox(
                       width: 180 * lineWidth.value,
-                      child: Divider(color: Colors.white.withValues(alpha: 0.35), thickness: 1),
+                      child: Divider(color: Colors.white.withOpacity(0.35), thickness: 1),
                     ),
                     const SizedBox(height: 14),
                     Opacity(
@@ -150,7 +150,7 @@ class UrbanSplashBody extends StatelessWidget {
                       child: Text(
                         'All Urban Services, One App',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.78),
+                          color: Colors.white.withOpacity(0.78),
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
                         ),
@@ -175,14 +175,14 @@ class UrbanSplashBody extends StatelessWidget {
                             height: 28,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.2,
-                              valueColor: AlwaysStoppedAnimation(Colors.white.withValues(alpha: 0.9)),
+                              valueColor: AlwaysStoppedAnimation(Colors.white.withOpacity(0.9)),
                             ),
                           ),
                           const SizedBox(height: 10),
                           Text(
                             'Loading...',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.65),
+                              color: Colors.white.withOpacity(0.65),
                               fontSize: 13,
                               letterSpacing: 0.5,
                             ),

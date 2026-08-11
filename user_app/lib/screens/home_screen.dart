@@ -194,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               border: Border.all(color: const Color(0xFFE2E8F0)),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.04),
+                                  color: Colors.black.withOpacity(0.04),
                                   blurRadius: 8,
                                   offset: const Offset(0, 2),
                                 ),
@@ -230,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.08),
+                                    color: Colors.black.withOpacity(0.08),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -266,13 +266,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           border: Border.all(color: const Color(0xFFE2E8F0), width: 1.0),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+                              color: const Color(0xFF0F172A).withOpacity(0.05),
                               blurRadius: 16,
                               spreadRadius: 0,
                               offset: const Offset(0, 4),
                             ),
                             BoxShadow(
-                              color: const Color(0xFF0F172A).withValues(alpha: 0.02),
+                              color: const Color(0xFF0F172A).withOpacity(0.02),
                               blurRadius: 4,
                               spreadRadius: 0,
                               offset: const Offset(0, 1),
@@ -395,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 border: Border.all(color: const Color(0xFFE2E8F0)),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.03),
+                                    color: Colors.black.withOpacity(0.03),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
                                   ),
@@ -407,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: AppTheme.primary.withValues(alpha: 0.1),
+                                      color: AppTheme.primary.withOpacity(0.1),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(Icons.rocket_launch_rounded, color: AppTheme.primary, size: 28),
@@ -474,8 +474,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                             boxShadow: [
                                               BoxShadow(
                                                 color: isSelected
-                                                    ? const Color(0xFF0F172A).withValues(alpha: 0.15)
-                                                    : Colors.black.withValues(alpha: 0.05),
+                                                    ? const Color(0xFF0F172A).withOpacity(0.15)
+                                                    : Colors.black.withOpacity(0.05),
                                                 blurRadius: isSelected ? 14 : 8,
                                                 offset: const Offset(0, 4),
                                               ),
@@ -548,7 +548,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 border: Border.all(color: const Color(0xFFE2E8F0)),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.03),
+                                    color: Colors.black.withOpacity(0.03),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
                                   ),
@@ -560,7 +560,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Container(
                                     padding: const EdgeInsets.all(12),
                                     decoration: BoxDecoration(
-                                      color: AppTheme.primary.withValues(alpha: 0.1),
+                                      color: AppTheme.primary.withOpacity(0.1),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(Icons.handyman_rounded, color: AppTheme.primary, size: 28),
@@ -605,7 +605,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       border: Border.all(color: const Color(0xFFE2E8F0)),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.03),
+                                          color: Colors.black.withOpacity(0.03),
                                           blurRadius: 10,
                                           offset: const Offset(0, 4),
                                         ),
@@ -669,7 +669,7 @@ class _HomeScreenState extends State<HomeScreen> {
         border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.12),
+            color: const Color(0xFF0F172A).withOpacity(0.12),
             blurRadius: 24,
             spreadRadius: 0,
             offset: const Offset(0, 8),

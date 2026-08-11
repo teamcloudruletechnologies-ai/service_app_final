@@ -109,7 +109,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [
-                                  Colors.black.withValues(alpha: 0.4),
+                                  Colors.black.withOpacity(0.4),
                                   Colors.transparent,
                                 ],
                                 begin: Alignment.topCenter,
@@ -128,12 +128,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                             child: Container(
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.95),
+                                color: Colors.white.withOpacity(0.95),
                                 shape: BoxShape.circle,
                                 border: Border.all(color: const Color(0xFFE2E8F0)),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.12),
+                                    color: Colors.black.withOpacity(0.12),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
                                   ),
@@ -151,7 +151,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.65),
+                                color: Colors.black.withOpacity(0.65),
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(color: Colors.white24),
                               ),
@@ -248,7 +248,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                       borderRadius: BorderRadius.circular(16),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.08),
+                                          color: Colors.black.withOpacity(0.08),
                                           blurRadius: 10,
                                           offset: const Offset(0, 3),
                                         ),
@@ -278,7 +278,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                               child: Container(
                                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
                                                 decoration: BoxDecoration(
-                                                  color: Colors.black.withValues(alpha: 0.80),
+                                                  color: Colors.black.withOpacity(0.80),
                                                   borderRadius: BorderRadius.circular(12),
                                                   border: Border.all(color: Colors.white24, width: 0.8),
                                                 ),
@@ -334,7 +334,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                 border: Border.all(color: const Color(0xFFE2E8F0)),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.03),
+                                    color: Colors.black.withOpacity(0.03),
                                     blurRadius: 10,
                                     offset: const Offset(0, 4),
                                   ),

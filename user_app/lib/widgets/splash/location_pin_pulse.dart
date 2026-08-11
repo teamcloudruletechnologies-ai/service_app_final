@@ -32,7 +32,7 @@ class LocationPinPulse extends StatelessWidget {
                   height: 90,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.2),
+                    border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.2),
                   ),
                 ),
               ),
@@ -75,7 +75,7 @@ class _PinPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round;
 
     final fill = Paint()
-      ..color = Colors.white.withValues(alpha: 0.08)
+      ..color = Colors.white.withOpacity(0.08)
       ..style = PaintingStyle.fill;
 
     final path = Path()
@@ -194,7 +194,7 @@ class ServiceIconRow extends StatelessWidget {
                   scale: 0.7 + t * 0.3,
                   child: Padding(
                     padding: EdgeInsets.only(left: index == 0 ? 0 : 28, right: index == 3 ? 0 : 0),
-                    child: Icon(_icons[index], color: Colors.white.withValues(alpha: 0.92), size: 26),
+                    child: Icon(_icons[index], color: Colors.white.withOpacity(0.92), size: 26),
                   ),
                 ),
               ),

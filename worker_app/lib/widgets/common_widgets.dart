@@ -121,7 +121,7 @@ class ServiceCard extends StatelessWidget {
 
   Widget _placeholder() {
     return Container(
-      color: AppTheme.primary.withValues(alpha: 0.1),
+      color: AppTheme.primary.withOpacity(0.1),
       child: const Center(
         child: Icon(Icons.home_repair_service, size: 40, color: AppTheme.primary),
       ),
@@ -174,7 +174,7 @@ class BookingCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _statusColor(booking.status).withValues(alpha: 0.12),
+                      color: _statusColor(booking.status).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(

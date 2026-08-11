@@ -303,7 +303,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ElevatedButton(
             onPressed: (isLoading || !_isPhoneValid) ? null : _onGetOtpPressed,
             style: ElevatedButton.styleFrom(
-              backgroundColor: _isPhoneValid ? AppTheme.primary : AppTheme.primary.withValues(alpha: 0.5),
+              backgroundColor: _isPhoneValid ? AppTheme.primary : AppTheme.primary.withOpacity(0.5),
               foregroundColor: const Color(0xFF1A1A1A),
               minimumSize: const Size.fromHeight(54),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -430,9 +430,9 @@ class _LoginScreenState extends State<LoginScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
-            color: AppTheme.primary.withValues(alpha: 0.15),
+            color: AppTheme.primary.withOpacity(0.15),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+            border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,

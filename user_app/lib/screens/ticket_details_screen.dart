@@ -147,7 +147,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                 margin: const EdgeInsets.only(right: 16),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(_ticket!.status).withValues(alpha: 0.1),
+                  color: _getStatusColor(_ticket!.status).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -230,7 +230,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen> {
                                   border: isUser ? null : Border.all(color: const Color(0xFFE2E8F0)),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.03),
+                                      color: Colors.black.withOpacity(0.03),
                                       blurRadius: 8,
                                       offset: const Offset(0, 2),
                                     ),
