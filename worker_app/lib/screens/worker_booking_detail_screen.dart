@@ -408,6 +408,7 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
                     (b.address != null && b.address!.isNotEmpty
                             ? b.address!.replaceAll(RegExp(r'[\r\n]+'), ', ').replaceAll(RegExp(r'\s+'), ' ').trim()
