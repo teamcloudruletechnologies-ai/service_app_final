@@ -751,7 +751,6 @@ class _ScheduleBottomSheet extends StatefulWidget {
 }
 
 class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
-  bool _isScheduled = false; // false = Instant, true = Scheduled
   int _selectedDayIndex = 0;
   int _selectedSlotIndex = 0;
   final _notesCtrl = TextEditingController();
@@ -813,120 +812,97 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
               ),
               const SizedBox(height: 16),
 
-              const Text(
-                'Select Booking Schedule',
-                style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF0F172A), letterSpacing: -0.3),
-              ),
-              const SizedBox(height: 16),
-
-              // Booking Mode Options
-              Row(
+              const Row(
                 children: [
-                  Expanded(
-                    child: ChoiceChip(
-                      label: const Text('⚡ Instant Now', style: TextStyle(fontWeight: FontWeight.bold)),
-                      selected: !_isScheduled,
-                      selectedColor: _themeDark,
-                      backgroundColor: const Color(0xFFF8FAFC),
-                      side: BorderSide(color: !_isScheduled ? _themeDark : const Color(0xFFE2E8F0)),
-                      labelStyle: TextStyle(color: !_isScheduled ? Colors.white : const Color(0xFF475569)),
-                      onSelected: (val) => setState(() => _isScheduled = false),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ChoiceChip(
-                      label: const Text('📅 Schedule Later', style: TextStyle(fontWeight: FontWeight.bold)),
-                      selected: _isScheduled,
-                      selectedColor: _themeDark,
-                      backgroundColor: const Color(0xFFF8FAFC),
-                      side: BorderSide(color: _isScheduled ? _themeDark : const Color(0xFFE2E8F0)),
-                      labelStyle: TextStyle(color: _isScheduled ? Colors.white : const Color(0xFF475569)),
-                      onSelected: (val) => setState(() => _isScheduled = true),
-                    ),
+                  Icon(Icons.calendar_month_rounded, color: AppTheme.primary, size: 24),
+                  SizedBox(width: 10),
+                  Text(
+                    'Schedule Service Date & Time',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: Color(0xFF0F172A), letterSpacing: -0.3),
                   ),
                 ],
               ),
+              const SizedBox(height: 18),
 
-              if (_isScheduled) ...[
-                const SizedBox(height: 20),
-                const Text(
-                  'Select Date',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
-                ),
-                const SizedBox(height: 10),
-                SizedBox(
-                  height: 64,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: days.length,
-                    itemBuilder: (context, index) {
-                      final day = days[index];
-                      final isSelected = _selectedDayIndex == index;
-                      final isToday = index == 0;
-                      return GestureDetector(
-                        onTap: () => setState(() => _selectedDayIndex = index),
-                        child: Container(
-                          width: 80,
-                          margin: const EdgeInsets.only(right: 10),
-                          decoration: BoxDecoration(
-                            color: isSelected ? _themeDark : Colors.white,
-                            border: Border.all(color: isSelected ? _themeDark : const Color(0xFFE2E8F0)),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                isToday ? 'Today' : DateFormat('EEE').format(day),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  color: isSelected ? Colors.white70 : const Color(0xFF64748B),
-                                ),
-                              ),
-                              Text(
-                                DateFormat('dd MMM').format(day),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 13,
-                                  color: isSelected ? Colors.white : const Color(0xFF0F172A),
-                                ),
-                              ),
-                            ],
-                          ),
+              // ─── SELECT DATE ───
+              const Text(
+                'Select Date',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                height: 64,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: days.length,
+                  itemBuilder: (context, index) {
+                    final day = days[index];
+                    final isSelected = _selectedDayIndex == index;
+                    final isToday = index == 0;
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedDayIndex = index),
+                      child: Container(
+                        width: 80,
+                        margin: const EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected ? _themeDark : Colors.white,
+                          border: Border.all(color: isSelected ? _themeDark : const Color(0xFFE2E8F0)),
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                      );
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-                const Text(
-                  'Select Time Slot',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: List.generate(_timeSlots.length, (index) {
-                    final isSelected = _selectedSlotIndex == index;
-                    return ChoiceChip(
-                      label: Text(_timeSlots[index]),
-                      selected: isSelected,
-                      selectedColor: _themeDark,
-                      backgroundColor: const Color(0xFFF8FAFC),
-                      side: BorderSide(color: isSelected ? _themeDark : const Color(0xFFE2E8F0)),
-                      labelStyle: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: isSelected ? Colors.white : const Color(0xFF374151),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              isToday ? 'Today' : DateFormat('EEE').format(day),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: isSelected ? Colors.white70 : const Color(0xFF64748B),
+                              ),
+                            ),
+                            Text(
+                              DateFormat('dd MMM').format(day),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13,
+                                color: isSelected ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      onSelected: (val) => setState(() => _selectedSlotIndex = index),
                     );
-                  }),
+                  },
                 ),
-              ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // ─── SELECT TIME SLOT ───
+              const Text(
+                'Select Time Slot',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: List.generate(_timeSlots.length, (index) {
+                  final isSelected = _selectedSlotIndex == index;
+                  return ChoiceChip(
+                    label: Text(_timeSlots[index]),
+                    selected: isSelected,
+                    selectedColor: _themeDark,
+                    backgroundColor: const Color(0xFFF8FAFC),
+                    side: BorderSide(color: isSelected ? _themeDark : const Color(0xFFE2E8F0)),
+                    labelStyle: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: isSelected ? Colors.white : const Color(0xFF374151),
+                    ),
+                    onSelected: (val) => setState(() => _selectedSlotIndex = index),
+                  );
+                }),
+              ),
 
               const SizedBox(height: 20),
               const Text(
@@ -952,14 +928,14 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
               const SizedBox(height: 24),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _themeDark,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size.fromHeight(52),
+                  backgroundColor: AppTheme.primary,
+                  foregroundColor: const Color(0xFF1A1A1A),
+                  minimumSize: const Size.fromHeight(54),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
                 onPressed: () {
-                  final scheduledAt = _isScheduled ? _calculateSelectedDateTime() : null;
+                  final scheduledAt = _calculateSelectedDateTime();
                   Navigator.pop(context, {
                     'scheduledAt': scheduledAt,
                     'notes': _notesCtrl.text.trim(),
@@ -967,7 +943,7 @@ class _ScheduleBottomSheetState extends State<_ScheduleBottomSheet> {
                 },
                 child: const Text(
                   'Confirm & Proceed',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF1A1A1A)),
                 ),
               ),
             ],

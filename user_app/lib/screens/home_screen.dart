@@ -55,11 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
         catalog.loadCategories(),
         catalog.loadServices(),
       ]);
-
-      if (!_hasPromptedLocationOnEntry) {
-        _hasPromptedLocationOnEntry = true;
-        _showLocationModal();
-      }
     });
   }
 
