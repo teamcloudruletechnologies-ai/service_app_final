@@ -33,16 +33,21 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final address = user?.address ?? '';
     final targetSub = sub ?? _selectedSubService;
 
+    final subName = targetSub?.name.trim() ?? '';
+    final validSubName = (subName.isNotEmpty && subName.toLowerCase() != 'book now')
+        ? subName
+        : widget.service.name;
+
     final customServiceItem = targetSub != null
         ? ServiceItem(
             id: widget.service.id,
             categoryId: widget.service.categoryId,
-            name: targetSub.name.trim().isNotEmpty ? targetSub.name : widget.service.name,
+            name: validSubName,
             description: widget.service.description,
             imageUrl: (targetSub.imageUrl != null && targetSub.imageUrl!.trim().isNotEmpty)
                 ? targetSub.imageUrl
                 : widget.service.imageUrl,
-            categoryName: widget.service.categoryName,
+            categoryName: widget.service.categoryName ?? widget.service.name,
             price: (targetSub.price > 0 ? targetSub.price : widget.service.price),
             status: widget.service.status,
             avgRating: widget.service.avgRating,
@@ -115,7 +120,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                               ),
-                            ),
+                            ),                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
                           ),
                         ),
                         // Back Button
