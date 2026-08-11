@@ -273,7 +273,34 @@ async function updateMyBookingStatus(req, res, next) {
         });
       }
     } else if (req.auth.role === "worker") {
-      if (["confirmed", "accepted", "assigned"].includes(status)) {
+      if (status === "cancelled") {
+        // When assigned worker cancels job before starting:
+        // 1. Unassign worker_id and revert status to 'pending' so other workers can accept
+        const db = require("../config/db");
+        await db.query(`UPDATE bookings SET worker_id = NULL, status = 'pending', updated_at = NOW() WHERE id = $1`, [booking.id]);
+        
+        // 2. Notify Customer about re-matching
+        fcmService.sendToUser(booking.user_id, {
+          title: "🔄 Re-matching Service Professional",
+          body: `Assigned partner had to cancel. We are re-sending your job request to remaining nearby professionals.`,
+          data: { bookingId: booking.id, status: "pending" }
+        });
+
+        // 3. Notify all remaining active & approved workers in that area
+        try {
+          const workersRes = await db.query(
+            `SELECT id FROM workers WHERE status = 'active' AND kyc_status = 'approved' AND id != $1`,
+            [req.auth.id]
+          );
+          for (const w of workersRes.rows) {
+            fcmService.sendToWorker(w.id, {
+              title: "🔔 NEW JOB REQUEST AVAILABLE!",
+              body: `New booking request available in your area.`,
+              data: { bookingId: booking.id, status: "pending" }
+            });
+          }
+        } catch (_) {}
+      } else if (["confirmed", "accepted", "assigned"].includes(status)) {
         fcmService.sendToUser(booking.user_id, {
           title: "✅ Worker Accepted!",
           body: `Partner accepted your booking #${booking.id}. Check 4-digit OTP on your booking card.`,
