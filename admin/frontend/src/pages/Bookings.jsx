@@ -3,10 +3,22 @@ import { bookingsAPI } from '../api';
 
 const STATUS_BADGES = {
   pending: { bg: 'var(--accent-light)', fg: 'var(--accent-dark)', text: 'Pending' },
-  confirmed: { bg: '#F5F3FF', fg: '#7C3AED', text: 'Confirmed' },
+  matching: { bg: '#EFF6FF', fg: '#2563EB', text: 'Matching' },
+  assigned: { bg: '#F5F3FF', fg: '#7C3AED', text: 'Assigned' },
+  accepted: { bg: '#ECFDF5', fg: '#059669', text: 'Accepted' },
+  arriving: { bg: '#FFFBEB', fg: '#D97706', text: 'Arriving' },
+  otp_verified: { bg: '#E0E7FF', fg: '#4338CA', text: 'OTP Verified' },
   in_progress: { bg: 'var(--status-amber-bg)', fg: 'var(--status-amber-fg)', text: 'In Progress' },
+  extra_cost_pending: { bg: '#FEF2F2', fg: '#DC2626', text: 'Extra Cost Pending' },
+  exception_pending: { bg: '#FEE2E2', fg: '#991B1B', text: 'Exception Pending' },
   completed: { bg: 'var(--status-green-bg)', fg: 'var(--status-green-fg)', text: 'Completed' },
+  payment_pending: { bg: '#FFF7ED', fg: '#EA580C', text: 'Payment Pending' },
+  paid: { bg: '#D1FAE5', fg: '#065F46', text: 'Paid' },
+  closed: { bg: '#F3F4F6', fg: '#374151', text: 'Closed' },
+  rejected: { bg: '#FEE2E2', fg: '#991B1B', text: 'Rejected' },
+  reassignment_required: { bg: '#FEF3C7', fg: '#92400E', text: 'Reassignment Required' },
   cancelled: { bg: 'var(--status-red-bg)', fg: 'var(--status-red-fg)', text: 'Cancelled' },
+  confirmed: { bg: '#F5F3FF', fg: '#7C3AED', text: 'Confirmed' },
 };
 
 
@@ -241,9 +253,19 @@ export default function Bookings() {
             {[
               { key: '', label: 'All Bookings' },
               { key: 'pending', label: 'Pending' },
-              { key: 'confirmed', label: 'Confirmed' },
+              { key: 'matching', label: 'Matching' },
+              { key: 'assigned', label: 'Assigned' },
+              { key: 'accepted', label: 'Accepted' },
+              { key: 'arriving', label: 'Arriving' },
+              { key: 'otp_verified', label: 'OTP Verified' },
               { key: 'in_progress', label: 'In Progress' },
+              { key: 'extra_cost_pending', label: 'Extra Cost' },
+              { key: 'exception_pending', label: 'Exceptions' },
+              { key: 'reassignment_required', label: 'Reassignment Req.' },
               { key: 'completed', label: 'Completed' },
+              { key: 'payment_pending', label: 'Payment Pending' },
+              { key: 'paid', label: 'Paid' },
+              { key: 'closed', label: 'Closed' },
               { key: 'cancelled', label: 'Cancelled' }
             ].map(opt => (
               <button
@@ -488,10 +510,20 @@ export default function Bookings() {
                       cursor: 'pointer'
                     }}
                   >
-                    <option value="pending">Pending Assignment</option>
-                    <option value="confirmed">Confirmed</option>
+                    <option value="pending">Pending</option>
+                    <option value="matching">Matching</option>
+                    <option value="assigned">Assigned</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="arriving">Arriving</option>
+                    <option value="otp_verified">OTP Verified</option>
                     <option value="in_progress">In Progress</option>
+                    <option value="extra_cost_pending">Extra Cost Pending</option>
+                    <option value="exception_pending">Exception Pending</option>
+                    <option value="reassignment_required">Reassignment Required</option>
                     <option value="completed">Completed</option>
+                    <option value="payment_pending">Payment Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="closed">Closed</option>
                     <option value="cancelled">Cancelled</option>
                   </select>
                   {updatingStatus && <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Saving...</span>}

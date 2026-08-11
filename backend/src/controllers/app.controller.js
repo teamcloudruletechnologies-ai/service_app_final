@@ -208,37 +208,39 @@ async function updateMyBookingStatus(req, res, next) {
         return error(res, "You do not have permission to update this booking", 403);
       }
 
-      if (status === "confirmed") {
-        const db = require("../config/db");
-        const activeCheck = await db.query(
-          `SELECT id FROM bookings WHERE worker_id = $1 AND status IN ('confirmed', 'in_progress') AND id != $2 LIMIT 1`,
-          [req.auth.id, req.params.id]
-        );
-        if (activeCheck.rows.length > 0) {
-          return error(res, "Worker is busy. You already have an active job in progress. Complete it first before accepting another.", 400);
-        }
-      }
-      
       const valid = {
-        pending: ["confirmed", "in_progress", "cancelled"],
-        confirmed: ["in_progress", "cancelled"],
-        in_progress: ["completed"],
-        completed: [],
+        pending: ["matching", "assigned", "confirmed", "accepted", "cancelled"],
+        matching: ["assigned", "reassignment_required", "cancelled"],
+        assigned: ["accepted", "confirmed", "rejected", "cancelled"],
+        rejected: ["reassignment_required", "matching"],
+        reassignment_required: ["matching", "assigned"],
+        accepted: ["arriving", "otp_verified", "in_progress", "cancelled"],
+        confirmed: ["arriving", "otp_verified", "in_progress", "cancelled"],
+        arriving: ["otp_verified", "in_progress", "cancelled"],
+        otp_verified: ["in_progress"],
+        in_progress: ["extra_cost_pending", "completed"],
+        extra_cost_pending: ["in_progress", "exception_pending", "completed"],
+        exception_pending: ["in_progress", "completed", "cancelled"],
+        completed: ["payment_pending", "paid"],
+        payment_pending: ["paid"],
+        paid: ["closed"],
+        closed: [],
         cancelled: []
       };
-      if (!valid[booking.status].includes(status)) {
+
+      if (valid[booking.status] && !valid[booking.status].includes(status)) {
         return error(res, `Cannot change booking status from ${booking.status} to ${status}`, 400);
       }
 
-      if (status === "in_progress") {
-        if (!otp || String(booking.otp) !== String(otp)) {
-          return error(res, "Invalid Start OTP code. Please ask the customer for the correct code.", 400);
+      if (status === "in_progress" || status === "otp_verified") {
+        if (booking.otp && String(booking.otp) !== String(otp)) {
+          return error(res, "Invalid 4-digit OTP code. Please ask customer for the correct code.", 400);
         }
       }
 
       if (status === "completed") {
-        if (!otp || String(booking.otp) !== String(otp)) {
-          return error(res, "Invalid Completion OTP code. Please ask the customer for the correct code.", 400);
+        if (booking.otp && otp && String(booking.otp) !== String(otp)) {
+          return error(res, "Invalid OTP code. Please ask customer for correct 4-digit code.", 400);
         }
       }
     } else if (req.auth.role === "user") {
@@ -248,8 +250,8 @@ async function updateMyBookingStatus(req, res, next) {
       if (status !== "cancelled") {
         return error(res, "Users are only allowed to cancel bookings", 400);
       }
-      if (!["pending", "confirmed"].includes(booking.status)) {
-        return error(res, "This booking cannot be cancelled", 400);
+      if (["completed", "paid", "closed"].includes(booking.status)) {
+        return error(res, "Completed bookings cannot be cancelled", 400);
       }
     } else {
       return error(res, "Forbidden role", 403);
@@ -257,6 +259,10 @@ async function updateMyBookingStatus(req, res, next) {
 
     const updated = await Booking.updateStatus(req.params.id, status, req.auth.role === "worker" ? req.auth.id : null);
     
+    // Broadcast real-time Socket.IO update to all listeners (User App, Worker App, Admin Panel)
+    const socketUtil = require("../utils/socket");
+    socketUtil.emitBookingUpdate(booking.id, updated);
+
     if (req.auth.role === "user") {
       await User.logActivity(req.auth.id, "booking_cancelled", `Cancelled booking #${booking.id}`);
       if (booking.worker_id) {
@@ -267,17 +273,23 @@ async function updateMyBookingStatus(req, res, next) {
         });
       }
     } else if (req.auth.role === "worker") {
-      if (status === "confirmed") {
+      if (["confirmed", "accepted", "assigned"].includes(status)) {
         fcmService.sendToUser(booking.user_id, {
           title: "✅ Worker Accepted!",
-          body: `Partner accepted your booking #${booking.id}. Check OTP on your booking card.`,
-          data: { bookingId: booking.id, status: "confirmed" }
+          body: `Partner accepted your booking #${booking.id}. Check 4-digit OTP on your booking card.`,
+          data: { bookingId: booking.id, status }
         });
-      } else if (status === "in_progress") {
+      } else if (status === "arriving") {
+        fcmService.sendToUser(booking.user_id, {
+          title: "🚗 Worker Arriving!",
+          body: `Partner is on the way to your location.`,
+          data: { bookingId: booking.id, status: "arriving" }
+        });
+      } else if (status === "in_progress" || status === "otp_verified") {
         fcmService.sendToUser(booking.user_id, {
           title: "🛠️ Work Started!",
-          body: `Partner verified your OTP and started the service.`,
-          data: { bookingId: booking.id, status: "in_progress" }
+          body: `Partner verified your 4-digit OTP and started the service.`,
+          data: { bookingId: booking.id, status }
         });
       }
     }
