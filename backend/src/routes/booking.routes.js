@@ -13,7 +13,7 @@ router.use(auth, allowRoles(roles.ADMIN));
 router.get(
   "/",
   [
-    query("status").optional().isIn(["pending", "confirmed", "in_progress", "completed", "cancelled"]),
+    query("status").optional().isIn(["pending", "matching", "assigned", "accepted", "arriving", "otp_verified", "in_progress", "extra_cost_pending", "exception_pending", "completed", "payment_pending", "paid", "closed", "rejected", "reassignment_required", "cancelled", "confirmed"]),
     query("userId").optional().isInt(),
     query("workerId").optional().isInt(),
   ],
@@ -28,7 +28,7 @@ router.patch(
   "/:id/status",
   [
     param("id").isInt(),
-    body("status").isIn(["pending", "confirmed", "in_progress", "completed", "cancelled"]),
+    body("status").isIn(["pending", "matching", "assigned", "accepted", "arriving", "otp_verified", "in_progress", "extra_cost_pending", "exception_pending", "completed", "payment_pending", "paid", "closed", "rejected", "reassignment_required", "cancelled", "confirmed"]),
   ],
   validate,
   controller.updateBookingStatus
