@@ -401,74 +401,97 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
             color: Color(0xFF64748B),
           ),
         ),
-        const SizedBox(height: 6),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    (b.address != null && b.address!.isNotEmpty
-                            ? b.address!.replaceAll(RegExp(r'[\r\n]+'), ', ').replaceAll(RegExp(r'\s+'), ' ').trim()
-                            : 'Anna Nagar, Madurai'),
-                    softWrap: true,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF0F172A),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A).withOpacity(0.08),
+                      shape: BoxShape.circle,
                     ),
+                    child: const Icon(Icons.location_on_rounded, color: Color(0xFF0F172A), size: 20),
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: const [
-                      Icon(Icons.location_on_outlined, size: 14, color: Color(0xFF64748B)),
-                      SizedBox(width: 4),
-                      Text(
-                        '1.2 km away',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF64748B),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _formatAddress(b.address),
+                          softWrap: true,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
+                            height: 1.35,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 6),
+                        const Row(
+                          children: [
+                            Icon(Icons.near_me_rounded, size: 13, color: Color(0xFF64748B)),
+                            SizedBox(width: 4),
+                            Text(
+                              '1.2 km away from your location',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => WorkerInAppNavigationScreen(
-                      bookingId: b.id,
-                      customerName: b.userName ?? 'Customer',
-                      customerAddress: b.address ?? 'Customer Location',
-                      initialLat: b.latitude,
-                      initialLng: b.longitude,
-                    ),
+              const SizedBox(height: 14),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => WorkerInAppNavigationScreen(
+                          bookingId: b.id,
+                          customerName: b.userName ?? 'Customer',
+                          customerAddress: _formatAddress(b.address),
+                          initialLat: b.latitude,
+                          initialLng: b.longitude,
+                        ),
+                      ),
+                    ).then((_) => _loadBooking());
+                  },
+                  icon: const Icon(Icons.map_outlined, size: 18),
+                  label: const Text(
+                    'View Live Route on Map',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
-                ).then((_) => _loadBooking());
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF1F5F9),
-                foregroundColor: const Color(0xFF0F172A),
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text(
-                'View on Map',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F172A),
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(46),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
 
         const SizedBox(height: 18),
@@ -666,5 +689,20 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
       await Future.delayed(const Duration(milliseconds: 150));
       _updateStatus('cancelled');
     }
+  }
+
+  String _formatAddress(String? raw) {
+    if (raw == null || raw.trim().isEmpty) {
+      return 'Anna Nagar, Madurai, Tamil Nadu 625020';
+    }
+    // Replace all vertical newlines and carriage returns with spaces
+    String cleaned = raw.replaceAll(RegExp(r'[\r\n]+'), ' ');
+    // Ensure space after commas if missing
+    cleaned = cleaned.replaceAll(RegExp(r',([^\s])'), ', \$1');
+    // Ensure space between concatenated words (e.g. AnnaNagar -> Anna Nagar, TamilNadu -> Tamil Nadu)
+    cleaned = cleaned.replaceAll(RegExp(r'(?<=[a-z])(?=[A-Z])'), ' ');
+    // Collapse multiple whitespace
+    cleaned = cleaned.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return cleaned.isEmpty ? 'Anna Nagar, Madurai, Tamil Nadu 625020' : cleaned;
   }
 }
