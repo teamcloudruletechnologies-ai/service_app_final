@@ -1,12 +1,15 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../config/api_config.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
+import 'location_picker_screen.dart';
 import 'main_shell.dart';
 
 /// Zomato-like "Select a Worker" screen.
@@ -256,194 +259,305 @@ class _NearbyWorkersScreenState extends State<NearbyWorkersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isBooking = _bookingWorkerId != null;
+
+    final rawName = widget.service.name.trim();
+    final rawCatName = widget.service.categoryName?.trim();
+    final displayServiceName = (rawName.isEmpty || rawName.toLowerCase() == 'book now')
+        ? (rawCatName != null && rawCatName.isNotEmpty ? rawCatName : 'Home Maintenance Service')
+        : rawName;
+    final displayCategory = (rawCatName != null && rawCatName.isNotEmpty && rawCatName != displayServiceName)
+        ? rawCatName
+        : 'Home Service & Repair';
+
+    final hasImage = widget.service.imageUrl != null && widget.service.imageUrl!.trim().isNotEmpty;
+    final resolvedImgUrl = hasImage ? ApiConfig.resolveImageUrl(widget.service.imageUrl!) : null;
+
+    final rawAddr = widget.address.trim();
+    final isGenericAddr = rawAddr.isEmpty || rawAddr == 'Madurai, Madurai, Tamil Nadu' || rawAddr == 'Madurai, Tamil Nadu';
+    final detailedAddress = isGenericAddr
+        ? 'Anna Nagar, Seeman Nagar, Karuppayurani, Madurai, Tamil Nadu - 625020'
+        : rawAddr;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
-          'Nearby Professionals',
+          'Confirm Booking',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF1A1A1A)),
         ),
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        foregroundColor: const Color(0xFF1A1A1A),
         elevation: 0,
         surfaceTintColor: Colors.white,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // ─── CONFIRMED LOCATION BAR ───
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                const Icon(Icons.location_on_rounded, color: Color(0xFF0F172A), size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'SERVICE LOCATION',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF94A3B8),
-                          letterSpacing: 1.0,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // ─── SELECTED SERVICE CARD WITH IMAGE ───
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Service Image or App Theme Icon
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppTheme.primary.withValues(alpha: 0.4)),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: resolvedImgUrl != null
+                        ? CachedNetworkImage(
+                            imageUrl: resolvedImgUrl,
+                            fit: BoxFit.cover,
+                            errorWidget: (_, __, ___) => const Center(
+                              child: Icon(Icons.home_repair_service_rounded, color: Color(0xFF1A1A1A), size: 36),
+                            ),
+                          )
+                        : const Center(
+                            child: Icon(Icons.home_repair_service_rounded, color: Color(0xFF1A1A1A), size: 36),
+                          ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.25),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'SERVICE NAME',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: Color(0xFF1A1A1A),
+                              letterSpacing: 0.8,
+                            ),
+                          ),
                         ),
+                        const SizedBox(height: 6),
+                        Text(
+                          displayServiceName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 17,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          displayCategory,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF64748B),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 18),
+
+            // ─── DETAILED SERVICE LOCATION CARD ───
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.location_on_rounded, color: Color(0xFF1A1A1A), size: 24),
+                          ),
+                          const SizedBox(width: 12),
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'CONFIRMED LOCATION',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                  color: Color(0xFF94A3B8),
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Detailed Service Address',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF1A1A1A),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 2),
-                      Text(
-                        widget.address,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+
+                      // ─── CHANGE LOCATION BUTTON ───
+                      InkWell(
+                        onTap: () {
+                          if (Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop();
+                          } else {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (_) => LocationPickerScreen(
+                                  service: widget.service,
+                                  initialAddress: widget.address,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: AppTheme.primary.withValues(alpha: 0.4)),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.edit_location_alt_rounded, size: 14, color: Color(0xFF1A1A1A)),
+                              SizedBox(width: 4),
+                              Text(
+                                'Change',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF1A1A1A),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          // ─── SERVICE SUMMARY ───
-          Container(
-            color: const Color(0xFFF1F5F9),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-            child: Row(
-              children: [
-                const Icon(Icons.home_repair_service_rounded, color: Color(0xFF0F172A), size: 18),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    widget.service.name,
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: Color(0xFF0F172A)),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Divider(color: Color(0xFFF1F5F9), height: 1),
                   ),
-                ),
-              ],
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.map_rounded, color: Color(0xFF2563EB), size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          detailedAddress,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1A1A1A),
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          const SizedBox(height: 8),
-
-          // ─── SORT/FILTER BAR ───
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: [
-                const Text(
-                  'Sort by:',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF64748B)),
-                ),
-                const SizedBox(width: 8),
-                _SortFilterChip(
-                  label: '⭐ Rating',
-                  active: _sortBy == 'rating',
-                  onTap: () => setState(() => _sortBy = 'rating'),
-                ),
-                const SizedBox(width: 6),
-                _SortFilterChip(
-                  label: '📍 Distance',
-                  active: _sortBy == 'distance',
-                  onTap: () => setState(() => _sortBy = 'distance'),
-                ),
-                const SizedBox(width: 6),
-                _SortFilterChip(
-                  label: '💼 Experience',
-                  active: _sortBy == 'experience',
-                  onTap: () => setState(() => _sortBy = 'experience'),
-                ),
-              ],
-            ),
-          ),
-
-          // Error banner
-          if (_bookingError != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                padding: const EdgeInsets.all(10),
+            // Error banner
+            if (_bookingError != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.red.shade200),
                 ),
                 child: Text(_bookingError!, style: const TextStyle(color: Colors.red, fontSize: 13)),
               ),
-            ),
-
-          // ─── WORKERS SECTION HEADER ───
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-            child: Row(
-              children: [
-                const Text(
-                  'AVAILABLE EXPERTS NEAR YOU',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFF94A3B8),
-                    letterSpacing: 1.1,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                if (!_loading)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFECFDF5),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${_workers.length} found',
-                      style: const TextStyle(
-                        color: Color(0xFF059669),
-                        fontWeight: FontWeight.w800,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          // ─── WORKER LIST ───
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFF0F172A)))
-                    : _workers.isEmpty
-                        ? _buildEmptyState()
-                        : ListView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            itemCount: _getSortedWorkers().length,
-                            itemBuilder: (context, index) => _buildWorkerCard(_getSortedWorkers()[index]),
-                          ),
-          ),
-        ],
+            ],
+          ],
+        ),
       ),
-      // ─── BOTTOM: BOOK ANY WORKER CTA ───
+
+      // ─── BOTTOM CTA: BOOK NOW (AppTheme.primary Yellow Button) ───
       bottomNavigationBar: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0F172A),
-              foregroundColor: Colors.white,
-              minimumSize: const Size.fromHeight(52),
+              backgroundColor: AppTheme.primary,
+              foregroundColor: const Color(0xFF1A1A1A),
+              minimumSize: const Size.fromHeight(56),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
             ),
-            onPressed: _bookingWorkerId != null ? null : () => _showScheduleAndBook(null),
-            child: _bookingWorkerId == -1
-                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-                : const Text(
-                    'Book Any Available Expert',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+            onPressed: isBooking ? null : () => _showScheduleAndBook(null),
+            child: isBooking
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(color: Color(0xFF1A1A1A), strokeWidth: 2.5),
+                  )
+                : const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Book Now',
+                        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: Color(0xFF1A1A1A)),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_forward_rounded, color: Color(0xFF1A1A1A), size: 22),
+                    ],
                   ),
           ),
         ),
