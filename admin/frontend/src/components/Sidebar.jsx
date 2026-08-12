@@ -69,23 +69,23 @@ export default function Sidebar({ activeKey, onNav, onLogout, currentAdmin }) {
   const [bookingsOpen, setBookingsOpen] = useState(activeKey?.startsWith('bookings') || false);
 
   const BOOKING_SUBITEMS = [
-    { label: '📋 All Bookings', key: 'bookings' },
-    { label: '⏳ Pending', key: 'bookings_pending' },
-    { label: '🔍 Matching', key: 'bookings_matching' },
-    { label: '👤 Assigned', key: 'bookings_assigned' },
-    { label: '✅ Confirmed', key: 'bookings_confirmed' },
-    { label: '👍 Accepted', key: 'bookings_accepted' },
-    { label: '🚗 Arriving', key: 'bookings_arriving' },
-    { label: '🔢 OTP Verified', key: 'bookings_otp_verified' },
-    { label: '🛠️ In Progress', key: 'bookings_in_progress' },
-    { label: '💸 Extra Cost', key: 'bookings_extra_cost_pending' },
-    { label: '⚠️ Exceptions', key: 'bookings_exception_pending' },
-    { label: '🔄 Reassign Req.', key: 'bookings_reassignment_required' },
-    { label: '🎉 Completed', key: 'bookings_completed' },
-    { label: '💳 Pay Pending', key: 'bookings_payment_pending' },
-    { label: '💰 Paid', key: 'bookings_paid' },
-    { label: '🔒 Closed', key: 'bookings_closed' },
-    { label: '❌ Cancelled', key: 'bookings_cancelled' },
+    { label: 'All Bookings', key: 'bookings', color: '#A89E91' },
+    { label: 'Pending', key: 'bookings_pending', color: '#F59E0B' },
+    { label: 'Matching', key: 'bookings_matching', color: '#3B82F6' },
+    { label: 'Assigned', key: 'bookings_assigned', color: '#8B5CF6' },
+    { label: 'Confirmed', key: 'bookings_confirmed', color: '#10B981' },
+    { label: 'Accepted', key: 'bookings_accepted', color: '#059669' },
+    { label: 'Arriving', key: 'bookings_arriving', color: '#D97706' },
+    { label: 'OTP Verified', key: 'bookings_otp_verified', color: '#6366F1' },
+    { label: 'In Progress', key: 'bookings_in_progress', color: '#3B82F6' },
+    { label: 'Extra Cost Pending', key: 'bookings_extra_cost_pending', color: '#DC2626' },
+    { label: 'Exception Pending', key: 'bookings_exception_pending', color: '#991B1B' },
+    { label: 'Reassignment Req.', key: 'bookings_reassignment_required', color: '#D97706' },
+    { label: 'Completed', key: 'bookings_completed', color: '#10B981' },
+    { label: 'Pay Pending', key: 'bookings_payment_pending', color: '#EA580C' },
+    { label: 'Paid', key: 'bookings_paid', color: '#059669' },
+    { label: 'Closed', key: 'bookings_closed', color: '#6B7280' },
+    { label: 'Cancelled', key: 'bookings_cancelled', color: '#EF4444' },
   ];
 
   // Dark black with olive accent
@@ -255,10 +255,11 @@ export default function Sidebar({ activeKey, onNav, onLogout, currentAdmin }) {
                               cursor: 'pointer',
                               display: 'flex',
                               alignItems: 'center',
-                              gap: 6
+                              gap: 8
                             }}
                           >
-                            <span>{sub.label}</span>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: sub.color, flexShrink: 0 }} />
+                            <span style={{ flex: 1 }}>{sub.label}</span>
                           </div>
                         );
                       })}
