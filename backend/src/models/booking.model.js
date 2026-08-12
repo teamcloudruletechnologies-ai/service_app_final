@@ -47,7 +47,7 @@ async function list({ status, userId, workerId, page, limit, offset }) {
 
   if (workerId) {
     params.push(workerId);
-    where.push(`(b.worker_id = $${params.length} OR (b.worker_id IS NULL AND b.status = 'pending'))`);
+    where.push(`(b.worker_id = $${params.length} OR (b.worker_id IS NULL AND b.status = 'pending' AND NOT ($${params.length} = ANY(COALESCE(b.declined_worker_ids, '{}')))))`);
   }
 
   const clause = where.length ? `WHERE ${where.join(" AND ")}` : "";

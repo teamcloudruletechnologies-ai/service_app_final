@@ -275,9 +275,17 @@ async function updateMyBookingStatus(req, res, next) {
     } else if (req.auth.role === "worker") {
       if (status === "cancelled") {
         // When assigned worker cancels job before starting:
-        // 1. Unassign worker_id and revert status to 'pending' so other workers can accept
+        // 1. Unassign worker_id, append worker to declined_worker_ids, and revert status to 'pending'
         const db = require("../config/db");
-        await db.query(`UPDATE bookings SET worker_id = NULL, status = 'pending', updated_at = NOW() WHERE id = $1`, [booking.id]);
+        await db.query(
+          `UPDATE bookings 
+           SET worker_id = NULL, 
+               status = 'pending', 
+               declined_worker_ids = array_append(COALESCE(declined_worker_ids, '{}'), $2), 
+               updated_at = NOW() 
+           WHERE id = $1`,
+          [booking.id, req.auth.id]
+        );
         
         // 2. Notify Customer about re-matching
         fcmService.sendToUser(booking.user_id, {
@@ -286,16 +294,23 @@ async function updateMyBookingStatus(req, res, next) {
           data: { bookingId: booking.id, status: "pending" }
         });
 
-        // 3. Notify all remaining active & approved workers in that area
+        // 3. Notify all remaining active & approved workers (excluding workers who declined/cancelled)
         try {
+          const serviceRes = await db.query(`SELECT category_id, name FROM services WHERE id = $1`, [booking.service_id]);
+          const serviceInfo = serviceRes.rows[0];
+
           const workersRes = await db.query(
-            `SELECT id FROM workers WHERE status = 'active' AND kyc_status = 'approved' AND id != $1`,
-            [req.auth.id]
+            `SELECT id FROM workers 
+             WHERE status = 'active' 
+               AND kyc_status = 'approved' 
+               AND id != $1 
+               AND NOT (id = ANY(COALESCE((SELECT declined_worker_ids FROM bookings WHERE id = $2), '{}')))`,
+            [req.auth.id, booking.id]
           );
           for (const w of workersRes.rows) {
             fcmService.sendToWorker(w.id, {
               title: "🔔 NEW JOB REQUEST AVAILABLE!",
-              body: `New booking request available in your area.`,
+              body: `New ${serviceInfo ? serviceInfo.name : 'service'} booking request available in your area.`,
               data: { bookingId: booking.id, status: "pending" }
             });
           }
