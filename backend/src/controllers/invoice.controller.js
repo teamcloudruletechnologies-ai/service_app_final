@@ -56,6 +56,7 @@ async function listPayments(req, res, next) {
        FROM payments p
        LEFT JOIN users u ON u.id = p.user_id
        LEFT JOIN bookings b ON b.id = p.booking_id
+       LEFT JOIN services s ON s.id = b.service_id
        ORDER BY p.created_at DESC`
     );
     return success(res, "Payments fetched successfully", result.rows);
