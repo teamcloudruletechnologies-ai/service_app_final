@@ -21,7 +21,16 @@ const PAGE_META = {
 export default function Topbar({ activePage }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
-  const meta = PAGE_META[activePage] || PAGE_META.dashboard;
+  
+  let meta = PAGE_META[activePage];
+  if (!meta && activePage?.startsWith('bookings')) {
+    const st = activePage.replace('bookings_', '').replace(/_/g, ' ').toUpperCase();
+    meta = {
+      title: activePage === 'bookings' ? 'Bookings' : `Bookings — ${st}`,
+      crumb: activePage === 'bookings' ? 'Admin Panel > Management > Bookings' : `Admin Panel > Management > Bookings > ${st}`
+    };
+  }
+  if (!meta) meta = PAGE_META.dashboard;
 
   return (
     <header style={{

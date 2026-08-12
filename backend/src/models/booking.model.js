@@ -156,12 +156,12 @@ async function completeJobWithPhoto(id, workerId, { photoUrl, notes }) {
 }
 
 async function analytics() {
-  const [summary, byStatus, revenueByStatus, recent] = await Promise.all([
+  const [summary, byStatus, revenueByStatus, recent, categoryBreakdown, serviceBreakdown, workerBreakdown, heatmapData] = await Promise.all([
     db.query(
       `SELECT
         COUNT(*)::int AS total_bookings,
-        COUNT(*) FILTER (WHERE status = 'pending')::int AS pending_bookings,
-        COUNT(*) FILTER (WHERE status = 'confirmed')::int AS confirmed_bookings,
+        COUNT(*) FILTER (WHERE status IN ('pending', 'matching'))::int AS pending_bookings,
+        COUNT(*) FILTER (WHERE status IN ('confirmed', 'accepted', 'assigned'))::int AS confirmed_bookings,
         COUNT(*) FILTER (WHERE status = 'completed')::int AS completed_bookings,
         COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled_bookings,
         COALESCE(SUM(amount), 0)::float AS total_amount,
@@ -182,6 +182,63 @@ async function analytics() {
        GROUP BY DATE(created_at)
        ORDER BY date DESC`
     ),
+    db.query(
+      `SELECT
+        COALESCE(sc.id, 0) AS category_id,
+        COALESCE(sc.name, 'General') AS category_name,
+        COALESCE(sc.icon_url, '🛠️') AS category_icon,
+        COUNT(b.id)::int AS total_bookings,
+        COUNT(b.id) FILTER (WHERE b.status = 'completed')::int AS completed_bookings,
+        COUNT(b.id) FILTER (WHERE b.status IN ('pending', 'matching', 'assigned', 'accepted', 'arriving', 'in_progress'))::int AS active_bookings,
+        COUNT(b.id) FILTER (WHERE b.status = 'cancelled')::int AS cancelled_bookings,
+        COALESCE(SUM(b.amount), 0)::float AS total_revenue
+       FROM bookings b
+       LEFT JOIN services s ON s.id = b.service_id
+       LEFT JOIN service_categories sc ON sc.id = s.category_id
+       GROUP BY sc.id, sc.name, sc.icon_url
+       ORDER BY total_bookings DESC`
+    ),
+    db.query(
+      `SELECT
+        COALESCE(s.id, 0) AS service_id,
+        COALESCE(s.name, 'Direct Booking') AS service_name,
+        COALESCE(sc.name, 'General') AS category_name,
+        COUNT(b.id)::int AS total_bookings,
+        COUNT(b.id) FILTER (WHERE b.status = 'completed')::int AS completed_bookings,
+        COUNT(b.id) FILTER (WHERE b.status = 'cancelled')::int AS cancelled_bookings,
+        COALESCE(SUM(b.amount), 0)::float AS total_revenue
+       FROM bookings b
+       LEFT JOIN services s ON s.id = b.service_id
+       LEFT JOIN service_categories sc ON sc.id = s.category_id
+       GROUP BY s.id, s.name, sc.name
+       ORDER BY total_bookings DESC`
+    ),
+    db.query(
+      `SELECT
+        w.id AS worker_id,
+        w.name AS worker_name,
+        w.phone AS worker_phone,
+        w.service_type,
+        COUNT(b.id)::int AS total_bookings,
+        COUNT(b.id) FILTER (WHERE b.status = 'completed')::int AS completed_bookings,
+        COUNT(b.id) FILTER (WHERE b.status IN ('confirmed', 'accepted', 'arriving', 'in_progress'))::int AS active_bookings,
+        COUNT(b.id) FILTER (WHERE b.status = 'cancelled')::int AS cancelled_bookings,
+        COALESCE(SUM(b.amount), 0)::float AS total_revenue
+       FROM workers w
+       JOIN bookings b ON b.worker_id = w.id
+       GROUP BY w.id, w.name, w.phone, w.service_type
+       ORDER BY total_bookings DESC`
+    ),
+    db.query(
+      `SELECT
+        EXTRACT(DOW FROM created_at)::int AS day_of_week,
+        EXTRACT(HOUR FROM created_at)::int AS hour_of_day,
+        COUNT(*)::int AS count
+       FROM bookings
+       WHERE created_at >= NOW() - INTERVAL '30 days'
+       GROUP BY EXTRACT(DOW FROM created_at), EXTRACT(HOUR FROM created_at)
+       ORDER BY day_of_week, hour_of_day`
+    ),
   ]);
 
   return {
@@ -189,6 +246,10 @@ async function analytics() {
     byStatus: byStatus.rows,
     revenueByStatus: revenueByStatus.rows,
     recent: recent.rows,
+    categoryBreakdown: categoryBreakdown.rows,
+    serviceBreakdown: serviceBreakdown.rows,
+    workerBreakdown: workerBreakdown.rows,
+    heatmapData: heatmapData.rows,
   };
 }
 

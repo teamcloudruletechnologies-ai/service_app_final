@@ -168,6 +168,28 @@ async function initDb() {
     ALTER TABLE workers ADD COLUMN IF NOT EXISTS current_lng NUMERIC;
     ALTER TABLE workers ADD COLUMN IF NOT EXISTS last_location_update TIMESTAMPTZ;
     ALTER TABLE workers ADD COLUMN IF NOT EXISTS pincode VARCHAR(20);
+    ALTER TABLE workers ADD COLUMN IF NOT EXISTS upi_id VARCHAR(100);
+    ALTER TABLE workers ADD COLUMN IF NOT EXISTS bank_account_number VARCHAR(50);
+    ALTER TABLE workers ADD COLUMN IF NOT EXISTS ifsc_code VARCHAR(30);
+    ALTER TABLE workers ADD COLUMN IF NOT EXISTS account_holder_name VARCHAR(120);
+
+    CREATE TABLE IF NOT EXISTS worker_settlements (
+      id SERIAL PRIMARY KEY,
+      worker_id INTEGER REFERENCES workers(id) ON DELETE CASCADE,
+      settlement_period_start TIMESTAMPTZ,
+      settlement_period_end TIMESTAMPTZ,
+      total_jobs INTEGER DEFAULT 0,
+      gross_amount NUMERIC(12,2) DEFAULT 0,
+      platform_fee NUMERIC(12,2) DEFAULT 0,
+      net_payout NUMERIC(12,2) DEFAULT 0,
+      status VARCHAR(30) DEFAULT 'pending',
+      payment_method VARCHAR(50) DEFAULT 'razorpay',
+      transaction_ref VARCHAR(100),
+      notes TEXT,
+      paid_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
 
     CREATE TABLE IF NOT EXISTS admin_permissions (
       id SERIAL PRIMARY KEY,

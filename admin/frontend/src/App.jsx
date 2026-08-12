@@ -15,6 +15,8 @@ import Roles from './pages/Roles';
 import Banners from './pages/Banners';
 import Categories from './pages/Categories';
 import Payments from './pages/Payments';
+import WorkerPayouts from './pages/WorkerPayouts';
+import Accounts from './pages/Accounts';
 import Reviews from './pages/Reviews';
 import Settings from './pages/Settings';
 import { bookingsAPI, authAPI } from './api';
@@ -229,12 +231,17 @@ export default function App() {
     
     if (page === 'roles') return false; // Sub-admins can never access roles
 
+    const targetPage = page.startsWith('bookings') ? 'bookings' : page;
+
     const permissionMap = {
       users: 'users',
       workers: 'workers',
       kyc: 'kyc',
       bookings: 'bookings',
       invoices: 'invoices',
+      payouts: 'invoices',
+      accounts: 'invoices',
+      payments: 'invoices',
       services: 'services',
       categories: 'services',
       banners: 'banners',
@@ -244,7 +251,7 @@ export default function App() {
       locations: 'locations',
     };
 
-    const requiredPerm = permissionMap[page];
+    const requiredPerm = permissionMap[targetPage];
     if (requiredPerm) {
       return currentAdmin.permissions?.includes(requiredPerm);
     }
@@ -261,7 +268,25 @@ export default function App() {
       case 'invoices':
         return <Invoices />;
       case 'bookings':
-        return <Bookings />;
+      case 'bookings_pending':
+      case 'bookings_matching':
+      case 'bookings_assigned':
+      case 'bookings_confirmed':
+      case 'bookings_accepted':
+      case 'bookings_arriving':
+      case 'bookings_otp_verified':
+      case 'bookings_in_progress':
+      case 'bookings_extra_cost_pending':
+      case 'bookings_exception_pending':
+      case 'bookings_reassignment_required':
+      case 'bookings_completed':
+      case 'bookings_payment_pending':
+      case 'bookings_paid':
+      case 'bookings_closed':
+      case 'bookings_cancelled': {
+        const status = activePage === 'bookings' ? '' : activePage.replace('bookings_', '');
+        return <Bookings initialStatus={status} key={activePage} />;
+      }
       case 'users':
         return <Users />;
       case 'services':
@@ -280,6 +305,10 @@ export default function App() {
         return <Notifications />;
       case 'roles':
         return <Roles />;
+      case 'payouts':
+        return <WorkerPayouts />;
+      case 'accounts':
+        return <Accounts />;
       case 'payments':
         return <Payments />;
       case 'reviews':

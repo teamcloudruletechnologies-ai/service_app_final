@@ -37,9 +37,16 @@ const NAV = [
     ],
   },
   {
+    label: 'Finance & Accounts',
+    items: [
+      { label: 'Total Revenue', key: 'payments', icon: Icons.Payments },
+      { label: 'Accounts Overview', key: 'accounts', icon: Icons.Invoices },
+      { label: 'Worker Payouts', key: 'payouts', icon: Icons.Workers },
+    ],
+  },
+  {
     label: 'Platform',
     items: [
-      { label: 'Payments', key: 'payments', icon: Icons.Payments },
       { label: 'Reviews', key: 'reviews', icon: Icons.Reviews },
       { label: 'Support', key: 'support', icon: Icons.Support },
       { label: 'Categories', key: 'categories', icon: Icons.Categories },
@@ -59,6 +66,27 @@ const NAV = [
 
 export default function Sidebar({ activeKey, onNav, onLogout, currentAdmin }) {
   const [hovered, setHovered] = useState(null);
+  const [bookingsOpen, setBookingsOpen] = useState(activeKey?.startsWith('bookings') || false);
+
+  const BOOKING_SUBITEMS = [
+    { label: '📋 All Bookings', key: 'bookings' },
+    { label: '⏳ Pending', key: 'bookings_pending' },
+    { label: '🔍 Matching', key: 'bookings_matching' },
+    { label: '👤 Assigned', key: 'bookings_assigned' },
+    { label: '✅ Confirmed', key: 'bookings_confirmed' },
+    { label: '👍 Accepted', key: 'bookings_accepted' },
+    { label: '🚗 Arriving', key: 'bookings_arriving' },
+    { label: '🔢 OTP Verified', key: 'bookings_otp_verified' },
+    { label: '🛠️ In Progress', key: 'bookings_in_progress' },
+    { label: '💸 Extra Cost', key: 'bookings_extra_cost_pending' },
+    { label: '⚠️ Exceptions', key: 'bookings_exception_pending' },
+    { label: '🔄 Reassign Req.', key: 'bookings_reassignment_required' },
+    { label: '🎉 Completed', key: 'bookings_completed' },
+    { label: '💳 Pay Pending', key: 'bookings_payment_pending' },
+    { label: '💰 Paid', key: 'bookings_paid' },
+    { label: '🔒 Closed', key: 'bookings_closed' },
+    { label: '❌ Cancelled', key: 'bookings_cancelled' },
+  ];
 
   // Dark black with olive accent
   const bgMain = '#181512';
@@ -79,6 +107,9 @@ export default function Sidebar({ activeKey, onNav, onLogout, currentAdmin }) {
       kyc: 'kyc',
       bookings: 'bookings',
       invoices: 'invoices',
+      payouts: 'invoices',
+      accounts: 'invoices',
+      payments: 'invoices',
       services: 'services',
       categories: 'services',
       banners: 'banners',
@@ -155,53 +186,83 @@ export default function Sidebar({ activeKey, onNav, onLogout, currentAdmin }) {
               </div>
             )}
             {section.items.map((item) => {
-              const active = (activeKey || 'dashboard') === item.key;
+              const isBookings = item.key === 'bookings';
+              const active = isBookings ? activeKey?.startsWith('bookings') : (activeKey || 'dashboard') === item.key;
               const isHovered = hovered === item.key;
+
               return (
-                <div
-                  key={item.key}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '10px 14px',
-                    borderRadius: 10,
-                    fontSize: 13.5,
-                    fontWeight: active ? 700 : 600, // bolder words
-                    color: active ? '#181512' : isHovered ? textActive : textInactive,
-                    background: active ? activeBg : isHovered ? hoverBg : 'transparent',
-                    cursor: 'pointer',
-                    marginBottom: 2,
-                    transition: 'all 0.15s ease',
-                    userSelect: 'none',
-                    letterSpacing: '-0.01em',
-                  }}
-                  onClick={() => onNav?.(item.key)}
-                  onMouseEnter={() => setHovered(item.key)}
-                  onMouseLeave={() => setHovered(null)}
-                >
-                  <span style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    opacity: active ? 1 : isHovered ? 0.9 : 0.7 
-                  }}>
-                    {item.icon}
-                  </span>
-                  <span style={{ flex: 1 }}>{item.label}</span>
-                  {item.badge && (
-                    <span style={{
-                      marginLeft: 'auto',
-                      background: active ? '#181512' : '#4A5343',
-                      color: active ? '#4A5343' : '#181512',
-                      fontSize: 10,
+                <div key={item.key}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      padding: '10px 14px',
                       borderRadius: 10,
-                      padding: '2px 8px',
-                      fontWeight: 800,
-                      letterSpacing: '0.02em',
-                    }}>
-                      {item.badge}
+                      fontSize: 13.5,
+                      fontWeight: active ? 700 : 600,
+                      color: active ? '#181512' : isHovered ? textActive : textInactive,
+                      background: active ? activeBg : isHovered ? hoverBg : 'transparent',
+                      cursor: 'pointer',
+                      marginBottom: 2,
+                      transition: 'all 0.15s ease',
+                      userSelect: 'none',
+                      letterSpacing: '-0.01em',
+                    }}
+                    onClick={() => {
+                      if (isBookings) {
+                        setBookingsOpen(prev => !prev);
+                        onNav?.('bookings');
+                      } else {
+                        onNav?.(item.key);
+                      }
+                    }}
+                    onMouseEnter={() => setHovered(item.key)}
+                    onMouseLeave={() => setHovered(null)}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: active ? 1 : isHovered ? 0.9 : 0.7 }}>
+                      {item.icon}
                     </span>
+                    <span style={{ flex: 1 }}>{item.label}</span>
+                    {isBookings && (
+                      <span style={{ fontSize: 10, color: active ? '#181512' : textInactive, marginLeft: 4 }}>
+                        {bookingsOpen ? '▼' : '▶'}
+                      </span>
+                    )}
+                    {item.badge && !isBookings && (
+                      <span style={{ marginLeft: 'auto', background: active ? '#181512' : '#4A5343', color: active ? '#4A5343' : '#181512', fontSize: 10, borderRadius: 10, padding: '2px 8px', fontWeight: 800 }}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Expanded Submenu Dropdown for Bookings */}
+                  {isBookings && bookingsOpen && (
+                    <div style={{ paddingLeft: 22, marginTop: 4, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      {BOOKING_SUBITEMS.map(sub => {
+                        const subActive = activeKey === sub.key || (sub.key === 'bookings' && activeKey === 'bookings');
+                        return (
+                          <div
+                            key={sub.key}
+                            onClick={() => onNav?.(sub.key)}
+                            style={{
+                              padding: '6px 10px',
+                              borderRadius: 6,
+                              fontSize: 12,
+                              fontWeight: subActive ? 700 : 500,
+                              color: subActive ? '#FAF7F0' : '#A89E91',
+                              background: subActive ? 'rgba(74, 83, 67, 0.4)' : 'transparent',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 6
+                            }}
+                          >
+                            <span>{sub.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
               );

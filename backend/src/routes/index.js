@@ -52,6 +52,11 @@ router.use("/admin/sub-admins", subAdminRoutes);
 router.use("/admin/notifications", checkPermission("notifications"), notificationRoutes);
 router.use("/admin/banners", checkPermission("banners"), bannerRoutes);
 
+const settlementRoutes = require("./settlement.routes");
+
+router.use("/admin/settlements", settlementRoutes);
+router.use("/settlements", settlementRoutes);
+
 // Admin reviews — accessible with admin token
 router.get("/admin/reviews", auth, adminListReviews);
 

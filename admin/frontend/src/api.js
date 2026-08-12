@@ -207,4 +207,13 @@ export const notificationsAPI = {
   delete: (id) => api.delete(`/admin/notifications/${id}`),
 };
 
+// ─── Settlements & Accounts ─────────────────────────────────────
+export const settlementsAPI = {
+  getUnsettled: (params) => api.get("/admin/settlements/unsettled", { params }),
+  createPayout: (data) => api.post("/admin/settlements/pay", data),
+  getHistory: (params) => api.get("/admin/settlements/history", { params }),
+  getSummary: () => api.get("/admin/settlements/summary"),
+  getRevenueBreakdown: () => api.get("/admin/settlements/revenue-breakdown"),
+};
+
 export default api;

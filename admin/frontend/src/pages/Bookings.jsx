@@ -21,8 +21,6 @@ const STATUS_BADGES = {
   confirmed: { bg: '#F5F3FF', fg: '#7C3AED', text: 'Confirmed' },
 };
 
-
-
 function Skeleton({ w = '100%', h = 16, radius = 6 }) {
   return (
     <div style={{
@@ -37,65 +35,149 @@ function Skeleton({ w = '100%', h = 16, radius = 6 }) {
 function StatCard({ label, value, icon, bg, fg, loading }) {
   return (
     <div style={{
-      background: 'var(--bg-card)',
-      border: '0.5px solid var(--border-color)',
-      borderRadius: 12,
-      padding: '16px 20px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      background: 'var(--bg-card)', border: '0.5px solid var(--border-color)', borderRadius: 12,
+      padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     }}>
       <div>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 6, fontWeight: 500 }}>{label}</div>
-        {loading ? (
-          <Skeleton w="90px" h={24} />
-        ) : (
+        {loading ? <Skeleton w="90px" h={24} /> : (
           <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</div>
         )}
       </div>
       <div style={{
-        width: 42, height: 42, borderRadius: 10,
-        backgroundColor: bg, color: fg,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 20, flexShrink: 0
-      }}>
-        {icon}
+        width: 42, height: 42, borderRadius: 10, backgroundColor: bg, color: fg,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0
+      }}>{icon}</div>
+    </div>
+  );
+}
+
+// 7-Day x 24-Hour Booking Activity Heatmap
+function BookingActivityHeatmap({ data = [] }) {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const hours = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
+
+  const matrix = Array.from({ length: 7 }, () => Array(24).fill(0));
+  let maxCount = 1;
+
+  data.forEach(item => {
+    const dow = Number(item.day_of_week);
+    const hr = Number(item.hour_of_day);
+    const cnt = Number(item.count || 0);
+    if (dow >= 0 && dow < 7 && hr >= 0 && hr < 24) {
+      matrix[dow][hr] = cnt;
+      if (cnt > maxCount) maxCount = cnt;
+    }
+  });
+
+  const getIntensityColor = (cnt) => {
+    if (!cnt || cnt === 0) return 'var(--bg-muted)';
+    const ratio = cnt / maxCount;
+    if (ratio < 0.25) return '#D1FAE5';
+    if (ratio < 0.5) return '#6EE7B7';
+    if (ratio < 0.75) return '#10B981';
+    return '#047857';
+  };
+
+  return (
+    <div style={{ background: 'var(--bg-card)', padding: '20px 24px', borderRadius: 14, border: '1px solid var(--border-color)', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            🔥 Booking Order Activity Heatmap (Last 30 Days Density)
+          </h3>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>Peak ordering hours & day-of-week demand intensity</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--text-muted)' }}>
+          <span>Low</span>
+          <div style={{ display: 'flex', gap: 4 }}>
+            <span style={{ width: 14, height: 14, borderRadius: 3, background: 'var(--bg-muted)' }} />
+            <span style={{ width: 14, height: 14, borderRadius: 3, background: '#D1FAE5' }} />
+            <span style={{ width: 14, height: 14, borderRadius: 3, background: '#6EE7B7' }} />
+            <span style={{ width: 14, height: 14, borderRadius: 3, background: '#10B981' }} />
+            <span style={{ width: 14, height: 14, borderRadius: 3, background: '#047857' }} />
+          </div>
+          <span>High Peak</span>
+        </div>
+      </div>
+
+      <div style={{ overflowX: 'auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '50px repeat(12, 1fr)', gap: 6, minWidth: 600 }}>
+          <div />
+          {hours.map(h => (
+            <div key={h} style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'center' }}>
+              {h === 0 ? '12 AM' : h === 12 ? '12 PM' : h > 12 ? `${h - 12} PM` : `${h} AM`}
+            </div>
+          ))}
+
+          {days.map((dayName, dIdx) => (
+            <div key={dayName} style={{ display: 'contents' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
+                {dayName}
+              </div>
+              {hours.map(h => {
+                const cnt = matrix[dIdx][h] + matrix[dIdx][h + 1];
+                return (
+                  <div
+                    key={h}
+                    title={`${dayName} ${h}:00 - ${cnt} bookings`}
+                    style={{
+                      height: 26, borderRadius: 4,
+                      background: getIntensityColor(cnt),
+                      border: '0.5px solid var(--border-color)',
+                      transition: 'transform 0.1s',
+                      cursor: 'pointer'
+                    }}
+                  />
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-export default function Bookings() {
+export default function Bookings({ initialStatus = '' }) {
   const [bookings, setBookings] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [error, setError] = useState('');
   
+  // Section View Tab: 'all' | 'category' | 'service' | 'worker'
+  const [activeSection, setActiveSection] = useState('all');
+
+  // Selected Worker for Worker Breakdown Drill-down
+  const [selectedWorkerId, setSelectedWorkerId] = useState(null);
+
   // Filters & Pagination
-  const [filterStatus, setFilterStatus] = useState('');
+  const [filterStatus, setFilterStatus] = useState(initialStatus);
+
+  useEffect(() => {
+    setFilterStatus(initialStatus);
+  }, [initialStatus]);
+
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const limit = 8;
+  const limit = 10;
 
   // Selected booking for detail drawer
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
-  // Fetch Booking Stats
   const fetchStats = () => {
     setStatsLoading(true);
     bookingsAPI.getAnalytics()
       .then(res => {
-        if (res && res.success) {
-          setAnalytics(res.data);
-        }
+        if (res && res.success) setAnalytics(res.data);
       })
       .catch(err => console.error('Failed to load booking analytics:', err))
       .finally(() => setStatsLoading(false));
   };
 
-  // Fetch Booking List
   const fetchBookingsList = () => {
     setLoading(true);
     setError('');
@@ -127,263 +209,451 @@ export default function Bookings() {
     fetchBookingsList();
   }, [currentPage, filterStatus]);
 
-  // Handle status update
   const handleStatusChange = (bookingId, newStatus) => {
     setUpdatingStatus(true);
     bookingsAPI.updateStatus(bookingId, newStatus)
       .then(res => {
         if (res && res.success) {
-          // Update local state in drawer
           setSelectedBooking(res.data);
-          // Refresh list and stats
           fetchBookingsList();
           fetchStats();
         }
       })
       .catch(err => {
-        console.error('Failed to update status:', err);
         alert(err?.message || 'Failed to update booking status');
       })
       .finally(() => setUpdatingStatus(false));
   };
 
-  // Helper Formats
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(Number(val) || 0);
+  const formatDate = (d) => {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '—';
-    return new Date(dateString).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const formatINR = (n) => '₹' + Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
 
   const summary = analytics?.summary || {};
+  const categoryBreakdown = analytics?.categoryBreakdown || [];
+  const serviceBreakdown = analytics?.serviceBreakdown || [];
+  const workerBreakdown = analytics?.workerBreakdown || [];
+  const heatmapData = analytics?.heatmapData || [];
+
+  const filteredBookings = bookings.filter(b => {
+    const s = searchQuery.toLowerCase().trim();
+    if (!s) return true;
+    return (b.user_name || '').toLowerCase().includes(s) ||
+      (b.worker_name || '').toLowerCase().includes(s) ||
+      (b.service_name || '').toLowerCase().includes(s) ||
+      String(b.id).includes(s);
+  });
+
+  // Selected Worker profile data
+  const activeWorker = workerBreakdown.find(w => w.worker_id === selectedWorkerId);
+  const workerBookingsList = bookings.filter(b => b.worker_id === selectedWorkerId);
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: 'var(--bg-app)', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
-      {/* CSS Animations */}
       <style>{`
-        @keyframes shimmer {
-          0%   { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideIn {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
-        }
-        .animate-fade {
-          animation: fadeIn 0.2s ease-out forwards;
-        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .b-row:hover { background: var(--bg-app); }
+        .sec-tab { padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
+        .sec-tab.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); }
+        .sec-tab.inactive { background: var(--bg-card); color: var(--text-secondary); border-color: var(--border-color); }
+        .worker-card:hover { transform: translateY(-2px); border-color: var(--accent-color) !important; }
       `}</style>
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>Bookings Management</h2>
-          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>Track customer service orders, assign jobs, and manage task lifecycles.</p>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
+            Bookings {filterStatus ? `— ${STATUS_BADGES[filterStatus]?.text || filterStatus.replace(/_/g, ' ').toUpperCase()}` : 'Management & Analytics'}
+            {filterStatus && (
+              <span style={{
+                background: STATUS_BADGES[filterStatus]?.bg || 'var(--accent-light)',
+                color: STATUS_BADGES[filterStatus]?.fg || 'var(--accent-dark)',
+                fontSize: 12, padding: '4px 12px', borderRadius: 12, fontWeight: 700
+              }}>
+                Dedicated Status Page
+              </span>
+            )}
+          </h2>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '4px 0 0' }}>
+            {filterStatus
+              ? `Showing all service orders with lifecycle status: ${STATUS_BADGES[filterStatus]?.text || filterStatus}`
+              : 'Track total service orders, booking activity heatmap demand, Category/Service/Worker breakdowns, and lifecycle status updates.'}
+          </p>
         </div>
+        <button
+          onClick={() => { fetchBookingsList(); fetchStats(); }}
+          style={{ background: 'var(--accent-color)', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: '#fff' }}
+        >
+          🔄 Refresh Bookings
+        </button>
       </div>
 
-      {/* Booking Statistics Dashboard */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12, marginBottom: 24 }}>
+      {/* TOP KPI OVERVIEW CARDS */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
         <StatCard
           label="Total Orders"
-          value={summary.total_bookings?.toLocaleString()}
-          icon="📅"
-          bg="var(--accent-light)"
-          fg="var(--accent-color)"
+          value={summary.total_bookings || 0}
+          icon="📋" bg="rgba(59,130,246,0.1)" fg="#3B82F6"
           loading={statsLoading}
         />
         <StatCard
-          label="Pending Assign"
-          value={summary.pending_bookings?.toLocaleString()}
-          icon="⏳"
-          bg="var(--status-amber-bg)"
-          fg="var(--status-amber-fg)"
+          label="Pending Assign / Matching"
+          value={summary.pending_bookings || 0}
+          icon="⏳" bg="rgba(245,158,11,0.1)" fg="#F59E0B"
           loading={statsLoading}
         />
         <StatCard
-          label="Confirmed"
-          value={summary.confirmed_bookings?.toLocaleString()}
-          icon="✅"
-          bg="#F5F3FF"
-          fg="#7C3AED"
+          label="Confirmed & Assigned"
+          value={summary.confirmed_bookings || 0}
+          icon="✅" bg="rgba(99,102,241,0.1)" fg="#6366F1"
           loading={statsLoading}
         />
         <StatCard
           label="Completed Tasks"
-          value={summary.completed_bookings?.toLocaleString()}
-          icon="🎉"
-          bg="var(--status-green-bg)"
-          fg="var(--status-green-fg)"
+          value={summary.completed_bookings || 0}
+          icon="🎉" bg="rgba(16,185,129,0.1)" fg="#10B981"
           loading={statsLoading}
         />
         <StatCard
           label="Cancelled Orders"
-          value={summary.cancelled_bookings?.toLocaleString()}
-          icon="❌"
-          bg="var(--status-red-bg)"
-          fg="var(--status-red-fg)"
+          value={summary.cancelled_bookings || 0}
+          icon="❌" bg="rgba(239,68,68,0.1)" fg="#EF4444"
           loading={statsLoading}
         />
       </div>
 
-      {/* Table Container Card */}
-      <div style={{ background: 'var(--bg-card)', border: '0.5px solid var(--border-color)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
-        
-        {/* Filters and List view padding */}
-        <div style={{ padding: '20px 24px' }}>
-          
-          {/* Status filter pills */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
-            {[
-              { key: '', label: 'All Bookings' },
-              { key: 'pending', label: 'Pending' },
-              { key: 'matching', label: 'Matching' },
-              { key: 'assigned', label: 'Assigned' },
-              { key: 'accepted', label: 'Accepted' },
-              { key: 'arriving', label: 'Arriving' },
-              { key: 'otp_verified', label: 'OTP Verified' },
-              { key: 'in_progress', label: 'In Progress' },
-              { key: 'extra_cost_pending', label: 'Extra Cost' },
-              { key: 'exception_pending', label: 'Exceptions' },
-              { key: 'reassignment_required', label: 'Reassignment Req.' },
-              { key: 'completed', label: 'Completed' },
-              { key: 'payment_pending', label: 'Payment Pending' },
-              { key: 'paid', label: 'Paid' },
-              { key: 'closed', label: 'Closed' },
-              { key: 'cancelled', label: 'Cancelled' }
-            ].map(opt => (
-              <button
-                key={opt.key}
-                onClick={() => { setFilterStatus(opt.key); setCurrentPage(1); }}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 20,
-                  border: '1px solid',
-                  borderColor: filterStatus === opt.key ? 'var(--accent-color)' : 'var(--border-color)',
-                  backgroundColor: filterStatus === opt.key ? 'var(--accent-light)' : 'var(--bg-card)',
-                  color: filterStatus === opt.key ? 'var(--accent-color)' : 'var(--text-secondary)',
-                  fontSize: 12,
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s',
-                }}
-              >
-                {opt.label}
-              </button>
-            ))}
+      {/* ACTIVITY HEATMAP CHART */}
+      <BookingActivityHeatmap data={heatmapData} />
+
+      {/* SECTION VIEWS BAR */}
+      <div style={{ background: 'var(--bg-card)', padding: '16px 20px', borderRadius: 14, border: '1px solid var(--border-color)', marginBottom: 24, display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            className={`sec-tab ${activeSection === 'all' ? 'active' : 'inactive'}`}
+            onClick={() => { setActiveSection('all'); setSelectedWorkerId(null); }}
+          >
+            📋 All Orders List
+          </button>
+          <button
+            className={`sec-tab ${activeSection === 'category' ? 'active' : 'inactive'}`}
+            onClick={() => { setActiveSection('category'); setSelectedWorkerId(null); }}
+          >
+            📁 Category Section
+          </button>
+          <button
+            className={`sec-tab ${activeSection === 'service' ? 'active' : 'inactive'}`}
+            onClick={() => { setActiveSection('service'); setSelectedWorkerId(null); }}
+          >
+            🔧 Service Section
+          </button>
+          <button
+            className={`sec-tab ${activeSection === 'worker' ? 'active' : 'inactive'}`}
+            onClick={() => setActiveSection('worker')}
+          >
+            👷 Individual Worker Breakdown
+          </button>
+        </div>
+      </div>
+
+      {/* SECTION VIEW 1: CATEGORY SECTION */}
+      {activeSection === 'category' && (
+        <div style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border-color)', overflow: 'hidden', marginBottom: 24 }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', fontWeight: 700, fontSize: 15 }}>
+            📁 Category Booking Breakdown
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, textAlign: 'left' }}>
+            <thead>
+              <tr style={{ background: 'var(--bg-muted)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)', fontSize: 12, fontWeight: 600 }}>
+                <th style={{ padding: '12px 16px' }}>Category</th>
+                <th style={{ padding: '12px 16px' }}>Total Bookings</th>
+                <th style={{ padding: '12px 16px' }}>Active In-Progress</th>
+                <th style={{ padding: '12px 16px' }}>Completed</th>
+                <th style={{ padding: '12px 16px' }}>Cancelled</th>
+                <th style={{ padding: '12px 16px' }}>Total Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categoryBreakdown.map(cat => (
+                <tr key={cat.category_id} className="b-row" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--text-primary)' }}>
+                    {cat.category_icon || '🛠️'} {cat.category_name}
+                  </td>
+                  <td style={{ padding: '14px 16px', fontWeight: 700 }}>{cat.total_bookings}</td>
+                  <td style={{ padding: '14px 16px', color: '#F59E0B', fontWeight: 600 }}>{cat.active_bookings}</td>
+                  <td style={{ padding: '14px 16px', color: '#10B981', fontWeight: 600 }}>{cat.completed_bookings}</td>
+                  <td style={{ padding: '14px 16px', color: '#EF4444' }}>{cat.cancelled_bookings}</td>
+                  <td style={{ padding: '14px 16px', fontWeight: 700 }}>{formatINR(cat.total_revenue)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* SECTION VIEW 2: SERVICE SECTION */}
+      {activeSection === 'service' && (
+        <div style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border-color)', overflow: 'hidden', marginBottom: 24 }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', fontWeight: 700, fontSize: 15 }}>
+            🔧 Service Booking Breakdown
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, textAlign: 'left' }}>
+            <thead>
+              <tr style={{ background: 'var(--bg-muted)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)', fontSize: 12, fontWeight: 600 }}>
+                <th style={{ padding: '12px 16px' }}>Service Name</th>
+                <th style={{ padding: '12px 16px' }}>Category</th>
+                <th style={{ padding: '12px 16px' }}>Total Bookings</th>
+                <th style={{ padding: '12px 16px' }}>Completed</th>
+                <th style={{ padding: '12px 16px' }}>Cancelled</th>
+                <th style={{ padding: '12px 16px' }}>Total Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {serviceBreakdown.map(srv => (
+                <tr key={srv.service_id} className="b-row" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--text-primary)' }}>🔧 {srv.service_name}</td>
+                  <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }}>{srv.category_name}</td>
+                  <td style={{ padding: '14px 16px', fontWeight: 700 }}>{srv.total_bookings}</td>
+                  <td style={{ padding: '14px 16px', color: '#10B981', fontWeight: 600 }}>{srv.completed_bookings}</td>
+                  <td style={{ padding: '14px 16px', color: '#EF4444' }}>{srv.cancelled_bookings}</td>
+                  <td style={{ padding: '14px 16px', fontWeight: 700 }}>{formatINR(srv.total_revenue)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* SECTION VIEW 3: INDIVIDUAL WORKER BREAKDOWN WITH PROFILE CARDS */}
+      {activeSection === 'worker' && (
+        <div style={{ marginBottom: 24 }}>
+          {selectedWorkerId ? (
+            /* Selected Worker Detailed History Table */
+            <div style={{ background: 'var(--bg-card)', padding: 20, borderRadius: 14, border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <div>
+                  <button
+                    onClick={() => setSelectedWorkerId(null)}
+                    style={{ background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: 6, padding: '6px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginBottom: 8, color: 'var(--text-primary)' }}
+                  >
+                    ← Back to All Workers Profile Grid
+                  </button>
+                  <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                    👷 Technician: {activeWorker?.worker_name || 'Worker'} (📞 {activeWorker?.worker_phone || '—'})
+                  </h3>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
+                    Specialty: {activeWorker?.service_type || 'General'} · Total Jobs: {activeWorker?.total_bookings || 0}
+                  </div>
+                </div>
+              </div>
+
+              {/* Worker Orders List */}
+              <div style={{ borderRadius: 10, border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--bg-muted)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)', fontSize: 12, fontWeight: 600 }}>
+                      <th style={{ padding: '12px 16px' }}>Booking ID</th>
+                      <th style={{ padding: '12px 16px' }}>Customer</th>
+                      <th style={{ padding: '12px 16px' }}>Service</th>
+                      <th style={{ padding: '12px 16px' }}>Amount</th>
+                      <th style={{ padding: '12px 16px' }}>Status</th>
+                      <th style={{ padding: '12px 16px' }}>Date</th>
+                      <th style={{ padding: '12px 16px', textAlign: 'right' }}>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {workerBookingsList.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} style={{ padding: 36, textAlign: 'center', color: 'var(--text-muted)' }}>
+                          No specific bookings found loaded for this worker.
+                        </td>
+                      </tr>
+                    ) : (
+                      workerBookingsList.map(b => {
+                        const badge = STATUS_BADGES[b.status] || { bg: '#F3F4F6', fg: '#374151', text: b.status };
+                        return (
+                          <tr key={b.id} className="b-row" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                            <td style={{ padding: '14px 16px', fontWeight: 700 }}>#{b.id}</td>
+                            <td style={{ padding: '14px 16px' }}>{b.user_name}</td>
+                            <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }}>{b.service_name}</td>
+                            <td style={{ padding: '14px 16px', fontWeight: 700 }}>{formatINR(b.amount)}</td>
+                            <td style={{ padding: '14px 16px' }}>
+                              <span style={{ background: badge.bg, color: badge.fg, padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 700 }}>
+                                {badge.text}
+                              </span>
+                            </td>
+                            <td style={{ padding: '14px 16px', color: 'var(--text-muted)', fontSize: 12 }}>{formatDate(b.created_at)}</td>
+                            <td style={{ padding: '14px 16px', textAlign: 'right' }}>
+                              <button
+                                onClick={() => setSelectedBooking(b)}
+                                style={{ background: 'var(--accent-color)', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                              >
+                                👁️ Details
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            /* Worker Profiles Grid Cards */
+            <div>
+              <h3 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 16px', color: 'var(--text-primary)' }}>
+                👷 Individual Worker Profiles & Booking Performance Grid
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+                {workerBreakdown.map(w => {
+                  const initials = (w.worker_name || 'WK').substring(0, 2).toUpperCase();
+                  return (
+                    <div
+                      key={w.worker_id}
+                      className="worker-card"
+                      onClick={() => setSelectedWorkerId(w.worker_id)}
+                      style={{
+                        background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 14,
+                        padding: 20, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 2px 6px rgba(0,0,0,0.02)'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+                        <div style={{
+                          width: 46, height: 46, borderRadius: '50%', background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
+                          color: '#fff', fontSize: 16, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                        }}>
+                          {initials}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-primary)' }}>{w.worker_name}</div>
+                          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>📞 {w.worker_phone || '—'}</div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, background: 'var(--bg-app)', padding: 12, borderRadius: 10, marginBottom: 14, textAlign: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: 16, fontWeight: 800, color: '#3B82F6' }}>{w.total_bookings}</div>
+                          <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>Total Jobs</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 16, fontWeight: 800, color: '#10B981' }}>{w.completed_bookings}</div>
+                          <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>Completed</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 16, fontWeight: 800, color: '#EF4444' }}>{w.cancelled_bookings}</div>
+                          <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600 }}>Cancelled</div>
+                        </div>
+                      </div>
+
+                      <button
+                        style={{
+                          width: '100%', background: 'var(--bg-app)', border: '1px solid #D1D5DB', borderRadius: 8,
+                          padding: '8px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: 'var(--text-primary)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+                        }}
+                      >
+                        👁️ View Worker Bookings ({w.total_bookings})
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SECTION VIEW 4: MASTER BOOKINGS TABLE (ONLY SHOWS WHEN 'all' TAB IS ACTIVE) */}
+      {activeSection === 'all' && (
+        <div style={{ background: 'var(--bg-card)', padding: 20, borderRadius: 14, border: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+              📋 Master Service Orders List {filterStatus ? `(${filterStatus.toUpperCase()})` : ''}
+            </h3>
+            <input
+              type="text"
+              placeholder="Search booking ID, customer, worker..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: 8, padding: '7px 14px', fontSize: 13, color: 'var(--text-primary)', width: 280 }}
+            />
           </div>
 
           {error && (
-            <div style={{ background: 'var(--status-red-bg)', border: '1px solid #FCA5A5', color: 'var(--status-red-fg)', padding: '12px 16px', borderRadius: 8, marginBottom: 16, fontSize: 13 }}>
-              ⚠️ <strong>Error loading bookings:</strong> {error}
+            <div style={{ background: '#FEE2E2', border: '1px solid #EF4444', color: '#991B1B', padding: '10px 14px', borderRadius: 8, fontSize: 12, marginBottom: 14 }}>
+              ⚠️ {error}
             </div>
           )}
 
-          {/* Table */}
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 800 }}>
+          <div style={{ borderRadius: 10, border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, textAlign: 'left' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  <th style={{ padding: '12px 16px', fontWeight: 600 }}>Booking ID</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 600 }}>Customer</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 600 }}>Professional</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 600 }}>Category</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 600, textAlign: 'right' }}>Price</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 600, textAlign: 'center' }}>Status</th>
-                  <th style={{ padding: '12px 16px', fontWeight: 600 }}>Order Date</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600 }}>Actions</th>
+                <tr style={{ background: 'var(--bg-muted)', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border-color)', fontSize: 12, fontWeight: 600 }}>
+                  <th style={{ padding: '12px 16px' }}>Booking ID</th>
+                  <th style={{ padding: '12px 16px' }}>Customer</th>
+                  <th style={{ padding: '12px 16px' }}>Service Name</th>
+                  <th style={{ padding: '12px 16px' }}>Technician</th>
+                  <th style={{ padding: '12px 16px' }}>OTP Code</th>
+                  <th style={{ padding: '12px 16px' }}>Status Badge</th>
+                  <th style={{ padding: '12px 16px' }}>Created Date</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'right' }}>Action</th>
                 </tr>
               </thead>
-              <tbody style={{ fontSize: 13, color: 'var(--text-primary)' }}>
+              <tbody>
                 {loading ? (
-                  [...Array(limit)].map((_, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
-                      <td style={{ padding: '14px 16px' }}><Skeleton w="60px" /></td>
-                      <td style={{ padding: '14px 16px' }}><Skeleton w="120px" /></td>
-                      <td style={{ padding: '14px 16px' }}><Skeleton w="120px" /></td>
-                      <td style={{ padding: '14px 16px' }}><Skeleton w="100px" /></td>
-                      <td style={{ padding: '14px 16px' }}><Skeleton w="60px" /></td>
-                      <td style={{ padding: '14px 16px', textAlign: 'center' }}><Skeleton w="80px" radius={12} /></td>
-                      <td style={{ padding: '14px 16px' }}><Skeleton w="100px" /></td>
-                      <td style={{ padding: '14px 16px' }}><Skeleton w="65px" /></td>
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td colSpan={8} style={{ padding: '14px 16px' }}><Skeleton h={20} /></td>
                     </tr>
                   ))
-                ) : bookings.length === 0 ? (
+                ) : filteredBookings.length === 0 ? (
                   <tr>
-                    <td colSpan="8" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
-                      <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
-                      <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>No bookings found</div>
-                      <div style={{ fontSize: 12 }}>Check your filters or add new bookings.</div>
+                    <td colSpan={8} style={{ padding: 36, textAlign: 'center', color: 'var(--text-muted)' }}>
+                      No bookings found matching selected filters.
                     </td>
                   </tr>
                 ) : (
-                  bookings.map(book => {
-                    const badge = STATUS_BADGES[book.status.toLowerCase()] || { bg: 'var(--border-color)', fg: 'var(--text-primary)', text: book.status };
+                  filteredBookings.map(b => {
+                    const badge = STATUS_BADGES[b.status] || { bg: '#F3F4F6', fg: '#374151', text: b.status };
                     return (
-                      <tr key={book.id} style={{ borderBottom: '1px solid var(--bg-muted)' }}>
-                        <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--text-primary)' }}>#{book.id}</td>
-                        <td style={{ padding: '14px 16px' }}>{book.user_name || `Customer #${book.user_id}`}</td>
-                        <td style={{ padding: '14px 16px' }}>{book.worker_name || 'Unassigned ⏳'}</td>
-                        <td style={{ padding: '14px 16px', textTransform: 'capitalize' }}>{book.service_type || '—'}</td>
-                        <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 600 }}>
-                          {(book.status === 'completed' && Number(book.amount) > 0)
-                            ? formatCurrency(book.amount)
-                            : <span style={{ color: 'var(--text-secondary)', fontSize: 11, fontStyle: 'italic' }}>Price after inspection</span>}
+                      <tr key={b.id} className="b-row" style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '14px 16px', fontWeight: 700 }}>#{b.id}</td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{b.user_name || 'Customer'}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>📞 {b.user_phone || '—'}</div>
                         </td>
-                        <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                          <span style={{
-                            display: 'inline-flex',
-                            fontSize: 11,
-                            borderRadius: 12,
-                            padding: '2px 8px',
-                            fontWeight: 600,
-                            backgroundColor: badge.bg,
-                            color: badge.fg
-                          }}>
+                        <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }}>{b.service_name || 'Home Service'}</td>
+                        <td style={{ padding: '14px 16px' }}>
+                          {b.worker_name ? (
+                            <div>
+                              <div style={{ fontWeight: 600 }}>{b.worker_name}</div>
+                              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>📞 {b.worker_phone}</div>
+                            </div>
+                          ) : (
+                            <span style={{ color: '#9CA3AF', fontSize: 12 }}>Unassigned</span>
+                          )}
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          {b.otp ? (
+                            <span style={{ background: 'var(--bg-app)', border: '1px solid var(--border-color)', padding: '2px 8px', borderRadius: 4, fontFamily: 'monospace', fontWeight: 700 }}>
+                              {b.otp}
+                            </span>
+                          ) : '—'}
+                        </td>
+                        <td style={{ padding: '14px 16px' }}>
+                          <span style={{ background: badge.bg, color: badge.fg, padding: '4px 10px', borderRadius: 12, fontSize: 11, fontWeight: 700 }}>
                             {badge.text}
                           </span>
                         </td>
-                        <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }}>{formatDate(book.created_at)}</td>
-                        <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                        <td style={{ padding: '14px 16px', color: 'var(--text-muted)', fontSize: 12 }}>{formatDate(b.created_at)}</td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right' }}>
                           <button
-                            onClick={() => setSelectedBooking(book)}
-                            style={{
-                              background: 'var(--accent-light)',
-                              border: 'none',
-                              borderRadius: 6,
-                              padding: '4px 10px',
-                              color: 'var(--accent-color)',
-                              fontSize: 11,
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              transition: 'all 0.15s'
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = 'var(--accent-color)';
-                              e.currentTarget.style.color = 'var(--bg-card)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = 'var(--accent-light)';
-                              e.currentTarget.style.color = 'var(--accent-color)';
-                            }}
+                            onClick={() => setSelectedBooking(b)}
+                            style={{ background: 'var(--accent-color)', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
                           >
-                            Manage
+                            👁️ Details
                           </button>
                         </td>
                       </tr>
@@ -395,218 +665,64 @@ export default function Bookings() {
           </div>
 
           {/* Pagination */}
-          {!loading && bookings.length > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, paddingTop: 16, borderTop: '0.5px solid var(--bg-muted)' }}>
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                Showing page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
-              </span>
+          {!loading && totalPages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Page {currentPage} of {totalPages}</div>
               <div style={{ display: 'flex', gap: 6 }}>
                 <button
                   disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: 6,
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-card)',
-                    color: currentPage === 1 ? 'var(--text-muted)' : 'var(--text-primary)',
-                    fontSize: 12,
-                    fontWeight: 500,
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                  }}
+                  onClick={() => setCurrentPage(p => p - 1)}
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 6, padding: '6px 12px', fontSize: 12, cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
                 >
-                  ◀ Prev
+                  Previous
                 </button>
                 <button
                   disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: 6,
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-card)',
-                    color: currentPage === totalPages ? 'var(--text-muted)' : 'var(--text-primary)',
-                    fontSize: 12,
-                    fontWeight: 500,
-                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                  }}
+                  onClick={() => setCurrentPage(p => p + 1)}
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 6, padding: '6px 12px', fontSize: 12, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
                 >
-                  Next ▶
+                  Next
                 </button>
               </div>
             </div>
           )}
-
         </div>
-      </div>
+      )}
 
-      {/* Booking Status Update Modal */}
+      {/* DETAIL DRAWER / MODAL */}
       {selectedBooking && (
-        <div
-          onClick={() => setSelectedBooking(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(11, 15, 25, 0.4)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 1000,
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}
-        >
-          {/* Slider content */}
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="animate-fade"
-            style={{
-              width: '100%',
-              maxWidth: 480,
-              height: '100%',
-              background: 'var(--bg-card)',
-              borderLeft: '1px solid var(--border-color)',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '-4px 0 24px rgba(0,0,0,0.08)',
-              animation: 'slideIn 0.25s ease-out forwards',
-            }}
-          >
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid var(--border-color)' }}>
-              <div>
-                <span style={{ fontSize: 11, background: 'var(--accent-light)', color: 'var(--accent-color)', fontWeight: 700, padding: '2px 8px', borderRadius: 4 }}>BOOKING OVERVIEW</span>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', margin: '4px 0 0' }}>Order ID: #{selectedBooking.id}</h3>
-              </div>
-              <button
-                onClick={() => setSelectedBooking(null)}
-                style={{ background: 'none', border: 'none', fontSize: 20, color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'flex-end', zIndex: 1000 }}>
+          <div style={{ background: 'var(--bg-card)', width: 480, maxWidth: '100%', height: '100%', padding: 24, overflowY: 'auto', boxShadow: '-10px 0 25px rgba(0,0,0,0.1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                Booking Details #{selectedBooking.id}
+              </h3>
+              <button onClick={() => setSelectedBooking(null)} style={{ background: 'transparent', border: 'none', fontSize: 20, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
+            </div>
+
+            <div style={{ background: 'var(--bg-app)', padding: 16, borderRadius: 12, marginBottom: 20 }}>
+              <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 4 }}>Current Lifecycle Status</div>
+              <select
+                value={selectedBooking.status}
+                disabled={updatingStatus}
+                onChange={e => handleStatusChange(selectedBooking.id, e.target.value)}
+                style={{ width: '100%', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: 8, padding: '8px 12px', fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}
               >
-                ✕
-              </button>
+                {Object.entries(STATUS_BADGES).map(([key, info]) => (
+                  <option key={key} value={key}>{info.text}</option>
+                ))}
+              </select>
             </div>
 
-            {/* Scroll Container */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
-              
-              {/* Dynamic Status Dropdown Control */}
-              <div style={{ background: 'var(--bg-app)', border: '1px solid var(--border-color)', borderRadius: 12, padding: 16, marginBottom: 24 }}>
-                <label style={{ block: 'block', fontSize: 11, color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, display: 'block' }}>
-                  Update Action Status
-                </label>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                  <select
-                    disabled={updatingStatus}
-                    value={selectedBooking.status.toLowerCase()}
-                    onChange={(e) => handleStatusChange(selectedBooking.id, e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: '10px 12px',
-                      borderRadius: 8,
-                      border: '1px solid #D1D5DB',
-                      backgroundColor: 'var(--bg-card)',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      color: 'var(--text-primary)',
-                      outline: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="matching">Matching</option>
-                    <option value="assigned">Assigned</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="arriving">Arriving</option>
-                    <option value="otp_verified">OTP Verified</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="extra_cost_pending">Extra Cost Pending</option>
-                    <option value="exception_pending">Exception Pending</option>
-                    <option value="reassignment_required">Reassignment Required</option>
-                    <option value="completed">Completed</option>
-                    <option value="payment_pending">Payment Pending</option>
-                    <option value="paid">Paid</option>
-                    <option value="closed">Closed</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                  {updatingStatus && <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Saving...</span>}
-                </div>
-              </div>
-
-              {/* Section 1: Customer Details */}
-              <div style={{ borderBottom: '1px dashed var(--border-color)', paddingBottom: 18, marginBottom: 18 }}>
-                <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>👤 Customer Node Details</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <div style={{ fontSize: 13 }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Name:</span> <strong style={{ color: 'var(--text-primary)' }}>{selectedBooking.user_name || 'Customer'}</strong>
-                  </div>
-                  <div style={{ fontSize: 13 }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Phone No:</span> <strong style={{ color: 'var(--text-primary)' }}>{selectedBooking.user_phone || '—'}</strong>
-                  </div>
-                  <div style={{ fontSize: 13 }}>
-                    <span style={{ color: 'var(--text-secondary)' }}>Customer Node ID:</span> <strong style={{ color: 'var(--text-primary)' }}>#{selectedBooking.user_id}</strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 2: Worker Details */}
-              <div style={{ borderBottom: '1px dashed var(--border-color)', paddingBottom: 18, marginBottom: 18 }}>
-                <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>💼 Professional Service Node</h4>
-                {selectedBooking.worker_id ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <div style={{ fontSize: 13 }}>
-                      <span style={{ color: 'var(--text-secondary)' }}>Name:</span> <strong style={{ color: 'var(--text-primary)' }}>{selectedBooking.worker_name}</strong>
-                    </div>
-                    <div style={{ fontSize: 13 }}>
-                      <span style={{ color: 'var(--text-secondary)' }}>Phone No:</span> <strong style={{ color: 'var(--text-primary)' }}>{selectedBooking.worker_phone}</strong>
-                    </div>
-                    <div style={{ fontSize: 13 }}>
-                      <span style={{ color: 'var(--text-secondary)' }}>Specialization:</span> <strong style={{ color: 'var(--text-primary)', textTransform: 'capitalize' }}>{selectedBooking.service_type}</strong>
-                    </div>
-                    <div style={{ fontSize: 13 }}>
-                      <span style={{ color: 'var(--text-secondary)' }}>Worker Node ID:</span> <strong style={{ color: 'var(--text-primary)' }}>#{selectedBooking.worker_id}</strong>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ fontSize: 13, color: 'var(--status-red-fg)', backgroundColor: 'var(--status-red-bg)', padding: '10px 14px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>⏳</span>
-                    <span>No professional has been assigned yet. Waiting to assign.</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Section 3: Financial Overview */}
-              <div>
-                <h4 style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>💰 Financial breakdown</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--accent-light)', padding: '12px 16px', borderRadius: 8 }}>
-                  <span style={{ fontSize: 13, color: 'var(--accent-dark)', fontWeight: 500 }}>Total Service Charge</span>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--accent-dark)' }}>
-                    {(selectedBooking.status === 'completed' && Number(selectedBooking.amount) > 0)
-                      ? formatCurrency(selectedBooking.amount)
-                      : 'Price after inspection'}
-                  </span>
-                </div>
-              </div>
-
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontSize: 13 }}>
+              <div><strong>Service Name:</strong> {selectedBooking.service_name || 'Home Service'}</div>
+              <div><strong>Customer Name:</strong> {selectedBooking.user_name} (📞 {selectedBooking.user_phone})</div>
+              <div><strong>Technician:</strong> {selectedBooking.worker_name ? `${selectedBooking.worker_name} (📞 ${selectedBooking.worker_phone})` : 'Unassigned'}</div>
+              <div><strong>Service Address:</strong> {selectedBooking.address || '—'}</div>
+              <div><strong>Customer Notes:</strong> {selectedBooking.notes || '—'}</div>
+              <div><strong>4-Digit OTP Code:</strong> <span style={{ fontFamily: 'monospace', fontWeight: 700 }}>{selectedBooking.otp || '—'}</span></div>
+              <div><strong>Created Date:</strong> {formatDate(selectedBooking.created_at)}</div>
             </div>
-
-            {/* Footer */}
-            <div style={{ borderTop: '1px solid var(--border-color)', padding: '16px 24px', backgroundColor: '#FAFAFB', display: 'flex', gap: 10 }}>
-              <button
-                onClick={() => setSelectedBooking(null)}
-                style={{
-                  flex: 1,
-                  padding: '10px 14px',
-                  borderRadius: 8,
-                  border: 'none',
-                  background: 'var(--accent-color)',
-                  color: 'var(--bg-card)',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                Done
-              </button>
-            </div>
-
           </div>
         </div>
       )}
