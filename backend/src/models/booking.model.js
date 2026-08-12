@@ -51,7 +51,14 @@ async function list({ status, userId, workerId, page, limit, offset }) {
   }
 
   const clause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-  const count = await db.query(`SELECT COUNT(*) FROM bookings b ${clause}`, params);
+  const count = await db.query(
+    `SELECT COUNT(*) FROM bookings b
+     LEFT JOIN users u ON u.id = b.user_id
+     LEFT JOIN workers w ON w.id = b.worker_id
+     LEFT JOIN services s ON s.id = b.service_id
+     ${clause}`,
+    params
+  );
 
   params.push(limit, offset);
   const result = await db.query(

@@ -34,65 +34,80 @@ function StatCard({ label, value, icon, bg, fg, sub, loading }) {
   );
 }
 
-// 3D Bar Chart Component with Isometric Depth & Glow
-function ThreeDBarChart({ title, data = [], height = 180, colorScheme = 'blue' }) {
+const RAINBOW_PALETTES = [
+  { front: '#3562D6', top: '#6B93F7', side: '#2345A1', glow: 'rgba(53,98,214,0.35)' },
+  { front: '#BA46D6', top: '#E388F7', side: '#8B24A3', glow: 'rgba(186,70,214,0.35)' },
+  { front: '#3FB5F2', top: '#82D7FF', side: '#1E83B8', glow: 'rgba(63,181,242,0.35)' },
+  { front: '#14B8A6', top: '#5EEAD4', side: '#0F766E', glow: 'rgba(20,184,166,0.35)' },
+  { front: '#84CC16', top: '#BEF264', side: '#4D7C0F', glow: 'rgba(132,204,22,0.35)' },
+  { front: '#F59E0B', top: '#FCD34D', side: '#B45309', glow: 'rgba(245,158,11,0.35)' },
+  { front: '#F43F5E', top: '#FDA4AF', side: '#BE123C', glow: 'rgba(244,63,94,0.35)' },
+  { front: '#EAB308', top: '#FEF08A', side: '#A16207', glow: 'rgba(234,179,8,0.35)' },
+];
+
+function ThreeDBarChart({ title, data = [], height = 220 }) {
   const maxVal = Math.max(...data.map(d => Number(d.value || 0)), 100);
 
-  const colors = {
-    blue: { top: '#60A5FA', front: '#3B82F6', side: '#1D4ED8', glow: 'rgba(59,130,246,0.3)' },
-    green: { top: '#34D399', front: '#10B981', side: '#047857', glow: 'rgba(16,185,129,0.3)' },
-    purple: { top: '#A78BFA', front: '#8B5CF6', side: '#6D28D9', glow: 'rgba(139,92,246,0.3)' },
-    amber: { top: '#FBBF24', front: '#F59E0B', side: '#B45309', glow: 'rgba(245,158,11,0.3)' }
-  }[colorScheme] || { top: '#60A5FA', front: '#3B82F6', side: '#1D4ED8', glow: 'rgba(59,130,246,0.3)' };
-
   return (
-    <div style={{ background: 'var(--bg-card)', padding: '20px 24px', borderRadius: 14, border: '1px solid var(--border-color)', marginTop: 20 }}>
-      <h4 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 16px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
-        {title}
+    <div style={{ background: 'var(--bg-card)', padding: '24px 28px', borderRadius: 16, border: '1px solid var(--border-color)', marginTop: 24, boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+      <h4 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 20px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+        📊 {title}
       </h4>
 
       {data.length === 0 ? (
-        <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>No chart data available for visualization.</div>
+        <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>No chart data available for visualization.</div>
       ) : (
-        <div style={{ display: 'flex', gap: 20, alignItems: 'flex-end', height: height, paddingTop: 24, paddingBottom: 12, overflowX: 'auto' }}>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-end', height: height, paddingTop: 30, paddingBottom: 16, overflowX: 'auto' }}>
           {data.map((d, idx) => {
-            const pct = Math.max((Number(d.value || 0) / maxVal) * 100, 10);
+            const pct = Math.max((Number(d.value || 0) / maxVal) * 100, 12);
+            const palette = RAINBOW_PALETTES[idx % RAINBOW_PALETTES.length];
+
             return (
-              <div key={idx} style={{ flex: 1, minWidth: 64, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                <div style={{ fontSize: 11, fontWeight: 800, color: colors.front, marginBottom: 6 }}>
+              <div key={idx} style={{ flex: 1, minWidth: 68, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+                <div style={{ fontSize: 12, fontWeight: 800, color: palette.front, marginBottom: 8 }}>
                   ₹{Math.round(d.value || 0).toLocaleString()}
                 </div>
 
-                {/* 3D Pillar Element */}
+                {/* 3D Glossy Pillar Element matching reference image */}
                 <div style={{
                   position: 'relative',
-                  width: '50%',
-                  maxWidth: 38,
+                  width: '52%',
+                  maxWidth: 42,
                   height: `${pct}%`,
-                  transition: 'height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  filter: `drop-shadow(0 6px 10px ${colors.glow})`
+                  transition: 'height 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                  filter: `drop-shadow(0 8px 14px ${palette.glow})`
                 }}>
                   {/* Top Face */}
                   <div style={{
-                    position: 'absolute', top: -6, left: 0, right: 0, height: 10,
-                    background: colors.top, borderRadius: '4px 4px 0 0',
-                    transform: 'skewX(-15deg)', transformOrigin: 'bottom left'
+                    position: 'absolute', top: -8, left: 0, right: 0, height: 12,
+                    background: `linear-gradient(135deg, #FFFFFF 0%, ${palette.top} 80%)`,
+                    borderRadius: '8px 8px 0 0',
+                    transform: 'skewX(-18deg)', transformOrigin: 'bottom left',
+                    boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.8)'
                   }} />
-                  {/* Front Face */}
+                  {/* Front Face with Specular Gloss Overlay */}
                   <div style={{
                     position: 'absolute', inset: 0,
-                    background: `linear-gradient(180deg, ${colors.top} 0%, ${colors.front} 100%)`,
-                    borderRadius: '2px 2px 4px 4px'
-                  }} />
-                  {/* Side Face */}
+                    background: `linear-gradient(180deg, ${palette.top} 0%, ${palette.front} 100%)`,
+                    borderRadius: '3px 3px 6px 6px',
+                    overflow: 'hidden'
+                  }}>
+                    {/* Gloss Specular Highlight Line */}
+                    <div style={{
+                      position: 'absolute', top: 0, left: 0, width: '40%', height: '100%',
+                      background: 'linear-gradient(90deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 100%)'
+                    }} />
+                  </div>
+                  {/* Side Face (Isometric Shadow Depth) */}
                   <div style={{
-                    position: 'absolute', top: -6, bottom: 0, right: -6, width: 6,
-                    background: colors.side, borderRadius: '0 4px 4px 0',
-                    transform: 'skewY(-15deg)', transformOrigin: 'top left'
+                    position: 'absolute', top: -8, bottom: 0, right: -8, width: 8,
+                    background: `linear-gradient(180deg, ${palette.side} 0%, rgba(0,0,0,0.4) 100%)`,
+                    borderRadius: '0 8px 8px 0',
+                    transform: 'skewY(-18deg)', transformOrigin: 'top left'
                   }} />
                 </div>
 
-                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 10, fontWeight: 600, textAlign: 'center', maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 12, fontWeight: 700, textAlign: 'center', maxWidth: 85, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {d.label}
                 </div>
               </div>
