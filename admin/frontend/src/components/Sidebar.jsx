@@ -78,7 +78,6 @@ export default function Sidebar({ activeKey, onNav, onLogout, currentAdmin }) {
     { label: 'Arriving', key: 'bookings_arriving', color: '#D97706' },
     { label: 'OTP Verified', key: 'bookings_otp_verified', color: '#6366F1' },
     { label: 'In Progress', key: 'bookings_in_progress', color: '#3B82F6' },
-    { label: 'Extra Cost Pending', key: 'bookings_extra_cost_pending', color: '#DC2626' },
     { label: 'Exception Pending', key: 'bookings_exception_pending', color: '#991B1B' },
     { label: 'Reassignment Req.', key: 'bookings_reassignment_required', color: '#D97706' },
     { label: 'Completed', key: 'bookings_completed', color: '#10B981' },
