@@ -56,7 +56,6 @@ async function listPayments(req, res, next) {
        FROM payments p
        LEFT JOIN users u ON u.id = p.user_id
        LEFT JOIN bookings b ON b.id = p.booking_id
-       LEFT JOIN services s ON s.id = b.service_id
        ORDER BY p.created_at DESC`
     );
     return success(res, "Payments fetched successfully", result.rows);
@@ -64,5 +63,33 @@ async function listPayments(req, res, next) {
     return next(err);
   }
 }
+async function updateInvoiceStatus(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const db = require("../config/db");
+    const fcmService = require("../utils/fcm.service");
 
-module.exports = { listInvoices, getInvoice, getInvoiceReports, getInvoicePayouts, listPayments };
+    const result = await db.query(
+      `UPDATE invoices SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+      [status, id]
+    );
+    if (!result.rows[0]) return error(res, "Invoice not found", 404);
+
+    const inv = result.rows[0];
+
+    if (status === 'approved' || status === 'pending') {
+      fcmService.sendToUser(inv.user_id, {
+        title: "🧾 Invoice Approved!",
+        body: `Admin approved your technician bill of ₹${inv.amount}. Tap to view & Pay Now.`,
+        data: { bookingId: inv.booking_id, invoiceId: inv.id, amount: inv.amount, type: "invoice_approved" }
+      });
+    }
+
+    return success(res, `Invoice status updated to ${status}`, inv);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = { listInvoices, getInvoice, getInvoiceReports, getInvoicePayouts, listPayments, updateInvoiceStatus };

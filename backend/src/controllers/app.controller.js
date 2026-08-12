@@ -549,21 +549,14 @@ async function submitWorkerInvoice(req, res, next) {
 
     await db.query(
       `INSERT INTO invoices (booking_id, user_id, worker_id, invoice_number, status, amount, platform_fee, worker_payout, created_at)
-       VALUES ($1, $2, $3, $4, 'pending', $5, $6, $7, NOW())
+       VALUES ($1, $2, $3, $4, 'pending_approval', $5, $6, $7, NOW())
        ON CONFLICT DO NOTHING`,
       [req.params.id, booking.user_id, booking.worker_id, invoiceNum, amountVal, platformFee, workerPayout]
     );
 
     const updated = await Booking.findById(req.params.id);
 
-    // Send FCM Notification to User that invoice is ready to pay
-    fcmService.sendToUser(booking.user_id, {
-      title: "🧾 Custom Invoice Ready!",
-      body: `Worker submitted bill of ₹${amountVal}. Tap to view & Pay Now via Razorpay.`,
-      data: { bookingId: booking.id, amount: amountVal, type: "invoice_ready" }
-    });
-
-    return success(res, "Invoice created and job completed successfully", updated);
+    return success(res, "Invoice submitted successfully. Awaiting Admin Approval before presenting to customer.", updated);
   } catch (err) {
     return next(err);
   }

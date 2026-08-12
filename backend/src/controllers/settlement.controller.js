@@ -1,5 +1,5 @@
 const Settlement = require("../models/settlement.model");
-const fcmService = require("../services/fcm.service");
+const fcmService = require("../utils/fcm.service");
 const { success, error } = require("../utils/response");
 const { getPagination } = require("../utils/pagination");
 
