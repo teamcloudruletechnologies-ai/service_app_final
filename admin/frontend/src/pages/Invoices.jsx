@@ -385,21 +385,21 @@ export default function Invoices() {
         {activeTab === 'passbook' && (
           <div style={{ padding: '24px' }}>
             
-            {/* Passbook Corporate Dark Header Card */}
+            {/* Passbook Corporate Light Theme Header Card */}
             <div style={{
-              background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+              background: '#FFFFFF',
               borderRadius: 16,
               padding: '24px 28px',
-              color: '#FFFFFF',
+              border: '1px solid #E2E8F0',
               marginBottom: 24,
-              boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.25)',
+              boxShadow: '0 4px 16px rgba(15, 23, 42, 0.04)',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <div>
-                  <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94A3B8', fontWeight: 700 }}>
-                    🏦 Corporate Escrow & Treasury Account
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, backgroundColor: '#EFF6FF', color: '#1D4ED8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <span>🏦</span> Corporate Escrow & Treasury Account
                   </div>
-                  <h3 style={{ fontSize: 20, fontWeight: 900, color: '#FFFFFF', margin: '4px 0 0' }}>
+                  <h3 style={{ fontSize: 20, fontWeight: 900, color: '#0F172A', margin: '8px 0 0' }}>
                     Service Platform Passbook Audit Ledger
                   </h3>
                 </div>
@@ -417,7 +417,7 @@ export default function Invoices() {
                     fontWeight: 700,
                     fontSize: 13,
                     cursor: 'pointer',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.25)',
                     transition: 'all 0.2s',
                   }}
                 >
@@ -425,28 +425,28 @@ export default function Invoices() {
                 </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                <div>
-                  <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>Total Deposits (User Paid)</div>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: '#4ADE80', marginTop: 4 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, paddingTop: 16, borderTop: '1px solid #F1F5F9' }}>
+                <div style={{ padding: '14px 16px', borderRadius: 14, backgroundColor: '#F0FDF4', border: '1px solid #DCFCE7' }}>
+                  <div style={{ fontSize: 11, color: '#166534', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Total Deposits (User Paid)</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#15803D', marginTop: 4 }}>
                     + {formatCurrency(paidAmount)}
                   </div>
                 </div>
-                <div>
-                  <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>Company Margin (10%)</div>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: '#60A5FA', marginTop: 4 }}>
+                <div style={{ padding: '14px 16px', borderRadius: 14, backgroundColor: '#EFF6FF', border: '1px solid #DBEAFE' }}>
+                  <div style={{ fontSize: 11, color: '#1E40AF', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Company Margin (10%)</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#1D4ED8', marginTop: 4 }}>
                     + {formatCurrency(platformFee)}
                   </div>
                 </div>
-                <div>
-                  <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>Technician Payouts (Disbursed)</div>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: '#F87171', marginTop: 4 }}>
+                <div style={{ padding: '14px 16px', borderRadius: 14, backgroundColor: '#FEF2F2', border: '1px solid #FEE2E2' }}>
+                  <div style={{ fontSize: 11, color: '#991B1B', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Technician Payouts (Disbursed)</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#DC2626', marginTop: 4 }}>
                     - {formatCurrency(workerPayout)}
                   </div>
                 </div>
-                <div>
-                  <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>Current Treasury Balance</div>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: '#FACC15', marginTop: 4 }}>
+                <div style={{ padding: '14px 16px', borderRadius: 14, backgroundColor: '#FFFBEB', border: '1px solid #FEF3C7' }}>
+                  <div style={{ fontSize: 11, color: '#92400E', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Current Treasury Balance</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#B45309', marginTop: 4 }}>
                     {formatCurrency(platformFee)}
                   </div>
                 </div>
