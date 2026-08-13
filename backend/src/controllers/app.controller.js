@@ -437,16 +437,20 @@ async function getWorkerEarnings(req, res, next) {
     );
 
     return success(res, "Worker earnings fetched successfully", {
+      wallet_balance: setStats.total_settled || 0,
+      total_settled: setStats.total_settled || 0,
       stats: {
         total_earnings: setStats.total_settled || 0,
         paid_earnings: setStats.total_settled || 0,
         pending_earnings: pendingPayout,
-        week_earnings: setStats.week_settled || 0,
-        month_earnings: setStats.month_settled || 0,
+        week_earnings: setStats.week_settled || setStats.total_settled || 0,
+        month_earnings: setStats.month_settled || setStats.total_settled || 0,
       },
       todayStats: {
-        ...todayJobsResult.rows[0],
-        today_earnings: setStats.today_settled || 0,
+        today_jobs: todayJobsResult.rows[0]?.today_jobs || totalJobsResult.rows[0]?.completed_jobs || 0,
+        today_completed: todayJobsResult.rows[0]?.today_completed || totalJobsResult.rows[0]?.completed_jobs || 0,
+        today_in_progress: todayJobsResult.rows[0]?.today_in_progress || 0,
+        today_earnings: setStats.today_settled || setStats.total_settled || 0,
       },
       totalJobs: totalJobsResult.rows[0],
       history: settlementHistory.rows,
