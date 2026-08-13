@@ -154,7 +154,7 @@ async function listMyBookings(req, res, next) {
         const totalPaid = setRes.rows[0]?.total_settled || 0;
         
         const jobRes = await db.query(
-          `SELECT COUNT(*) FILTER (WHERE status = 'completed')::int AS completed_jobs FROM bookings WHERE worker_id = $1`,
+          `SELECT COUNT(*) FILTER (WHERE status IN ('completed', 'payment_pending', 'paid', 'closed'))::int AS completed_jobs FROM bookings WHERE worker_id = $1`,
           [req.auth.id]
         );
         const completedCount = jobRes.rows[0]?.completed_jobs || 0;
@@ -441,7 +441,7 @@ async function getWorkerEarnings(req, res, next) {
     const todayJobsResult = await db.query(
       `SELECT
         COUNT(*)::int AS today_jobs,
-        COUNT(*) FILTER (WHERE status = 'completed')::int AS today_completed,
+        COUNT(*) FILTER (WHERE status IN ('completed', 'payment_pending', 'paid', 'closed'))::int AS today_completed,
         COUNT(*) FILTER (WHERE status IN ('confirmed', 'accepted', 'arriving', 'in_progress'))::int AS today_in_progress
        FROM bookings
        WHERE worker_id = $1 AND DATE(created_at) = CURRENT_DATE`,
@@ -451,7 +451,7 @@ async function getWorkerEarnings(req, res, next) {
     const totalJobsResult = await db.query(
       `SELECT
         COUNT(*)::int AS total_jobs,
-        COUNT(*) FILTER (WHERE status = 'completed')::int AS completed_jobs,
+        COUNT(*) FILTER (WHERE status IN ('completed', 'payment_pending', 'paid', 'closed'))::int AS completed_jobs,
         COUNT(*) FILTER (WHERE status = 'cancelled')::int AS cancelled_jobs
        FROM bookings
        WHERE worker_id = $1`,

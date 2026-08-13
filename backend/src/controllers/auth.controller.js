@@ -42,7 +42,7 @@ async function authPayload(account, role) {
       const totalPaid = settlementStatsResult.rows[0]?.total_settled || 0;
 
       const totalJobsResult = await db.query(
-        `SELECT COUNT(*) FILTER (WHERE status = 'completed')::int AS completed_jobs
+        `SELECT COUNT(*) FILTER (WHERE status IN ('completed', 'payment_pending', 'paid', 'closed'))::int AS completed_jobs
          FROM bookings
          WHERE worker_id = $1`,
         [account.id]
