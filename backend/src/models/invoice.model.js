@@ -126,51 +126,44 @@ async function passbookLedger() {
          ('CR-INV-' || i.id) AS event_id,
          i.created_at AS txn_date,
          'CREDIT' AS txn_type,
-         ('Customer Paid for Booking #US' || i.booking_id) AS particulars,
+         ('SETTLE-INV-' || i.booking_id) AS ref_no,
          COALESCE(u.name, 'Customer') AS party_name,
+         COALESCE(u.phone, '') AS party_phone,
          'Customer' AS party_role,
-         ('INV-' || i.booking_id) AS ref_no,
-         i.amount::float AS credit_amount,
-         0::float AS debit_amount,
-         i.amount::float AS net_flow,
-         'CREDITED' AS status
+         COALESCE(cat.name, 'General Service') AS category_name,
+         1 AS jobs_count,
+         i.amount::float AS gross_revenue,
+         i.platform_fee::float AS commission_amount,
+         i.worker_payout::float AS net_paid_amount,
+         'ONLINE' AS payment_method,
+         i.invoice_number AS transaction_ref,
+         i.amount::float AS net_flow
        FROM invoices i
        LEFT JOIN users u ON u.id = i.user_id
+       LEFT JOIN bookings b ON b.id = i.booking_id
+       LEFT JOIN services s ON s.id = b.service_id
+       LEFT JOIN service_categories cat ON cat.id = s.category_id
        WHERE i.status != 'cancelled'
 
        UNION ALL
 
-       -- 2. Platform 10% Revenue Retained
-       SELECT
-         ('FEE-INV-' || i.id) AS event_id,
-         i.created_at AS txn_date,
-         'COMMISSION' AS txn_type,
-         ('Company 10% Margin (Booking #US' || i.booking_id || ')') AS particulars,
-         'Platform Treasury' AS party_name,
-         'Company' AS party_role,
-         ('MARGIN-' || i.booking_id) AS ref_no,
-         i.platform_fee::float AS credit_amount,
-         0::float AS debit_amount,
-         i.platform_fee::float AS net_flow,
-         'RETAINED' AS status
-       FROM invoices i
-       WHERE i.status != 'cancelled'
-
-       UNION ALL
-
-       -- 3. Debit Disbursed Payouts to Workers
+       -- 2. Debit Disbursed Payouts to Workers
        SELECT
          ('DB-SETTLE-' || ws.id) AS event_id,
          COALESCE(ws.paid_at, ws.created_at) AS txn_date,
          'DEBIT' AS txn_type,
-         ('Worker Payout Disbursed (' || ws.total_jobs || ' job' || CASE WHEN ws.total_jobs > 1 THEN 's' ELSE '' END || ')') AS particulars,
-         COALESCE(w.name, 'Technician Partner') AS party_name,
-         'Technician' AS party_role,
          ('SETTLE-' || ws.id) AS ref_no,
-         0::float AS credit_amount,
-         ws.net_payout::float AS debit_amount,
-         (-1 * ws.net_payout)::float AS net_flow,
-         'DISBURSED' AS status
+         COALESCE(w.name, 'Technician Partner') AS party_name,
+         COALESCE(w.phone, '') AS party_phone,
+         'Technician' AS party_role,
+         COALESCE(w.service_type, 'Appliance Repair') AS category_name,
+         ws.total_jobs AS jobs_count,
+         ws.gross_amount::float AS gross_revenue,
+         ws.platform_fee::float AS commission_amount,
+         ws.net_payout::float AS net_paid_amount,
+         UPPER(COALESCE(ws.payment_method, 'RAZORPAY')) AS payment_method,
+         COALESCE(ws.transaction_ref, ('PAY-' || ws.id)) AS transaction_ref,
+         (-1 * ws.net_payout)::float AS net_flow
        FROM worker_settlements ws
        LEFT JOIN workers w ON w.id = ws.worker_id
        WHERE ws.status = 'paid'
@@ -179,14 +172,18 @@ async function passbookLedger() {
        event_id,
        txn_date,
        txn_type,
-       particulars,
-       party_name,
-       party_role,
        ref_no,
-       credit_amount,
-       debit_amount,
+       party_name,
+       party_phone,
+       party_role,
+       category_name,
+       jobs_count,
+       gross_revenue,
+       commission_amount,
+       net_paid_amount,
+       payment_method,
+       transaction_ref,
        net_flow,
-       status,
        SUM(net_flow) OVER (ORDER BY txn_date ASC, event_id ASC)::float AS running_balance
      FROM ledger_events
      ORDER BY txn_date DESC, event_id DESC`

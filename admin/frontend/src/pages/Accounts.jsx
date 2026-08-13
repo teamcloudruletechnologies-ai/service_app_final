@@ -93,19 +93,20 @@ export default function Accounts() {
       return;
     }
 
-    const headers = ["Txn Date", "Ref ID", "Txn Type", "Particulars / Description", "Party Name", "Party Role", "Credit (+ INR)", "Debit (- INR)", "Running Balance (INR)", "Status"];
+    const headers = ["Settlement Ref", "Worker / Party Name", "Phone", "Category", "Jobs Settled", "Gross Revenue (INR)", "Commission 10% (INR)", "Net Paid Amount (INR)", "Payment Method", "Transaction Ref / UTR", "Settlement Date"];
 
     const csvRows = passbook.map(row => [
-      `"${formatDate(row.txn_date)}"`,
-      `"${row.ref_no || ''}"`,
-      `"${row.txn_type || ''}"`,
-      `"${(row.particulars || '').replace(/"/g, '""')}"`,
+      `"#${row.ref_no || ''}"`,
       `"${(row.party_name || '').replace(/"/g, '""')}"`,
-      `"${row.party_role || ''}"`,
-      row.credit_amount || 0,
-      row.debit_amount || 0,
-      row.running_balance || 0,
-      `"${row.status || ''}"`
+      `"${row.party_phone || ''}"`,
+      `"${row.category_name || ''}"`,
+      row.jobs_count || 1,
+      row.gross_revenue || 0,
+      row.commission_amount || 0,
+      row.net_paid_amount || 0,
+      `"${row.payment_method || ''}"`,
+      `"${row.transaction_ref || ''}"`,
+      `"${formatDate(row.txn_date)}"`
     ]);
 
     const csvContent = [headers.join(','), ...csvRows.map(e => e.join(','))].join('\n');
@@ -113,7 +114,7 @@ export default function Accounts() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `Bank_Passbook_Ledger_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `Settlement_Accounting_Ledger_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -286,102 +287,88 @@ export default function Accounts() {
         </div>
 
         {/* Passbook Table */}
-        <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: 12 }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 900 }}>
+        <div style={{ overflowX: 'auto', border: '1px solid #E5E7EB', borderRadius: 12 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 1100 }}>
             <thead>
-              <tr style={{ background: '#F8FAFC', borderBottom: '1px solid var(--border-color)', fontSize: 12, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Date & Time</th>
-                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Ref ID</th>
-                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Transaction Description</th>
-                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Party / Person</th>
-                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Type</th>
-                <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Amount (₹)</th>
-                <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Bank Balance (Closing)</th>
+              <tr style={{ background: '#F4F1EA', borderBottom: '1px solid #E5E7EB', fontSize: 12, color: '#5A5A5A', letterSpacing: '0.01em' }}>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Settlement Ref</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Worker / Party Name</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Category</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Jobs Settled</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Gross Revenue</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Commission (10%)</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Net Paid Amount</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Payment Method</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Transaction Ref / UTR</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Settlement Date</th>
               </tr>
             </thead>
             <tbody>
               {passbookLoading ? (
                 <tr>
-                  <td colSpan="7" style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
-                    ⏳ Loading Bank Passbook Ledger...
+                  <td colSpan="10" style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
+                    ⏳ Loading Accounting Ledger Statements...
                   </td>
                 </tr>
               ) : filteredPassbook.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  <td colSpan="10" style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
                     No financial ledger transactions found matching the filter.
                   </td>
                 </tr>
               ) : (
                 filteredPassbook.map((row, idx) => {
-                  const isCredit = row.txn_type === 'CREDIT';
-                  const isComm = row.txn_type === 'COMMISSION';
                   const isDebit = row.txn_type === 'DEBIT';
 
                   return (
-                    <tr key={row.event_id || idx} style={{ borderBottom: '1px solid var(--border-color)', fontSize: 13, background: idx % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }}>
-                      <td style={{ padding: '14px 18px', whiteSpace: 'nowrap', color: 'var(--text-secondary)', fontSize: 12 }}>
-                        {formatDate(row.txn_date)}
+                    <tr key={row.event_id || idx} style={{ borderBottom: '1px solid #F1F5F9', fontSize: 13, background: idx % 2 === 0 ? '#FFFFFF' : '#FAFAFA' }}>
+                      <td style={{ padding: '14px 18px', fontWeight: 800, color: '#0F172A', fontFamily: 'monospace' }}>
+                        #{row.ref_no}
+                      </td>
+                      <td style={{ padding: '14px 18px' }}>
+                        <div style={{ fontWeight: 700, color: '#0F172A' }}>{row.party_name}</div>
+                        {row.party_phone && (
+                          <div style={{ fontSize: 11, color: '#64748B', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                            <span>📞</span> {row.party_phone}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding: '14px 18px', color: '#64748B', fontWeight: 500 }}>
+                        {row.category_name}
+                      </td>
+                      <td style={{ padding: '14px 18px', fontWeight: 700, color: '#0F172A' }}>
+                        {row.jobs_count} {row.jobs_count > 1 ? 'Jobs' : 'Job'}
+                      </td>
+                      <td style={{ padding: '14px 18px', textAlign: 'right', color: '#475569', fontWeight: 600 }}>
+                        {formatINR(row.gross_revenue)}
+                      </td>
+                      <td style={{ padding: '14px 18px', textAlign: 'right', color: '#EF4444', fontWeight: 600 }}>
+                        - {formatINR(row.commission_amount)}
+                      </td>
+                      <td style={{ padding: '14px 18px', textAlign: 'right', fontWeight: 800, color: '#10B981', fontSize: 14 }}>
+                        {formatINR(row.net_paid_amount)}
                       </td>
                       <td style={{ padding: '14px 18px' }}>
                         <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
                           padding: '4px 8px',
                           borderRadius: 6,
-                          backgroundColor: isCredit ? '#F0FDF4' : isComm ? '#EFF6FF' : '#FEF2F2',
-                          color: isCredit ? '#15803D' : isComm ? '#1D4ED8' : '#B91C1C',
-                          fontFamily: 'monospace',
+                          background: '#EFF6FF',
+                          color: '#2563EB',
+                          fontSize: 11,
                           fontWeight: 700,
-                          fontSize: 12,
-                          border: `1px solid ${isCredit ? '#DCFCE7' : isComm ? '#DBEAFE' : '#FEE2E2'}`
+                          textTransform: 'uppercase'
                         }}>
-                          #{row.ref_no}
+                          💳 {row.payment_method}
                         </span>
                       </td>
-                      <td style={{ padding: '14px 18px', color: 'var(--text-primary)', fontWeight: 600 }}>
-                        {row.particulars}
+                      <td style={{ padding: '14px 18px', fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: '#334155' }}>
+                        {row.transaction_ref}
                       </td>
-                      <td style={{ padding: '14px 18px', color: 'var(--text-secondary)', fontSize: 12.5 }}>
-                        <strong>{row.party_name}</strong>{' '}
-                        <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#E2E8F0', color: '#475569', fontWeight: 600 }}>
-                          {row.party_role}
-                        </span>
-                      </td>
-                      <td style={{ padding: '14px 18px' }}>
-                        {isCredit && (
-                          <span style={{ padding: '4px 10px', borderRadius: 12, background: '#DCFCE7', color: '#15803D', fontSize: 11, fontWeight: 800 }}>
-                            🟢 CREDIT (User Paid)
-                          </span>
-                        )}
-                        {isComm && (
-                          <span style={{ padding: '4px 10px', borderRadius: 12, background: '#EFF6FF', color: '#1D4ED8', fontSize: 11, fontWeight: 800 }}>
-                            🏢 10% MARGIN
-                          </span>
-                        )}
-                        {isDebit && (
-                          <span style={{ padding: '4px 10px', borderRadius: 12, background: '#FEE2E2', color: '#B91C1C', fontSize: 11, fontWeight: 800 }}>
-                            🔴 DEBIT (Worker Paid)
-                          </span>
-                        )}
-                      </td>
-                      <td style={{ padding: '14px 18px', textAlign: 'right', fontWeight: 900, fontSize: 14 }}>
-                        {isCredit && <span style={{ color: '#16A34A' }}>+ {formatINR(row.credit_amount)}</span>}
-                        {isComm && <span style={{ color: '#2563EB' }}>+ {formatINR(row.credit_amount)}</span>}
-                        {isDebit && <span style={{ color: '#DC2626' }}>- {formatINR(row.debit_amount)}</span>}
-                      </td>
-                      <td style={{ padding: '14px 18px', textAlign: 'right' }}>
-                        <span style={{
-                          display: 'inline-block',
-                          padding: '4px 10px',
-                          borderRadius: 8,
-                          background: '#F8FAFC',
-                          border: '1px solid #CBD5E1',
-                          fontFamily: 'monospace',
-                          fontWeight: 800,
-                          color: '#0F172A',
-                          fontSize: 13.5
-                        }}>
-                          {formatINR(row.running_balance)}
-                        </span>
+                      <td style={{ padding: '14px 18px', whiteSpace: 'nowrap', color: '#64748B', fontSize: 12 }}>
+                        {formatDate(row.txn_date)}
                       </td>
                     </tr>
                   );
