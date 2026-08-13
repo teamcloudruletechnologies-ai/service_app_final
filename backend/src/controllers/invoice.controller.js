@@ -80,6 +80,12 @@ async function updateInvoiceStatus(req, res, next) {
     const inv = result.rows[0];
 
     if (status === 'approved' || status === 'pending') {
+      // Transition corresponding booking to payment_pending
+      await db.query(
+        `UPDATE bookings SET status = 'payment_pending', updated_at = NOW() WHERE id = $1`,
+        [inv.booking_id]
+      );
+
       fcmService.sendToUser(inv.user_id, {
         title: "🧾 Invoice Approved!",
         body: `Admin approved your technician bill of ₹${inv.amount}. Tap to view & Pay Now.`,

@@ -36,8 +36,12 @@ async function list({ status, userId, workerId, page, limit, offset }) {
   const where = [];
 
   if (status) {
-    params.push(status);
-    where.push(`b.status = $${params.length}`);
+    if (status === 'payment_pending') {
+      where.push(`(b.status = 'payment_pending' OR b.payment_status = 'unpaid') AND b.status != 'cancelled'`);
+    } else {
+      params.push(status);
+      where.push(`b.status = $${params.length}`);
+    }
   }
 
   if (userId) {

@@ -3,7 +3,9 @@ import { invoicesAPI } from '../api';
 
 const STATUS_BADGES = {
   paid: { bg: 'var(--status-green-bg)', fg: 'var(--status-green-fg)', text: 'Paid' },
-  pending: { bg: 'var(--accent-light)', fg: 'var(--accent-dark)', text: 'Pending' },
+  pending: { bg: 'var(--accent-light)', fg: 'var(--accent-dark)', text: 'Pending Payment' },
+  pending_approval: { bg: '#FEF3C7', fg: '#92400E', text: 'Pending Approval' },
+  approved: { bg: '#DBEAFE', fg: '#1E40AF', text: 'Approved (Pay Pending)' },
   failed: { bg: 'var(--status-red-bg)', fg: 'var(--status-red-fg)', text: 'Failed' },
   cancelled: { bg: 'var(--bg-muted)', fg: 'var(--text-primary)', text: 'Cancelled' },
   refunded: { bg: 'var(--status-amber-bg)', fg: 'var(--status-amber-fg)', text: 'Refunded' },
@@ -144,6 +146,22 @@ export default function Invoices() {
         alert('Failed to load invoice details');
       })
       .finally(() => setDetailLoading(false));
+  const handleApproveInvoice = (id) => {
+    if (!window.confirm('Are you sure you want to approve this invoice? Once approved, customer will be notified to pay.')) return;
+    invoicesAPI.updateStatus(id, 'approved')
+      .then(res => {
+        if (res && res.success) {
+          alert('Invoice approved successfully! Customer notified.');
+          setInvoices(prev => prev.map(inv => inv.id === id ? { ...inv, status: 'approved' } : inv));
+          if (selectedInvoice && selectedInvoice.id === id) {
+            setSelectedInvoice(prev => ({ ...prev, status: 'approved' }));
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Error approving invoice:', err);
+        alert(err?.response?.data?.message || 'Failed to approve invoice');
+      });
   };
 
   const handleStatusFilterChange = (status) => {
@@ -291,8 +309,9 @@ export default function Invoices() {
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
               {[
                 { key: '', label: 'All Statuses' },
+                { key: 'pending_approval', label: 'Pending Approval' },
+                { key: 'pending', label: 'Pending Payment' },
                 { key: 'paid', label: 'Paid' },
-                { key: 'pending', label: 'Pending' },
                 { key: 'failed', label: 'Failed' },
                 { key: 'cancelled', label: 'Cancelled' }
               ].map(opt => (
@@ -366,6 +385,7 @@ export default function Invoices() {
                   ) : (
                     invoices.map((inv) => {
                       const badge = STATUS_BADGES[inv.status.toLowerCase()] || { bg: 'var(--border-color)', fg: 'var(--text-primary)', text: inv.status };
+                      const isPendingApprove = inv.status.toLowerCase() === 'pending_approval' || inv.status.toLowerCase() === 'pending';
                       return (
                         <tr key={inv.id} style={{ borderBottom: '1px solid var(--bg-muted)', transition: 'background-color 0.15s' }} className="hover:bg-gray-50/50">
                           <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--text-primary)' }}>{inv.invoice_number}</td>
@@ -389,30 +409,42 @@ export default function Invoices() {
                           </td>
                           <td style={{ padding: '14px 16px', color: 'var(--text-secondary)' }}>{formatDate(inv.created_at)}</td>
                           <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                            <button
-                              onClick={() => handleViewInvoice(inv.id)}
-                              style={{
-                                background: 'var(--accent-light)',
-                                border: 'none',
-                                borderRadius: 6,
-                                padding: '4px 10px',
-                                color: 'var(--accent-color)',
-                                fontSize: 11,
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                transition: 'all 0.15s'
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'var(--accent-color)';
-                                e.currentTarget.style.color = 'var(--bg-card)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'var(--accent-light)';
-                                e.currentTarget.style.color = 'var(--accent-color)';
-                              }}
-                            >
-                              Details
-                            </button>
+                            <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                              {isPendingApprove && (
+                                <button
+                                  onClick={() => handleApproveInvoice(inv.id)}
+                                  style={{
+                                    background: '#10B981',
+                                    color: '#FFFFFF',
+                                    border: 'none',
+                                    borderRadius: 6,
+                                    padding: '4px 10px',
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 4px rgba(16,185,129,0.2)'
+                                  }}
+                                >
+                                  ✅ Approve
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleViewInvoice(inv.id)}
+                                style={{
+                                  background: 'var(--accent-light)',
+                                  border: 'none',
+                                  borderRadius: 6,
+                                  padding: '4px 10px',
+                                  color: 'var(--accent-color)',
+                                  fontSize: 11,
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s'
+                                }}
+                              >
+                                Details
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -664,6 +696,25 @@ export default function Invoices() {
 
             {/* Modal Footer */}
             <div style={{ borderTop: '1px solid var(--border-color)', padding: '16px 24px', backgroundColor: '#FAFAFB', display: 'flex', gap: 10 }}>
+              {(selectedInvoice.status?.toLowerCase() === 'pending_approval' || selectedInvoice.status?.toLowerCase() === 'pending') && (
+                <button
+                  onClick={() => handleApproveInvoice(selectedInvoice.id)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 14px',
+                    borderRadius: 8,
+                    border: 'none',
+                    background: '#10B981',
+                    color: '#FFFFFF',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 6px rgba(16,185,129,0.3)'
+                  }}
+                >
+                  ✅ Approve Invoice
+                </button>
+              )}
               <button
                 onClick={() => window.print()}
                 style={{

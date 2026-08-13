@@ -15,7 +15,7 @@ router.use(auth, allowRoles(roles.ADMIN));
 router.get(
   "/",
   [
-    query("status").optional().isIn(["pending", "paid", "failed", "refunded", "cancelled"]),
+    query("status").optional().isIn(["pending_approval", "pending", "approved", "paid", "failed", "refunded", "cancelled"]),
     query("userId").optional().isInt(),
     query("workerId").optional().isInt(),
   ],
@@ -26,6 +26,7 @@ router.get(
 router.get("/payments", controller.listPayments);
 router.get("/reports", controller.getInvoiceReports);
 router.get("/payouts", controller.getInvoicePayouts);
+router.patch("/:id/status", [param("id").isInt()], validate, controller.updateInvoiceStatus);
 router.get("/:id", [param("id").isInt()], validate, controller.getInvoice);
 
 module.exports = router;
