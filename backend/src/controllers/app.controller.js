@@ -482,26 +482,40 @@ async function getWorkerEarnings(req, res, next) {
 
     return success(res, "Worker earnings fetched successfully", {
       // Top-level aliases for all mobile app UI property variations
+      balance: totalPaid,
+      wallet: totalPaid,
+      wallet_balance: totalPaid,
+      walletBalance: totalPaid,
       earnings: todayEarningsVal,
       today_earnings: todayEarningsVal,
       todayEarnings: todayEarningsVal,
+      this_week: setStats.week_settled || totalPaid,
+      thisWeek: setStats.week_settled || totalPaid,
+      week_earnings: setStats.week_settled || totalPaid,
+      weekly_earnings: setStats.week_settled || totalPaid,
+      this_month: setStats.month_settled || totalPaid,
+      thisMonth: setStats.month_settled || totalPaid,
+      month_earnings: setStats.month_settled || totalPaid,
+      monthly_earnings: setStats.month_settled || totalPaid,
       jobs_completed: todayCompletedVal,
       today_completed: todayCompletedVal,
       completed_jobs: completedCount,
       completedJobs: completedCount,
-      wallet_balance: totalPaid,
-      walletBalance: totalPaid,
       total_settled: totalPaid,
       total_earnings: totalPaid,
       paid_earnings: totalPaid,
       pending_earnings: pendingPayout,
 
       stats: {
+        balance: totalPaid,
+        wallet_balance: totalPaid,
         total_earnings: totalPaid,
         paid_earnings: totalPaid,
         pending_earnings: pendingPayout,
         week_earnings: setStats.week_settled || totalPaid,
         month_earnings: setStats.month_settled || totalPaid,
+        this_week: setStats.week_settled || totalPaid,
+        this_month: setStats.month_settled || totalPaid,
         today_earnings: todayEarningsVal,
         today_completed: todayCompletedVal,
       },
@@ -519,6 +533,10 @@ async function getWorkerEarnings(req, res, next) {
         jobs_completed: completedCount,
       },
       history: settlementHistory.rows,
+      transactions: settlementHistory.rows,
+      recent_transactions: settlementHistory.rows,
+      recentTransactions: settlementHistory.rows,
+      payouts: settlementHistory.rows,
     });
   } catch (err) {
     return next(err);

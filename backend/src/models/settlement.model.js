@@ -30,7 +30,7 @@ async function listUnsettled({ days = 3, startDate, endDate, minAmount = 500 }) 
       (COALESCE(SUM(i.worker_payout), 0) >= ${Number(minAmount) || 500}) AS is_eligible
     FROM workers w
     JOIN invoices i ON i.worker_id = w.id
-    WHERE i.status != 'cancelled'
+    WHERE i.status NOT IN ('paid', 'cancelled')
       ${dateClause}
       AND NOT EXISTS (
         SELECT 1 FROM worker_settlements ws
@@ -56,6 +56,23 @@ async function createSettlement({ workerId, periodStart, periodEnd, totalJobs, g
      RETURNING *`,
     [workerId, periodStart || null, periodEnd || null, totalJobs || 0, grossAmount || 0, platformFee || 0, netPayout || 0, paymentMethod, transactionRef || `REF-${Date.now()}`, notes || '']
   );
+
+  // Mark all unsettled invoices for this worker as paid
+  await db.query(
+    `UPDATE invoices
+     SET status = 'paid', paid_at = NOW(), updated_at = NOW()
+     WHERE worker_id = $1 AND status IN ('approved', 'pending_approval', 'pending')`,
+    [workerId]
+  );
+
+  // Mark corresponding bookings as paid
+  await db.query(
+    `UPDATE bookings
+     SET status = 'paid', payment_status = 'paid', updated_at = NOW()
+     WHERE worker_id = $1 AND status IN ('payment_pending', 'completed')`,
+    [workerId]
+  );
+
   return result.rows[0];
 }
 
