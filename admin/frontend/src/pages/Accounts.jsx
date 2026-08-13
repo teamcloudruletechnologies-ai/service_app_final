@@ -293,10 +293,10 @@ export default function Accounts() {
                 <th style={{ padding: '14px 18px', fontWeight: 700 }}>Date & Time</th>
                 <th style={{ padding: '14px 18px', fontWeight: 700 }}>Ref / Txn ID</th>
                 <th style={{ padding: '14px 18px', fontWeight: 700 }}>Particulars / Remarks</th>
-                <th style={{ padding: '14px 18px', fontWeight 700 }}>Source / Party</th>
-                <th style={{ padding: '14px 18px', fontWeight 700 }}>Type</th>
-                <th style={{ padding: '14px 18px', fontWeight 700, textAlign: 'right' }}>Amount (₹)</th>
-                <th style={{ padding: '14px 18px', fontWeight 700, textAlign: 'right' }}>Running Balance</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Source / Party</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Type</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Amount (₹)</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Running Balance</th>
               </tr>
             </thead>
             <tbody>
