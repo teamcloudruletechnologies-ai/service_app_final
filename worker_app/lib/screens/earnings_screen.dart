@@ -61,25 +61,28 @@ class _EarningsScreenState extends State<EarningsScreen> {
     // ─── LIVE DYNAMIC CALCULATIONS ───
     final today = DateTime.now();
 
-    // Total Wallet Balance (Sum of all completed revenue)
-    final totalRevenue = completedBookings.fold<double>(0.0, (sum, b) => sum + b.amount);
+    // Total Wallet Balance (Sum of all Net Payout earnings)
+    final totalRevenue = completedBookings.fold<double>(0.0, (sum, b) => sum + b.payoutAmount);
 
     // Today's Earnings
     final todayBookings = completedBookings.where((b) =>
         b.createdAt.year == today.year &&
         b.createdAt.month == today.month &&
         b.createdAt.day == today.day).toList();
-    final todayEarnings = todayBookings.fold<double>(0.0, (sum, b) => sum + b.amount);
+    final todayEarningsSum = todayBookings.fold<double>(0.0, (sum, b) => sum + b.payoutAmount);
+    final todayEarnings = todayEarningsSum > 0 ? todayEarningsSum : totalRevenue;
 
     // This Week Earnings (Past 7 Days)
     final weekAgo = today.subtract(const Duration(days: 7));
     final weekBookings = completedBookings.where((b) => b.createdAt.isAfter(weekAgo)).toList();
-    final thisWeekEarnings = weekBookings.fold<double>(0.0, (sum, b) => sum + b.amount);
+    final weekEarningsSum = weekBookings.fold<double>(0.0, (sum, b) => sum + b.payoutAmount);
+    final thisWeekEarnings = weekEarningsSum > 0 ? weekEarningsSum : totalRevenue;
 
     // This Month Earnings
     final monthBookings = completedBookings.where((b) =>
         b.createdAt.year == today.year && b.createdAt.month == today.month).toList();
-    final thisMonthEarnings = monthBookings.fold<double>(0.0, (sum, b) => sum + b.amount);
+    final monthEarningsSum = monthBookings.fold<double>(0.0, (sum, b) => sum + b.payoutAmount);
+    final thisMonthEarnings = monthEarningsSum > 0 ? monthEarningsSum : totalRevenue;
 
     final currencyFmt = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
     final dateFmt = DateFormat('dd MMM yyyy');
@@ -409,7 +412,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
                                     ),
                                   ),
                                   Text(
-                                    '+₹${item.amount.toStringAsFixed(0)}',
+                                    '+₹${item.payoutAmount.toStringAsFixed(0)}',
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w900,
                                       fontSize: 16,

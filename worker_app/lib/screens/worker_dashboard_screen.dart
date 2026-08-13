@@ -425,15 +425,10 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     final upcomingBookings = allBookings.where((b) => b.status == 'confirmed' || b.status == 'in_progress').toList();
     final completedBookings = allBookings.where((b) => b.status == 'completed' || b.status == 'paid' || b.status == 'payment_pending' || b.status == 'closed').toList();
 
-    // Today's stats calculation
-    final today = DateTime.now();
-    final todayBookings = allBookings.where((b) =>
-        b.createdAt.year == today.year &&
-        b.createdAt.month == today.month &&
-        b.createdAt.day == today.day).toList();
-    
-    final todayCompleted = todayBookings.where((b) => b.status == 'completed' || b.status == 'paid' || b.status == 'payment_pending' || b.status == 'closed').toList();
-    final todayEarnings = todayCompleted.fold<double>(0, (sum, b) => sum + b.amount);
+    // Completed / Finished jobs calculation for Home Page Overview
+    final finishedJobs = completedBookings;
+    final totalCompletedJobsCount = finishedJobs.length;
+    final totalPayoutEarnings = finishedJobs.fold<double>(0, (sum, b) => sum + b.payoutAmount);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -637,7 +632,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '₹${todayEarnings.toStringAsFixed(0)}',
+                            '₹${totalPayoutEarnings.toStringAsFixed(0)}',
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w900,
@@ -677,7 +672,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '${todayCompleted.length}',
+                            '$totalCompletedJobsCount',
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w900,

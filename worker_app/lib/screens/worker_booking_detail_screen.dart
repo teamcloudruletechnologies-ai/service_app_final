@@ -500,7 +500,7 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
 
         // ─── 6. AMOUNT SECTION ───
         const Text(
-          'Amount',
+          'Net Payout Amount',
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -509,7 +509,7 @@ class _WorkerBookingDetailScreenState extends State<WorkerBookingDetailScreen> {
         ),
         const SizedBox(height: 6),
         Text(
-          '₹${b.amount.toStringAsFixed(0)}',
+          '₹${b.payoutAmount.toStringAsFixed(0)}',
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w900,

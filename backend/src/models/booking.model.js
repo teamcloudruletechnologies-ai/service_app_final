@@ -20,6 +20,8 @@ const listFields = `
   b.scheduled_at,
   b.status,
   b.amount::float AS amount,
+  COALESCE(i.worker_payout, b.amount * 0.9)::float AS worker_payout,
+  COALESCE(i.worker_payout, b.amount * 0.9)::float AS payout,
   b.otp,
   b.start_photo_url,
   b.completion_photo_url,
@@ -60,6 +62,7 @@ async function list({ status, userId, workerId, page, limit, offset }) {
      LEFT JOIN users u ON u.id = b.user_id
      LEFT JOIN workers w ON w.id = b.worker_id
      LEFT JOIN services s ON s.id = b.service_id
+     LEFT JOIN invoices i ON i.booking_id = b.id
      ${clause}`,
     params
   );
@@ -71,6 +74,7 @@ async function list({ status, userId, workerId, page, limit, offset }) {
      LEFT JOIN users u ON u.id = b.user_id
      LEFT JOIN workers w ON w.id = b.worker_id
      LEFT JOIN services s ON s.id = b.service_id
+     LEFT JOIN invoices i ON i.booking_id = b.id
      ${clause}
      ORDER BY b.created_at DESC
      LIMIT $${params.length - 1} OFFSET $${params.length}`,
@@ -87,6 +91,7 @@ async function findById(id) {
      LEFT JOIN users u ON u.id = b.user_id
      LEFT JOIN workers w ON w.id = b.worker_id
      LEFT JOIN services s ON s.id = b.service_id
+     LEFT JOIN invoices i ON i.booking_id = b.id
      WHERE b.id = $1`,
     [id]
   );

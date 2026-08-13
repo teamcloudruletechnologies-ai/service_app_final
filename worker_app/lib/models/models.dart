@@ -144,6 +144,7 @@ class BookingItem {
   final String? userPhone;
   final String status;
   final double amount;
+  final double? workerPayout;
   final String? address;
   final String? notes;
   final DateTime? scheduledAt;
@@ -153,6 +154,8 @@ class BookingItem {
   final double? workerLng;
   final double? latitude;
   final double? longitude;
+
+  double get payoutAmount => (workerPayout != null && workerPayout! > 0) ? workerPayout! : (amount * 0.9);
 
   const BookingItem({
     required this.id,
@@ -166,6 +169,7 @@ class BookingItem {
     this.userPhone,
     required this.status,
     required this.amount,
+    this.workerPayout,
     this.address,
     this.notes,
     this.scheduledAt,
@@ -190,6 +194,7 @@ class BookingItem {
       userPhone: json['user_phone'] as String?,
       status: json['status'] as String? ?? 'pending',
       amount: _toDouble(json['amount']),
+      workerPayout: _toDouble(json['worker_payout'] ?? json['payout']),
       address: json['address'] as String?,
       notes: json['notes'] as String?,
       scheduledAt: json['scheduled_at'] != null

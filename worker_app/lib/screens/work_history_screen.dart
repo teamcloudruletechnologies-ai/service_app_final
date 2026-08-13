@@ -223,7 +223,7 @@ class _WorkHistoryScreenState extends State<WorkHistoryScreen> {
                 ),
               ),
               Text(
-                '₹${booking.amount.toStringAsFixed(0)}',
+                '₹${booking.payoutAmount.toStringAsFixed(0)}',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
