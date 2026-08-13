@@ -108,6 +108,7 @@ export const invoicesAPI = {
   getReports: () => api.get("/admin/invoices/reports"),
   getPayouts: () => api.get("/admin/invoices/payouts"),
   getPayments: () => api.get("/admin/invoices/payments"),
+  getPassbook: () => api.get("/admin/invoices/passbook"),
   updateStatus: (id, status) => api.patch(`/admin/invoices/${id}/status`, { status }),
 };
 

@@ -26,6 +26,7 @@ router.get(
 router.get("/payments", controller.listPayments);
 router.get("/reports", controller.getInvoiceReports);
 router.get("/payouts", controller.getInvoicePayouts);
+router.get("/passbook", controller.getPassbookLedger);
 router.patch("/:id/status", [param("id").isInt()], validate, controller.updateInvoiceStatus);
 router.get("/:id", [param("id").isInt()], validate, controller.getInvoice);
 

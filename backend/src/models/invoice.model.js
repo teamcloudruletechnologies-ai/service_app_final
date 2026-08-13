@@ -118,18 +118,80 @@ async function payouts() {
   return result.rows;
 }
 
-async function create({ bookingId, userId, workerId, amount, status = 'paid' }) {
-  const invoiceNumber = `INV-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
-  const platformFee = amount * 0.1; // 10% platform fee
-  const workerPayout = amount - platformFee;
-
+async function passbookLedger() {
   const result = await db.query(
-    `INSERT INTO invoices (booking_id, user_id, worker_id, invoice_number, status, amount, platform_fee, worker_payout, paid_at, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW(), NOW())
-     RETURNING *`,
-    [bookingId, userId, workerId, invoiceNumber, status, amount, platformFee, workerPayout]
+    `WITH ledger_events AS (
+       -- 1. Credit Deposits (User Payments)
+       SELECT
+         ('CR-INV-' || i.id) AS event_id,
+         i.created_at AS txn_date,
+         'CREDIT' AS txn_type,
+         ('Customer Payment for Booking #US' || i.booking_id) AS particulars,
+         COALESCE(u.name, 'Customer') AS party_name,
+         'Customer' AS party_role,
+         i.invoice_number AS ref_no,
+         i.amount::float AS credit_amount,
+         0::float AS debit_amount,
+         i.amount::float AS net_flow,
+         'CREDITED' AS status
+       FROM invoices i
+       LEFT JOIN users u ON u.id = i.user_id
+       WHERE i.status != 'cancelled'
+
+       UNION ALL
+
+       -- 2. Platform 10% Revenue Retained
+       SELECT
+         ('FEE-INV-' || i.id) AS event_id,
+         i.created_at AS txn_date,
+         'COMMISSION' AS txn_type,
+         ('10% Platform Service Margin (Inv #' || i.invoice_number || ')') AS particulars,
+         'Platform Treasury' AS party_name,
+         'Company' AS party_role,
+         ('MARGIN-' || i.invoice_number) AS ref_no,
+         i.platform_fee::float AS credit_amount,
+         0::float AS debit_amount,
+         i.platform_fee::float AS net_flow,
+         'RETAINED' AS status
+       FROM invoices i
+       WHERE i.status != 'cancelled'
+
+       UNION ALL
+
+       -- 3. Debit Disbursed Payouts to Workers
+       SELECT
+         ('DB-SETTLE-' || ws.id) AS event_id,
+         COALESCE(ws.paid_at, ws.created_at) AS txn_date,
+         'DEBIT' AS txn_type,
+         ('Technician Settlement Payout (' || ws.total_jobs || ' jobs)') AS particulars,
+         COALESCE(w.name, 'Technician Partner') AS party_name,
+         'Technician' AS party_role,
+         ('SETTLE-' || ws.id) AS ref_no,
+         0::float AS credit_amount,
+         ws.net_payout::float AS debit_amount,
+         (-1 * ws.net_payout)::float AS net_flow,
+         'DISBURSED' AS status
+       FROM worker_settlements ws
+       LEFT JOIN workers w ON w.id = ws.worker_id
+       WHERE ws.status = 'paid'
+     )
+     SELECT
+       event_id,
+       txn_date,
+       txn_type,
+       particulars,
+       party_name,
+       party_role,
+       ref_no,
+       credit_amount,
+       debit_amount,
+       net_flow,
+       status,
+       SUM(net_flow) OVER (ORDER BY txn_date ASC, event_id ASC)::float AS running_balance
+     FROM ledger_events
+     ORDER BY txn_date DESC, event_id DESC`
   );
-  return result.rows[0];
+  return result.rows;
 }
 
-module.exports = { list, findById, reports, payouts, create };
+module.exports = { list, findById, reports, payouts, create, passbookLedger };

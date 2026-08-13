@@ -61,10 +61,14 @@ export default function Invoices() {
   const [invoices, setInvoices] = useState([]);
   const [reports, setReports] = useState(null);
   const [payouts, setPayouts] = useState([]);
-  const [activeTab, setActiveTab] = useState('invoices'); // 'invoices' | 'payouts'
+  const [passbook, setPassbook] = useState([]);
+  const [activeTab, setActiveTab] = useState('passbook'); // 'passbook' | 'invoices' | 'payouts'
   const [loading, setLoading] = useState(true);
   const [reportsLoading, setReportsLoading] = useState(true);
   const [payoutsLoading, setPayoutsLoading] = useState(false);
+  const [passbookLoading, setPassbookLoading] = useState(false);
+  const [passbookFilter, setPassbookFilter] = useState(''); // '' | 'CREDIT' | 'COMMISSION' | 'DEBIT'
+  const [passbookSearch, setPassbookSearch] = useState('');
   const [error, setError] = useState('');
   
   // Filters and Pagination
@@ -89,6 +93,20 @@ export default function Invoices() {
       .catch(err => console.error('Failed to load invoice reports:', err))
       .finally(() => setReportsLoading(false));
   }, []);
+
+  // Fetch passbook ledger when passbook tab becomes active
+  useEffect(() => {
+    if (activeTab !== 'passbook') return;
+    setPassbookLoading(true);
+    invoicesAPI.getPassbook()
+      .then(res => {
+        if (res && res.success) {
+          setPassbook(res.data || []);
+        }
+      })
+      .catch(err => console.error('Error fetching passbook ledger:', err))
+      .finally(() => setPassbookLoading(false));
+  }, [activeTab]);
 
   // Fetch invoices list on filter/page change
   useEffect(() => {
@@ -199,6 +217,50 @@ export default function Invoices() {
   const workerPayout = summary.worker_payout || 0;
   const totalInvoicesCount = summary.total_invoices || 0;
 
+  const filteredPassbook = passbook.filter(row => {
+    if (passbookFilter && row.txn_type !== passbookFilter) return false;
+    if (passbookSearch) {
+      const q = passbookSearch.toLowerCase();
+      const matchParticulars = (row.particulars || '').toLowerCase().includes(q);
+      const matchRef = (row.ref_no || '').toLowerCase().includes(q);
+      const matchParty = (row.party_name || '').toLowerCase().includes(q);
+      if (!matchParticulars && !matchRef && !matchParty) return false;
+    }
+    return true;
+  });
+
+  const handleExportPassbookCSV = () => {
+    if (!passbook || passbook.length === 0) {
+      alert('No passbook ledger records available to export.');
+      return;
+    }
+
+    const headers = ["Txn Date", "Ref ID", "Txn Type", "Particulars / Description", "Party Name", "Party Role", "Credit (+ INR)", "Debit (- INR)", "Running Balance (INR)", "Status"];
+
+    const csvRows = passbook.map(row => [
+      `"${formatDate(row.txn_date)}"`,
+      `"${row.ref_no || ''}"`,
+      `"${row.txn_type || ''}"`,
+      `"${(row.particulars || '').replace(/"/g, '""')}"`,
+      `"${(row.party_name || '').replace(/"/g, '""')}"`,
+      `"${row.party_role || ''}"`,
+      row.credit_amount || 0,
+      row.debit_amount || 0,
+      row.running_balance || 0,
+      `"${row.status || ''}"`
+    ]);
+
+    const csvContent = [headers.join(','), ...csvRows.map(e => e.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Bank_Passbook_Ledger_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: 'var(--bg-app)', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       {/* Keyframe animation injected inline */}
@@ -268,7 +330,23 @@ export default function Invoices() {
       <div style={{ background: 'var(--bg-card)', border: '0.5px solid var(--border-color)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
         
         {/* Navigation Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', background: '#FAFAFB', padding: '0 20px' }}>
+        <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', background: '#FAFAFB', padding: '0 20px', gap: 6 }}>
+          <button
+            onClick={() => setActiveTab('passbook')}
+            style={{
+              padding: '16px 20px',
+              background: 'none',
+              border: 'none',
+              borderBottom: activeTab === 'passbook' ? '2.5px solid #2563EB' : '2.5px solid transparent',
+              color: activeTab === 'passbook' ? '#2563EB' : 'var(--text-secondary)',
+              fontWeight: activeTab === 'passbook' ? 700 : 500,
+              fontSize: 13.5,
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+          >
+            🏛️ Bank Mini Statement (Passbook Ledger)
+          </button>
           <button
             onClick={() => setActiveTab('invoices')}
             style={{
@@ -278,7 +356,7 @@ export default function Invoices() {
               borderBottom: activeTab === 'invoices' ? '2.5px solid var(--accent-color)' : '2.5px solid transparent',
               color: activeTab === 'invoices' ? 'var(--accent-color)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'invoices' ? 600 : 500,
-              fontSize: 13,
+              fontSize: 13.5,
               cursor: 'pointer',
               transition: 'all 0.15s',
             }}
@@ -294,7 +372,7 @@ export default function Invoices() {
               borderBottom: activeTab === 'payouts' ? '2.5px solid var(--accent-color)' : '2.5px solid transparent',
               color: activeTab === 'payouts' ? 'var(--accent-color)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'payouts' ? 600 : 500,
-              fontSize: 13,
+              fontSize: 13.5,
               cursor: 'pointer',
               transition: 'all 0.15s',
             }}
@@ -302,6 +380,206 @@ export default function Invoices() {
             💰 Professional Payouts Summary
           </button>
         </div>
+
+        {/* Tab 0: BANK MINI STATEMENT (PASSBOOK LEDGER) PANEL */}
+        {activeTab === 'passbook' && (
+          <div style={{ padding: '24px' }}>
+            
+            {/* Passbook Corporate Dark Header Card */}
+            <div style={{
+              background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+              borderRadius: 16,
+              padding: '24px 28px',
+              color: '#FFFFFF',
+              marginBottom: 24,
+              boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.25)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <div>
+                  <div style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94A3B8', fontWeight: 700 }}>
+                    🏦 Corporate Escrow & Treasury Account
+                  </div>
+                  <h3 style={{ fontSize: 20, fontWeight: 900, color: '#FFFFFF', margin: '4px 0 0' }}>
+                    Service Platform Passbook Audit Ledger
+                  </h3>
+                </div>
+                <button
+                  onClick={handleExportPassbookCSV}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    padding: '10px 18px',
+                    borderRadius: 12,
+                    background: '#10B981',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  📊 Export Mini Statement (.CSV)
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>Total Deposits (User Paid)</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#4ADE80', marginTop: 4 }}>
+                    + {formatCurrency(paidAmount)}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>Company Margin (10%)</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#60A5FA', marginTop: 4 }}>
+                    + {formatCurrency(platformFee)}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>Technician Payouts (Disbursed)</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#F87171', marginTop: 4 }}>
+                    - {formatCurrency(workerPayout)}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600 }}>Current Treasury Balance</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: '#FACC15', marginTop: 4 }}>
+                    {formatCurrency(platformFee)}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filter & Live Search Controls Row */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {[
+                  { key: '', label: 'All Transactions' },
+                  { key: 'CREDIT', label: '🟢 Credits (+ User Payments)' },
+                  { key: 'COMMISSION', label: '🏢 Commission (10% Company Margin)' },
+                  { key: 'DEBIT', label: '🔴 Debits (- Worker Payouts)' },
+                ].map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setPassbookFilter(opt.key)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: 20,
+                      border: '1px solid',
+                      borderColor: passbookFilter === opt.key ? '#2563EB' : 'var(--border-color)',
+                      backgroundColor: passbookFilter === opt.key ? '#EFF6FF' : 'var(--bg-card)',
+                      color: passbookFilter === opt.key ? '#1D4ED8' : 'var(--text-secondary)',
+                      fontSize: 12.5,
+                      fontWeight: passbookFilter === opt.key ? 700 : 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              <input
+                type="text"
+                placeholder="Search particulars, ref ID, party name..."
+                value={passbookSearch}
+                onChange={(e) => setPassbookSearch(e.target.value)}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 10,
+                  border: '1px solid var(--border-color)',
+                  fontSize: 13,
+                  width: 280,
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            {/* Passbook Ledger Table */}
+            <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: 12 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 900 }}>
+                <thead>
+                  <tr style={{ background: '#F8FAFC', borderBottom: '1px solid var(--border-color)', fontSize: 12, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    <th style={{ padding: '14px 18px', fontWeight: 700 }}>Date & Time</th>
+                    <th style={{ padding: '14px 18px', fontWeight: 700 }}>Ref / Txn ID</th>
+                    <th style={{ padding: '14px 18px', fontWeight: 700 }}>Particulars / Remarks</th>
+                    <th style={{ padding: '14px 18px', fontWeight: 700 }}>Source / Party</th>
+                    <th style={{ padding: '14px 18px', fontWeight: 700 }}>Type</th>
+                    <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Amount (₹)</th>
+                    <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Running Balance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {passbookLoading ? (
+                    <tr>
+                      <td colSpan="7" style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
+                        ⏳ Loading Bank Passbook Ledger...
+                      </td>
+                    </tr>
+                  ) : filteredPassbook.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ padding: 40, textAlign: 'center', color: 'var(--text-secondary)' }}>
+                        No financial ledger transactions found matching the filter.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredPassbook.map((row, idx) => {
+                      const isCredit = row.txn_type === 'CREDIT';
+                      const isComm = row.txn_type === 'COMMISSION';
+                      const isDebit = row.txn_type === 'DEBIT';
+
+                      return (
+                        <tr key={row.event_id || idx} style={{ borderBottom: '1px solid var(--border-color)', fontSize: 13, background: idx % 2 === 0 ? '#FFFFFF' : '#F8FAFC' }}>
+                          <td style={{ padding: '14px 18px', whiteSpace: 'nowrap', color: 'var(--text-secondary)', fontSize: 12 }}>
+                            {formatDate(row.txn_date)}
+                          </td>
+                          <td style={{ padding: '14px 18px', fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-primary)' }}>
+                            {row.ref_no}
+                          </td>
+                          <td style={{ padding: '14px 18px', color: 'var(--text-primary)', fontWeight: 500 }}>
+                            {row.particulars}
+                          </td>
+                          <td style={{ padding: '14px 18px', color: 'var(--text-secondary)', fontSize: 12.5 }}>
+                            <strong>{row.party_name}</strong> <span style={{ opacity: 0.7 }}>({row.party_role})</span>
+                          </td>
+                          <td style={{ padding: '14px 18px' }}>
+                            {isCredit && (
+                              <span style={{ padding: '4px 10px', borderRadius: 12, background: '#DCFCE7', color: '#15803D', fontSize: 11, fontWeight: 800 }}>
+                                🟢 CREDIT
+                              </span>
+                            )}
+                            {isComm && (
+                              <span style={{ padding: '4px 10px', borderRadius: 12, background: '#EFF6FF', color: '#1D4ED8', fontSize: 11, fontWeight: 800 }}>
+                                🏢 COMMISSION
+                              </span>
+                            )}
+                            {isDebit && (
+                              <span style={{ padding: '4px 10px', borderRadius: 12, background: '#FEE2E2', color: '#B91C1C', fontSize: 11, fontWeight: 800 }}>
+                                🔴 DEBIT
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '14px 18px', textAlign: 'right', fontWeight: 900, fontSize: 14 }}>
+                            {isCredit && <span style={{ color: '#16A34A' }}>+ {formatCurrency(row.credit_amount)}</span>}
+                            {isComm && <span style={{ color: '#2563EB' }}>+ {formatCurrency(row.credit_amount)}</span>}
+                            {isDebit && <span style={{ color: '#DC2626' }}>- {formatCurrency(row.debit_amount)}</span>}
+                          </td>
+                          <td style={{ padding: '14px 18px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 800, color: '#0F172A', fontSize: 14 }}>
+                            {formatCurrency(row.running_balance)}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Tab 1: INVOICES PANEL */}
         {activeTab === 'invoices' && (

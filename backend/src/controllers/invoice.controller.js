@@ -99,4 +99,13 @@ async function updateInvoiceStatus(req, res, next) {
   }
 }
 
-module.exports = { listInvoices, getInvoice, getInvoiceReports, getInvoicePayouts, listPayments, updateInvoiceStatus };
+async function getPassbookLedger(req, res, next) {
+  try {
+    const data = await Invoice.passbookLedger();
+    return success(res, "Passbook ledger fetched successfully", data);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+module.exports = { listInvoices, getInvoice, getInvoiceReports, getInvoicePayouts, listPayments, updateInvoiceStatus, getPassbookLedger };
