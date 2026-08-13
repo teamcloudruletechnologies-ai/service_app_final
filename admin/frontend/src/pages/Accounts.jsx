@@ -291,12 +291,12 @@ export default function Accounts() {
             <thead>
               <tr style={{ background: '#F8FAFC', borderBottom: '1px solid var(--border-color)', fontSize: 12, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 <th style={{ padding: '14px 18px', fontWeight: 700 }}>Date & Time</th>
-                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Ref / Txn ID</th>
-                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Particulars / Remarks</th>
-                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Source / Party</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Ref ID</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Transaction Description</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700 }}>Party / Person</th>
                 <th style={{ padding: '14px 18px', fontWeight: 700 }}>Type</th>
                 <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Amount (₹)</th>
-                <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Running Balance</th>
+                <th style={{ padding: '14px 18px', fontWeight: 700, textAlign: 'right' }}>Bank Balance (Closing)</th>
               </tr>
             </thead>
             <tbody>
@@ -323,29 +323,43 @@ export default function Accounts() {
                       <td style={{ padding: '14px 18px', whiteSpace: 'nowrap', color: 'var(--text-secondary)', fontSize: 12 }}>
                         {formatDate(row.txn_date)}
                       </td>
-                      <td style={{ padding: '14px 18px', fontFamily: 'monospace', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {row.ref_no}
+                      <td style={{ padding: '14px 18px' }}>
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: 6,
+                          backgroundColor: isCredit ? '#F0FDF4' : isComm ? '#EFF6FF' : '#FEF2F2',
+                          color: isCredit ? '#15803D' : isComm ? '#1D4ED8' : '#B91C1C',
+                          fontFamily: 'monospace',
+                          fontWeight: 700,
+                          fontSize: 12,
+                          border: `1px solid ${isCredit ? '#DCFCE7' : isComm ? '#DBEAFE' : '#FEE2E2'}`
+                        }}>
+                          #{row.ref_no}
+                        </span>
                       </td>
-                      <td style={{ padding: '14px 18px', color: 'var(--text-primary)', fontWeight: 500 }}>
+                      <td style={{ padding: '14px 18px', color: 'var(--text-primary)', fontWeight: 600 }}>
                         {row.particulars}
                       </td>
                       <td style={{ padding: '14px 18px', color: 'var(--text-secondary)', fontSize: 12.5 }}>
-                        <strong>{row.party_name}</strong> <span style={{ opacity: 0.7 }}>({row.party_role})</span>
+                        <strong>{row.party_name}</strong>{' '}
+                        <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: '#E2E8F0', color: '#475569', fontWeight: 600 }}>
+                          {row.party_role}
+                        </span>
                       </td>
                       <td style={{ padding: '14px 18px' }}>
                         {isCredit && (
                           <span style={{ padding: '4px 10px', borderRadius: 12, background: '#DCFCE7', color: '#15803D', fontSize: 11, fontWeight: 800 }}>
-                            🟢 CREDIT
+                            🟢 CREDIT (User Paid)
                           </span>
                         )}
                         {isComm && (
                           <span style={{ padding: '4px 10px', borderRadius: 12, background: '#EFF6FF', color: '#1D4ED8', fontSize: 11, fontWeight: 800 }}>
-                            🏢 COMMISSION
+                            🏢 10% MARGIN
                           </span>
                         )}
                         {isDebit && (
                           <span style={{ padding: '4px 10px', borderRadius: 12, background: '#FEE2E2', color: '#B91C1C', fontSize: 11, fontWeight: 800 }}>
-                            🔴 DEBIT
+                            🔴 DEBIT (Worker Paid)
                           </span>
                         )}
                       </td>
@@ -354,8 +368,20 @@ export default function Accounts() {
                         {isComm && <span style={{ color: '#2563EB' }}>+ {formatINR(row.credit_amount)}</span>}
                         {isDebit && <span style={{ color: '#DC2626' }}>- {formatINR(row.debit_amount)}</span>}
                       </td>
-                      <td style={{ padding: '14px 18px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 800, color: '#0F172A', fontSize: 14 }}>
-                        {formatINR(row.running_balance)}
+                      <td style={{ padding: '14px 18px', textAlign: 'right' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          padding: '4px 10px',
+                          borderRadius: 8,
+                          background: '#F8FAFC',
+                          border: '1px solid #CBD5E1',
+                          fontFamily: 'monospace',
+                          fontWeight: 800,
+                          color: '#0F172A',
+                          fontSize: 13.5
+                        }}>
+                          {formatINR(row.running_balance)}
+                        </span>
                       </td>
                     </tr>
                   );
