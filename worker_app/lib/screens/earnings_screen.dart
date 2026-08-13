@@ -55,7 +55,7 @@ class _EarningsScreenState extends State<EarningsScreen> {
     final user = auth.user;
 
     final completedBookings = bookingProv.bookings
-        .where((b) => b.status == 'completed')
+        .where((b) => b.status == 'completed' || b.status == 'paid' || b.status == 'payment_pending' || b.status == 'closed')
         .toList();
 
     // ─── LIVE DYNAMIC CALCULATIONS ───

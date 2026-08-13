@@ -38,13 +38,13 @@ class _WorkHistoryScreenState extends State<WorkHistoryScreen> {
   List<BookingItem> _filterBookings(List<BookingItem> allBookings) {
     switch (_selectedTab) {
       case 'Completed':
-        return allBookings.where((b) => b.status == 'completed').toList();
+        return allBookings.where((b) => b.status == 'completed' || b.status == 'paid' || b.status == 'payment_pending' || b.status == 'closed').toList();
       case 'Cancelled':
         return allBookings.where((b) => b.status == 'cancelled').toList();
       case 'All':
       default:
         // Shows completed and cancelled (finished/past work history)
-        return allBookings.where((b) => b.status == 'completed' || b.status == 'cancelled' || b.status == 'confirmed').toList();
+        return allBookings.where((b) => b.status == 'completed' || b.status == 'paid' || b.status == 'payment_pending' || b.status == 'closed' || b.status == 'cancelled' || b.status == 'confirmed').toList();
     }
   }
 

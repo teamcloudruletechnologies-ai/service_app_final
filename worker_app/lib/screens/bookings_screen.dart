@@ -42,7 +42,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
             .where((b) => b.status == 'confirmed' || b.status == 'in_progress' || b.status == 'pending')
             .toList();
       case 'Completed':
-        return allBookings.where((b) => b.status == 'completed').toList();
+        return allBookings.where((b) => b.status == 'completed' || b.status == 'paid' || b.status == 'payment_pending' || b.status == 'closed').toList();
       case 'Cancelled':
         return allBookings.where((b) => b.status == 'cancelled').toList();
       case 'All':

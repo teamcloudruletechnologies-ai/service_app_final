@@ -423,7 +423,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
     final allBookings = bookingProv.bookings;
     final pendingBookings = allBookings.where((b) => b.status == 'pending').toList();
     final upcomingBookings = allBookings.where((b) => b.status == 'confirmed' || b.status == 'in_progress').toList();
-    final completedBookings = allBookings.where((b) => b.status == 'completed').toList();
+    final completedBookings = allBookings.where((b) => b.status == 'completed' || b.status == 'paid' || b.status == 'payment_pending' || b.status == 'closed').toList();
 
     // Today's stats calculation
     final today = DateTime.now();
@@ -432,7 +432,7 @@ class _WorkerDashboardScreenState extends State<WorkerDashboardScreen> {
         b.createdAt.month == today.month &&
         b.createdAt.day == today.day).toList();
     
-    final todayCompleted = todayBookings.where((b) => b.status == 'completed').toList();
+    final todayCompleted = todayBookings.where((b) => b.status == 'completed' || b.status == 'paid' || b.status == 'payment_pending' || b.status == 'closed').toList();
     final todayEarnings = todayCompleted.fold<double>(0, (sum, b) => sum + b.amount);
 
     return Scaffold(
