@@ -65,9 +65,6 @@ export default function Invoices() {
   const [loading, setLoading] = useState(true);
   const [reportsLoading, setReportsLoading] = useState(true);
   const [payoutsLoading, setPayoutsLoading] = useState(false);
-  const [passbookLoading, setPassbookLoading] = useState(false);
-  const [passbookFilter, setPassbookFilter] = useState(''); // '' | 'CREDIT' | 'COMMISSION' | 'DEBIT'
-  const [passbookSearch, setPassbookSearch] = useState('');
   const [error, setError] = useState('');
   
   // Filters and Pagination
@@ -92,20 +89,6 @@ export default function Invoices() {
       .catch(err => console.error('Failed to load invoice reports:', err))
       .finally(() => setReportsLoading(false));
   }, []);
-
-  // Fetch passbook ledger when passbook tab becomes active
-  useEffect(() => {
-    if (activeTab !== 'passbook') return;
-    setPassbookLoading(true);
-    invoicesAPI.getPassbook()
-      .then(res => {
-        if (res && res.success) {
-          setPassbook(res.data || []);
-        }
-      })
-      .catch(err => console.error('Error fetching passbook ledger:', err))
-      .finally(() => setPassbookLoading(false));
-  }, [activeTab]);
 
   // Fetch invoices list on filter/page change
   useEffect(() => {
@@ -215,50 +198,6 @@ export default function Invoices() {
   const platformFee = summary.platform_fee || 0;
   const workerPayout = summary.worker_payout || 0;
   const totalInvoicesCount = summary.total_invoices || 0;
-
-  const filteredPassbook = passbook.filter(row => {
-    if (passbookFilter && row.txn_type !== passbookFilter) return false;
-    if (passbookSearch) {
-      const q = passbookSearch.toLowerCase();
-      const matchParticulars = (row.particulars || '').toLowerCase().includes(q);
-      const matchRef = (row.ref_no || '').toLowerCase().includes(q);
-      const matchParty = (row.party_name || '').toLowerCase().includes(q);
-      if (!matchParticulars && !matchRef && !matchParty) return false;
-    }
-    return true;
-  });
-
-  const handleExportPassbookCSV = () => {
-    if (!passbook || passbook.length === 0) {
-      alert('No passbook ledger records available to export.');
-      return;
-    }
-
-    const headers = ["Txn Date", "Ref ID", "Txn Type", "Particulars / Description", "Party Name", "Party Role", "Credit (+ INR)", "Debit (- INR)", "Running Balance (INR)", "Status"];
-
-    const csvRows = passbook.map(row => [
-      `"${formatDate(row.txn_date)}"`,
-      `"${row.ref_no || ''}"`,
-      `"${row.txn_type || ''}"`,
-      `"${(row.particulars || '').replace(/"/g, '""')}"`,
-      `"${(row.party_name || '').replace(/"/g, '""')}"`,
-      `"${row.party_role || ''}"`,
-      row.credit_amount || 0,
-      row.debit_amount || 0,
-      row.running_balance || 0,
-      `"${row.status || ''}"`
-    ]);
-
-    const csvContent = [headers.join(','), ...csvRows.map(e => e.join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `Bank_Passbook_Ledger_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   return (
     <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: 'var(--bg-app)', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
