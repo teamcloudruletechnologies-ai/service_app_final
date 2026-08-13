@@ -207,15 +207,15 @@ export default function Accounts() {
         </div>
       </div>
 
-      {/* 🏛️ BANK MINI STATEMENT (PASSBOOK AUDIT LEDGER) SECTION */}
+      {/* FINANCIAL SETTLEMENTS & REVENUE LEDGER SECTION */}
       <div style={{ background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border-color)', padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, backgroundColor: '#EFF6FF', color: '#1D4ED8', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              <span>🏦</span> Corporate Escrow & Treasury Account
+              <span>📜</span> Settlement Accounts Ledger
             </div>
             <h3 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: '6px 0 0' }}>
-              Bank Passbook Audit Statement & Ledger
+              Financial Settlements & Payouts Statement
             </h3>
           </div>
           <button
@@ -236,7 +236,7 @@ export default function Accounts() {
               transition: 'all 0.2s',
             }}
           >
-            📊 Export Mini Statement (.CSV)
+            📊 Export Statement (.CSV)
           </button>
         </div>
 
