@@ -436,23 +436,49 @@ async function getWorkerEarnings(req, res, next) {
       [workerId]
     );
 
+    const totalPaid = setStats.total_settled || 0;
+    const completedCount = totalJobsResult.rows[0]?.completed_jobs || 0;
+    const todayEarningsVal = (setStats.today_settled > 0 ? setStats.today_settled : totalPaid);
+    const todayCompletedVal = (todayJobsResult.rows[0]?.today_completed > 0 ? todayJobsResult.rows[0]?.today_completed : completedCount);
+
     return success(res, "Worker earnings fetched successfully", {
-      wallet_balance: setStats.total_settled || 0,
-      total_settled: setStats.total_settled || 0,
+      // Top-level aliases for all mobile app UI property variations
+      earnings: todayEarningsVal,
+      today_earnings: todayEarningsVal,
+      todayEarnings: todayEarningsVal,
+      jobs_completed: todayCompletedVal,
+      today_completed: todayCompletedVal,
+      completed_jobs: completedCount,
+      completedJobs: completedCount,
+      wallet_balance: totalPaid,
+      walletBalance: totalPaid,
+      total_settled: totalPaid,
+      total_earnings: totalPaid,
+      paid_earnings: totalPaid,
+      pending_earnings: pendingPayout,
+
       stats: {
-        total_earnings: setStats.total_settled || 0,
-        paid_earnings: setStats.total_settled || 0,
+        total_earnings: totalPaid,
+        paid_earnings: totalPaid,
         pending_earnings: pendingPayout,
-        week_earnings: setStats.week_settled || setStats.total_settled || 0,
-        month_earnings: setStats.month_settled || setStats.total_settled || 0,
+        week_earnings: setStats.week_settled || totalPaid,
+        month_earnings: setStats.month_settled || totalPaid,
+        today_earnings: todayEarningsVal,
+        today_completed: todayCompletedVal,
       },
       todayStats: {
-        today_jobs: todayJobsResult.rows[0]?.today_jobs || totalJobsResult.rows[0]?.completed_jobs || 0,
-        today_completed: todayJobsResult.rows[0]?.today_completed || totalJobsResult.rows[0]?.completed_jobs || 0,
+        today_jobs: todayJobsResult.rows[0]?.today_jobs || completedCount,
+        today_completed: todayCompletedVal,
         today_in_progress: todayJobsResult.rows[0]?.today_in_progress || 0,
-        today_earnings: setStats.today_settled || setStats.total_settled || 0,
+        today_earnings: todayEarningsVal,
+        earnings: todayEarningsVal,
+        jobs_completed: todayCompletedVal,
       },
-      totalJobs: totalJobsResult.rows[0],
+      totalJobs: {
+        ...totalJobsResult.rows[0],
+        completed_jobs: completedCount,
+        jobs_completed: completedCount,
+      },
       history: settlementHistory.rows,
     });
   } catch (err) {
