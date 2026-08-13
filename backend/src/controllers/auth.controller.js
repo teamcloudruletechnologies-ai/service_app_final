@@ -12,7 +12,7 @@ const modelByRole = {
   [roles.WORKER]: Worker,
 };
 
-function authPayload(account, role) {
+async function authPayload(account, role) {
   const payload = {
     id: account.id,
     role: account.role || role,
@@ -30,6 +30,36 @@ function authPayload(account, role) {
     payload.experience_years = account.experience_years;
     payload.city = account.city;
     payload.pincode = account.pincode;
+
+    try {
+      const db = require("../config/db");
+      const settlementStatsResult = await db.query(
+        `SELECT COALESCE(SUM(net_payout), 0)::float AS total_settled
+         FROM worker_settlements
+         WHERE worker_id = $1 AND status = 'paid'`,
+        [account.id]
+      );
+      const totalPaid = settlementStatsResult.rows[0]?.total_settled || 0;
+
+      const totalJobsResult = await db.query(
+        `SELECT COUNT(*) FILTER (WHERE status = 'completed')::int AS completed_jobs
+         FROM bookings
+         WHERE worker_id = $1`,
+        [account.id]
+      );
+      const completedCount = totalJobsResult.rows[0]?.completed_jobs || 0;
+
+      payload.wallet_balance = totalPaid;
+      payload.walletBalance = totalPaid;
+      payload.total_earnings = totalPaid;
+      payload.earnings = totalPaid;
+      payload.today_earnings = totalPaid;
+      payload.todayEarnings = totalPaid;
+      payload.jobs_completed = completedCount;
+      payload.today_completed = completedCount;
+      payload.completed_jobs = completedCount;
+      payload.completedJobs = completedCount;
+    } catch (_) {}
   }
   return payload;
 }
@@ -85,7 +115,7 @@ async function login(req, res, next) {
     if (!matches) return error(res, "Invalid login credentials", 401);
     if (account.status && account.status !== "active") return error(res, "Account is not active", 403);
 
-    const payload = authPayload(account, role);
+    const payload = await authPayload(account, role);
     if (role === roles.USER) {
       await User.logActivity(account.id, "login", "User logged in successfully");
     }
@@ -105,7 +135,8 @@ async function me(req, res, next) {
     const account = await model.findById(req.auth.id);
     if (!account) return error(res, "Account not found", 404);
 
-    return success(res, "Profile fetched", authPayload(account, req.auth.role));
+    const payload = await authPayload(account, req.auth.role);
+    return success(res, "Profile fetched", payload);
   } catch (err) {
     return next(err);
   }
@@ -153,7 +184,7 @@ async function phoneLogin(req, res, next) {
       return error(res, "Account is suspended. Contact support.", 403);
     }
 
-    const payload = authPayload(account, role);
+    const payload = await authPayload(account, role);
     if (role === roles.USER && !isNew) {
       await User.logActivity(account.id, "login", "User logged in via phone/OTP");
     }

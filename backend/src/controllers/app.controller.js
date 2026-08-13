@@ -143,6 +143,45 @@ async function listMyBookings(req, res, next) {
       filter.userId = req.auth.id;
     }
     const data = await Booking.list(filter);
+
+    if (req.auth.role === "worker") {
+      try {
+        const db = require("../config/db");
+        const setRes = await db.query(
+          `SELECT COALESCE(SUM(net_payout), 0)::float AS total_settled FROM worker_settlements WHERE worker_id = $1 AND status = 'paid'`,
+          [req.auth.id]
+        );
+        const totalPaid = setRes.rows[0]?.total_settled || 0;
+        
+        const jobRes = await db.query(
+          `SELECT COUNT(*) FILTER (WHERE status = 'completed')::int AS completed_jobs FROM bookings WHERE worker_id = $1`,
+          [req.auth.id]
+        );
+        const completedCount = jobRes.rows[0]?.completed_jobs || 0;
+
+        return success(res, "Bookings fetched", {
+          ...data,
+          earnings: totalPaid,
+          today_earnings: totalPaid,
+          todayEarnings: totalPaid,
+          jobs_completed: completedCount,
+          today_completed: completedCount,
+          completed_jobs: completedCount,
+          completedJobs: completedCount,
+          wallet_balance: totalPaid,
+          walletBalance: totalPaid,
+          total_earnings: totalPaid,
+          paid_earnings: totalPaid,
+          summary: {
+            earnings: totalPaid,
+            today_earnings: totalPaid,
+            jobs_completed: completedCount,
+            today_completed: completedCount,
+          }
+        });
+      } catch (_) {}
+    }
+
     return success(res, "Bookings fetched", data);
   } catch (err) {
     return next(err);
