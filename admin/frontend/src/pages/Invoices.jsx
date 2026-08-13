@@ -146,6 +146,8 @@ export default function Invoices() {
         alert('Failed to load invoice details');
       })
       .finally(() => setDetailLoading(false));
+  };
+
   const handleApproveInvoice = (id) => {
     if (!window.confirm('Are you sure you want to approve this invoice? Once approved, customer will be notified to pay.')) return;
     invoicesAPI.updateStatus(id, 'approved')

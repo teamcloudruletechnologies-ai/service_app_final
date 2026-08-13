@@ -372,22 +372,38 @@ async function getWorkerEarnings(req, res, next) {
     const workerId = req.auth.id;
     const db = require("../config/db");
 
-    const statsResult = await db.query(
+    // 1. Paid Settlement Stats from Admin Settlements Table
+    const settlementStatsResult = await db.query(
       `SELECT
-        COALESCE(SUM(worker_payout), 0)::float AS total_earnings,
-        COALESCE(SUM(worker_payout) FILTER (WHERE status = 'paid'), 0)::float AS paid_earnings,
-        COALESCE(SUM(worker_payout) FILTER (WHERE status = 'pending'), 0)::float AS pending_earnings
-       FROM invoices
-       WHERE worker_id = $1`,
+        COALESCE(SUM(net_payout), 0)::float AS total_settled,
+        COALESCE(SUM(net_payout) FILTER (WHERE DATE(created_at) = CURRENT_DATE), 0)::float AS today_settled,
+        COALESCE(SUM(net_payout) FILTER (WHERE created_at >= DATE_TRUNC('week', CURRENT_DATE)), 0)::float AS week_settled,
+        COALESCE(SUM(net_payout) FILTER (WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)), 0)::float AS month_settled
+       FROM worker_settlements
+       WHERE worker_id = $1 AND status = 'paid'`,
       [workerId]
     );
+    const setStats = settlementStatsResult.rows[0] || {};
 
-    const todayStatsResult = await db.query(
+    // 2. Pending Unsettled Payouts calculation from completed invoices
+    const pendingResult = await db.query(
+      `SELECT COALESCE(SUM(i.worker_payout), 0)::float AS pending_payout
+       FROM invoices i
+       WHERE i.worker_id = $1 AND i.status != 'cancelled'
+         AND NOT EXISTS (
+           SELECT 1 FROM worker_settlements ws
+           WHERE ws.worker_id = i.worker_id AND ws.status = 'paid' AND ws.created_at >= i.created_at
+         )`,
+      [workerId]
+    );
+    const pendingPayout = pendingResult.rows[0]?.pending_payout || 0;
+
+    // 3. Today's Completed Jobs & Earnings from Settlements
+    const todayJobsResult = await db.query(
       `SELECT
         COUNT(*)::int AS today_jobs,
-        COALESCE(SUM(amount) FILTER (WHERE status = 'completed'), 0)::float AS today_earnings,
         COUNT(*) FILTER (WHERE status = 'completed')::int AS today_completed,
-        COUNT(*) FILTER (WHERE status = 'in_progress')::int AS today_in_progress
+        COUNT(*) FILTER (WHERE status IN ('confirmed', 'accepted', 'arriving', 'in_progress'))::int AS today_in_progress
        FROM bookings
        WHERE worker_id = $1 AND DATE(created_at) = CURRENT_DATE`,
       [workerId]
@@ -403,29 +419,37 @@ async function getWorkerEarnings(req, res, next) {
       [workerId]
     );
 
-    const historyResult = await db.query(
+    // 4. History from worker_settlements (Admin Payouts)
+    const settlementHistory = await db.query(
       `SELECT
-        i.id,
-        i.invoice_number,
-        i.amount::float AS amount,
-        i.worker_payout::float AS worker_payout,
-        i.status,
-        i.paid_at,
-        b.created_at as booking_date,
-        s.name as service_name
-       FROM invoices i
-       LEFT JOIN bookings b ON b.id = i.booking_id
-       LEFT JOIN services s ON s.id = b.service_id
-       WHERE i.worker_id = $1
-       ORDER BY i.created_at DESC`,
+        ws.id,
+        ('SETTLE-' || ws.id) AS invoice_number,
+        ws.gross_amount::float AS amount,
+        ws.net_payout::float AS worker_payout,
+        ws.status,
+        ws.created_at AS paid_at,
+        ws.created_at AS booking_date,
+        ('Admin Payout (' || ws.total_jobs || ' jobs)') AS service_name
+       FROM worker_settlements ws
+       WHERE ws.worker_id = $1 AND ws.status = 'paid'
+       ORDER BY ws.created_at DESC`,
       [workerId]
     );
 
     return success(res, "Worker earnings fetched successfully", {
-      stats: statsResult.rows[0],
-      todayStats: todayStatsResult.rows[0],
+      stats: {
+        total_earnings: setStats.total_settled || 0,
+        paid_earnings: setStats.total_settled || 0,
+        pending_earnings: pendingPayout,
+        week_earnings: setStats.week_settled || 0,
+        month_earnings: setStats.month_settled || 0,
+      },
+      todayStats: {
+        ...todayJobsResult.rows[0],
+        today_earnings: setStats.today_settled || 0,
+      },
       totalJobs: totalJobsResult.rows[0],
-      history: historyResult.rows,
+      history: settlementHistory.rows,
     });
   } catch (err) {
     return next(err);
