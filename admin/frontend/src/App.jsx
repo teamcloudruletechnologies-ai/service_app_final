@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { LanguageProvider } from './context/LanguageContext';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import Dashboard from './pages/Dashboard';
@@ -334,22 +335,24 @@ export default function App() {
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-app)', color: 'var(--text-primary)' }}>
-      <Sidebar activeKey={activePage} onNav={setActivePage} onLogout={handleLogout} currentAdmin={currentAdmin} />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Topbar activePage={activePage} />
-        {renderPage()}
-      </div>
+    <LanguageProvider>
+      <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-app)', color: 'var(--text-primary)' }}>
+        <Sidebar activeKey={activePage} onNav={setActivePage} onLogout={handleLogout} currentAdmin={currentAdmin} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <Topbar activePage={activePage} />
+          {renderPage()}
+        </div>
 
-      {/* New Booking Popup Toast */}
-      {newBookings.length > 0 && (
-        <NewBookingToast
-          bookings={newBookings}
-          onDismiss={() => setNewBookings([])}
-          onViewBookings={() => setActivePage('bookings')}
-        />
-      )}
-    </div>
+        {/* New Booking Popup Toast */}
+        {newBookings.length > 0 && (
+          <NewBookingToast
+            bookings={newBookings}
+            onDismiss={() => setNewBookings([])}
+            onViewBookings={() => setActivePage('bookings')}
+          />
+        )}
+      </div>
+    </LanguageProvider>
   );
 }
 

@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'providers/auth_provider.dart';
 import 'providers/booking_provider.dart';
 import 'providers/catalog_provider.dart';
+import 'providers/language_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/worker_dashboard_screen.dart';
 import 'services/api_service.dart';
@@ -223,6 +224,7 @@ class _UrbanServiceAppState extends State<UrbanServiceApp> {
     return MultiProvider(
       providers: [
         Provider<ApiService>.value(value: widget.apiService),
+        ChangeNotifierProvider(create: (_) => WorkerLanguageProvider()..init()),
         ChangeNotifierProvider(create: (_) => AuthProvider(widget.apiService)),
         ChangeNotifierProvider(create: (_) => CatalogProvider(widget.apiService)),
         ChangeNotifierProvider(create: (_) => BookingProvider(widget.apiService)),

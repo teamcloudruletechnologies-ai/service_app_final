@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 // SVG Icons for professional look
 const Icons = {
   Dashboard: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>,
-  Users: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  Users: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
   Workers: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>,
   KYC: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
   Bookings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
@@ -20,44 +21,43 @@ const Icons = {
   Settings: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
 };
 
-const NAV = [
+const getNavItems = (t) => [
   {
     items: [
-      { label: 'Dashboard', key: 'dashboard', icon: Icons.Dashboard },
+      { label: t('nav_dashboard'), key: 'dashboard', icon: Icons.Dashboard },
     ],
   },
   {
     label: 'Management',
     items: [
-      { label: 'Users', key: 'users', badge: 12, icon: Icons.Users },
-      { label: 'Workers', key: 'workers', icon: Icons.Workers },
-      { label: 'KYC', key: 'kyc', badge: 5, icon: Icons.KYC },
-      { label: 'Bookings', key: 'bookings', icon: Icons.Bookings },
-      { label: 'Invoices', key: 'invoices', icon: Icons.Invoices },
+      { label: t('nav_users'), key: 'users', badge: 12, icon: Icons.Users },
+      { label: t('nav_workers'), key: 'workers', icon: Icons.Workers },
+      { label: t('nav_kyc'), key: 'kyc', badge: 5, icon: Icons.KYC },
+      { label: t('nav_bookings'), key: 'bookings', icon: Icons.Bookings },
+      { label: t('nav_invoices'), key: 'invoices', icon: Icons.Invoices },
     ],
   },
   {
     label: 'Finance & Accounts',
     items: [
-      { label: 'Total Revenue', key: 'payments', icon: Icons.Payments },
-      { label: 'Accounts Overview', key: 'accounts', icon: Icons.Invoices },
-      { label: 'Worker Payouts', key: 'payouts', icon: Icons.Workers },
+      { label: t('nav_accounts'), key: 'accounts', icon: Icons.Invoices },
+      { label: t('nav_payouts'), key: 'payouts', icon: Icons.Workers },
     ],
   },
   {
     label: 'Platform',
     items: [
-      { label: 'Reviews', key: 'reviews', icon: Icons.Reviews },
-      { label: 'Support', key: 'support', icon: Icons.Support },
-      { label: 'Categories', key: 'categories', icon: Icons.Categories },
-      { label: 'Services', key: 'services', icon: Icons.Services },
-      { label: 'Banners', key: 'banners', icon: Icons.Banners },
+      { label: t('nav_reviews'), key: 'reviews', icon: Icons.Reviews },
+      { label: t('nav_support'), key: 'support', icon: Icons.Support },
+      { label: t('nav_categories'), key: 'categories', icon: Icons.Categories },
+      { label: t('nav_services'), key: 'services', icon: Icons.Services },
+      { label: t('nav_banners'), key: 'banners', icon: Icons.Banners },
     ],
   },
   {
     label: 'Config',
     items: [
-      { label: 'Notifications', key: 'notifications', icon: Icons.Notifications },
+      { label: t('nav_notifications'), key: 'notifications', icon: Icons.Notifications },
       { label: 'Roles & Perms', key: 'roles', icon: Icons.Roles },
       { label: 'Settings', key: 'settings', icon: Icons.Settings },
     ],
@@ -125,7 +125,10 @@ export default function Sidebar({ activeKey, onNav, onLogout, currentAdmin }) {
     return false;
   };
 
-  const filteredNav = NAV.map(section => ({
+  const { t } = useLanguage();
+  const navItems = getNavItems(t);
+
+  const filteredNav = navItems.map(section => ({
     ...section,
     items: section.items.filter(item => hasPermission(item.key))
   })).filter(section => section.items.length > 0);

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 const PAGE_META = {
   dashboard:     { title: 'Dashboard',       crumb: 'Admin Panel > Dashboard' },
@@ -21,6 +22,7 @@ const PAGE_META = {
 export default function Topbar({ activePage }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState('');
+  const { lang, changeLanguage } = useLanguage();
   
   let meta = PAGE_META[activePage];
   if (!meta && activePage?.startsWith('bookings')) {
@@ -52,6 +54,30 @@ export default function Topbar({ activePage }) {
 
       {/* Right: actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Language Selector Dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#F8FAFC', border: '1px solid #CBD5E1', borderRadius: 10, padding: '4px 10px' }}>
+          <span style={{ fontSize: 13 }}>🌐</span>
+          <select
+            value={lang}
+            onChange={(e) => changeLanguage(e.target.value)}
+            style={{
+              border: 'none',
+              background: 'transparent',
+              fontSize: 12,
+              fontWeight: 700,
+              color: '#0F172A',
+              outline: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="en">🇬🇧 English</option>
+            <option value="ta">🇮🇳 தமிழ் (Tamil)</option>
+            <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+            <option value="ml">🇮🇳 മലയാളം (Malayalam)</option>
+            <option value="kn">🇮🇳 ಕನ್ನಡ (Kannada)</option>
+          </select>
+        </div>
+
         {/* Search */}
         {searchOpen ? (
           <div style={{
