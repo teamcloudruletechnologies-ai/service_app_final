@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
+import '../providers/language_provider.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -186,9 +187,9 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text(
-          'My Profile',
-          style: TextStyle(
+        title: Text(
+          context.translate('edit_profile'),
+          style: const TextStyle(
             color: Color(0xFF0F172A),
             fontWeight: FontWeight.w900,
             fontSize: 20,

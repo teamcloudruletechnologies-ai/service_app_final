@@ -411,7 +411,7 @@ class BookingCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      _getFormattedStatus(booking.status),
+                      _getFormattedStatus(context, booking.status),
                       style: TextStyle(
                         color: _statusColor(booking.status),
                         fontSize: 11,
@@ -731,30 +731,30 @@ class BookingCard extends StatelessWidget {
   }
 }
 
-String _getFormattedStatus(String status) {
+String _getFormattedStatus(BuildContext context, String status) {
   switch (status) {
     case 'pending':
-      return 'SEARCHING FOR WORKER';
+      return context.translate('status_pending_badge');
     case 'assigned':
-      return 'WORKER ASSIGNED';
+      return context.translate('status_assigned_badge');
     case 'confirmed':
-      return 'WORKER ACCEPTED';
+      return context.translate('status_confirmed_badge');
     case 'on_the_way':
-      return 'WORKER ON THE WAY';
+      return context.translate('status_ontheway_badge');
     case 'reached':
-      return 'WORKER REACHED';
+      return context.translate('status_reached_badge');
     case 'otp_pending':
-      return 'OTP VERIFICATION PENDING';
+      return context.translate('status_otppending_badge');
     case 'in_progress':
-      return 'WORK STARTED';
+      return context.translate('status_inprogress_badge');
     case 'invoice_ready':
-      return 'INVOICE READY';
+      return context.translate('status_invoiceready_badge');
     case 'payment_pending':
-      return 'PAYMENT PENDING';
+      return context.translate('status_paymentpending_badge');
     case 'completed':
-      return 'BOOKING COMPLETED';
+      return context.translate('status_completed_badge');
     case 'cancelled':
-      return 'CANCELLED';
+      return context.translate('status_cancelled_badge');
     default:
       return status.replaceAll('_', ' ').toUpperCase();
   }

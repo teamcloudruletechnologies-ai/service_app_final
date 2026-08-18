@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/api_service.dart';
 import '../models/models.dart';
+import '../providers/language_provider.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -108,7 +109,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(context.translate('notifications')),
         actions: [
           if (_notifications.any((n) => !n.read))
             IconButton(

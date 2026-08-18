@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
+import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import 'main_shell.dart';
 
@@ -112,7 +113,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text('Book Service')),
+      appBar: AppBar(title: Text(context.translate('book_service'))),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Form(
@@ -155,7 +156,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                           : null,
                     ),
                     title: Text(widget.selectedWorker!.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('Selected Professional (${widget.selectedWorker!.serviceType ?? "Service"})'),
+                    subtitle: Text('${context.translate("selected_pro")} (${widget.selectedWorker!.serviceType ?? "Service"})'),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -174,24 +175,24 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
               TextFormField(
                 controller: _addressCtrl,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Service Address',
-                  hintText: 'Enter your full address',
-                  prefixIcon: Icon(Icons.location_on_outlined),
+                decoration: InputDecoration(
+                  labelText: context.translate('service_address'),
+                  hintText: context.translate('address_hint'),
+                  prefixIcon: const Icon(Icons.location_on_outlined),
                 ),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Address is required' : null,
+                validator: (v) => v == null || v.trim().isEmpty ? context.translate('address_required') : null,
               ),
               const SizedBox(height: 16),
               InkWell(
                 onTap: _pickDateTime,
                 borderRadius: BorderRadius.circular(12),
                 child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Preferred Date & Time (optional)',
-                    prefixIcon: Icon(Icons.schedule),
+                  decoration: InputDecoration(
+                    labelText: context.translate('preferred_date_time'),
+                    prefixIcon: const Icon(Icons.schedule),
                   ),
                   child: Text(
-                    _scheduledAt != null ? dateFmt.format(_scheduledAt!) : 'Tap to select',
+                    _scheduledAt != null ? dateFmt.format(_scheduledAt!) : context.translate('tap_to_select'),
                     style: TextStyle(color: _scheduledAt != null ? Colors.black87 : Colors.grey),
                   ),
                 ),
@@ -200,10 +201,10 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
               TextFormField(
                 controller: _notesCtrl,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Notes (optional)',
-                  hintText: 'Any special instructions...',
-                  prefixIcon: Icon(Icons.notes_outlined),
+                decoration: InputDecoration(
+                  labelText: context.translate('notes_optional'),
+                  hintText: context.translate('notes_hint'),
+                  prefixIcon: const Icon(Icons.notes_outlined),
                 ),
               ),
               const SizedBox(height: 16),
@@ -235,7 +236,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1E293B)),
                       )
-                    : const Text('Confirm Booking'),
+                    : Text(context.translate('confirm_booking')),
               ),
             ],
           ),
