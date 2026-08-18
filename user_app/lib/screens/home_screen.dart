@@ -490,7 +490,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                         const SizedBox(height: 6),
                                         Text(
-                                          cat.name,
+                                          context.translate(cat.name),
                                           style: TextStyle(
                                             fontSize: 13.5,
                                             height: 1.15,

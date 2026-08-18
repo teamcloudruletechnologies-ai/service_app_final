@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../config/api_config.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
+import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import 'location_picker_screen.dart';
 
@@ -181,7 +182,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         children: [
                           // Service Name Title
                           Text(
-                            widget.service.name,
+                            context.translate(widget.service.name),
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
@@ -292,7 +293,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                                                   children: [
                                                     if (hasName)
                                                       Text(
-                                                        sub.name,
+                                                        context.translate(sub.name),
                                                         style: const TextStyle(
                                                           color: Colors.white,
                                                           fontSize: 13.5,

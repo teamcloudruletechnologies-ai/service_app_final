@@ -194,7 +194,7 @@ class ServiceCard extends StatelessWidget {
                 children: [
                   // Service name
                   Text(
-                    service.name,
+                    context.translate(service.name),
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 14,
