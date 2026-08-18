@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
+import '../providers/language_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/common_widgets.dart';

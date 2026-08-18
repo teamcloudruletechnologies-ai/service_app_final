@@ -9,6 +9,7 @@ import '../config/api_config.dart';
 import '../models/models.dart';
 import '../providers/auth_provider.dart';
 import '../providers/catalog_provider.dart';
+import '../providers/language_provider.dart';
 import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/auto_slider_banner_widget.dart';
@@ -138,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Hello, ${user?.name.isNotEmpty == true ? user!.name : "User"} 👋',
+                              '${context.translate("hey")}${user?.name.isNotEmpty == true ? user!.name : "User"} 👋',
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -292,9 +293,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                 ),
-                                decoration: const InputDecoration(
-                                  hintText: 'Search for services...',
-                                  hintStyle: TextStyle(
+                                decoration: InputDecoration(
+                                  hintText: context.translate('search_hint'),
+                                  hintStyle: const TextStyle(
                                     color: Color(0xFF94A3B8),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
