@@ -237,9 +237,8 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                 Center(
                   child: CircleAvatar(
                     radius: 46,
-                    backgroundColor: AppTheme.primary.withOpacity(0.15),
+                    backgroundColor: AppTheme.primary.withValues(alpha: 0.15),
                     child: const Icon(Icons.person_rounded, size: 52, color: Color(0xFF1A1A1A)),
-                  ),
                   ),
                 ),
                 const SizedBox(height: 28),
