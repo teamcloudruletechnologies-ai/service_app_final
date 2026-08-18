@@ -22,17 +22,23 @@ class WorkerLanguageProvider extends ChangeNotifier {
   }
 
   String translate(String key) {
+    if (key.trim().isEmpty) return key;
     final code = _locale.languageCode;
-    if (code == 'ta') {
-      return _tamilStrings[key] ?? _englishStrings[key] ?? key;
-    } else if (code == 'hi') {
-      return _hindiStrings[key] ?? _englishStrings[key] ?? key;
-    } else if (code == 'ml') {
-      return _malayalamStrings[key] ?? _englishStrings[key] ?? key;
-    } else if (code == 'kn') {
-      return _kannadaStrings[key] ?? _englishStrings[key] ?? key;
-    }
-    return _englishStrings[key] ?? key;
+    final map = code == 'ta'
+        ? _tamilStrings
+        : code == 'hi'
+            ? _hindiStrings
+            : code == 'ml'
+                ? _malayalamStrings
+                : code == 'kn'
+                    ? _kannadaStrings
+                    : _englishStrings;
+
+    final trimmed = key.trim();
+    if (map.containsKey(trimmed)) return map[trimmed]!;
+    if (map.containsKey(trimmed.toLowerCase())) return map[trimmed.toLowerCase()]!;
+    if (_englishStrings.containsKey(trimmed)) return _englishStrings[trimmed]!;
+    return key;
   }
 
   static const Map<String, String> _englishStrings = {

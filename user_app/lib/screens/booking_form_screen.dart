@@ -127,7 +127,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(widget.service.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text(context.translate(widget.service.name), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                       const SizedBox(height: 8),
                       Text(
                         '₹${widget.service.price.toStringAsFixed(0)}',

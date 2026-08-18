@@ -630,7 +630,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Padding(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                           child: Text(
-                                            s.name,
+                                            context.translate(s.name),
                                             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF0F172A)),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
@@ -793,7 +793,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: Text(
-                                      service.name,
+                                      context.translate(service.name),
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w800,
                                         fontSize: 14,

@@ -400,7 +400,7 @@ class BookingCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      booking.serviceName ?? 'Service #${booking.serviceId}',
+                      context.translate(booking.serviceName ?? 'Service'),
                       style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Color(0xFF0F172A)),
                     ),
                   ),
