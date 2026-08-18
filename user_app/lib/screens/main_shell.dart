@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/booking_provider.dart';
+import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import 'bookings_screen.dart';
 import 'home_screen.dart';
@@ -116,9 +117,9 @@ class _MainShellState extends State<MainShell> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, 'Home'),
-            _buildNavItem(1, Icons.calendar_today_outlined, Icons.calendar_month_rounded, 'Bookings'),
-            _buildNavItem(2, Icons.grid_view_outlined, Icons.grid_view_rounded, 'Menu'),
+            _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, context.translate('home')),
+            _buildNavItem(1, Icons.calendar_today_outlined, Icons.calendar_month_rounded, context.translate('my_bookings')),
+            _buildNavItem(2, Icons.grid_view_outlined, Icons.grid_view_rounded, context.translate('menu')),
           ],
         ),
       ),

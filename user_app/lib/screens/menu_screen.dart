@@ -118,9 +118,9 @@ class MenuScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: const Text(
-          'Menu',
-          style: TextStyle(
+        title: Text(
+          context.translate('menu'),
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w900,
             color: Color(0xFF0F172A),
@@ -179,7 +179,7 @@ class MenuScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          userName.trim().isNotEmpty ? userName : 'Guest User',
+                          userName.trim().isNotEmpty ? userName : context.translate('guest_user'),
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
@@ -190,7 +190,7 @@ class MenuScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          userPhone.trim().isNotEmpty ? userPhone : 'Tap below to manage account',
+                          userPhone.trim().isNotEmpty ? userPhone : context.translate('sign_in_access'),
                           style: const TextStyle(
                             fontSize: 13,
                             color: Color(0xFF94A3B8),
@@ -216,9 +216,9 @@ class MenuScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.white.withOpacity(0.2)),
                       ),
-                      child: const Text(
-                        'Edit Profile',
-                        style: TextStyle(
+                      child: Text(
+                        context.translate('edit_profile'),
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -232,11 +232,11 @@ class MenuScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // ─── SECTION 1: SERVICES & NAVIGATION ───
-            const Padding(
-              padding: EdgeInsets.only(left: 6, bottom: 12),
+            Padding(
+              padding: const EdgeInsets.only(left: 6, bottom: 12),
               child: Text(
-                'SERVICES & BOOKINGS',
-                style: TextStyle(
+                context.translate('services_bookings'),
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
                   color: Color(0xFF94A3B8),
@@ -264,7 +264,7 @@ class MenuScreen extends StatelessWidget {
                     icon: Icons.calendar_month_rounded,
                     iconColor: const Color(0xFF7C3AED),
                     iconBg: const Color(0xFFF3E8FF),
-                    title: 'My Bookings',
+                    title: context.translate('my_bookings'),
                     subtitle: 'View active & completed orders',
                     onTap: () {
                       Navigator.of(context).push(
@@ -278,7 +278,7 @@ class MenuScreen extends StatelessWidget {
                     icon: Icons.location_on_rounded,
                     iconColor: const Color(0xFFD97706),
                     iconBg: const Color(0xFFFEF3C7),
-                    title: 'Saved Addresses',
+                    title: context.translate('saved_addresses'),
                     subtitle: 'Manage delivery & service locations',
                     onTap: () {
                       Navigator.of(context).push(
@@ -292,7 +292,7 @@ class MenuScreen extends StatelessWidget {
                     icon: Icons.map_rounded,
                     iconColor: const Color(0xFF2563EB),
                     iconBg: const Color(0xFFDBEAFE),
-                    title: 'Open Service Map',
+                    title: context.translate('open_map'),
                     subtitle: 'Explore nearby workers & set location pin',
                     onTap: () {
                       Navigator.of(context).push(
@@ -306,7 +306,7 @@ class MenuScreen extends StatelessWidget {
                     icon: Icons.notifications_rounded,
                     iconColor: const Color(0xFF059669),
                     iconBg: const Color(0xFFD1FAE5),
-                    title: 'Notifications',
+                    title: context.translate('notifications'),
                     subtitle: 'Booking updates & promo offers',
                     onTap: () {
                       Navigator.of(context).push(
@@ -320,11 +320,11 @@ class MenuScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // ─── SECTION 2: ACCOUNT & SETTINGS ───
-            const Padding(
-              padding: EdgeInsets.only(left: 6, bottom: 12),
+            Padding(
+              padding: const EdgeInsets.only(left: 6, bottom: 12),
               child: Text(
-                'ACCOUNT & SETTINGS',
-                style: TextStyle(
+                context.translate('account_settings_sec'),
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
                   color: Color(0xFF94A3B8),
@@ -352,7 +352,7 @@ class MenuScreen extends StatelessWidget {
                     icon: Icons.headset_mic_rounded,
                     iconColor: const Color(0xFF0284C7),
                     iconBg: const Color(0xFFE0F2FE),
-                    title: 'Help & Support',
+                    title: context.translate('help_support'),
                     subtitle: '24/7 Customer assistance & FAQs',
                     onTap: () {
                       Navigator.of(context).push(
@@ -366,8 +366,8 @@ class MenuScreen extends StatelessWidget {
                     icon: Icons.tune_rounded,
                     iconColor: const Color(0xFF475569),
                     iconBg: const Color(0xFFF1F5F9),
-                    title: 'Settings',
-                    subtitle: 'App Language: ${lang.isTamil ? "தமிழ்" : "English"}',
+                    title: context.translate('language'),
+                    subtitle: 'Selected Language: ${lang.locale.languageCode == "ta" ? "தமிழ்" : lang.locale.languageCode == "hi" ? "हिन्दी" : lang.locale.languageCode == "ml" ? "മലയാളം" : lang.locale.languageCode == "kn" ? "ಕನ್ನಡ" : "English"}',
                     onTap: () => _showLanguageDialog(context),
                   ),
                 ],
@@ -411,9 +411,9 @@ class MenuScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      const Text(
-                        'Logout',
-                        style: TextStyle(
+                      Text(
+                        context.translate('logout'),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                           color: Color(0xFFE11D48),
