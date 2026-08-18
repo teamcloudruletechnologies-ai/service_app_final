@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/language_provider.dart';
 
 class WorkerSettingsScreen extends StatefulWidget {
   const WorkerSettingsScreen({super.key});
@@ -92,8 +94,19 @@ class _WorkerSettingsScreenState extends State<WorkerSettingsScreen> {
                   _buildSettingRow(
                     icon: Icons.language_rounded,
                     title: 'Language',
-                    trailingText: _language,
+                    trailingText: context.watch<WorkerLanguageProvider>().locale.languageCode.toUpperCase(),
                     onTap: () {
+                      final lang = context.read<WorkerLanguageProvider>();
+                      final currentCode = lang.locale.languageCode;
+
+                      final languages = [
+                        {'code': 'en', 'label': 'English'},
+                        {'code': 'ta', 'label': 'தமிழ் (Tamil)'},
+                        {'code': 'hi', 'label': 'हिन्दी (Hindi)'},
+                        {'code': 'ml', 'label': 'മലയാളം (Malayalam)'},
+                        {'code': 'kn', 'label': 'ಕನ್ನಡ (Kannada)'},
+                      ];
+
                       showModalBottomSheet(
                         context: context,
                         backgroundColor: Colors.white,
@@ -105,28 +118,31 @@ class _WorkerSettingsScreenState extends State<WorkerSettingsScreen> {
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Select Language / மொழியைத் தேர்ந்தெடுக்கவும்',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                Text(
+                                  lang.translate('select_language'),
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                 ),
                                 const SizedBox(height: 16),
-                                ListTile(
-                                  title: const Text('English'),
-                                  trailing: _language == 'English' ? const Icon(Icons.check_circle, color: Color(0xFF0F172A)) : null,
-                                  onTap: () {
-                                    setState(() => _language = 'English');
-                                    Navigator.pop(ctx);
-                                  },
-                                ),
-                                const Divider(height: 1),
-                                ListTile(
-                                  title: const Text('தமிழ் (Tamil)'),
-                                  trailing: _language == 'Tamil' ? const Icon(Icons.check_circle, color: Color(0xFF0F172A)) : null,
-                                  onTap: () {
-                                    setState(() => _language = 'Tamil');
-                                    Navigator.pop(ctx);
-                                  },
-                                ),
+                                ...languages.map((item) {
+                                  final code = item['code']!;
+                                  final label = item['label']!;
+                                  final isSelected = currentCode == code;
+
+                                  return Column(
+                                    key: ValueKey(code),
+                                    children: [
+                                      ListTile(
+                                        title: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+                                        trailing: isSelected ? const Icon(Icons.check_circle, color: Color(0xFF0F172A)) : null,
+                                        onTap: () {
+                                          lang.setLanguage(code);
+                                          Navigator.pop(ctx);
+                                        },
+                                      ),
+                                      if (code != 'kn') const Divider(height: 1),
+                                    ],
+                                  );
+                                }),
                               ],
                             ),
                           );

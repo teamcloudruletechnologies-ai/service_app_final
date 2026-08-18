@@ -55,32 +55,47 @@ class MenuScreen extends StatelessWidget {
       context: context,
       builder: (ctx) {
         final lang = Provider.of<LanguageProvider>(context, listen: false);
+        final currentCode = lang.locale.languageCode;
+
+        final languages = [
+          {'code': 'en', 'label': 'English'},
+          {'code': 'ta', 'label': 'தமிழ் (Tamil)'},
+          {'code': 'hi', 'label': 'हिन्दी (Hindi)'},
+          {'code': 'ml', 'label': 'മലയാളം (Malayalam)'},
+          {'code': 'kn', 'label': 'ಕನ್ನಡ (Kannada)'},
+        ];
+
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text('Select Language / மொழி', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                title: const Text('English', style: TextStyle(fontWeight: FontWeight.w700)),
-                trailing: !lang.isTamil ? const Icon(Icons.check_circle_rounded, color: AppTheme.primaryDark) : null,
-                onTap: () {
-                  lang.setLanguage('en');
-                  Navigator.pop(ctx);
-                },
-              ),
-              const Divider(height: 1),
-              ListTile(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                title: const Text('தமிழ் (Tamil)', style: TextStyle(fontWeight: FontWeight.w700)),
-                trailing: lang.isTamil ? const Icon(Icons.check_circle_rounded, color: AppTheme.primaryDark) : null,
-                onTap: () {
-                  lang.setLanguage('ta');
-                  Navigator.pop(ctx);
-                },
-              ),
-            ],
+          title: Text(
+            lang.translate('select_language'),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: languages.map((item) {
+                final code = item['code']!;
+                final label = item['label']!;
+                final isSelected = currentCode == code;
+
+                return Column(
+                  key: ValueKey(code),
+                  children: [
+                    ListTile(
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      title: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+                      trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: AppTheme.primaryDark) : null,
+                      onTap: () {
+                        lang.setLanguage(code);
+                        Navigator.pop(ctx);
+                      },
+                    ),
+                    if (code != 'kn') const Divider(height: 1),
+                  ],
+                );
+              }).toList(),
+            ),
           ),
         );
       },
