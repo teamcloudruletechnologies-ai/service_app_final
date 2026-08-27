@@ -141,6 +141,16 @@ async function initDb() {
     ALTER TABLE services ADD COLUMN IF NOT EXISTS icon TEXT;
     ALTER TABLE services ALTER COLUMN category_id DROP NOT NULL;
 
+    ALTER TABLE service_categories ADD COLUMN IF NOT EXISTS name_ta TEXT;
+    ALTER TABLE service_categories ADD COLUMN IF NOT EXISTS name_hi TEXT;
+    ALTER TABLE service_categories ADD COLUMN IF NOT EXISTS name_ml TEXT;
+    ALTER TABLE service_categories ADD COLUMN IF NOT EXISTS name_kn TEXT;
+
+    ALTER TABLE services ADD COLUMN IF NOT EXISTS name_ta TEXT;
+    ALTER TABLE services ADD COLUMN IF NOT EXISTS name_hi TEXT;
+    ALTER TABLE services ADD COLUMN IF NOT EXISTS name_ml TEXT;
+    ALTER TABLE services ADD COLUMN IF NOT EXISTS name_kn TEXT;
+
     CREATE TABLE IF NOT EXISTS zones (
       id SERIAL PRIMARY KEY,
       name VARCHAR(120) NOT NULL,

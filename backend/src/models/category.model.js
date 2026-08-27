@@ -1,12 +1,12 @@
 const db = require("../config/db");
 const { paged } = require("../utils/pagination");
 
-async function create({ name, description, icon_url, status, parent_id }) {
+async function create({ name, description, icon_url, status, parent_id, name_ta, name_hi, name_ml, name_kn }) {
   const result = await db.query(
-    `INSERT INTO service_categories (name, description, icon_url, status, parent_id)
-     VALUES ($1, $2, $3, COALESCE($4, 'active'), $5)
+    `INSERT INTO service_categories (name, description, icon_url, status, parent_id, name_ta, name_hi, name_ml, name_kn)
+     VALUES ($1, $2, $3, COALESCE($4, 'active'), $5, $6, $7, $8, $9)
      RETURNING *`,
-    [name, description, icon_url || null, status, parent_id || null]
+    [name, description, icon_url || null, status, parent_id || null, name_ta || null, name_hi || null, name_ml || null, name_kn || null]
   );
   return result.rows[0];
 }
@@ -63,7 +63,7 @@ async function listSubCategories(parent_id, options = {}) {
 }
 
 async function update(id, values) {
-  const allowed = ["name", "description", "icon_url", "status", "parent_id"];
+  const allowed = ["name", "description", "icon_url", "status", "parent_id", "name_ta", "name_hi", "name_ml", "name_kn"];
   const sets = [];
   const params = [];
 

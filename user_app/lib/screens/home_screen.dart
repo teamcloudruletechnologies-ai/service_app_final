@@ -490,7 +490,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                         const SizedBox(height: 6),
                                         Text(
-                                          context.translate(cat.name),
+                                          context.translate(cat.name, nameTa: cat.nameTa, nameHi: cat.nameHi, nameMl: cat.nameMl, nameKn: cat.nameKn),
                                           style: TextStyle(
                                             fontSize: 13.5,
                                             height: 1.15,
@@ -630,7 +630,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Padding(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                                           child: Text(
-                                            context.translate(s.name),
+                                            context.translate(s.name, nameTa: s.nameTa, nameHi: s.nameHi, nameMl: s.nameMl, nameKn: s.nameKn),
                                             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF0F172A)),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,

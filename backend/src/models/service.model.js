@@ -1,10 +1,10 @@
 const db = require("../config/db");
 const { paged } = require("../utils/pagination");
 
-async function create({ category_id, name, description, image_url, status, icon, price, estimated_time, sub_services }) {
+async function create({ category_id, name, description, image_url, status, icon, price, estimated_time, sub_services, name_ta, name_hi, name_ml, name_kn }) {
   const result = await db.query(
-    `INSERT INTO services (category_id, name, description, image_url, status, icon, price, estimated_time, sub_services)
-     VALUES ($1, $2, $3, $4, COALESCE($5, 'active'), $6, $7, $8, $9)
+    `INSERT INTO services (category_id, name, description, image_url, status, icon, price, estimated_time, sub_services, name_ta, name_hi, name_ml, name_kn)
+     VALUES ($1, $2, $3, $4, COALESCE($5, 'active'), $6, $7, $8, $9, $10, $11, $12, $13)
      RETURNING *`,
     [
       category_id || null,
@@ -15,7 +15,11 @@ async function create({ category_id, name, description, image_url, status, icon,
       icon || null,
       price || 0,
       estimated_time || 60,
-      JSON.stringify(sub_services || [])
+      JSON.stringify(sub_services || []),
+      name_ta || null,
+      name_hi || null,
+      name_ml || null,
+      name_kn || null
     ]
   );
   return result.rows[0];
@@ -92,7 +96,7 @@ async function list({ page, limit, offset, search, category_id, status }) {
 }
 
 async function update(id, values) {
-  const allowed = ["category_id", "name", "description", "image_url", "status", "icon", "price", "estimated_time", "sub_services"];
+  const allowed = ["category_id", "name", "description", "image_url", "status", "icon", "price", "estimated_time", "sub_services", "name_ta", "name_hi", "name_ml", "name_kn"];
   const sets = [];
   const params = [];
 

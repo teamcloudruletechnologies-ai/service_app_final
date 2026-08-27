@@ -22,9 +22,15 @@ class LanguageProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  String translate(String key) {
+  String translate(String key, {String? nameTa, String? nameHi, String? nameMl, String? nameKn}) {
     if (key.trim().isEmpty) return key;
     final code = _locale.languageCode;
+
+    if (code == 'ta' && nameTa != null && nameTa.trim().isNotEmpty) return nameTa.trim();
+    if (code == 'hi' && nameHi != null && nameHi.trim().isNotEmpty) return nameHi.trim();
+    if (code == 'ml' && nameMl != null && nameMl.trim().isNotEmpty) return nameMl.trim();
+    if (code == 'kn' && nameKn != null && nameKn.trim().isNotEmpty) return nameKn.trim();
+
     final map = code == 'ta'
         ? _tamilStrings
         : code == 'hi'

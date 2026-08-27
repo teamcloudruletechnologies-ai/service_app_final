@@ -54,6 +54,10 @@ export default function Services() {
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
+    name_ta: '',
+    name_hi: '',
+    name_ml: '',
+    name_kn: '',
     category_id: '',
     description: '',
     image: '',
@@ -131,6 +135,10 @@ export default function Services() {
     setEditingService(null);
     setFormData({
       name: '',
+      name_ta: '',
+      name_hi: '',
+      name_ml: '',
+      name_kn: '',
       category_id: '',
       description: '',
       image: '',
@@ -150,7 +158,11 @@ export default function Services() {
         : service.sub_services;
     }
     setFormData({
-      name: service.name,
+      name: service.name || '',
+      name_ta: service.name_ta || '',
+      name_hi: service.name_hi || '',
+      name_ml: service.name_ml || '',
+      name_kn: service.name_kn || '',
       category_id: service.category_id || '',
       description: service.description || '',
       image: service.image_url || '',
@@ -176,8 +188,16 @@ export default function Services() {
     setSubmitting(true);
     const payload = {
       name: formData.name,
+      name_ta: formData.name_ta || null,
+      name_hi: formData.name_hi || null,
+      name_ml: formData.name_ml || null,
+      name_kn: formData.name_kn || null,
       category_id: formData.category_id ? parseInt(formData.category_id) : null,
       description: formData.description || null,
+      image_url: formData.image || null,
+      status: formData.status,
+      sub_services: formData.sub_services
+    };
       image: formData.image || '',
       status: formData.status,
       sub_services: formData.sub_services.map(s => ({
@@ -468,7 +488,7 @@ export default function Services() {
               
               {/* Name */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Service Name</label>
+                <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Service Name (English)</label>
                 <input
                   type="text"
                   required
@@ -477,6 +497,55 @@ export default function Services() {
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   style={{ padding: '8px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 13, outline: 'none' }}
                 />
+              </div>
+
+              {/* Regional Multi-Language Names */}
+              <div style={{ border: '1px solid #E2E8F0', borderRadius: 10, padding: 12, background: '#F8FAFC', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <label style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  🌐 Regional Language Names (Multi-Language Support)
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#475569' }}>🇮🇳 Tamil Name (தமிழ்)</label>
+                    <input
+                      type="text"
+                      placeholder="எ.கா. பிளம்பிங் சேவை"
+                      value={formData.name_ta || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name_ta: e.target.value }))}
+                      style={{ width: '100%', padding: '6px 10px', border: '1px solid #CBD5E1', borderRadius: 6, fontSize: 12, marginTop: 2 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#475569' }}>🇮🇳 Hindi Name (हिन्दी)</label>
+                    <input
+                      type="text"
+                      placeholder="उदा. नलसाजी सेवा"
+                      value={formData.name_hi || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name_hi: e.target.value }))}
+                      style={{ width: '100%', padding: '6px 10px', border: '1px solid #CBD5E1', borderRadius: 6, fontSize: 12, marginTop: 2 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#475569' }}>🇮🇳 Malayalam Name (മലയാളം)</label>
+                    <input
+                      type="text"
+                      placeholder="ഉദാ. പ്ലംബിംഗ് സേവനം"
+                      value={formData.name_ml || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name_ml: e.target.value }))}
+                      style={{ width: '100%', padding: '6px 10px', border: '1px solid #CBD5E1', borderRadius: 6, fontSize: 12, marginTop: 2 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#475569' }}>🇮🇳 Kannada Name (ಕನ್ನಡ)</label>
+                    <input
+                      type="text"
+                      placeholder="ಉದಾ. ಪ್ಲಂಬಿಂಗ್ ಸೇವೆ"
+                      value={formData.name_kn || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name_kn: e.target.value }))}
+                      style={{ width: '100%', padding: '6px 10px', border: '1px solid #CBD5E1', borderRadius: 6, fontSize: 12, marginTop: 2 }}
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Category Dropdown */}

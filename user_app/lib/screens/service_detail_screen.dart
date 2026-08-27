@@ -182,7 +182,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                         children: [
                           // Service Name Title
                           Text(
-                            context.translate(widget.service.name),
+                            context.translate(widget.service.name, nameTa: widget.service.nameTa, nameHi: widget.service.nameHi, nameMl: widget.service.nameMl, nameKn: widget.service.nameKn),
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,

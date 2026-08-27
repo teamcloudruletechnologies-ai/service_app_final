@@ -61,6 +61,10 @@ class UserAccount {
 class ServiceCategory {
   final int id;
   final String name;
+  final String? nameTa;
+  final String? nameHi;
+  final String? nameMl;
+  final String? nameKn;
   final String? description;
   final String? iconUrl;
   final String status;
@@ -68,6 +72,10 @@ class ServiceCategory {
   const ServiceCategory({
     required this.id,
     required this.name,
+    this.nameTa,
+    this.nameHi,
+    this.nameMl,
+    this.nameKn,
     this.description,
     this.iconUrl,
     required this.status,
@@ -77,6 +85,10 @@ class ServiceCategory {
     return ServiceCategory(
       id: json['id'] as int,
       name: json['name'] as String? ?? '',
+      nameTa: json['name_ta'] as String?,
+      nameHi: json['name_hi'] as String?,
+      nameMl: json['name_ml'] as String?,
+      nameKn: json['name_kn'] as String?,
       description: json['description'] as String?,
       iconUrl: json['icon_url'] as String?,
       status: json['status'] as String? ?? 'active',
@@ -115,6 +127,10 @@ class ServiceItem {
   final int id;
   final int? categoryId;
   final String name;
+  final String? nameTa;
+  final String? nameHi;
+  final String? nameMl;
+  final String? nameKn;
   final String? description;
   final String? imageUrl;
   final String? categoryName;
@@ -132,6 +148,10 @@ class ServiceItem {
     required this.id,
     this.categoryId,
     required this.name,
+    this.nameTa,
+    this.nameHi,
+    this.nameMl,
+    this.nameKn,
     this.description,
     this.imageUrl,
     this.categoryName,
@@ -158,6 +178,10 @@ class ServiceItem {
       id: json['id'] as int,
       categoryId: json['category_id'] as int?,
       name: json['name'] as String? ?? '',
+      nameTa: json['name_ta'] as String?,
+      nameHi: json['name_hi'] as String?,
+      nameMl: json['name_ml'] as String?,
+      nameKn: json['name_kn'] as String?,
       description: json['description'] as String?,
       imageUrl: json['image_url'] as String?,
       categoryName: json['category_name'] as String?,
