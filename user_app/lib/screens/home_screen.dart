@@ -350,16 +350,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Categories',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
+                      Text(
+                        context.translate('categories'),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
                       ),
                       TextButton(
                         onPressed: () {
                           catalog.selectCategory(null);
                         },
                         child: Text(
-                          'Show All',
+                          context.translate('show_all'),
                           style: TextStyle(
                             color: catalog.selectedCategoryId != null ? const Color(0xFF0F172A) : const Color(0xFF0F172A),
                             fontWeight: FontWeight.w800,
@@ -515,9 +515,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Padding(
                   key: _servicesKey,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: const Text(
-                    'Our Services',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
+                  child: Text(
+                    context.translate('our_services'),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF1A1A1A)),
                   ),
                 ),
                 const SizedBox(height: 14),

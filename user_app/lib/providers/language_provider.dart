@@ -65,6 +65,9 @@ class LanguageProvider extends ChangeNotifier {
     'notifications': 'Notifications',
     'services_bookings': 'SERVICES & BOOKINGS',
     'account_settings_sec': 'ACCOUNT & SETTINGS',
+    'categories': 'Categories',
+    'show_all': 'Show All',
+    'our_services': 'Our Services',
     
     // Categories
     'cat_all': 'All',
@@ -97,7 +100,8 @@ class LanguageProvider extends ChangeNotifier {
     'selected_pro': 'Selected Professional',
 
     // Bookings
-    'my_bookings': 'My Bookings',
+    'my_bookings': 'Bookings',
+    'bookings': 'Bookings',
     'guest_mode': 'Guest Mode Active',
     'login_prompt': 'Log in to view your booked appointments and track service history.',
     'login_register': 'Log In / Register',
@@ -184,6 +188,9 @@ class LanguageProvider extends ChangeNotifier {
     'notifications': 'அறிவிப்புகள்',
     'services_bookings': 'சேவைகள் & முன்பதிவுகள்',
     'account_settings_sec': 'கணக்கு & அமைப்புகள்',
+    'categories': 'பிரிவுகள்',
+    'show_all': 'அனைத்தும்',
+    'our_services': 'எங்கள் சேவைகள்',
     'cat_all': 'அனைத்தும்',
     'cat_cleaning': 'சுத்தம் செய்தல்',
     'cat_plumbing': 'குழாய் வேலை',
@@ -208,7 +215,8 @@ class LanguageProvider extends ChangeNotifier {
     'booking_placed': 'முன்பதிவு செய்யப்பட்டது! கட்டணப் பக்கத்திற்குச் செல்கிறது...',
     'booking_failed': 'முன்பதிவு தோல்வியடைந்தது',
     'selected_pro': 'தேர்ந்தெடுக்கப்பட்ட வல்லுநர்',
-    'my_bookings': 'எனது முன்பதிவுகள்',
+    'my_bookings': 'முன்பதிவுகள்',
+    'bookings': 'முன்பதிவுகள்',
     'guest_mode': 'விருந்தினர் பயன்முறை',
     'login_prompt': 'உங்கள் முன்பதிவுகளைக் காண மற்றும் சேவை வரலாற்றைக் கண்காணிக்க உள்நுழையவும்.',
     'login_register': 'உள்நுழைக / பதிவு செய்க',
@@ -235,7 +243,7 @@ class LanguageProvider extends ChangeNotifier {
     'status_paymentpending_badge': 'கட்டணம் நிலுவையில்',
     'status_completed_badge': 'முன்பதிவு முடிந்தது',
     'status_cancelled_badge': 'ரத்து செய்யப்பட்டது',
-    'menu': 'பட்டி',
+    'menu': 'மெனு',
     'guest_user': 'விருந்தினர்',
     'sign_in_access': 'மெனுவை அணுக உள்நுழையவும்',
     'account_settings': 'கணக்கு அமைப்புகள்',
@@ -265,7 +273,7 @@ class LanguageProvider extends ChangeNotifier {
     'faq_1_q': 'ஒரு சேவையை எவ்வாறு முன்பதிவு செய்வது?',
     'faq_1_a': 'முகப்புத் திரையில் இருந்து ஒரு சேவையைத் தேர்ந்தெடுத்து, துணைப்பிரிவைத் தேர்ந்தெடுத்து, வல்லுநரைத் தேர்வுசெய்து (விரும்பினால்), தேதி மற்றும் நேரத்தை அமைத்து, உங்கள் முகவரியை உள்ளிட்டு, ரேஸர்பே மூலம் பணம் செலுத்துங்கள்.',
     'faq_2_q': 'முன்பதிவை ரத்து செய்ய முடியுமா?',
-    'faq_2_a': 'ஆம், சேவை தொடங்கும் முன் எப்போது வேண்டுமானாலும் முன்பதிவை ரத்து செய்யலாம். "எனது முன்பதிவுகள்" சென்று "முன்பதிவை ரத்து செய்" என்பதைத் தட்டவும்.',
+    'faq_2_a': 'ஆம், சேவை தொடங்கும் முன் எப்போது வேண்டுமானாலும் முன்பதிவை ரத்து செய்யலாம். "முன்பதிவுகள்" சென்று "முன்பதிவை ரத்து செய்" என்பதைத் தட்டவும்.',
     'faq_3_q': 'சேவைகளுக்கு எவ்வாறு பணம் செலுத்துவது?',
     'faq_3_a': 'யுபிஐ, கார்டுகள், நெட்பேங்கிங் மற்றும் வாலெட்டுகளை ஆதரிக்கும் ரேஸர்பே மூலம் ஆன்லைனில் பாதுகாப்பாகப் பணம் செலுத்தலாம்.',
     'faq_4_q': 'கோல்ட் மெம்பர்ஷிப் என்றால் என்ன?',
@@ -276,6 +284,7 @@ class LanguageProvider extends ChangeNotifier {
     'app_name': 'अर्बन सर्व',
     'welcome_guest': 'नमस्ते अतिथि',
     'hey': 'नमस्ते, ',
+    'home': 'होम',
     'search_hint': 'सेवाएं, प्लंबिंग, सफाई खोजें...',
     'detecting_location': 'स्थान खोजा जा रहा है...',
     'gold_flash_sale': 'फ्लैश सेल',
@@ -283,6 +292,9 @@ class LanguageProvider extends ChangeNotifier {
     'renew_gold': 'गोल्ड मेंबरशिप नवीनीकृत करें',
     'explore': 'एक्सप्लोर करें',
     'offers': 'ऑफ़र',
+    'categories': 'श्रेणियां',
+    'show_all': 'सभी देखें',
+    'our_services': 'हमारी सेवाएं',
     'cat_all': 'सभी',
     'cat_cleaning': 'सफाई',
     'cat_plumbing': 'प्लंबिंग',
@@ -307,7 +319,8 @@ class LanguageProvider extends ChangeNotifier {
     'booking_placed': 'बुकिंग हो गई! भुगतान पर जा रहे हैं...',
     'booking_failed': 'बुकिंग विफल रही',
     'selected_pro': 'चयनित पेशेवर',
-    'my_bookings': 'मेरी बुकिंग',
+    'my_bookings': 'बुकिंग',
+    'bookings': 'बुकिंग',
     'guest_mode': 'अतिथि मोड सक्रिय',
     'login_prompt': 'अपनी बुकिंग देखने के लिए लॉगिन करें।',
     'login_register': 'लॉग इन / रजिस्टर करें',
@@ -350,6 +363,7 @@ class LanguageProvider extends ChangeNotifier {
     'app_name': 'അർബൻ സെർവ്',
     'welcome_guest': 'സ്വാഗതം',
     'hey': 'ഹലോ, ',
+    'home': 'ഹോം',
     'search_hint': 'സേവനങ്ങൾ, പ്ലംബിംഗ്, ക്ലീനിംഗ് തിരയുക...',
     'detecting_location': 'ലൊക്കേഷൻ കണ്ടെത്തുന്നു...',
     'gold_flash_sale': 'ഫ്ലാഷ് സെയിൽ',
@@ -357,6 +371,9 @@ class LanguageProvider extends ChangeNotifier {
     'renew_gold': 'ഗോൾഡ് മെമ്പർഷിപ്പ് പുതുക്കുക',
     'explore': 'കണ്ടെത്തുക',
     'offers': 'ഓഫറുകൾ',
+    'categories': 'വിഭാഗങ്ങൾ',
+    'show_all': 'എല്ലാം കാണുക',
+    'our_services': 'ഞങ്ങളുടെ സേവനങ്ങൾ',
     'cat_all': 'എല്ലാം',
     'cat_cleaning': 'ക്ലീനിംഗ്',
     'cat_plumbing': 'പ്ലംബിംഗ്',
@@ -381,7 +398,8 @@ class LanguageProvider extends ChangeNotifier {
     'booking_placed': 'ബുക്കിംഗ് വിജയകരമായി പൂർത്തിയായി!',
     'booking_failed': 'ബുക്കിംഗ് പരാജയപ്പെട്ടു',
     'selected_pro': 'തിരഞ്ഞെടുത്ത പ്രൊഫഷണൽ',
-    'my_bookings': 'എന്റെ ബുക്കിംഗുകൾ',
+    'my_bookings': 'ബുക്കിംഗുകൾ',
+    'bookings': 'ബുക്കിംഗുകൾ',
     'guest_mode': 'ഗസ്റ്റ് മോഡ്',
     'login_prompt': 'ബുക്കിംഗുകൾ കാണാൻ ലോഗിൻ ചെയ്യുക.',
     'login_register': 'ലോഗിൻ / രജിസ്റ്റർ ചെയ്യുക',
@@ -424,6 +442,7 @@ class LanguageProvider extends ChangeNotifier {
     'app_name': 'ಅರ್ಬನ್ ಸರ್ವ್',
     'welcome_guest': 'ಸ್ವಾಗತ ಅತಿಥಿ',
     'hey': 'ಹಲೋ, ',
+    'home': 'ಮುಖಪುಟ',
     'search_hint': 'ಸೇವೆಗಳು, ಪ್ಲಂಬಿಂಗ್, ಕ್ಲೀನಿಂಗ್ ಹುಡುಕಿ...',
     'detecting_location': 'ಸ್ಥಳ ಪತ್ತೆ ಮಾಡಲಾಗುತ್ತಿದೆ...',
     'gold_flash_sale': 'ಫ್ಲ್ಯಾಶ್ ಸೇಲ್',
@@ -431,6 +450,9 @@ class LanguageProvider extends ChangeNotifier {
     'renew_gold': 'ಗೋಲ್ಡ್ ಸದಸ್ಯತ್ವ ನವೀಕರಿಸಿ',
     'explore': 'ಅನ್ವೇಷಿಸಿ',
     'offers': 'ಆಫರ್‌ಗಳು',
+    'categories': 'ವರ್ಗಗಳು',
+    'show_all': 'ಎಲ್ಲವನ್ನೂ ತೋರಿಸಿ',
+    'our_services': 'ನಮ್ಮ ಸೇವೆಗಳು',
     'cat_all': 'ಎಲ್ಲವೂ',
     'cat_cleaning': 'ಕ್ಲೀನಿಂಗ್',
     'cat_plumbing': 'ಪ್ಲಂಬಿಂಗ್',
@@ -455,7 +477,8 @@ class LanguageProvider extends ChangeNotifier {
     'booking_placed': 'ಬುಕಿಂಗ್ ಯಶಸ್ವಿಯಾಗಿದೆ!',
     'booking_failed': 'ಬುಕಿಂಗ್ ವಿಫಲವಾಗಿದೆ',
     'selected_pro': 'ಆಯ್ಕೆಯಾದ ತಜ್ಞರು',
-    'my_bookings': 'ನನ್ನ ಬುಕಿಂಗ್‌ಗಳು',
+    'my_bookings': 'ಬುಕಿಂಗ್ಸ್',
+    'bookings': 'ಬುಕಿಂಗ್ಸ್',
     'guest_mode': 'ಅತಿಥಿ ಮೋಡ್ ಸಕ್ರಿಯವಾಗಿದೆ',
     'login_prompt': 'ಬುಕಿಂಗ್ ನೋಡಲು ಲಾಗಿನ್ ಮಾಡಿ.',
     'login_register': 'ಲಾಗಿನ್ / ನೋಂದಾಯಿಸಿ',
@@ -496,9 +519,15 @@ class LanguageProvider extends ChangeNotifier {
 }
 
 extension TranslationExtension on BuildContext {
-  String translate(String key) {
+  String translate(String key, {String? nameTa, String? nameHi, String? nameMl, String? nameKn}) {
     try {
-      return Provider.of<LanguageProvider>(this).translate(key);
+      return Provider.of<LanguageProvider>(this).translate(
+        key,
+        nameTa: nameTa,
+        nameHi: nameHi,
+        nameMl: nameMl,
+        nameKn: nameKn,
+      );
     } catch (_) {
       return key;
     }

@@ -57,37 +57,47 @@ class _MainShellState extends State<MainShell> {
 
   Widget _buildNavItem(int index, IconData outlineIcon, IconData solidIcon, String label) {
     final isSelected = _index == index;
-    final activeColor = const Color(0xFF0F172A);
-    final inactiveColor = const Color(0xFF94A3B8);
+    const activeColor = Color(0xFF0F172A);
+    const inactiveColor = Color(0xFF94A3B8);
 
-    return GestureDetector(
-      onTap: () {
-        setState(() => _index = index);
-        if (index == 1) {
-          context.read<BookingProvider>().loadBookings();
-        }
-      },
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 72,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isSelected ? solidIcon : outlineIcon,
-              color: isSelected ? activeColor : inactiveColor,
-              size: 25,
-            ),
-            const SizedBox(height: 3),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected ? const Color(0xFF1A1A1A) : inactiveColor,
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          setState(() => _index = index);
+          if (index == 1) {
+            context.read<BookingProvider>().loadBookings();
+          }
+        },
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isSelected ? solidIcon : outlineIcon,
+                color: isSelected ? activeColor : inactiveColor,
+                size: 24,
               ),
-            ),
-          ],
+              const SizedBox(height: 3),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    color: isSelected ? const Color(0xFF0F172A) : inactiveColor,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -99,8 +109,6 @@ class _MainShellState extends State<MainShell> {
       backgroundColor: AppTheme.surface,
       body: IndexedStack(index: _index, children: _pages),
       bottomNavigationBar: Container(
-        height: 62 + MediaQuery.paddingOf(context).bottom,
-        padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -114,13 +122,19 @@ class _MainShellState extends State<MainShell> {
             top: BorderSide(color: Color(0xFFF1F5F9), width: 1.0),
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, context.translate('home')),
-            _buildNavItem(1, Icons.calendar_today_outlined, Icons.calendar_month_rounded, context.translate('my_bookings')),
-            _buildNavItem(2, Icons.grid_view_outlined, Icons.grid_view_rounded, context.translate('menu')),
-          ],
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 60,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, context.translate('home')),
+                _buildNavItem(1, Icons.calendar_today_outlined, Icons.calendar_month_rounded, context.translate('my_bookings')),
+                _buildNavItem(2, Icons.grid_view_outlined, Icons.grid_view_rounded, context.translate('menu')),
+              ],
+            ),
+          ),
         ),
       ),
     );
