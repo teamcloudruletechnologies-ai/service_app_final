@@ -88,11 +88,57 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void _showError(String errorMsg) {
     setState(() {
       _messages.add(ChatMessage(
-        text: "⚠️ $errorMsg",
+        text: "Error: $errorMsg",
         isUser: false,
         timestamp: DateTime.now(),
       ));
     });
+  }
+
+  Widget _buildQuickReplies() {
+    return Container(
+      margin: const EdgeInsets.only(left: 10, right: 60, top: 5, bottom: 5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          OutlinedButton(
+            onPressed: () {
+              _messageController.text = "Show my current booking";
+              _sendMessage();
+            },
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.blue[50],
+              alignment: Alignment.centerLeft,
+            ),
+            child: const Text("📅 My Current Booking"),
+          ),
+          const SizedBox(height: 5),
+          OutlinedButton(
+            onPressed: () {
+              _messageController.text = "Show my past bookings";
+              _sendMessage();
+            },
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.blue[50],
+              alignment: Alignment.centerLeft,
+            ),
+            child: const Text("📜 Past Bookings"),
+          ),
+          const SizedBox(height: 5),
+          OutlinedButton(
+            onPressed: () {
+              _messageController.text = "Reschedule my booking";
+              _sendMessage();
+            },
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Colors.blue[50],
+              alignment: Alignment.centerLeft,
+            ),
+            child: const Text("⏰ Reschedule"),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildMessageBubble(ChatMessage message) {
@@ -139,6 +185,15 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 padding: const EdgeInsets.all(8),
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildMessageBubble(_messages[0]),
+                        _buildQuickReplies(),
+                      ],
+                    );
+                  }
                   return _buildMessageBubble(_messages[index]);
                 },
               ),
@@ -157,53 +212,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                 ),
               ),
               
-            // Quick Reply Chips (Line by Line)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              color: Colors.white,
-              width: double.infinity,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  OutlinedButton(
-                    onPressed: () {
-                      _messageController.text = "Show my current booking";
-                      _sendMessage();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.blue[50],
-                      alignment: Alignment.centerLeft,
-                    ),
-                    child: const Text("📅 My Current Booking"),
-                  ),
-                  const SizedBox(height: 5),
-                  OutlinedButton(
-                    onPressed: () {
-                      _messageController.text = "Show my past bookings";
-                      _sendMessage();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.blue[50],
-                      alignment: Alignment.centerLeft,
-                    ),
-                    child: const Text("📜 Past Bookings"),
-                  ),
-                  const SizedBox(height: 5),
-                  OutlinedButton(
-                    onPressed: () {
-                      _messageController.text = "Reschedule my booking";
-                      _sendMessage();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.blue[50],
-                      alignment: Alignment.centerLeft,
-                    ),
-                    child: const Text("⏰ Reschedule"),
-                  ),
-                ],
-              ),
-            ),
-
             // Input Box
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
@@ -238,6 +246,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

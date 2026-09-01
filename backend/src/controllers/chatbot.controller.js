@@ -14,24 +14,28 @@ exports.handleWebhook = async (req, res) => {
       });
     }
 
-    // Step 1: Intent Detection
-    const intent = detectIntent(message);
-    
-    let reply = "";
-
-    // Step 2: Route to specific service logic based on intent (Now async)
-    switch (intent) {
-      case 'CURRENT_BOOKING':
-        reply = await chatbotService.handleCurrentBooking(userId);
-        break;
-      case 'PAST_BOOKINGS':
-        reply = await chatbotService.handlePastBookings(userId);
-        break;
-      case 'RESCHEDULE':
-        reply = await chatbotService.handleReschedule(userId, message);
-        break;
-      default:
-        reply = chatbotService.handleUnknown();
+    // Check Multi-turn Session State First
+    const session = chatbotService.getSession(userId);
+    if (session && session.step === 'WAITING_FOR_DATE') {
+      reply = await chatbotService.processRescheduleDate(userId, message);
+    } else {
+      // Step 1: Normal Intent Detection
+      const intent = detectIntent(message);
+      
+      // Step 2: Route to specific service logic based on intent
+      switch (intent) {
+        case 'CURRENT_BOOKING':
+          reply = await chatbotService.handleCurrentBooking(userId);
+          break;
+        case 'PAST_BOOKINGS':
+          reply = await chatbotService.handlePastBookings(userId);
+          break;
+        case 'RESCHEDULE':
+          reply = await chatbotService.handleRescheduleInit(userId);
+          break;
+        default:
+          reply = chatbotService.handleUnknown();
+      }
     }
 
     // Step 3: Send Webhook Response
