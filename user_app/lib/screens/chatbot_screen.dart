@@ -14,8 +14,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   bool _isTyping = false;
   
   // NOTE: If testing on Android Emulator, 10.0.2.2 points to your computer's localhost.
-  // If testing on a real device, replace this with your computer's IP address (e.g., 192.168.1.10)
-  final String _webhookUrl = 'http://10.0.2.2:3000/api/webhook/urban'; 
+  // Using the live Render URL since the backend is already deployed.
+  final String _webhookUrl = 'https://service-app-final.onrender.com/api/webhook/urban'; 
+
 
   @override
   void initState() {
