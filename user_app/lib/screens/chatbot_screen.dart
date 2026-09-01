@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../models/chat_message.dart';
+import '../providers/auth_provider.dart';
 
 class ChatbotScreen extends StatefulWidget {
   @override
@@ -16,7 +18,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   // NOTE: If testing on Android Emulator, 10.0.2.2 points to your computer's localhost.
   // Using the live Render URL since the backend is already deployed.
   final String _webhookUrl = 'https://service-app-final.onrender.com/api/webhook/urban'; 
-
 
   @override
   void initState() {
@@ -45,15 +46,18 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     _messageController.clear();
 
+    // Get real User ID from Provider, fallback to 1 if testing without login
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final int userId = authProvider.user?.id ?? 1;
+
     // 2. Call the Node.js Webhook
     try {
       final response = await http.post(
         Uri.parse(_webhookUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'userId': 'U1024', // Dummy ID for now, can be fetched from Auth provider
+          'userId': userId,
           'message': text,
-          'bookingId': 'B-1234', // Dummy booking ID for tracking testing
           'platform': 'flutter',
         }),
       );
