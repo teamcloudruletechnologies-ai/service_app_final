@@ -3,8 +3,10 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../providers/language_provider.dart';
 import '../theme/app_theme.dart';
 import 'main_shell.dart';
+
 
 class UserOnboardingScreen extends StatefulWidget {
   const UserOnboardingScreen({super.key});
@@ -246,12 +248,12 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                 // Full Name Input
                 TextFormField(
                   controller: _nameCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name *',
-                    hintText: 'Full Name',
-                    prefixIcon: Icon(Icons.person_outline_rounded),
+                  decoration: InputDecoration(
+                    labelText: context.translate('full_name_required'),
+                    hintText: context.translate('full_name'),
+                    prefixIcon: const Icon(Icons.person_outline_rounded),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Full Name is required' : null,
+                  validator: (v) => (v == null || v.trim().isEmpty) ? context.translate('enter_name_hint') : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -259,13 +261,14 @@ class _UserOnboardingScreenState extends State<UserOnboardingScreen> {
                 TextFormField(
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email Address (Optional)',
-                    hintText: 'Email Address',
-                    prefixIcon: Icon(Icons.email_outlined),
+                  decoration: InputDecoration(
+                    labelText: context.translate('email_optional'),
+                    hintText: context.translate('email_address'),
+                    prefixIcon: const Icon(Icons.email_outlined),
                   ),
                 ),
                 const SizedBox(height: 24),
+
 
                 // Select Your Type (Home vs Other)
                 const Text(

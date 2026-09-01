@@ -45,9 +45,9 @@ class ProfileScreen extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'Edit Profile',
-                        style: TextStyle(
+                      Text(
+                        context.translate('edit_profile'),
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w800,
                           color: Color(0xFF0F172A),
@@ -67,11 +67,11 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 24),
-                      _buildTextField('Full Name', nameCtrl, Icons.person_outline_rounded),
+                      _buildTextField(context.translate('full_name'), nameCtrl, Icons.person_outline_rounded, context),
                       const SizedBox(height: 16),
-                      _buildTextField('Email Address', emailCtrl, Icons.mail_outline_rounded),
+                      _buildTextField(context.translate('email_address'), emailCtrl, Icons.mail_outline_rounded, context, isEmail: true),
                       const SizedBox(height: 16),
-                      _buildTextField('Phone Number', phoneCtrl, Icons.phone_outlined),
+                      _buildTextField(context.translate('phone_number'), phoneCtrl, Icons.phone_outlined, context),
                       const SizedBox(height: 28),
                       Row(
                         children: [
@@ -86,7 +86,7 @@ class ProfileScreen extends StatelessWidget {
                                 ),
                                 foregroundColor: const Color(0xFF475569),
                               ),
-                              child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+                              child: Text(context.translate('cancel'), style: const TextStyle(fontWeight: FontWeight.w700)),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -106,11 +106,11 @@ class ProfileScreen extends StatelessWidget {
 
                                 if (ok) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Profile updated successfully')),
+                                    SnackBar(content: Text(context.translate('profile_updated'))),
                                   );
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text(auth.error ?? 'Failed to update profile')),
+                                    SnackBar(content: Text(auth.error ?? context.translate('failed_to_update'))),
                                   );
                                 }
                               },
@@ -123,7 +123,7 @@ class ProfileScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.w800)),
+                              child: Text(context.translate('save_changes'), style: const TextStyle(fontWeight: FontWeight.w800)),
                             ),
                           ),
                         ],
@@ -139,7 +139,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController ctrl, IconData icon) {
+  Widget _buildTextField(String label, TextEditingController ctrl, IconData icon, BuildContext context, {bool isEmail = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -171,14 +171,15 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           validator: (v) {
-            if (v == null || v.trim().isEmpty) return 'Required';
-            if (label == 'Email Address' && !v.contains('@')) return 'Enter a valid email';
+            if (v == null || v.trim().isEmpty) return context.translate('required_field');
+            if (isEmail && !v.contains('@')) return context.translate('enter_valid_email');
             return null;
           },
         ),
       ],
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -278,11 +279,11 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // ─── SECTION 1: ACCOUNT DETAILS ───
-            const Padding(
-              padding: EdgeInsets.only(left: 4, bottom: 10),
+            Padding(
+              padding: const EdgeInsets.only(left: 4, bottom: 10),
               child: Text(
-                'ACCOUNT DETAILS',
-                style: TextStyle(
+                context.translate('account_details'),
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w900,
                   color: Color(0xFF64748B),
@@ -309,7 +310,7 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.mail_rounded,
                     iconBg: const Color(0xFFEEF2FF),
                     iconColor: const Color(0xFF4F46E5),
-                    title: 'Email Address',
+                    title: context.translate('email_address'),
                     value: user?.email ?? 'Not set',
                   ),
                   const Divider(height: 1, color: Color(0xFFF1F5F9), indent: 64, endIndent: 16),
@@ -317,7 +318,7 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.phone_rounded,
                     iconBg: const Color(0xFFECFDF5),
                     iconColor: const Color(0xFF059669),
-                    title: 'Phone Number',
+                    title: context.translate('phone_number'),
                     value: user?.phone ?? 'Not set',
                   ),
                   const Divider(height: 1, color: Color(0xFFF1F5F9), indent: 64, endIndent: 16),
@@ -325,7 +326,7 @@ class ProfileScreen extends StatelessWidget {
                     icon: Icons.verified_user_rounded,
                     iconBg: const Color(0xFFFEF3C7),
                     iconColor: const Color(0xFFD97706),
-                    title: 'Account Status',
+                    title: context.translate('account_status'),
                     value: (user?.status ?? 'active').toUpperCase(),
                     isBadge: true,
                   ),
@@ -339,9 +340,9 @@ class ProfileScreen extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () => _showEditDialog(context, user),
                 icon: const Icon(Icons.edit_rounded, size: 20),
-                label: const Text(
-                  'Edit Profile',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                label: Text(
+                  context.translate('edit_profile'),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                 ),
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(54),
@@ -356,9 +357,9 @@ class ProfileScreen extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: () => _logout(context),
               icon: const Icon(Icons.logout_rounded, size: 20, color: Color(0xFFDC2626)),
-              label: const Text(
-                'Logout',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFFDC2626)),
+              label: Text(
+                context.translate('logout'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFFDC2626)),
               ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(52),
@@ -374,6 +375,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
+
 
 class _ProfileDetailRow extends StatelessWidget {
   const _ProfileDetailRow({
