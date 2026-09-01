@@ -18,6 +18,8 @@ import 'location_picker_screen.dart';
 import 'notification_screen.dart';
 import 'profile_screen.dart';
 import 'service_detail_screen.dart';
+import 'chatbot_screen.dart';
+
 import 'nearby_workers_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -109,6 +111,16 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Scaffold(
         backgroundColor: const Color(0xFFFAFAFC),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ChatbotScreen()),
+            );
+          },
+          backgroundColor: AppTheme.primary,
+          child: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+        ),
         body: SafeArea(
           child: RefreshIndicator(
             onRefresh: () async {
