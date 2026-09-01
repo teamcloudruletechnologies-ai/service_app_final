@@ -129,72 +129,82 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
       ),
-      body: Column(
-        children: [
-          // Chat Area
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                return _buildMessageBubble(_messages[index]);
-              },
-            ),
-          ),
-          
-          // Typing Indicator
-          if (_isTyping)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Bot is typing...",
-                  style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
-                ),
+      body: Container(
+        color: Colors.white, // Ensure Chatbot background is white
+        child: Column(
+          children: [
+            // Chat Area
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  return _buildMessageBubble(_messages[index]);
+                },
               ),
             ),
             
-          // Quick Reply Chips
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            color: Colors.white,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+            // Typing Indicator
+            if (_isTyping)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Bot is typing...",
+                    style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                  ),
+                ),
+              ),
+              
+            // Quick Reply Chips (Line by Line)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              color: Colors.white,
+              width: double.infinity,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  ActionChip(
-                    label: const Text("📅 My Current Booking"),
+                  OutlinedButton(
                     onPressed: () {
                       _messageController.text = "Show my current booking";
                       _sendMessage();
                     },
-                    backgroundColor: Colors.blue[50],
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.blue[50],
+                      alignment: Alignment.centerLeft,
+                    ),
+                    child: const Text("📅 My Current Booking"),
                   ),
-                  const SizedBox(width: 8),
-                  ActionChip(
-                    label: const Text("📜 Past Bookings"),
+                  const SizedBox(height: 5),
+                  OutlinedButton(
                     onPressed: () {
                       _messageController.text = "Show my past bookings";
                       _sendMessage();
                     },
-                    backgroundColor: Colors.blue[50],
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.blue[50],
+                      alignment: Alignment.centerLeft,
+                    ),
+                    child: const Text("📜 Past Bookings"),
                   ),
-                  const SizedBox(width: 8),
-                  ActionChip(
-                    label: const Text("⏰ Reschedule"),
+                  const SizedBox(height: 5),
+                  OutlinedButton(
                     onPressed: () {
                       _messageController.text = "Reschedule my booking";
                       _sendMessage();
                     },
-                    backgroundColor: Colors.blue[50],
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.blue[50],
+                      alignment: Alignment.centerLeft,
+                    ),
+                    child: const Text("⏰ Reschedule"),
                   ),
                 ],
               ),
             ),
-          ),
 
-          // Input Box
+            // Input Box
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
             color: Colors.white,
