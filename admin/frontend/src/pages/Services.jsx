@@ -194,13 +194,10 @@ export default function Services() {
       name_kn: formData.name_kn || null,
       category_id: formData.category_id ? parseInt(formData.category_id) : null,
       description: formData.description || null,
+      image: formData.image || '',
       image_url: formData.image || null,
       status: formData.status,
-      sub_services: formData.sub_services
-    };
-      image: formData.image || '',
-      status: formData.status,
-      sub_services: formData.sub_services.map(s => ({
+      sub_services: (formData.sub_services || []).map(s => ({
         id: s.id,
         name: s.name,
         image_url: s.image_url || s.image || '',
