@@ -635,9 +635,9 @@ class LanguageProvider extends ChangeNotifier {
 }
 
 extension TranslationExtension on BuildContext {
-  String translate(String key) {
+  String translate(String key, {String? nameTa, String? nameHi, String? nameMl, String? nameKn}) {
     try {
-      return Provider.of<LanguageProvider>(this).translate(key);
+      return Provider.of<LanguageProvider>(this).translate(key, nameTa: nameTa, nameHi: nameHi, nameMl: nameMl, nameKn: nameKn);
     } catch (_) {
       return key;
     }

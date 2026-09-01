@@ -6,7 +6,7 @@ const chatbotService = require("../services/chatbot.service");
  */
 exports.handleWebhook = async (req, res) => {
   try {
-    const { userId, message, bookingId, platform } = req.body;
+    const { userId, message, platform } = req.body;
 
     if (!userId || !message) {
       return res.status(400).json({
@@ -19,19 +19,16 @@ exports.handleWebhook = async (req, res) => {
     
     let reply = "";
 
-    // Step 2: Route to specific service logic based on intent
+    // Step 2: Route to specific service logic based on intent (Now async)
     switch (intent) {
-      case 'BOOK_SERVICE':
-        reply = chatbotService.handleBooking(message);
+      case 'CURRENT_BOOKING':
+        reply = await chatbotService.handleCurrentBooking(userId);
         break;
-      case 'TRACK_WORKER':
-        reply = chatbotService.handleTracking(bookingId);
+      case 'PAST_BOOKINGS':
+        reply = await chatbotService.handlePastBookings(userId);
         break;
-      case 'CANCEL_BOOKING':
-        reply = chatbotService.handleCancellation(bookingId);
-        break;
-      case 'INVOICE':
-        reply = chatbotService.handleInvoice(bookingId);
+      case 'RESCHEDULE':
+        reply = await chatbotService.handleReschedule(userId, message);
         break;
       default:
         reply = chatbotService.handleUnknown();
@@ -40,7 +37,6 @@ exports.handleWebhook = async (req, res) => {
     // Step 3: Send Webhook Response
     return res.json({
       userId,
-      bookingId: bookingId || null,
       intentDetected: intent,
       reply
     });

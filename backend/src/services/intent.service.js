@@ -1,25 +1,21 @@
 /**
  * Analyzes the customer's chat message to detect their intent.
- * Based on simple keyword matching as per Step 5 of the PDF.
+ * Updated for Customer Support (Version 2.0).
  */
 function detectIntent(message) {
   if (!message) return 'UNKNOWN';
   const text = message.toLowerCase();
 
-  if (text.includes("book") || text.includes("plumber") || text.includes("ac") || text.includes("service")) {
-    return 'BOOK_SERVICE';
+  if (text.includes("current") || text.includes("active") || text.includes("today") || text.includes("upcoming") || text.includes("now")) {
+    return 'CURRENT_BOOKING';
   }
   
-  if (text.includes("track") || text.includes("technician") || text.includes("where")) {
-    return 'TRACK_WORKER';
+  if (text.includes("past") || text.includes("history") || text.includes("previous") || text.includes("completed")) {
+    return 'PAST_BOOKINGS';
   }
   
-  if (text.includes("cancel")) {
-    return 'CANCEL_BOOKING';
-  }
-  
-  if (text.includes("invoice") || text.includes("payment") || text.includes("bill")) {
-    return 'INVOICE';
+  if (text.includes("reschedule") || text.includes("change time") || text.includes("postpone") || text.includes("delay")) {
+    return 'RESCHEDULE';
   }
 
   return 'UNKNOWN';
@@ -28,3 +24,4 @@ function detectIntent(message) {
 module.exports = {
   detectIntent
 };
+

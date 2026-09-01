@@ -151,6 +151,45 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
               ),
             ),
             
+          // Quick Reply Chips
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            color: Colors.white,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ActionChip(
+                    label: const Text("📅 My Current Booking"),
+                    onPressed: () {
+                      _messageController.text = "Show my current booking";
+                      _sendMessage();
+                    },
+                    backgroundColor: Colors.blue[50],
+                  ),
+                  const SizedBox(width: 8),
+                  ActionChip(
+                    label: const Text("📜 Past Bookings"),
+                    onPressed: () {
+                      _messageController.text = "Show my past bookings";
+                      _sendMessage();
+                    },
+                    backgroundColor: Colors.blue[50],
+                  ),
+                  const SizedBox(width: 8),
+                  ActionChip(
+                    label: const Text("⏰ Reschedule"),
+                    onPressed: () {
+                      _messageController.text = "Reschedule my booking";
+                      _sendMessage();
+                    },
+                    backgroundColor: Colors.blue[50],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           // Input Box
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),

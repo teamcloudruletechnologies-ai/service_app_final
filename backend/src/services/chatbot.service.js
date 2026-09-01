@@ -1,43 +1,99 @@
+const db = require("../config/db");
+
 /**
  * Chatbot Service handling the core responses to different intents.
- * Currently uses simulated responses, which can later be connected to actual DB models.
+ * Connected to actual Postgres DB.
  */
 
-function handleBooking(message) {
-  return "Sure! Which service do you need and what is your location?";
+async function handleCurrentBooking(userId) {
+  try {
+    // Query active bookings for the user
+    const result = await db.query(
+      `SELECT b.id, s.name as service_name, b.status, b.scheduled_at 
+       FROM bookings b 
+       JOIN services s ON b.service_id = s.id 
+       WHERE b.user_id = $1 AND b.status NOT IN ('completed', 'cancelled')
+       ORDER BY b.scheduled_at ASC LIMIT 1`, 
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return "You don't have any current or upcoming bookings.";
+    }
+
+    const booking = result.rows[0];
+    const date = new Date(booking.scheduled_at).toLocaleString();
+    return `You have an active booking (ID: ${booking.id}) for ${booking.service_name} scheduled at ${date}. Current status: ${booking.status}.`;
+  } catch (err) {
+    console.error("DB Error in handleCurrentBooking:", err);
+    return "Sorry, I couldn't fetch your current bookings due to a system error.";
+  }
 }
 
-function handleTracking(bookingId) {
-  if (!bookingId) {
-    return "Please provide a booking ID to track your technician.";
+async function handlePastBookings(userId) {
+  try {
+    const result = await db.query(
+      `SELECT b.id, s.name as service_name, b.scheduled_at 
+       FROM bookings b 
+       JOIN services s ON b.service_id = s.id 
+       WHERE b.user_id = $1 AND b.status = 'completed'
+       ORDER BY b.scheduled_at DESC LIMIT 3`, 
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return "You don't have any past completed bookings yet.";
+    }
+
+    let reply = "Here are your recent past bookings:\n";
+    result.rows.forEach(b => {
+      reply += `- ${b.service_name} on ${new Date(b.scheduled_at).toLocaleDateString()}\n`;
+    });
+    return reply;
+  } catch (err) {
+    console.error("DB Error in handlePastBookings:", err);
+    return "Sorry, I couldn't fetch your booking history.";
   }
-  // Mock tracking response simulating DB fetch
-  return `Let me check your technician and booking status for ID ${bookingId}. Your technician Suresh is 10 mins away. Job Start OTP: 4567.`;
 }
 
-function handleCancellation(bookingId) {
-  if (!bookingId) {
-    return "Please provide a booking ID to cancel.";
-  }
-  // Mock cancellation response
-  return `I will check whether booking ${bookingId} can be cancelled. Done, your booking has been cancelled and any refund will be processed in 2-3 days.`;
-}
+async function handleReschedule(userId, message) {
+  try {
+    // For demo purposes, we will find the user's latest active booking and push it by 1 day.
+    // In a full NLP bot, we would parse the exact requested time from 'message'.
+    const result = await db.query(
+      `SELECT id, scheduled_at FROM bookings 
+       WHERE user_id = $1 AND status NOT IN ('completed', 'cancelled')
+       ORDER BY scheduled_at ASC LIMIT 1`,
+      [userId]
+    );
 
-function handleInvoice(bookingId) {
-  if (!bookingId) {
-    return "Please provide a booking ID to check your invoice.";
+    if (result.rows.length === 0) {
+      return "You don't have any active bookings to reschedule.";
+    }
+
+    const booking = result.rows[0];
+    const newDate = new Date(booking.scheduled_at);
+    newDate.setDate(newDate.getDate() + 1); // Postpone by 1 day for this logic
+
+    await db.query(
+      `UPDATE bookings SET scheduled_at = $1, updated_at = NOW() WHERE id = $2`,
+      [newDate, booking.id]
+    );
+
+    return `Your booking (ID: ${booking.id}) has been successfully rescheduled to ${newDate.toLocaleString()}.`;
+  } catch (err) {
+    console.error("DB Error in handleReschedule:", err);
+    return "Sorry, I couldn't reschedule your booking.";
   }
-  return `The total invoice amount for booking ${bookingId} is ₹500. Status: PAID.`;
 }
 
 function handleUnknown() {
-  return "I can help with booking a service, tracking a technician, cancellation, invoices, and payment status. How can I assist you today?";
+  return "I can help you check your current bookings, past history, or reschedule an upcoming service. Just tap one of the options below!";
 }
 
 module.exports = {
-  handleBooking,
-  handleTracking,
-  handleCancellation,
-  handleInvoice,
+  handleCurrentBooking,
+  handlePastBookings,
+  handleReschedule,
   handleUnknown
 };
