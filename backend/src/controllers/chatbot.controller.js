@@ -15,30 +15,38 @@ exports.handleWebhook = async (req, res) => {
     }
 
     let reply = "";
-    let intent = "SESSION_CONTINUE";
+    let intent = detectIntent(message);
 
-    // Check Multi-turn Session State First
-    const session = chatbotService.getSession(userId);
-    if (session && session.step === 'WAITING_FOR_DATE') {
-      reply = await chatbotService.processRescheduleDate(userId, message);
-    } else {
-      // Step 1: Normal Intent Detection
-      intent = detectIntent(message);
-      
-      // Step 2: Route to specific service logic based on intent
-      switch (intent) {
-        case 'CURRENT_BOOKING':
-          reply = await chatbotService.handleCurrentBooking(userId);
-          break;
-        case 'PAST_BOOKINGS':
-          reply = await chatbotService.handlePastBookings(userId);
-          break;
-        case 'RESCHEDULE':
-          reply = await chatbotService.handleRescheduleInit(userId);
-          break;
-        default:
-          reply = chatbotService.handleUnknown();
+    // Escape Hatch: If user typed a core intent, clear any active session so they don't get trapped.
+    if (intent !== 'UNKNOWN') {
+      chatbotService.clearSession(userId);
+    } 
+    // Multi-turn Session Routing
+    else {
+      const session = chatbotService.getSession(userId);
+      if (session) {
+        if (session.step === 'WAITING_FOR_DATE') {
+          reply = await chatbotService.processRescheduleDate(userId, message);
+        } else if (session.step === 'WAITING_FOR_PAST_TIMEFRAME') {
+          reply = await chatbotService.processPastBookingsTimeframe(userId, message);
+        }
+        return res.json({ userId, intentDetected: 'SESSION_CONTINUE', reply });
       }
+    }
+
+    // Step 2: Route to specific service logic based on new intent
+    switch (intent) {
+      case 'CURRENT_BOOKING':
+        reply = await chatbotService.handleCurrentBooking(userId);
+        break;
+      case 'PAST_BOOKINGS':
+        reply = await chatbotService.handlePastBookingsInit(userId);
+        break;
+      case 'RESCHEDULE':
+        reply = await chatbotService.handleRescheduleInit(userId);
+        break;
+      default:
+        reply = chatbotService.handleUnknown();
     }
 
     // Step 3: Send Webhook Response
