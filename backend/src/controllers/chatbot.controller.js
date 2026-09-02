@@ -14,13 +14,16 @@ exports.handleWebhook = async (req, res) => {
       });
     }
 
+    let reply = "";
+    let intent = "SESSION_CONTINUE";
+
     // Check Multi-turn Session State First
     const session = chatbotService.getSession(userId);
     if (session && session.step === 'WAITING_FOR_DATE') {
       reply = await chatbotService.processRescheduleDate(userId, message);
     } else {
       // Step 1: Normal Intent Detection
-      const intent = detectIntent(message);
+      intent = detectIntent(message);
       
       // Step 2: Route to specific service logic based on intent
       switch (intent) {
