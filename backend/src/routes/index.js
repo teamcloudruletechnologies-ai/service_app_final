@@ -15,6 +15,7 @@ const checkPermission = require("../middlewares/permission.middleware");
 const subAdminRoutes = require("./subAdmin.routes");
 const notificationRoutes = require("./notification.routes");
 const bannerRoutes = require("./banner.routes");
+const webhookRoutes = require("./webhook.routes"); // Added Chatbot Webhook
 const { adminListReviews } = require("../controllers/review.controller");
 const auth = require("../middlewares/auth.middleware");
 
@@ -51,6 +52,9 @@ router.use("/bookings", appRoutes); // Alias route support for mobile app endpoi
 router.use("/admin/sub-admins", subAdminRoutes);
 router.use("/admin/notifications", checkPermission("notifications"), notificationRoutes);
 router.use("/admin/banners", checkPermission("banners"), bannerRoutes);
+
+// Connect the Chatbot Webhook
+router.use("/webhook", webhookRoutes);
 
 const settlementRoutes = require("./settlement.routes");
 

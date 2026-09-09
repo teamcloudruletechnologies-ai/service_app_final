@@ -433,7 +433,7 @@ class LanguageProvider extends ChangeNotifier {
     'select_language': 'ഭാഷ തിരഞ്ഞെടുക്കുക',
     'english': 'English',
     'tamil': 'தமிழ் (Tamil)',
-    'hindi': 'हिन्दी (Hindi)',
+    'hindi': 'ഹിन्दी (Hindi)',
     'malayalam': 'മലയാളം (Malayalam)',
     'kannada': 'ಕನ್ನಡ (Kannada)',
   };
