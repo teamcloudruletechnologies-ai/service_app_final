@@ -115,11 +115,21 @@ class _HomeScreenState extends State<HomeScreen> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ChatbotScreen()),
+              MaterialPageRoute(builder: (context) => const ChatbotScreen()),
             );
           },
-          backgroundColor: AppTheme.primary,
-          child: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+          backgroundColor: const Color(0xFF0F172A),
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Image.asset(
+              'assets/images/chatbot_icon.png',
+              width: 56,
+              height: 56,
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
         body: SafeArea(
           child: RefreshIndicator(
